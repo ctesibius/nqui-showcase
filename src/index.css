@@ -1,0 +1,68 @@
+/* nqui + Tailwind v4 (see nqui/nqui-setup.css) */
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+@custom-variant mid (&:where(.mid, .mid *));
+
+@import "@nqlib/nqui/styles";
+@source "./**/*.{js,ts,jsx,tsx,mdx}";
+@source "../components/**/*.{js,ts,jsx,tsx,mdx}";
+@source "../node_modules/@nqlib/nqui/dist/**/*.js";
+/* App-level: full-bleed marketing layout */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+/*
+ * Dashboard demo command palette: cmdk sets data-selected on every row (true/false).
+ * Tailwind `data-selected:*` utilities match any [data-selected], so all rows pick up bg-muted.
+ * Scope fixes here only — do not change @nqlib/nqui command.tsx for this.
+ */
+@layer components {
+  .dashboard-command-palette [data-slot="command-group"] {
+    @apply flex flex-col gap-1.5;
+  }
+
+  /* Beat library `data-selected:bg-muted` (utilities layer) — cmdk sets data-selected on every row. */
+  .dashboard-command-palette [data-slot="command-item"] {
+    @apply !bg-transparent;
+  }
+
+  .dashboard-command-palette [data-slot="command-item"][data-selected="true"],
+  .dashboard-command-palette [data-slot="command-item"][aria-selected="true"] {
+    @apply !bg-muted text-foreground;
+  }
+
+  /*
+   * Dashboard icon rail (~48px): outer p-2 + header/group p-2 stacks horizontal padding and
+   * pushes icons off-center. Center hit targets and trim extra px.
+   */
+  .dashboard-sidebar-rail {
+    @apply !px-1;
+  }
+
+  .dashboard-sidebar-rail [data-sidebar="header"],
+  .dashboard-sidebar-rail [data-sidebar="footer"],
+  .dashboard-sidebar-rail [data-sidebar="group"] {
+    @apply !px-0;
+  }
+
+  .dashboard-sidebar-rail [data-sidebar="menu-button"] {
+    @apply justify-center;
+  }
+
+  /* Logo row: second column is for expanded labels; rail is always icon-only on this page */
+  .dashboard-sidebar-rail [data-sidebar="menu-button"] .dashboard-sidebar-brand-text {
+    @apply hidden;
+  }
+}

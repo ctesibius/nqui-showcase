@@ -1,0 +1,11 @@
+/* ═══════════════════════════════════════════════════
+   nqui – Recommended Tailwind & Import Setup
+   Add these lines to the TOP of your main CSS file
+   ═══════════════════════════════════════════════════ */
+
+@import "tailwindcss";
+
+@import "tw-animate-css";
+
+/* Import nqui design tokens */
+@import "@nqlib/nqui/styles";
