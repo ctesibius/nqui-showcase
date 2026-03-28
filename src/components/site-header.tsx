@@ -4,8 +4,10 @@ import {
   Button,
   FrostedGlass,
   NquiLogo,
+  Separator,
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -20,6 +22,23 @@ const sections = [
   { href: "/#preview", label: "Components" },
   { href: "/#frosted-glass", label: "Frosted glass" },
 ] as const;
+
+/** Same sections as readme-page (install / CLI doc) for mobile sheet deep links */
+const docsMenu = [
+  { to: "/readme#install", label: "Install & CLI" },
+  { to: "/readme#requirements", label: "Requirements" },
+  { to: "/readme#cli", label: "CLI commands" },
+  { to: "/readme#vite-tailwind", label: "Vite: Tailwind @source" },
+  { to: "/readme#suggested-order", label: "Suggested order" },
+] as const;
+
+function docsMenuItemActive(pathname: string, hash: string, to: string): boolean {
+  if (pathname !== "/readme") return false;
+  const i = to.indexOf("#");
+  if (i === -1) return hash === "" || hash === "#";
+  const want = to.slice(i);
+  return hash === want;
+}
 
 /** Primary pill nav — short labels, monospace (reference: centered dock). */
 const pillNav = [
@@ -133,14 +152,38 @@ export function SiteHeader() {
                   <HugeiconsIcon icon={Menu01Icon} className="size-4" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="flex flex-col gap-6">
+              <SheetContent side="right" className="flex flex-col gap-5 overflow-y-auto">
                 <SheetHeader className="text-left">
                   <SheetTitle>Menu</SheetTitle>
+                  <SheetDescription className="text-left text-muted-foreground">
+                    Site navigation, landing sections, and install / CLI docs.
+                  </SheetDescription>
                 </SheetHeader>
-                <nav className="flex flex-col gap-1 font-mono text-sm" aria-label="Mobile">
-                  {pillNav.map((item) => {
-                    const active = navItemActive(pathname, hash, item);
-                    if (item.type === "route") {
+                <div className="flex flex-col gap-1">
+                  <Link
+                    to="/"
+                    onClick={() => setMobileOpen(false)}
+                    className="block w-full rounded-md px-2 py-1.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                  >
+                    Site
+                  </Link>
+                  <nav className="flex flex-col gap-1 font-mono text-sm" aria-label="Mobile primary">
+                    {pillNav.map((item) => {
+                      const active = navItemActive(pathname, hash, item);
+                      if (item.type === "route") {
+                        return (
+                          <Button
+                            key={item.label}
+                            variant={active ? "secondary" : "ghost"}
+                            className="justify-start"
+                            asChild
+                          >
+                            <Link to={item.to} onClick={() => setMobileOpen(false)}>
+                              {item.label}
+                            </Link>
+                          </Button>
+                        );
+                      }
                       return (
                         <Button
                           key={item.label}
@@ -148,38 +191,61 @@ export function SiteHeader() {
                           className="justify-start"
                           asChild
                         >
+                          <a href={item.href} onClick={() => setMobileOpen(false)}>
+                            {item.label}
+                          </a>
+                        </Button>
+                      );
+                    })}
+                  </nav>
+                </div>
+                <Separator />
+                <div className="flex flex-col gap-1">
+                  <a
+                    href="/#product"
+                    onClick={() => setMobileOpen(false)}
+                    className="block w-full rounded-md px-2 py-1.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                  >
+                    Landing
+                  </a>
+                  <nav className="flex flex-col gap-1 font-mono text-sm" aria-label="Landing sections">
+                    {sections.map((item) => (
+                      <Button key={item.href} variant="ghost" className="justify-start font-mono" asChild>
+                        <a
+                          href={item.href}
+                          onClick={() => {
+                            setMobileOpen(false);
+                          }}
+                        >
+                          {item.label}
+                        </a>
+                      </Button>
+                    ))}
+                  </nav>
+                </div>
+                <Separator />
+                <div className="flex flex-col gap-1">
+                  <Link
+                    to="/readme#install"
+                    onClick={() => setMobileOpen(false)}
+                    className="block w-full rounded-md px-2 py-1.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                  >
+                    Install &amp; docs
+                  </Link>
+                  <nav className="flex flex-col gap-1 font-mono text-sm" aria-label="Install and CLI documentation">
+                    {docsMenu.map((item) => {
+                      const active = docsMenuItemActive(pathname, hash, item.to);
+                      return (
+                        <Button key={item.to} variant={active ? "secondary" : "ghost"} className="justify-start" asChild>
                           <Link to={item.to} onClick={() => setMobileOpen(false)}>
                             {item.label}
                           </Link>
                         </Button>
                       );
-                    }
-                    return (
-                      <Button
-                        key={item.label}
-                        variant={active ? "secondary" : "ghost"}
-                        className="justify-start"
-                        asChild
-                      >
-                        <a href={item.href} onClick={() => setMobileOpen(false)}>
-                          {item.label}
-                        </a>
-                      </Button>
-                    );
-                  })}
-                  {sections.map((item) => (
-                    <Button key={item.href} variant="ghost" className="justify-start font-mono" asChild>
-                      <a
-                        href={item.href}
-                        onClick={() => {
-                          setMobileOpen(false);
-                        }}
-                      >
-                        {item.label}
-                      </a>
-                    </Button>
-                  ))}
-                </nav>
+                    })}
+                  </nav>
+                </div>
+                <Separator />
                 <Button asChild>
                   <a
                     href="/#preview"

@@ -12,4 +12,10 @@ export default defineConfig({
   resolve: {
     alias: { "@": path.resolve(__dirname, "./src") },
   },
+  // Bind to loopback only so dev does not trigger “local network” device prompts on some mobile browsers.
+  server: {
+    host: "127.0.0.1",
+    strictPort: true,
+    port: 5173,
+  },
 })

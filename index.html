@@ -2,6 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- Block device APIs so the browser does not prompt for serial/USB/HID/etc. -->
+    <meta
+      http-equiv="Permissions-Policy"
+      content="serial=(), usb=(), hid=(), bluetooth=(), camera=(), microphone=(), geolocation=(), display-capture=()"
+    />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

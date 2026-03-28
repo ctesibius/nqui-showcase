@@ -15,10 +15,12 @@ const cliTable = [
   { cmd: "npm run nqui:init", desc: "If postinstall added it: full chain including init-css --sidebar --force." },
 ] as const;
 
+const scrollAnchor = "scroll-mt-28";
+
 export function ReadmePage() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-12 sm:px-6">
-      <div className="flex flex-col gap-3">
+      <div id="install" className={`flex flex-col gap-3 ${scrollAnchor}`}>
         <Badge variant="secondary" className="w-fit">
           @nqlib/nqui
         </Badge>
@@ -29,7 +31,7 @@ export function ReadmePage() {
         </p>
       </div>
 
-      <Card>
+      <Card id="requirements" className={scrollAnchor}>
         <CardHeader>
           <CardTitle>Requirements</CardTitle>
           <CardDescription>React 18+, Tailwind v4, Node per your toolchain.</CardDescription>
@@ -47,7 +49,7 @@ export function ReadmePage() {
         </CardContent>
       </Card>
 
-      <section className="flex flex-col gap-4">
+      <section id="cli" className={`flex flex-col gap-4 ${scrollAnchor}`}>
         <h2 className="text-xl font-semibold tracking-tight">CLI commands</h2>
         <p className="text-sm text-muted-foreground">Run from project root.</p>
         <div className="flex flex-col gap-3">
@@ -65,7 +67,7 @@ export function ReadmePage() {
 
       <Separator />
 
-      <section className="flex flex-col gap-4">
+      <section id="vite-tailwind" className={`flex flex-col gap-4 ${scrollAnchor}`}>
         <h2 className="text-xl font-semibold tracking-tight">Vite: Tailwind @source</h2>
         <p className="text-sm text-muted-foreground">
           If nqui styles look broken, add after <code className="rounded bg-muted px-1 py-0.5">@import &quot;@nqlib/nqui/styles&quot;;</code>:
@@ -81,7 +83,7 @@ export function ReadmePage() {
         </Card>
       </section>
 
-      <section className="flex flex-col gap-4">
+      <section id="suggested-order" className={`flex flex-col gap-4 ${scrollAnchor}`}>
         <h2 className="text-xl font-semibold tracking-tight">Suggested order</h2>
         <ol className="flex flex-col gap-3 text-sm text-muted-foreground [counter-reset:step]">
           <li className="[counter-increment:step] before:mr-2 before:font-mono before:text-foreground before:content-[counter(step)'.']">
