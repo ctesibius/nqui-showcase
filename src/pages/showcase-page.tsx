@@ -35,9 +35,9 @@ export function ShowcasePage() {
           <strong className="text-foreground">no dedicated Cursor skill file only for FrostedGlass</strong> — see{" "}
           <code className="rounded bg-muted px-1.5 py-0.5 text-sm">node_modules/@nqlib/nqui/docs/components/nqui-frosted-glass.md</code>{" "}
           and the components index after <code className="rounded bg-muted px-1.5 py-0.5 text-sm">npx @nqlib/nqui init-skills</code>.{" "}
-          For a full app shell (sidebar + project panel + dashboard), see the{" "}
-          <Link to="/dashboard" className="font-medium text-foreground underline underline-offset-4">
-            dashboard showcase
+          For tables and a left-rail workspace on the home page, see the{" "}
+          <Link to="/?tab=workspace" className="font-medium text-foreground underline underline-offset-4">
+            Examples
           </Link>
           .
         </p>

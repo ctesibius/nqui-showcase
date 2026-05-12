@@ -13,10 +13,10 @@ When building UI with @nqlib/nqui, follow these rules so the AI builds component
 Run this when setting up a new project or when components fail due to missing peers:
 
 ```bash
-pnpm add @nqlib/nqui @hugeicons/react @hugeicons/core-free-icons cmdk @dnd-kit/core @dnd-kit/modifiers @dnd-kit/sortable @dnd-kit/utilities embla-carousel-react @tanstack/react-table react-day-picker date-fns sonner vaul react-resizable-panels @base-ui/react
+pnpm add @nqlib/nqui @hugeicons/react @hugeicons/core-free-icons cmdk @dnd-kit/core @dnd-kit/modifiers @dnd-kit/sortable @dnd-kit/utilities embla-carousel-react @tanstack/react-table react-day-picker date-fns sonner vaul react-resizable-panels
 ```
 
-Alternative (npm): `npm install @nqlib/nqui @hugeicons/react @hugeicons/core-free-icons cmdk @dnd-kit/core @dnd-kit/modifiers @dnd-kit/sortable @dnd-kit/utilities embla-carousel-react @tanstack/react-table react-day-picker date-fns sonner vaul react-resizable-panels @base-ui/react`
+Alternative (npm): `npm install @nqlib/nqui @hugeicons/react @hugeicons/core-free-icons cmdk @dnd-kit/core @dnd-kit/modifiers @dnd-kit/sortable @dnd-kit/utilities embla-carousel-react @tanstack/react-table react-day-picker date-fns sonner vaul react-resizable-panels`
 
 Or use `npx @nqlib/nqui install-peers` to auto-detect package manager.
 
@@ -87,6 +87,7 @@ If user hasn't run init-css, suggest: `npx @nqlib/nqui init-css` then add the im
 ## Skills (load for install or component questions)
 
 - **Install/setup:** Load `.cursor/skills/nqui-install/SKILL.md` — commands to execute
-- **Components:** Load `.cursor/skills/nqui-components/SKILL.md` — points to `node_modules/@nqlib/nqui/docs/components/`
+- **Components:** Load `.cursor/skills/nqui-components/SKILL.md` — routing for per-component docs
+- **After `init-skills`:** `.cursor/nqui-skills/COMPONENTS_INDEX.md` then **one** file under `.cursor/nqui-skills/components/nqui-<name>.md`
 
-For any component question, read from `node_modules/@nqlib/nqui/docs/components/README.md` (index) then `nqui-<name>.md` (specific component).
+Fallback (no init-skills): `node_modules/@nqlib/nqui/docs/components/README.md` (index, skim sections) then `nqui-<name>.md`.

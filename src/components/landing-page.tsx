@@ -1,5 +1,5 @@
-import { type CSSProperties, useMemo, useState } from "react";
-import { useTheme } from "next-themes";
+import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   DeliveryTruck01Icon,
@@ -85,16 +85,7 @@ import {
   TooltipTrigger,
 } from "@nqlib/nqui";
 import { FrostedGlassShowcase } from "./frosted-glass-showcase";
-
-/** Accent chips: hue (deg) matches nqui primary scale shape in colors.css */
-const ACCENT_CHIPS = [
-  { hue: 240, label: "Blue" },
-  { hue: 280, label: "Violet" },
-  { hue: 150, label: "Emerald" },
-  { hue: 75, label: "Amber" },
-  { hue: 350, label: "Rose" },
-  { hue: 195, label: "Cyan" },
-] as const;
+import { HomeWorkspaceView } from "./dashboard/home-workspace-view";
 
 /** Mock people for avatar stack (pravatar.cc — stable demo faces). */
 const AVATAR_GROUP_USERS = [
@@ -114,68 +105,10 @@ function initialsFromName(name: string) {
     .toUpperCase();
 }
 
-type ThemeMode = "light" | "dark" | "mid";
-
-/** Override primary scale + ring for the preview section only (inherits to descendants). */
-function previewPrimaryVars(hue: number, mode: ThemeMode): CSSProperties {
-  const fg = "oklch(0.98 0 0)";
-  if (mode === "light") {
-    return {
-      "--primary-100": `oklch(0.95 0.08 ${hue})`,
-      "--primary-200": `oklch(0.9 0.1 ${hue})`,
-      "--primary-300": `oklch(0.85 0.12 ${hue})`,
-      "--primary-400": `oklch(0.8 0.14 ${hue})`,
-      "--primary-500": `oklch(0.6 0.25 ${hue})`,
-      "--primary-600": `oklch(0.5 0.28 ${hue})`,
-      "--primary": `oklch(0.6 0.25 ${hue})`,
-      "--primary-foreground": fg,
-      "--primary-hover": `oklch(0.8 0.14 ${hue})`,
-      "--ring": `oklch(0.6 0.25 ${hue})`,
-    } as CSSProperties;
-  }
-  if (mode === "dark") {
-    return {
-      "--primary-100": `oklch(0.4 0.15 ${hue})`,
-      "--primary-200": `oklch(0.45 0.18 ${hue})`,
-      "--primary-300": `oklch(0.5 0.2 ${hue})`,
-      "--primary-400": `oklch(0.55 0.22 ${hue})`,
-      "--primary-500": `oklch(0.65 0.2 ${hue})`,
-      "--primary-600": `oklch(0.7 0.22 ${hue})`,
-      "--primary": `oklch(0.65 0.2 ${hue})`,
-      "--primary-foreground": fg,
-      "--primary-hover": `oklch(0.55 0.22 ${hue})`,
-      "--ring": `oklch(0.65 0.2 ${hue})`,
-    } as CSSProperties;
-  }
-  /* mid — same L/C structure as nqui .mid, rotated hue */
-  return {
-    "--primary-100": `oklch(0.675 0.115 ${hue})`,
-    "--primary-200": `oklch(0.675 0.14 ${hue})`,
-    "--primary-300": `oklch(0.675 0.16 ${hue})`,
-    "--primary-400": `oklch(0.675 0.18 ${hue})`,
-    "--primary-500": `oklch(0.625 0.225 ${hue})`,
-    "--primary-600": `oklch(0.6 0.25 ${hue})`,
-    "--primary": `oklch(0.625 0.225 ${hue})`,
-    "--primary-foreground": fg,
-    "--primary-hover": `oklch(0.675 0.18 ${hue})`,
-    "--ring": `oklch(0.625 0.225 ${hue})`,
-  } as CSSProperties;
-}
-
-function themeModeFromResolved(resolved: string | undefined): ThemeMode {
-  if (resolved === "dark") return "dark";
-  if (resolved === "mid") return "mid";
-  return "light";
-}
-
 const RANGE_KEYS = ["1d", "7d", "1m", "1y", "all"] as const;
 type RangeKey = (typeof RANGE_KEYS)[number];
 
 function ComponentsShowcase() {
-  const { resolvedTheme } = useTheme();
-  const themeMode = themeModeFromResolved(resolvedTheme);
-
-  const [accentHue, setAccentHue] = useState(240);
   const [price, setPrice] = useState([250]);
   const [otp, setOtp] = useState("4320");
   const [notify, setNotify] = useState(true);
@@ -184,39 +117,12 @@ function ComponentsShowcase() {
   const [italicOn, setItalicOn] = useState(true);
   const [viewMode, setViewMode] = useState("list");
 
-  const previewAccentStyle = useMemo(() => previewPrimaryVars(accentHue, themeMode), [accentHue, themeMode]);
-
   const priceLabel = () =>
     new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(price[0] ?? 0);
 
   return (
-    <section
-      id="preview"
-      className="border-b py-14 sm:py-20"
-      style={previewAccentStyle}
-    >
+    <section id="preview" className="border-b py-14 sm:py-20">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 sm:px-6">
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <span className="text-xs text-muted-foreground">Primary</span>
-          {ACCENT_CHIPS.map(({ hue, label }) => (
-            <Button
-              key={hue}
-              type="button"
-              size="icon"
-              variant="ghost"
-              aria-label={`Set primary accent: ${label}`}
-              aria-pressed={accentHue === hue}
-              className={
-                accentHue === hue
-                  ? "size-8 rounded-full p-0 ring-2 ring-ring ring-offset-2 ring-offset-background"
-                  : "size-8 rounded-full p-0 ring-1 ring-border"
-              }
-              style={{ background: `oklch(0.55 0.22 ${hue})` }}
-              onClick={() => setAccentHue(hue)}
-            />
-          ))}
-        </div>
-
         <div className="grid gap-4 md:grid-cols-3 md:items-start">
           <div className="flex flex-col gap-4">
             <Card>
@@ -652,79 +558,96 @@ function ComponentsShowcase() {
   );
 }
 
+function LandingShowcaseTab() {
+  return (
+    <>
+      <section id="product" className="border-b">
+        <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 pb-16 pt-14 sm:px-6 sm:pb-20 sm:pt-20">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
+            <NquiLogo className="size-16 shrink-0 sm:size-20" aria-hidden />
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="secondary">@nqlib/nqui</Badge>
+                <span className="text-sm text-muted-foreground">Marketing demo</span>
+              </div>
+              <h1 className="max-w-3xl text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
+                Components that feel ready for production
+              </h1>
+              <p className="max-w-2xl text-pretty text-lg text-muted-foreground">
+                A compact preview of forms, controls, and patterns from the library — the section below uses the same
+                tokens as the rest of the page.
+              </p>
+            </div>
+          </div>
+
+          <Alert>
+            <HugeiconsIcon icon={Rocket01Icon} className="size-4" data-icon="inline-start" />
+            <AlertTitle>Try the showcase</AlertTitle>
+            <AlertDescription>
+              Interactive controls below use the same primitives as the full Storybook and docs. Open{" "}
+              <span className="font-medium text-foreground">Examples</span> in the header for TanStack data tables,
+              nested rows, and portfolio layouts.
+            </AlertDescription>
+          </Alert>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button size="lg">
+                  <HugeiconsIcon icon={DeliveryTruck01Icon} data-icon="inline-start" />
+                  Book a walkthrough
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Walkthrough</DialogTitle>
+                  <DialogDescription>
+                    Same dialog primitives as production: title, description, and a clear footer.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button variant="outline" type="button">
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      toast("Slot requested", { description: "Demo only — no backend." });
+                    }}
+                  >
+                    Confirm
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Button size="lg" variant="outline" asChild>
+              <a href="#preview">View components</a>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <ComponentsShowcase />
+      <FrostedGlassShowcase />
+    </>
+  );
+}
+
 export function LandingPage() {
+  const [searchParams] = useSearchParams();
+  const examples = searchParams.get("tab") === "workspace";
+
   return (
     <div className="flex min-h-dvh flex-col bg-background text-foreground">
       <Toaster position="bottom-right" />
-      <main className="flex-1">
-        <section id="product" className="border-b">
-          <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 pb-16 pt-14 sm:px-6 sm:pb-20 sm:pt-20">
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
-              <NquiLogo className="size-16 shrink-0 sm:size-20" aria-hidden />
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="secondary">@nqlib/nqui</Badge>
-                  <span className="text-sm text-muted-foreground">Marketing demo</span>
-                </div>
-                <h1 className="max-w-3xl text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
-                  Components that feel ready for production
-                </h1>
-                <p className="max-w-2xl text-pretty text-lg text-muted-foreground">
-                  A compact preview of forms, controls, and patterns from the library — the section below uses the same
-                  tokens as the rest of the page.
-                </p>
-              </div>
-            </div>
-
-            <Alert>
-              <HugeiconsIcon icon={Rocket01Icon} className="size-4" data-icon="inline-start" />
-              <AlertTitle>Try the showcase</AlertTitle>
-              <AlertDescription>
-                Interactive controls below use the same primitives as the full Storybook and docs.{" "}
-                <Kbd>⌘</Kbd> <span className="text-muted-foreground">+</span> <Kbd>K</Kbd> opens the palette in the
-                dashboard demo.
-              </AlertDescription>
-            </Alert>
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button size="lg">
-                    <HugeiconsIcon icon={DeliveryTruck01Icon} data-icon="inline-start" />
-                    Book a walkthrough
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Walkthrough</DialogTitle>
-                    <DialogDescription>
-                      Same dialog primitives as production: title, description, and a clear footer.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <Button variant="outline" type="button">
-                      Cancel
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        toast("Slot requested", { description: "Demo only — no backend." });
-                      }}
-                    >
-                      Confirm
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-              <Button size="lg" variant="outline" asChild>
-                <a href="#preview">View components</a>
-              </Button>
-            </div>
+      <main className="flex min-h-0 flex-1 flex-col">
+        {examples ? (
+          <div className="mx-auto min-h-0 w-full max-w-[120rem] flex-1 bg-background">
+            <HomeWorkspaceView />
           </div>
-        </section>
-
-        <ComponentsShowcase />
-        <FrostedGlassShowcase />
+        ) : (
+          <LandingShowcaseTab />
+        )}
       </main>
     </div>
   );

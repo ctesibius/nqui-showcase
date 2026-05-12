@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import {
   Button,
   FrostedGlass,
@@ -16,6 +16,36 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Menu01Icon } from "@hugeicons/core-free-icons";
 import { ThemeToggle } from "./theme-toggle";
+import { ACCENT_CHIPS, usePrimaryAccent } from "../context/primary-accent-context";
+
+function PrimaryAccentPicker({ onPick, className }: { onPick?: () => void; className?: string }) {
+  const { accentHue, setAccentHue } = usePrimaryAccent();
+  return (
+    <div className={cn("flex flex-wrap items-center gap-1", className)} role="group" aria-label="Primary accent">
+      <span className="hidden text-xs text-muted-foreground lg:inline">Primary</span>
+      {ACCENT_CHIPS.map(({ hue, label }) => (
+        <Button
+          key={hue}
+          type="button"
+          size="icon"
+          variant="ghost"
+          aria-label={`Set primary accent: ${label}`}
+          aria-pressed={accentHue === hue}
+          className={
+            accentHue === hue
+              ? "size-7 rounded-full p-0 ring-2 ring-ring ring-offset-2 ring-offset-background sm:size-8"
+              : "size-7 rounded-full p-0 ring-1 ring-border sm:size-8"
+          }
+          style={{ background: `oklch(0.55 0.22 ${hue})` }}
+          onClick={() => {
+            setAccentHue(hue);
+            onPick?.();
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 const sections = [
   { href: "/#product", label: "Overview" },
@@ -42,43 +72,50 @@ function docsMenuItemActive(pathname: string, hash: string, to: string): boolean
 
 /** Primary pill nav — short labels, monospace (reference: centered dock). */
 const pillNav = [
-  { type: "hash" as const, href: "/", hash: "", label: "Home" },
-  { type: "route" as const, to: "/readme", label: "Docs" },
-  { type: "hash" as const, href: "/#frosted-glass", hash: "#frosted-glass", label: "Frosted" },
-  { type: "route" as const, to: "/dashboard", label: "Dashboard" },
+  { kind: "showcase" as const, label: "Home", to: "/" },
+  { kind: "route" as const, label: "Docs", to: "/readme" },
+  { kind: "hash" as const, label: "Frosted", href: "/#frosted-glass", hash: "#frosted-glass" },
+  { kind: "workspace" as const, label: "Examples", to: "/?tab=workspace" },
 ] as const;
 
 function useNavActive() {
   const { pathname, hash } = useLocation();
-  return { pathname, hash };
+  const [searchParams] = useSearchParams();
+  return { pathname, hash, tab: searchParams.get("tab") };
 }
 
 function navItemActive(
   pathname: string,
   hash: string,
+  tab: string | null,
   item: (typeof pillNav)[number],
 ): boolean {
-  if (item.type === "route") {
+  if (item.kind === "showcase") {
+    return pathname === "/" && tab !== "workspace" && (hash === "" || hash === "#" || hash === "#product");
+  }
+  if (item.kind === "workspace") {
+    return pathname === "/" && tab === "workspace";
+  }
+  if (item.kind === "route") {
     return pathname === item.to;
   }
-  if (item.hash === "") {
-    return pathname === "/" && (hash === "" || hash === "#" || hash === "#product");
-  }
-  return pathname === "/" && hash === item.hash;
+  return pathname === "/" && tab !== "workspace" && hash === item.hash;
 }
 
 function PillNavLink({
   item,
   pathname,
   hash,
+  tab,
   onNavigate,
 }: {
   item: (typeof pillNav)[number];
   pathname: string;
   hash: string;
+  tab: string | null;
   onNavigate?: () => void;
 }) {
-  const active = navItemActive(pathname, hash, item);
+  const active = navItemActive(pathname, hash, tab, item);
 
   const className = cn(
     "relative whitespace-nowrap px-2.5 py-1.5 font-mono text-xs transition-colors sm:px-3 sm:text-sm",
@@ -92,7 +129,7 @@ function PillNavLink({
     />
   );
 
-  if (item.type === "route") {
+  if (item.kind === "showcase" || item.kind === "workspace" || item.kind === "route") {
     return (
       <span className="relative inline-flex flex-col items-center pb-0.5">
         <Link to={item.to} className={className} onClick={onNavigate}>
@@ -115,7 +152,7 @@ function PillNavLink({
 
 export function SiteHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { pathname, hash } = useNavActive();
+  const { pathname, hash, tab } = useNavActive();
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-[var(--z-sticky-page)] flex justify-center px-3 pt-4">
@@ -135,9 +172,13 @@ export function SiteHeader() {
             aria-label="Primary"
           >
             {pillNav.map((item) => (
-              <PillNavLink key={item.label} item={item} pathname={pathname} hash={hash} />
+              <PillNavLink key={item.label} item={item} pathname={pathname} hash={hash} tab={tab} />
             ))}
           </nav>
+
+          <div className="hidden items-center gap-0.5 border-l border-border/50 pl-2 md:flex" aria-label="Primary accent">
+            <PrimaryAccentPicker />
+          </div>
 
           <div className="flex items-center gap-0.5 sm:gap-1">
             <ThemeToggle />
@@ -169,8 +210,8 @@ export function SiteHeader() {
                   </Link>
                   <nav className="flex flex-col gap-1 font-mono text-sm" aria-label="Mobile primary">
                     {pillNav.map((item) => {
-                      const active = navItemActive(pathname, hash, item);
-                      if (item.type === "route") {
+                      const active = navItemActive(pathname, hash, tab, item);
+                      if (item.kind === "hash") {
                         return (
                           <Button
                             key={item.label}
@@ -178,9 +219,9 @@ export function SiteHeader() {
                             className="justify-start"
                             asChild
                           >
-                            <Link to={item.to} onClick={() => setMobileOpen(false)}>
+                            <a href={item.href} onClick={() => setMobileOpen(false)}>
                               {item.label}
-                            </Link>
+                            </a>
                           </Button>
                         );
                       }
@@ -191,9 +232,9 @@ export function SiteHeader() {
                           className="justify-start"
                           asChild
                         >
-                          <a href={item.href} onClick={() => setMobileOpen(false)}>
+                          <Link to={item.to} onClick={() => setMobileOpen(false)}>
                             {item.label}
-                          </a>
+                          </Link>
                         </Button>
                       );
                     })}
@@ -244,6 +285,11 @@ export function SiteHeader() {
                       );
                     })}
                   </nav>
+                </div>
+                <Separator />
+                <div className="flex flex-col gap-2">
+                  <p className="px-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Primary accent</p>
+                  <PrimaryAccentPicker onPick={() => setMobileOpen(false)} className="px-1" />
                 </div>
                 <Separator />
                 <Button asChild>
