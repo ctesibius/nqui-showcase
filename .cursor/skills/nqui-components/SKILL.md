@@ -39,4 +39,4 @@ node_modules/@nqlib/nqui/docs/components/
 import { Button, ToggleGroup, ToggleGroupItem } from "@nqlib/nqui"
 ```
 
-CSS: `@import "@nqlib/nqui/styles"` in main CSS (run `npx @nqlib/nqui init-css` first).
+CSS: `@import "@nqlib/nqui/styles"` in main CSS (run `pnpm dlx @nqlib/nqui init-css` first).

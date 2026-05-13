@@ -5,14 +5,14 @@ import { Link } from "react-router-dom";
 import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Separator } from "@nqlib/nqui";
 
 const cliTable = [
-  { cmd: "npx @nqlib/nqui setup", desc: "Re-run postinstall: Cursor rules only (no peers/CSS)." },
-  { cmd: "npx @nqlib/nqui install-peers", desc: "Install @nqlib/nqui and required + optional peers." },
-  { cmd: "npx @nqlib/nqui init-cursor", desc: "Write .cursor rules/skills and download nqui-skills + AGENTS.md." },
-  { cmd: "npx @nqlib/nqui init-skills", desc: "Refresh .cursor/nqui-skills only. Use --force to overwrite." },
-  { cmd: "npx @nqlib/nqui init-css", desc: "Create nqui/index.css and nqui/nqui-setup.css. Options: --sidebar, --force, --wizard." },
-  { cmd: "npx @nqlib/nqui", desc: "Same as init-css with default output nqui/index.css." },
-  { cmd: "npx @nqlib/nqui init-debug / init-debug-css", desc: "Debug CSS for DebugPanel." },
-  { cmd: "npm run nqui:init", desc: "If postinstall added it: full chain including init-css --sidebar --force." },
+  { cmd: "pnpm dlx @nqlib/nqui setup", desc: "Re-run postinstall: Cursor rules only (no peers/CSS)." },
+  { cmd: "pnpm dlx @nqlib/nqui install-peers", desc: "Install @nqlib/nqui and required + optional peers." },
+  { cmd: "pnpm dlx @nqlib/nqui init-cursor", desc: "Write .cursor rules/skills and download nqui-skills + AGENTS.md." },
+  { cmd: "pnpm dlx @nqlib/nqui init-skills", desc: "Refresh .cursor/nqui-skills only. Use --force to overwrite." },
+  { cmd: "pnpm dlx @nqlib/nqui init-css", desc: "Create nqui/index.css and nqui/nqui-setup.css. Options: --sidebar, --force, --wizard." },
+  { cmd: "pnpm dlx @nqlib/nqui", desc: "Same as init-css with default output nqui/index.css." },
+  { cmd: "pnpm dlx @nqlib/nqui init-debug / init-debug-css", desc: "Debug CSS for DebugPanel." },
+  { cmd: "pnpm run nqui:init", desc: "If postinstall added it: full chain including init-css --sidebar --force." },
 ] as const;
 
 const scrollAnchor = "scroll-mt-28";
@@ -40,11 +40,11 @@ export function ReadmePage() {
           <p>
             Minimal:{" "}
             <code className="text-foreground">
-              npm install @nqlib/nqui @hugeicons/react @hugeicons/core-free-icons
+              pnpm add @nqlib/nqui @hugeicons/react @hugeicons/core-free-icons
             </code>
           </p>
           <p>
-            Full peers: <code className="text-foreground">npx @nqlib/nqui install-peers</code>
+            Full peers: <code className="text-foreground">pnpm dlx @nqlib/nqui install-peers</code>
           </p>
         </CardContent>
       </Card>
@@ -90,14 +90,14 @@ export function ReadmePage() {
             Install nqui + icons or run <code className="text-foreground">install-peers</code>.
           </li>
           <li>
-            <code className="text-foreground">npm install tw-animate-css next-themes</code>
+            <code className="text-foreground">pnpm add tw-animate-css next-themes</code>
           </li>
           <li>
-            <code className="text-foreground">npx @nqlib/nqui init-cursor</code> and{" "}
-            <code className="text-foreground">npx @nqlib/nqui init-skills</code>
+            <code className="text-foreground">pnpm dlx @nqlib/nqui init-cursor</code> and{" "}
+            <code className="text-foreground">pnpm dlx @nqlib/nqui init-skills</code>
           </li>
           <li>
-            <code className="text-foreground">npx @nqlib/nqui init-css</code> (decline example copy if you keep a custom UI)
+            <code className="text-foreground">pnpm dlx @nqlib/nqui init-css</code> (decline example copy if you keep a custom UI)
           </li>
           <li>Merge CSS; add ThemeProvider + TooltipProvider as needed.</li>
         </ol>

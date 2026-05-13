@@ -33,8 +33,8 @@ function PrimaryAccentPicker({ onPick, className }: { onPick?: () => void; class
           aria-pressed={accentHue === hue}
           className={
             accentHue === hue
-              ? "size-7 rounded-full p-0 ring-2 ring-ring ring-offset-2 ring-offset-background sm:size-8"
-              : "size-7 rounded-full p-0 ring-1 ring-border sm:size-8"
+              ? "size-4 rounded-full p-0 ring-2 ring-ring ring-offset-1 ring-offset-background sm:size-5"
+              : "size-4 rounded-full p-0 ring-1 ring-border sm:size-5"
           }
           style={{ background: `oklch(0.55 0.22 ${hue})` }}
           onClick={() => {

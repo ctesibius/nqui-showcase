@@ -76,7 +76,6 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-  Toaster,
   Toggle,
   ToggleGroup,
   ToggleGroupItem,
@@ -108,7 +107,7 @@ function initialsFromName(name: string) {
 const RANGE_KEYS = ["1d", "7d", "1m", "1y", "all"] as const;
 type RangeKey = (typeof RANGE_KEYS)[number];
 
-function ComponentsShowcase() {
+function ComponentsShowcase({ onOpenCommandPalette }: { onOpenCommandPalette: () => void }) {
   const [price, setPrice] = useState([250]);
   const [otp, setOtp] = useState("4320");
   const [notify, setNotify] = useState(true);
@@ -275,6 +274,17 @@ function ComponentsShowcase() {
                     <Button variant="ghost">Quick menu</Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start">
+                    <DropdownMenuItem onClick={() => onOpenCommandPalette()}>
+                      Command palette
+                      <span className="ml-auto flex items-center gap-1.5">
+                        <Kbd>⌘K</Kbd>
+                        <span className="text-muted-foreground" aria-hidden>
+                          /
+                        </span>
+                        <Kbd>Ctrl+K</Kbd>
+                      </span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => toast("New file")}>
                       New file <Kbd className="ml-auto">⌘N</Kbd>
                     </DropdownMenuItem>
@@ -558,7 +568,7 @@ function ComponentsShowcase() {
   );
 }
 
-function LandingShowcaseTab() {
+function LandingShowcaseTab({ onRequestOpenCommandPalette }: { onRequestOpenCommandPalette: () => void }) {
   return (
     <>
       <section id="product" className="border-b">
@@ -627,26 +637,25 @@ function LandingShowcaseTab() {
         </div>
       </section>
 
-      <ComponentsShowcase />
+      <ComponentsShowcase onOpenCommandPalette={onRequestOpenCommandPalette} />
       <FrostedGlassShowcase />
     </>
   );
 }
 
-export function LandingPage() {
+export function LandingPage({ onRequestOpenCommandPalette }: { onRequestOpenCommandPalette: () => void }) {
   const [searchParams] = useSearchParams();
   const examples = searchParams.get("tab") === "workspace";
 
   return (
     <div className="flex min-h-dvh flex-col bg-background text-foreground">
-      <Toaster position="bottom-right" />
       <main className="flex min-h-0 flex-1 flex-col">
         {examples ? (
           <div className="mx-auto min-h-0 w-full max-w-[120rem] flex-1 bg-background">
             <HomeWorkspaceView />
           </div>
         ) : (
-          <LandingShowcaseTab />
+          <LandingShowcaseTab onRequestOpenCommandPalette={onRequestOpenCommandPalette} />
         )}
       </main>
     </div>

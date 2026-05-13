@@ -2,32 +2,32 @@
 
 This document mirrors [INSTALLATION.md](https://github.com/nqlib/nqui/blob/main/packages/nqui/INSTALLATION.md) in the nqui repo and records **exact commands** used for this project, plus a map from **visual effect → nqui vs custom**.
 
-## Why not `npm run nqui:init`?
+## Why not `pnpm run nqui:init`?
 
 Postinstall can add `nqui:init`, which runs `init-css --sidebar --force`. For **Vite**, that can overwrite `App.tsx` / `main.tsx` with the sidebar + router example — fine for apps, but not for a custom marketing layout. This demo uses **Option B (step-by-step)** from INSTALLATION instead.
 
 ## 1. Stack checklist (copy-paste)
 
-From an empty directory (or after `npm create vite@latest`):
+From an empty directory (or after `pnpm create vite@latest`):
 
 ```bash
 # Scaffold (optional — this repo already has the result)
-npm create vite@latest my-app -- --template react-ts
+pnpm create vite@latest my-app -- --template react-ts
 cd my-app
-npm install
+pnpm install
 
 # Tailwind CSS v4 + Vite plugin (required by nqui)
-npm install tailwindcss @tailwindcss/vite
+pnpm add tailwindcss @tailwindcss/vite
 
 # nqui + required icon peers (INSTALLATION minimal set)
-npm install @nqlib/nqui@latest @hugeicons/react @hugeicons/core-free-icons
+pnpm add @nqlib/nqui@latest @hugeicons/react @hugeicons/core-free-icons
 
 # Animation + theming (used in README Vite snippet and this app)
-npm install tw-animate-css next-themes
+pnpm add tw-animate-css next-themes
 
 # Full optional peers — required for a successful Vite production build of the main
 # nqui bundle (Combobox, Resizable, etc. resolve at build time).
-npx @nqlib/nqui install-peers
+pnpm dlx @nqlib/nqui install-peers
 ```
 
 Wire Tailwind in `vite.config.ts`:
@@ -61,14 +61,14 @@ Add path alias for TypeScript in `tsconfig.app.json`:
 Cursor / IDE assets (INSTALLATION Step 5):
 
 ```bash
-npx @nqlib/nqui init-cursor
-npx @nqlib/nqui init-skills
+pnpm dlx @nqlib/nqui init-cursor
+pnpm dlx @nqlib/nqui init-skills
 ```
 
 CSS helper files:
 
 ```bash
-npx @nqlib/nqui init-css
+pnpm dlx @nqlib/nqui init-css
 ```
 
 When prompted **Copy vite example files?**, answer **n** if you are keeping a custom `App.tsx`.
@@ -94,7 +94,7 @@ After `@import "@nqlib/nqui/styles";`, add Tailwind **`@source` lines** so class
 @source "../node_modules/@nqlib/nqui/dist/**/*.js";
 ```
 
-`npx @nqlib/nqui init-css` now appends these for Vite in `nqui/nqui-setup.css`. See [INSTALLATION.md §2c](https://github.com/nqlib/nqui/blob/main/packages/nqui/INSTALLATION.md) in the nqui repo.
+`pnpm dlx @nqlib/nqui init-css` now appends these for Vite in `nqui/nqui-setup.css`. See [INSTALLATION.md §2c](https://github.com/nqlib/nqui/blob/main/packages/nqui/INSTALLATION.md) in the nqui repo.
 
 **Alternative:** paste the entire contents of `nqui/nqui-setup.css` at the top of `src/index.css` (INSTALLATION Option B).
 
@@ -122,7 +122,7 @@ After `@import "@nqlib/nqui/styles";`, add Tailwind **`@source` lines** so class
 
 Spacing: prefer **`flex` + `gap-*`**, not `space-y-*`, per nqui skills.
 
-## 5. Optional: local nqui instead of npm
+## 5. Optional: local nqui instead of the registry package
 
 If you develop the library from a git checkout, see the **nqui-local-published-toggle** skill in the nqui repo (optional `scripts/toggle-nqui.js`). Not required for published-package usage.
 

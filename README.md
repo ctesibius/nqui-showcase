@@ -1,8 +1,10 @@
 # nqui — demo app
 
-Vite + TypeScript + **[@nqlib/nqui](https://www.npmjs.com/package/@nqlib/nqui)**.
+Vite + TypeScript + **[@nqlib/nqui](https://www.npmjs.com/package/@nqlib/nqui)**. This repo uses **pnpm** (`packageManager` in `package.json`; enable via `corepack enable`).
 
-- In-app **Library readme**: run `npm run dev` and open `/readme` (install + CLI + Vite `@source`).
+- **Install:** `pnpm install`
+- **Dev:** `pnpm dev`
+- In-app **Library readme**: run `pnpm dev` and open `/readme` (install + CLI + Vite `@source`).
 - **[REPLICATION.md](./REPLICATION.md)** — full stack checklist and CSS notes.
 
 ---

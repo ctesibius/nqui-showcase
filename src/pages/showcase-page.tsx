@@ -34,7 +34,7 @@ export function ShowcasePage() {
           <code className="rounded bg-muted px-1.5 py-0.5 text-sm">@nqlib/nqui</code>. There is{" "}
           <strong className="text-foreground">no dedicated Cursor skill file only for FrostedGlass</strong> — see{" "}
           <code className="rounded bg-muted px-1.5 py-0.5 text-sm">node_modules/@nqlib/nqui/docs/components/nqui-frosted-glass.md</code>{" "}
-          and the components index after <code className="rounded bg-muted px-1.5 py-0.5 text-sm">npx @nqlib/nqui init-skills</code>.{" "}
+          and the components index after <code className="rounded bg-muted px-1.5 py-0.5 text-sm">pnpm dlx @nqlib/nqui init-skills</code>.{" "}
           For tables and a left-rail workspace on the home page, see the{" "}
           <Link to="/?tab=workspace" className="font-medium text-foreground underline underline-offset-4">
             Examples

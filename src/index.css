@@ -66,6 +66,21 @@ body {
   }
 
   /*
+   * Site command palette (⌘K): nqui CommandItem merges `data-selected:bg-accent` (cmdk sets
+   * data-selected on every row as "true" | "false"). Tailwind matches any [data-selected], so
+   * all rows look filled. Reset to clear; surface only on hover or real selection.
+   */
+  .site-command-palette [data-slot="command-item"] {
+    @apply !bg-transparent;
+  }
+
+  .site-command-palette [data-slot="command-item"]:hover,
+  .site-command-palette [data-slot="command-item"][data-selected="true"],
+  .site-command-palette [data-slot="command-item"][aria-selected="true"] {
+    @apply !bg-muted text-foreground;
+  }
+
+  /*
    * Dashboard icon rail (~48px): outer p-2 + header/group p-2 stacks horizontal padding and
    * pushes icons off-center. Center hit targets and trim extra px.
    */

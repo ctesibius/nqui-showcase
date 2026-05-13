@@ -86,13 +86,13 @@ Optional:
 
 ```bash
 # Quick setup
-npx @nqlib/nqui init-css
+pnpm dlx @nqlib/nqui init-css
 
 # App setup with sidebar
-npx @nqlib/nqui init-css --sidebar
+pnpm dlx @nqlib/nqui init-css --sidebar
 
 # Install peer dependencies
-npx @nqlib/nqui install-peers
+pnpm dlx @nqlib/nqui install-peers
 ```
 
 ## CSS Variables
