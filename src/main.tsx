@@ -20,7 +20,7 @@ createRoot(document.getElementById("root")!).render(
         defaultTheme="system"
         enableSystem
         disableTransitionOnChange
-        themes={["light", "dark", "mid"]}
+        themes={["light", "dark"]}
       >
         <SystemLightAsMid />
         <TooltipProvider delayDuration={200}>

@@ -1,9 +1,13 @@
-import type { ReactNode } from "react";
 import { useId, useState } from "react";
 import { toast } from "sonner";
 import { BarChart, BarList, DonutChart, LineChart } from "@nqlib/nqcharts";
 import {
   Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -36,6 +40,10 @@ const hrs = (n: number) => `${n}h`;
 
 type ThroughputRow = { day: string; throughput: number; backlog: number };
 
+/** Series colors from nqui `styles.css` chart tokens (same scale as nqcharts palette names). */
+const CHART_SERIES_1 = "var(--chart-1)";
+const CHART_SERIES_2 = "var(--chart-2)";
+
 /** Recharts area chart (nqcharts AreaChart did not register graphical areas in this app build). */
 function ThroughputBacklogRechartsChart({ data }: { data: readonly ThroughputRow[] }) {
   const idBase = useId().replace(/:/g, "");
@@ -48,12 +56,12 @@ function ThroughputBacklogRechartsChart({ data }: { data: readonly ThroughputRow
         <RechartsAreaChart data={series} margin={{ top: 8, right: 8, bottom: 28, left: 52 }}>
           <defs>
             <linearGradient id={tpGrad} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="rgb(59 130 246)" stopOpacity={0.35} />
-              <stop offset="95%" stopColor="rgb(59 130 246)" stopOpacity={0} />
+              <stop offset="5%" stopColor={CHART_SERIES_1} stopOpacity={0.35} />
+              <stop offset="95%" stopColor={CHART_SERIES_1} stopOpacity={0} />
             </linearGradient>
             <linearGradient id={blGrad} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="rgb(139 92 246)" stopOpacity={0.35} />
-              <stop offset="95%" stopColor="rgb(139 92 246)" stopOpacity={0} />
+              <stop offset="5%" stopColor={CHART_SERIES_2} stopOpacity={0.35} />
+              <stop offset="95%" stopColor={CHART_SERIES_2} stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="4 8" className="stroke-border/50" vertical={false} />
@@ -80,7 +88,7 @@ function ThroughputBacklogRechartsChart({ data }: { data: readonly ThroughputRow
               angle: -90,
               position: "left",
               fill: "currentColor",
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: 600,
               offset: 10,
               style: { textAnchor: "middle" },
@@ -98,7 +106,7 @@ function ThroughputBacklogRechartsChart({ data }: { data: readonly ThroughputRow
             type="monotone"
             dataKey="throughput"
             name="Throughput"
-            stroke="rgb(59 130 246)"
+            stroke={CHART_SERIES_1}
             strokeWidth={2}
             fill={`url(#${tpGrad})`}
             isAnimationActive={false}
@@ -107,42 +115,13 @@ function ThroughputBacklogRechartsChart({ data }: { data: readonly ThroughputRow
             type="monotone"
             dataKey="backlog"
             name="Backlog"
-            stroke="rgb(139 92 246)"
+            stroke={CHART_SERIES_2}
             strokeWidth={2}
             fill={`url(#${blGrad})`}
             isAnimationActive={false}
           />
         </RechartsAreaChart>
       </ResponsiveContainer>
-    </div>
-  );
-}
-
-/** Soft vignette on plot edges (avoids harsh SVG clip); keep left clear for Y-axis ticks. */
-function ChartPlotEdgeFade({
-  children,
-  sides = ["top", "right"],
-}: {
-  children: ReactNode;
-  sides?: ("top" | "right")[];
-}) {
-  const showTop = sides.includes("top");
-  const showRight = sides.includes("right");
-  return (
-    <div className="relative min-h-0 min-w-0">
-      <div className="min-h-0 min-w-0">{children}</div>
-      {showTop ? (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-7 bg-gradient-to-b from-background/85 via-background/35 to-transparent"
-        />
-      ) : null}
-      {showRight ? (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-y-0 right-0 z-[1] w-11 max-w-[18%] bg-gradient-to-l from-background/90 via-background/40 to-transparent"
-        />
-      ) : null}
     </div>
   );
 }
@@ -154,16 +133,16 @@ function ChartFrame({
 }: {
   title: string;
   description?: string;
-  children: ReactNode;
+  children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-0 flex-col gap-2 rounded-lg border border-border/55 bg-background/40 p-4 shadow-inner dark:bg-background/30">
-      <div>
-        <h3 className="text-sm font-semibold leading-normal text-foreground">{title}</h3>
-        {description ? <p className="text-xs leading-normal text-muted-foreground">{description}</p> : null}
-      </div>
-      <div className="min-h-0 min-w-0 flex-1">{children}</div>
-    </div>
+    <Card className="flex min-h-0 flex-col">
+      <CardHeader>
+        <CardTitle className="text-sm">{title}</CardTitle>
+        {description ? <CardDescription>{description}</CardDescription> : null}
+      </CardHeader>
+      <CardContent className="min-h-0 flex-1">{children}</CardContent>
+    </Card>
   );
 }
 
@@ -186,7 +165,7 @@ export function WorkspaceCharts() {
             >
               @nqlib/nqcharts
             </a>{" "}
-            (Recharts + nqui tokens). Charts sit in light bordered frames only — no stacked cards.
+            (Recharts + nqui tokens). Chart frames use nqui <span className="font-medium text-foreground">Card</span>.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -230,14 +209,15 @@ export function WorkspaceCharts() {
           { label: "Lead time", value: "2.4d", hint: "p50 stories" },
           { label: "WIP cap", value: "18", hint: "at limit" },
         ].map((k) => (
-          <div
-            key={k.label}
-            className="rounded-lg border border-border/55 bg-background/40 p-4 shadow-inner dark:bg-background/30"
-          >
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{k.label}</p>
-            <p className="mt-1 text-xl font-semibold tabular-nums text-foreground">{k.value}</p>
-            <p className="text-xs text-muted-foreground">{k.hint}</p>
-          </div>
+          <Card key={k.label}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{k.label}</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <p className="text-xl font-semibold tabular-nums text-foreground">{k.value}</p>
+              <CardDescription className="mt-1 text-xs">{k.hint}</CardDescription>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
@@ -248,28 +228,24 @@ export function WorkspaceCharts() {
             throughputWindow === "10d" ? "Last 10 working days — area (gradient fill)." : "15-day window — mock extension."
           }
         >
-          <ChartPlotEdgeFade sides={["right"]}>
-            <ThroughputBacklogRechartsChart data={throughputData} />
-          </ChartPlotEdgeFade>
+          <ThroughputBacklogRechartsChart data={throughputData} />
         </ChartFrame>
 
         <ChartFrame title="Weekly merge cadence" description="Merged vs opened PRs — stacked bars.">
-          <ChartPlotEdgeFade sides={["right"]}>
-            <BarChart
-              className="h-64"
-              data={[...weeklyMergeOpen]}
-              index="week"
-              categories={["merged", "opened"]}
-              colors={["blue", "cyan"]}
-              type="stacked"
-              valueFormatter={pts}
-              showLegend
-              allowDecimals={false}
-              tickGap={28}
-              yAxisWidth={48}
-              xAxisLabel="Sprint week"
-            />
-          </ChartPlotEdgeFade>
+          <BarChart
+            className="h-64"
+            data={[...weeklyMergeOpen]}
+            index="week"
+            categories={["merged", "opened"]}
+            colors={["blue", "cyan"]}
+            type="stacked"
+            valueFormatter={pts}
+            showLegend
+            allowDecimals={false}
+            tickGap={28}
+            yAxisWidth={48}
+            xAxisLabel="Sprint week"
+          />
         </ChartFrame>
 
         <ChartFrame title="Work mix (hours)" description="Donut — share of effort by category.">
@@ -289,22 +265,20 @@ export function WorkspaceCharts() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <ChartFrame title="Velocity trend" description="Line chart — story points completed per week.">
-          <ChartPlotEdgeFade sides={["top", "right"]}>
-            <LineChart
-              className="h-56"
-              data={[...velocityWeekly]}
-              index="week"
-              categories={["velocity"]}
-              colors={["blue"]}
-              valueFormatter={pts}
-              showDots
-              glowLastDot={false}
-              showLegend={false}
-              allowDecimals={false}
-              tickGap={32}
-              yAxisWidth={52}
-            />
-          </ChartPlotEdgeFade>
+          <LineChart
+            className="h-56"
+            data={[...velocityWeekly]}
+            index="week"
+            categories={["velocity"]}
+            colors={["blue"]}
+            valueFormatter={pts}
+            showDots
+            glowLastDot={false}
+            showLegend={false}
+            allowDecimals={false}
+            tickGap={32}
+            yAxisWidth={52}
+          />
         </ChartFrame>
 
         <ChartFrame title="Merge share by lead" description="Bar list — ranked merge counts (mock).">

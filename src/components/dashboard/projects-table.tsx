@@ -1,11 +1,10 @@
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import {
   type ExpandedState,
   createColumnHelper,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   type RowSelectionState,
   type SortingState,
@@ -20,7 +19,7 @@ import {
   Badge,
   Button,
   Checkbox,
-  Table,
+  ScrollArea,
   TableBody,
   TableCell,
   TableHead,
@@ -32,7 +31,24 @@ import {
   cn,
 } from "@nqlib/nqui";
 import { demoAssigneePerson, type ProjectLeadPerson, type ProjectRow } from "../../data/dashboard-tables-mock";
-import { stickyTableHeaderClass, tableDenseTypography } from "./table-typography";
+import {
+  tableBodyClass,
+  tableCellClass,
+  tableDenseTypography,
+  tableFooterClass,
+  tableHeaderClass,
+  tableHeadClass,
+  tableNestedHeaderClass,
+  tableNestedPanelClass,
+  tableNumericMutedClass,
+  tableNumericStrongClass,
+  tableRowClass,
+  tableScrollAreaContentClass,
+  tableScrollAreaRootClass,
+  tableScrollViewportStyle,
+  tableShellClass,
+} from "./table-typography";
+import { useInfiniteVisibleRows } from "./use-infinite-visible-rows";
 
 const columnHelper = createColumnHelper<ProjectRow>();
 
@@ -58,7 +74,7 @@ function PersonAvatarWithTooltip({ person }: { person: ProjectLeadPerson }) {
         >
           <Avatar className="size-7">
             <AvatarImage src={person.image} alt={person.name} />
-            <AvatarFallback className="text-[10px] font-medium">{initialsFromName(person.name)}</AvatarFallback>
+            <AvatarFallback className="text-xs font-medium">{initialsFromName(person.name)}</AvatarFallback>
           </Avatar>
         </button>
       </TooltipTrigger>
@@ -98,40 +114,40 @@ function statusVariant(s: ProjectRow["status"]) {
 
 function SubtasksMiniTable({ data }: { data: ProjectRow["subtasks"] }) {
   return (
-    <div className="max-h-48 min-h-0 overflow-auto rounded-md border border-border/50 bg-muted/20">
-      <Table className={tableDenseTypography}>
-        <TableHeader className={stickyTableHeaderClass}>
-          <TableRow>
-            <TableHead className="h-8 w-10 bg-card">Done</TableHead>
-            <TableHead className="h-8 bg-card">Subtask</TableHead>
-            <TableHead className="h-8 bg-card">Owner</TableHead>
-            <TableHead className="h-8 bg-card">Due</TableHead>
+    <div className={tableNestedPanelClass}>
+      <table className={tableDenseTypography}>
+        <TableHeader className={tableNestedHeaderClass}>
+          <TableRow className={tableRowClass}>
+            <TableHead className={cn(tableHeadClass, "h-9 w-10")}>Done</TableHead>
+            <TableHead className={cn(tableHeadClass, "h-9")}>Subtask</TableHead>
+            <TableHead className={cn(tableHeadClass, "h-9")}>Owner</TableHead>
+            <TableHead className={cn(tableHeadClass, "h-9")}>Due</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody className={tableBodyClass}>
           {data.map((t) => (
-            <TableRow key={t.id} className="border-border/40">
-              <TableCell className="py-1.5">
+            <TableRow key={t.id} className={tableRowClass}>
+              <TableCell className={cn(tableCellClass, "py-2")}>
                 <Checkbox checked={t.done} disabled aria-label={t.done ? "Done" : "Open"} className="hit-area-6" />
               </TableCell>
-              <TableCell className="py-1.5 text-foreground">{t.title}</TableCell>
-              <TableCell className="py-1.5">
+              <TableCell className={cn(tableCellClass, "py-2 text-foreground")}>{t.title}</TableCell>
+              <TableCell className={cn(tableCellClass, "py-2")}>
                 <span className="inline-flex p-0.5">
                   <PersonAvatarWithTooltip person={demoAssigneePerson(t.assignee)} />
                 </span>
               </TableCell>
-              <TableCell className="py-1.5 font-mono tabular-nums text-muted-foreground">{t.due}</TableCell>
+              <TableCell className={cn(tableCellClass, "py-2", tableNumericMutedClass)}>{t.due}</TableCell>
             </TableRow>
           ))}
         </TableBody>
-      </Table>
+      </table>
     </div>
   );
 }
 
 function CommentsThread({ items }: { items: ProjectRow["comments"] }) {
   return (
-    <ul className="flex flex-col gap-2 rounded-md border border-border/50 bg-muted/15 p-3">
+    <ul className={cn(tableNestedPanelClass, "flex flex-col gap-2 p-3")}>
       {items.map((c) => (
         <li key={c.id} className="text-sm leading-normal">
           <span className="font-medium text-foreground">{c.author}</span>
@@ -147,6 +163,10 @@ export function ProjectsTable({ data }: { data: ProjectRow[] }) {
   const [sorting, setSorting] = useState<SortingState>([{ id: "updatedAt", desc: true }]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [expanded, setExpanded] = useState<ExpandedState>({});
+  const [scrollRoot, setScrollRoot] = useState<HTMLDivElement | null>(null);
+  const captureViewportRef = useCallback((node: HTMLDivElement | null) => {
+    setScrollRoot(node);
+  }, []);
 
   const columns = useMemo(
     () => [
@@ -154,9 +174,9 @@ export function ProjectsTable({ data }: { data: ProjectRow[] }) {
         id: "select",
         header: ({ table }) => (
           <Checkbox
-            checked={table.getIsAllPageRowsSelected() ? true : table.getIsSomePageRowsSelected() ? "indeterminate" : false}
-            onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
-            aria-label="Select all on page"
+            checked={table.getIsAllRowsSelected() ? true : table.getIsSomeRowsSelected() ? "indeterminate" : false}
+            onCheckedChange={(v) => table.toggleAllRowsSelected(!!v)}
+            aria-label="Select all rows"
             className="hit-area-6"
           />
         ),
@@ -190,13 +210,13 @@ export function ProjectsTable({ data }: { data: ProjectRow[] }) {
       columnHelper.accessor("updatedAt", {
         header: "Updated",
         cell: (info) => (
-          <span className="font-mono text-sm tabular-nums leading-normal text-muted-foreground">{info.getValue()}</span>
+          <span className={tableNumericMutedClass}>{info.getValue()}</span>
         ),
       }),
       columnHelper.accessor("budgetUsd", {
         header: () => <span className="w-full text-right">Budget</span>,
         cell: (info) => (
-          <div className="text-right font-mono text-sm tabular-nums leading-normal text-foreground">
+          <div className={cn("text-right", tableNumericStrongClass)}>
             {money.format(info.getValue())}
           </div>
         ),
@@ -204,7 +224,7 @@ export function ProjectsTable({ data }: { data: ProjectRow[] }) {
       columnHelper.accessor("progress", {
         header: () => <span className="w-full text-right">%</span>,
         cell: (info) => (
-          <div className="text-right font-mono text-sm tabular-nums leading-normal text-muted-foreground">
+          <div className={cn("text-right", tableNumericMutedClass)}>
             {info.getValue()}%
           </div>
         ),
@@ -235,6 +255,7 @@ export function ProjectsTable({ data }: { data: ProjectRow[] }) {
     [],
   );
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack useReactTable
   const table = useReactTable({
     data,
     columns,
@@ -245,24 +266,35 @@ export function ProjectsTable({ data }: { data: ProjectRow[] }) {
     getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getRowCanExpand: () => true,
-    initialState: { pagination: { pageSize: 6 } },
   });
+  const rows = table.getRowModel().rows;
+  const { hasMore, resetVisibleRows, sentinelRef, visibleRows } = useInfiniteVisibleRows(rows, 6, 6, scrollRoot);
+
+  useEffect(() => {
+    resetVisibleRows();
+  }, [data, resetVisibleRows, sorting]);
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-lg border border-border/55 bg-background/95 shadow-inner dark:bg-background/50">
-      <div className="max-h-[min(28rem,52vh)] min-h-0 overflow-auto rounded-t-lg">
-        <Table className={tableDenseTypography}>
-          <TableHeader className={stickyTableHeaderClass}>
+    <div className={tableShellClass}>
+      <ScrollArea
+        orientation="both"
+        fadeMask={false}
+        className={tableScrollAreaRootClass}
+        viewportRef={captureViewportRef}
+        viewportStyle={tableScrollViewportStyle}
+      >
+        <div className={tableScrollAreaContentClass}>
+        <table className={tableDenseTypography}>
+          <TableHeader className={tableHeaderClass}>
             {table.getHeaderGroups().map((hg) => (
-              <TableRow key={hg.id}>
+              <TableRow key={hg.id} className={tableRowClass}>
                 {hg.headers.map((header) => (
                   <TableHead
                     key={header.id}
                     className={cn(
-                      "bg-card",
+                      tableHeadClass,
                       header.column.id === "budgetUsd" || header.column.id === "progress" ? "text-right" : "",
                     )}
                     style={{ width: header.getSize() !== 150 ? header.getSize() : undefined }}
@@ -273,59 +305,53 @@ export function ProjectsTable({ data }: { data: ProjectRow[] }) {
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <Fragment key={row.id}>
-              <TableRow data-state={row.getIsSelected() && "selected"} className="border-border/40">
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="align-middle">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-              {row.getIsExpanded() ? (
-                <TableRow className="border-border/40 hover:bg-transparent">
-                  <TableCell colSpan={row.getVisibleCells().length} className="bg-muted/10 p-3 sm:p-4">
-                    <div className="grid gap-4 lg:grid-cols-2">
-                      <div className="space-y-2">
-                        <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground leading-normal">
-                          <HugeiconsIcon icon={TaskDaily01Icon} className="size-3.5" aria-hidden />
-                          Subtasks
-                        </p>
-                        <SubtasksMiniTable data={row.original.subtasks} />
-                      </div>
-                      <div className="space-y-2">
-                        <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground leading-normal">
-                          <HugeiconsIcon icon={Comment01Icon} className="size-3.5" aria-hidden />
-                          Comments
-                        </p>
-                        <CommentsThread items={row.original.comments} />
-                      </div>
-                    </div>
-                  </TableCell>
+          <TableBody className={tableBodyClass}>
+            {visibleRows.map((row) => (
+              <Fragment key={row.id}>
+                <TableRow data-state={row.getIsSelected() && "selected"} className={tableRowClass}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className={tableCellClass}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              ) : null}
-            </Fragment>
-          ))}
+                {row.getIsExpanded() ? (
+                  <TableRow className={cn(tableRowClass, "hover:bg-transparent [&>td]:bg-card/40")}>
+                    <TableCell colSpan={row.getVisibleCells().length} className="p-4">
+                      <div className="grid gap-4 lg:grid-cols-2">
+                        <div className="space-y-2">
+                          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground leading-normal">
+                            <HugeiconsIcon icon={TaskDaily01Icon} className="size-3.5" aria-hidden />
+                            Subtasks
+                          </p>
+                          <SubtasksMiniTable data={row.original.subtasks} />
+                        </div>
+                        <div className="space-y-2">
+                          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground leading-normal">
+                            <HugeiconsIcon icon={Comment01Icon} className="size-3.5" aria-hidden />
+                            Comments
+                          </p>
+                          <CommentsThread items={row.original.comments} />
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : null}
+              </Fragment>
+            ))}
           </TableBody>
-        </Table>
-      </div>
-
-      <div className="flex flex-col gap-2 rounded-b-lg border-t border-border/50 bg-card px-2 py-2 sm:flex-row sm:items-center sm:justify-between sm:px-3">
-        <p className="text-sm leading-normal text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} selected (this page)
-        </p>
-        <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" size="sm" disabled={!table.getCanPreviousPage()} onClick={() => table.previousPage()}>
-            Previous
-          </Button>
-          <span className="text-sm tabular-nums leading-normal text-muted-foreground">
-            Page {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
-          </span>
-          <Button type="button" size="sm" disabled={!table.getCanNextPage()} onClick={() => table.nextPage()}>
-            Next
-          </Button>
+        </table>
+        {hasMore ? <div ref={sentinelRef} className="h-1 shrink-0" aria-hidden /> : null}
         </div>
+      </ScrollArea>
+
+      <div className={tableFooterClass}>
+        <p className="text-sm leading-normal text-muted-foreground">
+          {table.getSelectedRowModel().rows.length} selected · Showing {visibleRows.length} of {rows.length}
+        </p>
+        <p className="text-sm leading-normal text-muted-foreground">
+          {hasMore ? "Scroll to load more rows" : "All rows loaded"}
+        </p>
       </div>
     </div>
   );

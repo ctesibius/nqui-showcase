@@ -1,16 +1,34 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, cn } from "@nqlib/nqui";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { Button, ScrollArea, TableBody, TableCell, TableHead, TableHeader, TableRow, cn } from "@nqlib/nqui";
 import type { PortfolioRow } from "../../data/dashboard-tables-mock";
-import { stickyTableHeaderClass, tableDenseTypography } from "./table-typography";
+import {
+  tableBodyClass,
+  tableCellClass,
+  tableDenseTypography,
+  tableFooterClass,
+  tableHeaderClass,
+  tableHeadClass,
+  tableNumericClass,
+  tableNumericMutedClass,
+  tableNumericStrongClass,
+  tableRowClass,
+  tableScrollAreaContentClass,
+  tableScrollAreaRootClass,
+  tableScrollViewportStyle,
+  tableShellClass,
+} from "./table-typography";
+
+const PAGE_SIZE = 10;
 
 const columnHelper = createColumnHelper<PortfolioRow>();
 
@@ -18,13 +36,14 @@ const fmt2 = (n: number) => n.toFixed(2);
 
 export function PortfolioTable({ data }: { data: PortfolioRow[] }) {
   const [sorting, setSorting] = useState<SortingState>([{ id: "weightPct", desc: true }]);
+  const [page, setPage] = useState(0);
 
   const columns = useMemo(
     () => [
       columnHelper.accessor("ticker", {
         header: "Ticker",
         cell: (info) => (
-          <span className="font-mono text-sm font-semibold tabular-nums leading-normal text-foreground">{info.getValue()}</span>
+          <span className={tableNumericStrongClass}>{info.getValue()}</span>
         ),
       }),
       columnHelper.accessor("name", {
@@ -40,19 +59,19 @@ export function PortfolioTable({ data }: { data: PortfolioRow[] }) {
       columnHelper.accessor("shares", {
         header: () => <span className="w-full text-right">Shares</span>,
         cell: (info) => (
-          <div className="text-right font-mono text-sm tabular-nums leading-normal text-foreground">{info.getValue()}</div>
+          <div className={cn("text-right", tableNumericStrongClass)}>{info.getValue()}</div>
         ),
       }),
       columnHelper.accessor("avgCost", {
         header: () => <span className="w-full text-right">Avg</span>,
         cell: (info) => (
-          <div className="text-right font-mono text-sm tabular-nums leading-normal text-muted-foreground">${fmt2(info.getValue())}</div>
+          <div className={cn("text-right", tableNumericMutedClass)}>${fmt2(info.getValue())}</div>
         ),
       }),
       columnHelper.accessor("last", {
         header: () => <span className="w-full text-right">Last</span>,
         cell: (info) => (
-          <div className="text-right font-mono text-sm tabular-nums leading-normal text-foreground">${fmt2(info.getValue())}</div>
+          <div className={cn("text-right", tableNumericStrongClass)}>${fmt2(info.getValue())}</div>
         ),
       }),
       columnHelper.accessor("dayPnLPct", {
@@ -63,8 +82,9 @@ export function PortfolioTable({ data }: { data: PortfolioRow[] }) {
           return (
             <div
               className={cn(
-                "text-right font-mono text-sm tabular-nums leading-normal",
+                "text-right",
                 pos ? "text-foreground" : "text-destructive",
+                tableNumericClass,
               )}
             >
               {pos ? "+" : ""}
@@ -76,7 +96,7 @@ export function PortfolioTable({ data }: { data: PortfolioRow[] }) {
       columnHelper.accessor("weightPct", {
         header: () => <span className="w-full text-right">Weight</span>,
         cell: (info) => (
-          <div className="text-right font-mono text-sm tabular-nums leading-normal text-muted-foreground">
+          <div className={cn("text-right", tableNumericMutedClass)}>
             {fmt2(info.getValue())}%
           </div>
         ),
@@ -85,6 +105,7 @@ export function PortfolioTable({ data }: { data: PortfolioRow[] }) {
     [],
   );
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack useReactTable
   const table = useReactTable({
     data,
     columns,
@@ -92,25 +113,47 @@ export function PortfolioTable({ data }: { data: PortfolioRow[] }) {
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    initialState: { pagination: { pageSize: 5 } },
   });
+  const rows = table.getRowModel().rows;
+  const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  const maxPage = pageCount - 1;
 
-  const start = table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1;
-  const end = Math.min(start + table.getRowModel().rows.length - 1, data.length);
+  const pageRows = useMemo(() => {
+    const start = page * PAGE_SIZE;
+    return rows.slice(start, start + PAGE_SIZE);
+  }, [rows, page]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [data, sorting]);
+
+  useEffect(() => {
+    setPage((p) => Math.min(p, maxPage));
+  }, [maxPage]);
+
+  const rangeStart = rows.length === 0 ? 0 : page * PAGE_SIZE + 1;
+  const rangeEnd = rows.length === 0 ? 0 : Math.min((page + 1) * PAGE_SIZE, rows.length);
+  const canGoPrevious = page > 0;
+  const canGoNext = page < maxPage;
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-lg border border-border/55 bg-background/95 shadow-inner dark:bg-background/50">
-      <div className="max-h-[min(26rem,48vh)] min-h-0 overflow-auto rounded-t-lg">
-        <Table className={tableDenseTypography}>
-          <TableHeader className={stickyTableHeaderClass}>
+    <div className={tableShellClass}>
+      <ScrollArea
+        orientation="both"
+        fadeMask={false}
+        className={tableScrollAreaRootClass}
+        viewportStyle={tableScrollViewportStyle}
+      >
+        <div className={tableScrollAreaContentClass}>
+        <table className={tableDenseTypography}>
+          <TableHeader className={tableHeaderClass}>
             {table.getHeaderGroups().map((hg) => (
-              <TableRow key={hg.id}>
+              <TableRow key={hg.id} className={tableRowClass}>
                 {hg.headers.map((header) => (
                   <TableHead
                     key={header.id}
                     className={cn(
-                      "bg-card",
+                      tableHeadClass,
                       ["shares", "avgCost", "last", "dayPnLPct", "weightPct"].includes(header.column.id) && "text-right",
                     )}
                   >
@@ -134,29 +177,54 @@ export function PortfolioTable({ data }: { data: PortfolioRow[] }) {
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} className="border-border/40">
+          <TableBody className={tableBodyClass}>
+            {pageRows.map((row) => (
+              <TableRow key={row.id} className={tableRowClass}>
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                  <TableCell key={cell.id} className={tableCellClass}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
                 ))}
               </TableRow>
             ))}
           </TableBody>
-        </Table>
-      </div>
+        </table>
+        </div>
+      </ScrollArea>
 
-      <div className="flex flex-col gap-3 rounded-b-lg border-t border-border/50 bg-card px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm leading-normal text-muted-foreground">
-          Viewing <span className="font-medium text-foreground">{start}</span>–<span className="font-medium text-foreground">{end}</span> of{" "}
-          <span className="font-medium text-foreground">{data.length}</span> holdings
-        </p>
-        <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" size="sm" disabled={!table.getCanPreviousPage()} onClick={() => table.previousPage()}>
-            Previous
+      <div className={tableFooterClass}>
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <p className="text-sm leading-normal text-muted-foreground">
+            Rows <span className="font-medium text-foreground">{rangeStart}</span>–
+            <span className="font-medium text-foreground">{rangeEnd}</span> of{" "}
+            <span className="font-medium text-foreground">{rows.length}</span> · Page{" "}
+            <span className="font-medium text-foreground">{page + 1}</span> of{" "}
+            <span className="font-medium text-foreground">{pageCount}</span>
+          </p>
+          <p className="text-sm leading-normal text-muted-foreground">Use Back / Next to change page.</p>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={!canGoPrevious}
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            aria-label="Show previous rows"
+          >
+            <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" aria-hidden />
+            Back
           </Button>
-          <Button type="button" size="sm" disabled={!table.getCanNextPage()} onClick={() => table.nextPage()}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={!canGoNext}
+            onClick={() => setPage((p) => Math.min(maxPage, p + 1))}
+            aria-label="Show more rows"
+          >
             Next
+            <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" aria-hidden />
           </Button>
         </div>
       </div>

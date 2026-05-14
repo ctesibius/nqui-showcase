@@ -11,6 +11,7 @@ Best practices for composing nqui components.
 - Choosing between overlay components
 - Dialog, Sheet, and Drawer always need a Title
 - Card structure
+- Scrollable Card / Sheet / panel (flex + overflow)
 - TabsTrigger must be inside TabsList
 - Avatar always needs AvatarFallback
 - Use Separator instead of raw hr or border divs
@@ -142,6 +143,14 @@ Use full composition — don't dump everything into `CardContent`:
   </CardFooter>
 </Card>
 ```
+
+---
+
+## Scrollable Card / Sheet / panel (flex + overflow)
+
+When the **body** should scroll but **header** and **footer** stay fixed, use a **column flex** on the card (or a wrapper): **`flex flex-col min-h-0`**, **`shrink-0`** on chrome, **`flex-1 min-h-0 overflow-hidden`** (or **`ScrollArea`**) for the middle slot. **Do not** rely on **`overflow-hidden`** on the outer **Card** alone — it clips overlays; clip on an **inner** column instead.
+
+**Rules file:** **`rules/scroll-layout.md`** — scroll stuck, double scrollbar, overlap, `h-full` / `%` height, **`min-h-0`** chain. **Docs:** **`node_modules/@nqlib/nqui/docs/components/nqui-scroll-area.md` §0–§6**. **Design system:** **`design-system.md` § Card + ScrollArea**.
 
 ---
 

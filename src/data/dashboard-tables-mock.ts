@@ -50,6 +50,19 @@ export type FlightRow = {
   end: string;
   destination: string;
   status: "boarding" | "on_time" | "delayed" | "cancelled";
+  /** Operations stress-test / wide table (optional). */
+  origin?: string;
+  aircraft?: string;
+  gate?: string;
+  terminal?: string;
+  stand?: string;
+  pax?: number;
+  crew?: number;
+  delayMin?: number;
+  loadPct?: number;
+  fuel1kKg?: number;
+  groundHandler?: string;
+  belt?: string;
 };
 
 /** Stable pravatar.cc faces for demo leads (matches landing avatar set). */
@@ -285,12 +298,274 @@ export const mockPortfolio: PortfolioRow[] = [
 ];
 
 export const mockFlights: FlightRow[] = [
-  { id: "f1", code: "WN4567", start: "06:10", duration: "2h 15m", end: "08:25", destination: "Austin", status: "boarding" },
-  { id: "f2", code: "UA1204", start: "07:45", duration: "4h 02m", end: "11:47", destination: "Seattle", status: "on_time" },
-  { id: "f3", code: "DL882", start: "09:20", duration: "1h 08m", end: "10:28", destination: "Boston", status: "delayed" },
-  { id: "f4", code: "LH7890", start: "11:05", duration: "7h 40m", end: "18:45", destination: "Munich", status: "cancelled" },
-  { id: "f5", code: "AA334", start: "13:15", duration: "3h 22m", end: "16:37", destination: "Denver", status: "on_time" },
-  { id: "f6", code: "B61408", start: "15:50", duration: "5h 10m", end: "21:00", destination: "San Juan", status: "on_time" },
-  { id: "f7", code: "SK990", start: "18:30", duration: "8h 05m", end: "02:35", destination: "Stockholm", status: "boarding" },
-  { id: "f8", code: "FR221", start: "20:10", duration: "2h 50m", end: "23:00", destination: "Dublin", status: "delayed" },
+  {
+    id: "f1",
+    code: "WN4567",
+    start: "06:10",
+    duration: "2h 15m",
+    end: "08:25",
+    destination: "Austin",
+    status: "boarding",
+    origin: "SFO",
+    aircraft: "738",
+    gate: "B12",
+    terminal: "T1",
+    stand: "S-14",
+    pax: 143,
+    crew: 4,
+    delayMin: 0,
+    loadPct: 87,
+    fuel1kKg: 8,
+    groundHandler: "Swissport",
+    belt: "3",
+  },
+  {
+    id: "f2",
+    code: "UA1204",
+    start: "07:45",
+    duration: "4h 02m",
+    end: "11:47",
+    destination: "Seattle",
+    status: "on_time",
+    origin: "ORD",
+    aircraft: "739",
+    gate: "C6",
+    terminal: "T2",
+    stand: "S-22",
+    pax: 162,
+    crew: 5,
+    delayMin: 0,
+    loadPct: 91,
+    fuel1kKg: 11,
+    groundHandler: "United Ground",
+    belt: "5",
+  },
+  {
+    id: "f3",
+    code: "DL882",
+    start: "09:20",
+    duration: "1h 08m",
+    end: "10:28",
+    destination: "Boston",
+    status: "delayed",
+    origin: "JFK",
+    aircraft: "321",
+    gate: "A18",
+    terminal: "T4",
+    stand: "S-31",
+    pax: 128,
+    crew: 4,
+    delayMin: 42,
+    loadPct: 79,
+    fuel1kKg: 6,
+    groundHandler: "Menzies",
+    belt: "2",
+  },
+  {
+    id: "f4",
+    code: "LH7890",
+    start: "11:05",
+    duration: "7h 40m",
+    end: "18:45",
+    destination: "Munich",
+    status: "cancelled",
+    origin: "ATL",
+    aircraft: "359",
+    gate: "F4",
+    terminal: "INTL",
+    stand: "S-08",
+    pax: 0,
+    crew: 0,
+    delayMin: 0,
+    loadPct: 0,
+    fuel1kKg: 0,
+    groundHandler: "Dnata",
+    belt: "—",
+  },
+  {
+    id: "f5",
+    code: "AA334",
+    start: "13:15",
+    duration: "3h 22m",
+    end: "16:37",
+    destination: "Denver",
+    status: "on_time",
+    origin: "DFW",
+    aircraft: "788",
+    gate: "D22",
+    terminal: "T0",
+    stand: "S-55",
+    pax: 214,
+    crew: 6,
+    delayMin: 0,
+    loadPct: 88,
+    fuel1kKg: 14,
+    groundHandler: "Menzies",
+    belt: "7",
+  },
+  {
+    id: "f6",
+    code: "B61408",
+    start: "15:50",
+    duration: "5h 10m",
+    end: "21:00",
+    destination: "San Juan",
+    status: "on_time",
+    origin: "BOS",
+    aircraft: "320",
+    gate: "E9",
+    terminal: "C",
+    stand: "S-41",
+    pax: 150,
+    crew: 4,
+    delayMin: 0,
+    loadPct: 82,
+    fuel1kKg: 9,
+    groundHandler: "Swissport",
+    belt: "4",
+  },
+  {
+    id: "f7",
+    code: "SK990",
+    start: "18:30",
+    duration: "8h 05m",
+    end: "02:35",
+    destination: "Stockholm",
+    status: "boarding",
+    origin: "EWR",
+    aircraft: "333",
+    gate: "B44",
+    terminal: "B",
+    stand: "S-19",
+    pax: 198,
+    crew: 5,
+    delayMin: 0,
+    loadPct: 93,
+    fuel1kKg: 16,
+    groundHandler: "United Ground",
+    belt: "6",
+  },
+  {
+    id: "f8",
+    code: "FR221",
+    start: "20:10",
+    duration: "2h 50m",
+    end: "23:00",
+    destination: "Dublin",
+    status: "delayed",
+    origin: "STN",
+    aircraft: "738",
+    gate: "K2",
+    terminal: "L",
+    stand: "S-03",
+    pax: 189,
+    crew: 5,
+    delayMin: 28,
+    loadPct: 76,
+    fuel1kKg: 7,
+    groundHandler: "Menzies",
+    belt: "1",
+  },
 ];
+
+const OPS_EXTRA_DESTINATIONS = [
+  "Austin",
+  "Seattle",
+  "Boston",
+  "Munich",
+  "Denver",
+  "San Juan",
+  "Stockholm",
+  "Dublin",
+  "Atlanta",
+  "Chicago",
+  "Dallas",
+  "Phoenix",
+  "Miami",
+  "Portland",
+  "Toronto",
+  "Vancouver",
+  "London",
+  "Paris",
+  "Amsterdam",
+  "Zurich",
+  "Singapore",
+  "Tokyo",
+  "Sydney",
+  "Honolulu",
+];
+
+const OPS_EXTRA_AIRLINES = ["WN", "UA", "DL", "LH", "AA", "B6", "SK", "FR", "AS", "BA", "KL", "AF", "AC", "QF", "JL", "SQ"];
+
+const OPS_EXTRA_ORIGINS = [
+  "SFO",
+  "LAX",
+  "JFK",
+  "ORD",
+  "DFW",
+  "DEN",
+  "SEA",
+  "MIA",
+  "ATL",
+  "PHX",
+  "IAH",
+  "MSP",
+  "LAS",
+  "CLT",
+  "BOS",
+  "EWR",
+];
+
+const OPS_EXTRA_AIRCRAFT = ["738", "739", "7M8", "321", "320", "223", "E75", "CR9", "788", "359", "333", "77W"];
+
+const OPS_EXTRA_HANDLERS = ["Swissport", "Menzies", "Dnata", "United Ground", "Alliance", "ASIG", "SAS GS"];
+
+const OPS_EXTRA_STATUSES: FlightRow["status"][] = ["boarding", "on_time", "delayed", "cancelled"];
+
+function padClock(n: number) {
+  return String(n).padStart(2, "0");
+}
+
+function minutesToTime(m: number) {
+  const wrapped = ((m % (24 * 60)) + 24 * 60) % (24 * 60);
+  return `${padClock(Math.floor(wrapped / 60))}:${padClock(wrapped % 60)}`;
+}
+
+/** Deterministic synthetic rows for stress-testing long / wide tables (after the small seed set). */
+export function generateExtraMockFlights(count: number): FlightRow[] {
+  const rows: FlightRow[] = [];
+  for (let i = 0; i < count; i++) {
+    const startM = 360 + (i * 37) % 1320;
+    const durM = 50 + (i * 29) % 540;
+    const endM = startM + durM;
+    const h = Math.floor(durM / 60);
+    const mm = durM % 60;
+    const status = OPS_EXTRA_STATUSES[i % OPS_EXTRA_STATUSES.length];
+    const delayMin = status === "delayed" ? 12 + (i * 13) % 140 : 0;
+    rows.push({
+      id: `f-gen-${i}`,
+      code: `${OPS_EXTRA_AIRLINES[i % OPS_EXTRA_AIRLINES.length]}${String(1000 + (i % 8999)).padStart(4, "0")}`,
+      start: minutesToTime(startM),
+      duration: `${h}h ${mm}m`,
+      end: minutesToTime(endM),
+      destination: OPS_EXTRA_DESTINATIONS[i % OPS_EXTRA_DESTINATIONS.length],
+      status,
+      origin: OPS_EXTRA_ORIGINS[i % OPS_EXTRA_ORIGINS.length],
+      aircraft: OPS_EXTRA_AIRCRAFT[i % OPS_EXTRA_AIRCRAFT.length],
+      gate: `${String.fromCharCode(65 + (i % 6))}${(i % 32) + 1}`,
+      terminal: `T${(i % 5) + 1}`,
+      stand: `S-${100 + (i % 90)}`,
+      pax: status === "cancelled" ? 0 : 48 + (i * 17) % 174,
+      crew: status === "cancelled" ? 0 : 3 + (i % 5),
+      delayMin,
+      loadPct: status === "cancelled" ? 0 : 52 + (i * 11) % 48,
+      fuel1kKg: status === "cancelled" ? 0 : 4 + (i % 19),
+      groundHandler: OPS_EXTRA_HANDLERS[i % OPS_EXTRA_HANDLERS.length],
+      belt: status === "cancelled" ? "—" : `${(i % 9) + 1}`,
+    });
+  }
+  return rows;
+}
+
+/** Seed flights plus synthetic rows — 500 total, wide ops columns, for the Operations workspace. */
+export const mockFlightsOperations: FlightRow[] = [...mockFlights, ...generateExtraMockFlights(492)];

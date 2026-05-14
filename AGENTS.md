@@ -13,6 +13,7 @@ For component implementation and UI design with @nqlib/nqui, load skills from:
 The skills include:
 - Component implementation guide
 - Design system conventions (sizing, z-index)
+- Data tables + ScrollArea (`nqui-data-tables/SKILL.md`) for bounded dashboard grids
 - ToggleGroup usage rules
 - App design patterns
 
@@ -20,6 +21,7 @@ The skills include:
 
 When working with nqui components, AI assistants should load:
 - `.cursor/nqui-skills/SKILL.md` - main guide
+- `.cursor/nqui-skills/nqui-data-tables/SKILL.md` - when implementing scrollable data tables
 
 ---
 

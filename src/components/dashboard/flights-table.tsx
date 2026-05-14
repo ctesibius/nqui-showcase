@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import {
   createColumnHelper,
   flexRender,
@@ -8,11 +8,49 @@ import {
   type ExpandedState,
   type RowSelectionState,
   type SortingState,
+  type Table,
+  type VisibilityState,
   useReactTable,
 } from "@tanstack/react-table";
-import { Badge, Button, Checkbox, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, cn } from "@nqlib/nqui";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Search01Icon } from "@hugeicons/core-free-icons";
+import {
+  Badge,
+  Button,
+  Checkbox,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  Input,
+  ScrollArea,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  cn,
+} from "@nqlib/nqui";
 import type { FlightRow } from "../../data/dashboard-tables-mock";
-import { stickyTableHeaderClass, tableDenseTypography } from "./table-typography";
+import {
+  tableBodyClass,
+  tableCellClass,
+  tableDenseTypography,
+  tableFooterClass,
+  tableHeaderClass,
+  tableHeadClass,
+  tableNumericClass,
+  tableNumericMutedClass,
+  tableNumericStrongClass,
+  tableRowClass,
+  tableScrollAreaContentClass,
+  tableScrollAreaRootClass,
+  tableScrollViewportStyle,
+  tableShellClass,
+  flightsTableShellExtraClass,
+} from "./table-typography";
+import { useInfiniteVisibleRows } from "./use-infinite-visible-rows";
 
 const columnHelper = createColumnHelper<FlightRow>();
 
@@ -22,6 +60,80 @@ const gateNotes: Record<string, string[]> = {
   f4: ["Weather at MUC — rebook hotline active"],
   f8: ["De-icing queue — monitor FIDS"],
 };
+
+const COLUMN_LABELS: Record<string, string> = {
+  code: "Flight",
+  origin: "Origin",
+  destination: "Destination",
+  start: "Schedule",
+  duration: "Duration",
+  status: "Status",
+  aircraft: "Equipment",
+  gate: "Gate",
+  terminal: "Terminal",
+  stand: "Stand",
+  pax: "Passengers",
+  crew: "Crew",
+  delayMin: "Delay",
+  loadPct: "Load %",
+  fuel1kKg: "Fuel (1000 kg)",
+  groundHandler: "Ground handler",
+  belt: "Bag belt",
+};
+
+function rowMatchesSearch(f: FlightRow, query: string) {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  const blob = [
+    f.code,
+    f.origin,
+    f.destination,
+    f.start,
+    f.end,
+    f.duration,
+    f.aircraft,
+    f.gate,
+    f.terminal,
+    f.stand,
+    f.groundHandler,
+    f.belt,
+    f.status,
+    String(f.pax ?? ""),
+    String(f.crew ?? ""),
+    String(f.delayMin ?? ""),
+    String(f.loadPct ?? ""),
+    String(f.fuel1kKg ?? ""),
+  ]
+    .join(" ")
+    .toLowerCase();
+  return blob.includes(q);
+}
+
+function headStickyClass(columnId: string): string | undefined {
+  if (columnId === "select") {
+    return "sticky top-0 left-0 z-40 w-12 min-w-12 max-w-12 border-r border-border/60 bg-card shadow-[4px_0_12px_-8px_rgba(0,0,0,0.12)]";
+  }
+  if (columnId === "code") {
+    return "sticky top-0 left-12 z-30 min-w-[5.5rem] border-r border-border/60 bg-card shadow-[4px_0_12px_-8px_rgba(0,0,0,0.12)]";
+  }
+  if (columnId === "origin") {
+    return "sticky top-0 left-[7.75rem] z-20 min-w-[4.5rem] border-r border-border/60 bg-card shadow-[4px_0_12px_-8px_rgba(0,0,0,0.12)]";
+  }
+  return undefined;
+}
+
+function cellStickyClass(columnId: string): string | undefined {
+  if (columnId === "select") {
+    return "sticky left-0 z-[5] w-12 min-w-12 max-w-12 border-r border-border/60 bg-muted/55 shadow-[4px_0_12px_-8px_rgba(0,0,0,0.08)] group-data-[state=selected]/row:bg-accent";
+  }
+  if (columnId === "code") {
+    return "sticky left-12 z-[4] min-w-[5.5rem] border-r border-border/60 bg-muted/55 shadow-[4px_0_12px_-8px_rgba(0,0,0,0.08)] group-data-[state=selected]/row:bg-accent";
+  }
+  if (columnId === "origin") {
+    return "sticky left-[7.75rem] z-[3] min-w-[4.5rem] border-r border-border/60 bg-muted/55 shadow-[4px_0_12px_-8px_rgba(0,0,0,0.08)] group-data-[state=selected]/row:bg-accent";
+  }
+  return undefined;
+}
 
 function FlightStatusBadge({ status }: { status: FlightRow["status"] }) {
   const map = {
@@ -45,7 +157,7 @@ function TimelineCell({ row }: { row: FlightRow }) {
     <div className="flex min-w-[11rem] items-center gap-1.5 sm:min-w-[13rem]">
       <span
         className={cn(
-          "font-mono text-sm tabular-nums leading-normal",
+          tableNumericClass,
           delayed && "font-medium text-primary",
           cancelled && "line-through opacity-60",
         )}
@@ -63,10 +175,43 @@ function TimelineCell({ row }: { row: FlightRow }) {
         <span className="size-1 shrink-0 rounded-full bg-muted-foreground/50" aria-hidden />
         <span className="h-px flex-1 border-b border-dotted border-border" />
       </span>
-      <span className={cn("font-mono text-sm tabular-nums leading-normal", cancelled && "line-through opacity-60")}>
+      <span className={cn(tableNumericClass, cancelled && "line-through opacity-60")}>
         {row.end}
       </span>
     </div>
+  );
+}
+
+function ColumnVisibilityMenu({ table }: { table: Table<FlightRow> }) {
+  const hideable = table.getAllLeafColumns().filter((c) => c.getCanHide());
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button type="button" variant="outline" size="sm">
+          Columns
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-60">
+        <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Visible columns</p>
+        <DropdownMenuSeparator />
+        {hideable.map((column) => (
+          <DropdownMenuItem
+            key={column.id}
+            className="flex cursor-default items-center gap-2 py-2"
+            onSelect={(e) => e.preventDefault()}
+          >
+            <Checkbox
+              checked={column.getIsVisible()}
+              onCheckedChange={(v) => column.toggleVisibility(!!v)}
+              aria-label={COLUMN_LABELS[column.id] ?? column.id}
+              className="hit-area-6"
+            />
+            <span className="text-sm leading-normal text-foreground">{COLUMN_LABELS[column.id] ?? column.id}</span>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -74,11 +219,22 @@ export function FlightsTable({ data }: { data: FlightRow[] }) {
   const [sorting, setSorting] = useState<SortingState>([{ id: "start", desc: false }]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [scrollRoot, setScrollRoot] = useState<HTMLDivElement | null>(null);
+  const captureViewportRef = useCallback((node: HTMLDivElement | null) => {
+    setScrollRoot(node);
+  }, []);
+
+  const filteredData = useMemo(() => {
+    return data.filter((f) => rowMatchesSearch(f, searchQuery));
+  }, [data, searchQuery]);
 
   const columns = useMemo(
     () => [
       columnHelper.display({
         id: "select",
+        enableHiding: false,
         header: ({ table }) => (
           <Checkbox
             checked={table.getIsAllRowsSelected() ? true : table.getIsSomeRowsSelected() ? "indeterminate" : false}
@@ -97,47 +253,156 @@ export function FlightsTable({ data }: { data: FlightRow[] }) {
         ),
       }),
       columnHelper.accessor("code", {
+        id: "code",
+        enableHiding: false,
         header: "Flight",
         cell: (info) => {
           const cancelled = info.row.original.status === "cancelled";
           return (
-            <span
-              className={cn(
-                "font-mono text-sm font-semibold tabular-nums leading-normal text-foreground",
-                cancelled && "line-through opacity-60",
-              )}
-            >
+            <span className={cn(tableNumericStrongClass, cancelled && "line-through opacity-60")}>{info.getValue()}</span>
+          );
+        },
+      }),
+      columnHelper.accessor("origin", {
+        id: "origin",
+        enableHiding: true,
+        header: "Origin",
+        cell: (info) => (
+          <span className="whitespace-nowrap font-medium leading-normal text-foreground">{info.getValue() ?? "—"}</span>
+        ),
+      }),
+      columnHelper.accessor("destination", {
+        id: "destination",
+        enableHiding: true,
+        header: "Dest",
+        cell: (info) => {
+          const cancelled = info.row.original.status === "cancelled";
+          return (
+            <span className={cn("whitespace-nowrap font-medium leading-normal text-foreground", cancelled && "line-through opacity-60")}>
               {info.getValue()}
             </span>
           );
         },
       }),
       columnHelper.accessor("start", {
+        id: "start",
+        enableHiding: true,
         header: () => (
-          <span className="inline-flex items-center gap-1">
-            Time <span className="text-xs text-primary">▲</span>
+          <span className="inline-flex items-center gap-1 whitespace-nowrap">
+            Schedule <span className="text-xs text-primary">▲</span>
           </span>
         ),
         cell: ({ row }) => <TimelineCell row={row.original} />,
         sortingFn: "alphanumeric",
       }),
-      columnHelper.accessor("destination", {
-        header: "Destination",
-        cell: (info) => {
-          const cancelled = info.row.original.status === "cancelled";
-          return (
-            <span className={cn("font-medium leading-normal text-foreground", cancelled && "line-through opacity-60")}>
-              {info.getValue()}
-            </span>
-          );
-        },
+      columnHelper.accessor("duration", {
+        id: "duration",
+        enableHiding: true,
+        header: "Dur",
+        cell: (info) => (
+          <span className={cn(tableNumericMutedClass, "whitespace-nowrap")}>{info.getValue()}</span>
+        ),
+        sortingFn: "alphanumeric",
       }),
       columnHelper.accessor("status", {
+        id: "status",
+        enableHiding: true,
         header: "Status",
         cell: (info) => <FlightStatusBadge status={info.getValue()} />,
       }),
+      columnHelper.accessor("aircraft", {
+        id: "aircraft",
+        enableHiding: true,
+        header: "Eqp",
+        cell: (info) => <span className={cn(tableNumericStrongClass, "whitespace-nowrap")}>{info.getValue() ?? "—"}</span>,
+      }),
+      columnHelper.accessor("gate", {
+        id: "gate",
+        enableHiding: true,
+        header: "Gate",
+        cell: (info) => <span className={cn(tableNumericMutedClass, "whitespace-nowrap")}>{info.getValue() ?? "—"}</span>,
+      }),
+      columnHelper.accessor("terminal", {
+        id: "terminal",
+        enableHiding: true,
+        header: "Term",
+        cell: (info) => <span className="whitespace-nowrap text-muted-foreground">{info.getValue() ?? "—"}</span>,
+      }),
+      columnHelper.accessor("stand", {
+        id: "stand",
+        enableHiding: true,
+        header: "Stand",
+        cell: (info) => <span className={cn(tableNumericMutedClass, "whitespace-nowrap")}>{info.getValue() ?? "—"}</span>,
+      }),
+      columnHelper.accessor("pax", {
+        id: "pax",
+        enableHiding: true,
+        header: () => <span className="block w-full whitespace-nowrap text-right">Pax</span>,
+        cell: (info) => <div className={cn("text-right tabular-nums", tableNumericMutedClass)}>{info.getValue() ?? "—"}</div>,
+        sortingFn: "basic",
+      }),
+      columnHelper.accessor("crew", {
+        id: "crew",
+        enableHiding: true,
+        header: () => <span className="block w-full whitespace-nowrap text-right">Crew</span>,
+        cell: (info) => <div className={cn("text-right tabular-nums", tableNumericMutedClass)}>{info.getValue() ?? "—"}</div>,
+        sortingFn: "basic",
+      }),
+      columnHelper.accessor("delayMin", {
+        id: "delayMin",
+        enableHiding: true,
+        header: () => <span className="block w-full whitespace-nowrap text-right">Delay</span>,
+        cell: (info) => {
+          const v = info.getValue() ?? 0;
+          return (
+            <div className={cn("text-right tabular-nums", v > 0 ? "font-medium text-primary" : tableNumericMutedClass)}>
+              {v ? `${v}m` : "—"}
+            </div>
+          );
+        },
+        sortingFn: "basic",
+      }),
+      columnHelper.accessor("loadPct", {
+        id: "loadPct",
+        enableHiding: true,
+        header: () => <span className="block w-full whitespace-nowrap text-right">Load</span>,
+        cell: (info) => {
+          const v = info.getValue();
+          return (
+            <div className={cn("text-right tabular-nums", tableNumericMutedClass)}>{v != null ? `${v}%` : "—"}</div>
+          );
+        },
+        sortingFn: "basic",
+      }),
+      columnHelper.accessor("fuel1kKg", {
+        id: "fuel1kKg",
+        enableHiding: true,
+        header: () => <span className="block w-full whitespace-nowrap text-right">Fuel</span>,
+        cell: (info) => {
+          const v = info.getValue();
+          return <div className={cn("text-right tabular-nums", tableNumericMutedClass)}>{v != null ? `${v}k` : "—"}</div>;
+        },
+        sortingFn: "basic",
+      }),
+      columnHelper.accessor("groundHandler", {
+        id: "groundHandler",
+        enableHiding: true,
+        header: "Ground",
+        cell: (info) => (
+          <span className="max-w-[7rem] truncate text-muted-foreground" title={info.getValue() ?? ""}>
+            {info.getValue() ?? "—"}
+          </span>
+        ),
+      }),
+      columnHelper.accessor("belt", {
+        id: "belt",
+        enableHiding: true,
+        header: () => <span className="block w-full whitespace-nowrap text-right">Bag</span>,
+        cell: (info) => <div className={cn("text-right", tableNumericMutedClass)}>{info.getValue() ?? "—"}</div>,
+      }),
       columnHelper.display({
         id: "ops",
+        enableHiding: false,
         header: "",
         cell: ({ row }) =>
           row.getCanExpand() ? (
@@ -162,60 +427,131 @@ export function FlightsTable({ data }: { data: FlightRow[] }) {
     [],
   );
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack useReactTable
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
-    state: { sorting, expanded, rowSelection },
+    state: { sorting, expanded, rowSelection, columnVisibility },
     onSortingChange: setSorting,
     onExpandedChange: setExpanded,
     onRowSelectionChange: setRowSelection,
+    onColumnVisibilityChange: setColumnVisibility,
     getRowId: (r) => r.id,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getRowCanExpand: (row) => Boolean(gateNotes[row.original.id]?.length),
   });
+  const rows = table.getRowModel().rows;
+  const { hasMore, resetVisibleRows, sentinelRef, visibleRows } = useInfiniteVisibleRows(rows, 24, 24, scrollRoot);
+
+  useEffect(() => {
+    resetVisibleRows();
+  }, [filteredData, resetVisibleRows, sorting, columnVisibility, searchQuery]);
 
   return (
-    <div className="max-h-[min(24rem,45vh)] min-h-0 overflow-auto rounded-lg border border-border/55 bg-background/95 shadow-inner dark:bg-background/50">
-      <Table className={tableDenseTypography}>
-        <TableHeader className={stickyTableHeaderClass}>
-          {table.getHeaderGroups().map((hg) => (
-            <TableRow key={hg.id}>
-              {hg.headers.map((header) => (
-                <TableHead key={header.id} className="bg-card">
-                  {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.map((row) => {
-            const cancelled = row.original.status === "cancelled";
-            return (
-              <Fragment key={row.id}>
-                <TableRow className={cn("border-border/40", cancelled && "bg-muted/20 text-muted-foreground")}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                  ))}
+    <div className="flex w-full flex-col gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="relative min-w-0 flex-1 sm:max-w-md">
+          <HugeiconsIcon
+            icon={Search01Icon}
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            aria-hidden
+          />
+          <Input
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search flights, gates, cities…"
+            className="h-9 pl-9"
+            aria-label="Search flights"
+          />
+        </div>
+        <ColumnVisibilityMenu table={table} />
+      </div>
+
+      <div className={cn(tableShellClass, flightsTableShellExtraClass)}>
+        <ScrollArea
+          orientation="both"
+          fadeMask={false}
+          className={tableScrollAreaRootClass}
+          viewportRef={captureViewportRef}
+          viewportStyle={tableScrollViewportStyle}
+        >
+          <div className={tableScrollAreaContentClass}>
+            <table className={cn(tableDenseTypography, "min-w-[1320px]")}>
+              <TableHeader className={tableHeaderClass}>
+              {table.getHeaderGroups().map((hg) => (
+                <TableRow key={hg.id} className={tableRowClass}>
+                  {hg.headers.map((header) => {
+                    const id = header.column.id;
+                    const sticky = header.column.getIsVisible() ? headStickyClass(id) : undefined;
+                    return (
+                      <TableHead key={header.id} className={cn(tableHeadClass, sticky)}>
+                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
-                {row.getIsExpanded() && gateNotes[row.original.id] ? (
-                  <TableRow className="border-border/40 hover:bg-transparent">
-                    <TableCell colSpan={row.getVisibleCells().length} className="bg-muted/15 p-3 text-sm leading-normal text-muted-foreground">
-                      <ul className="list-inside list-disc space-y-1">
-                        {gateNotes[row.original.id].map((n, i) => (
-                          <li key={i}>{n}</li>
-                        ))}
-                      </ul>
-                    </TableCell>
-                  </TableRow>
-                ) : null}
-              </Fragment>
-            );
-          })}
-        </TableBody>
-      </Table>
+              ))}
+              </TableHeader>
+              <TableBody className={tableBodyClass}>
+              {visibleRows.map((row) => {
+                const cancelled = row.original.status === "cancelled";
+                return (
+                  <Fragment key={row.id}>
+                    <TableRow
+                      data-state={row.getIsSelected() ? "selected" : undefined}
+                      className={cn("group/row", tableRowClass, cancelled && "[&>td]:text-muted-foreground [&>td]:opacity-75")}
+                    >
+                      {row.getVisibleCells().map((cell) => {
+                        const id = cell.column.id;
+                        const sticky = cell.column.getIsVisible() ? cellStickyClass(id) : undefined;
+                        return (
+                          <TableCell key={cell.id} className={cn(tableCellClass, sticky)}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                    {row.getIsExpanded() && gateNotes[row.original.id] ? (
+                      <TableRow className={cn(tableRowClass, "hover:bg-transparent [&>td]:bg-card/40")}>
+                        <TableCell
+                          colSpan={row.getVisibleCells().length}
+                          className="p-4 text-sm leading-normal text-muted-foreground"
+                        >
+                          <ul className="list-inside list-disc space-y-1">
+                            {gateNotes[row.original.id].map((n, i) => (
+                              <li key={i}>{n}</li>
+                            ))}
+                          </ul>
+                        </TableCell>
+                      </TableRow>
+                    ) : null}
+                  </Fragment>
+                );
+              })}
+              </TableBody>
+            </table>
+            {hasMore ? <div ref={sentinelRef} className="h-1 shrink-0" aria-hidden /> : null}
+          </div>
+        </ScrollArea>
+        <div className={tableFooterClass}>
+          <p className="text-sm leading-normal text-muted-foreground">
+            Showing <span className="font-medium text-foreground">{visibleRows.length}</span> of{" "}
+            <span className="font-medium text-foreground">{rows.length}</span> in view
+            {searchQuery.trim() ? (
+              <>
+                {" "}
+                (<span className="font-medium text-foreground">{data.length}</span> total)
+              </>
+            ) : null}
+          </p>
+          <p className="text-sm leading-normal text-muted-foreground">
+            {hasMore ? "Scroll to load more rows" : "All rows loaded"}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

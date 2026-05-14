@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -647,11 +647,23 @@ export function LandingPage({ onRequestOpenCommandPalette }: { onRequestOpenComm
   const [searchParams] = useSearchParams();
   const examples = searchParams.get("tab") === "workspace";
 
+  useEffect(() => {
+    if (!examples) return;
+
+    document.documentElement.classList.add("workspace-scroll-lock");
+    document.body.classList.add("workspace-scroll-lock");
+
+    return () => {
+      document.documentElement.classList.remove("workspace-scroll-lock");
+      document.body.classList.remove("workspace-scroll-lock");
+    };
+  }, [examples]);
+
   return (
-    <div className="flex min-h-dvh flex-col bg-background text-foreground">
-      <main className="flex min-h-0 flex-1 flex-col">
+    <div className={examples ? "workspace-scroll-root h-[calc(100dvh-4.5rem)] overflow-hidden bg-background text-foreground" : "flex min-h-dvh flex-col bg-background text-foreground"}>
+      <main className={examples ? "h-full min-h-0" : "flex min-h-0 flex-1 flex-col"}>
         {examples ? (
-          <div className="mx-auto min-h-0 w-full max-w-[120rem] flex-1 bg-background">
+          <div className="mx-auto h-full min-h-0 w-full max-w-[120rem] bg-background">
             <HomeWorkspaceView />
           </div>
         ) : (

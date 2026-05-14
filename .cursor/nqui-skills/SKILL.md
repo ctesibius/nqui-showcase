@@ -11,7 +11,9 @@ Reference `packages/nqui/docs/components/README.md` for the full component index
 
 1. **Main index:** `packages/nqui/docs/components/README.md` - all components, use cases, prerequisites
 2. **Per-component:** `packages/nqui/docs/components/nqui-<name>.md` - import, examples, variants
-3. **Design system:** this folder - sizing, grouped controls
+3. **Design system:** this folder — **`design-system.md`** (sizing, grouped controls, **Card + ScrollArea**)
+4. **Scroll / flex / overflow (Card, Sheet, panels):** **`rules/scroll-layout.md`** — stuck scroll, overlap, double scrollbar, `min-h-0` chain; plus **`node_modules/@nqlib/nqui/docs/components/nqui-scroll-area.md`** (**§0** symptom routing, **§1–§6**)
+5. **Data tables + ScrollArea:** **`nqui-data-tables/SKILL.md`** — bounded tables (TanStack/native), sticky header, HV scroll, IO or paging
 
 ## App Design Rule: Inline Selection → ToggleGroup
 
@@ -40,7 +42,11 @@ When designing app UI (toolbars, headers, inline controls):
 
 ## Design System Conventions
 
-See **`design-system.md`** in this folder for sizing, grouped controls (including pill **ButtonGroup** / **ToggleGroup** shells), and file paths under `packages/nqui/src/components/ui/`.
+See **`design-system.md`** in this folder for sizing, grouped controls (including pill **ButtonGroup** / **ToggleGroup** shells), file paths under `packages/nqui/src/components/ui/`, and **Card + ScrollArea**.
+
+### Scroll, overflow, and flex height (any bounded panel)
+
+When **`ScrollArea`** or **`overflow-auto`** inside **Card**, **Sheet**, **sidebar**, or **grid** cells misbehaves (**stuck scroll**, **footer overlap**, **bleed past radius**, **double scrollbar**, **`h-full` useless**), use **`rules/scroll-layout.md`** first, then **`node_modules/@nqlib/nqui/docs/components/nqui-scroll-area.md`** (**§0**–**§6**). Tables: **`nqui-data-tables/SKILL.md`**.
 
 ### Control Sizing
 - sm = h-6
@@ -71,6 +77,10 @@ Always use CSS variables from elevation.css:
 ### Hit area (optional)
 
 Library CSS includes [Bazza hit-area](https://bazza.dev/craft/2026/hit-area) utilities. For **Checkbox** / **Switch** in padded tables or lists, pass **`className="hit-area-6"`** (or `hit-area-4`, axis variants) on the **component root**, not on a wrapper-only parent. Opt-in only; use **`hit-area-debug`** while tuning. Details: `packages/nqui/docs/components/nqui-checkbox.md`, `nqui-switch.md`; examples: `ComponentShowcase` Checkbox + Switch sections.
+
+## Data tables (TanStack + ScrollArea)
+
+Bounded card tables, sticky headers, horizontal + vertical scroll, flex height chain, `viewportStyle` pinning, infinite rows or paging: read **`nqui-data-tables/SKILL.md`** in this folder, **`design-system.md` § Card + ScrollArea**, and **`node_modules/@nqlib/nqui/docs/components/nqui-scroll-area.md`** (especially **§6 Data tables / wide grids** — `orientation="both"`, `h-0 flex-1`, absolute viewport pin).
 
 ## Key Dependencies
 

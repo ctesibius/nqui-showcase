@@ -6,7 +6,11 @@ import { useTheme } from "next-themes";
  * theme instead of stark **light** (matches nqui App shell defaults).
  */
 export function SystemLightAsMid() {
-  const { theme } = useTheme();
+  const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    if (theme === "mid") setTheme("light");
+  }, [theme, setTheme]);
 
   useEffect(() => {
     if (typeof document === "undefined") return;

@@ -41,6 +41,30 @@ body {
   min-height: 100dvh;
 }
 
+html.workspace-scroll-lock,
+body.workspace-scroll-lock {
+  overflow: hidden;
+  scrollbar-width: none;
+}
+
+html.workspace-scroll-lock::-webkit-scrollbar,
+body.workspace-scroll-lock::-webkit-scrollbar {
+  height: 0;
+  width: 0;
+}
+
+html:has(.workspace-scroll-root),
+body:has(.workspace-scroll-root) {
+  overflow: hidden;
+  scrollbar-width: none;
+}
+
+html:has(.workspace-scroll-root)::-webkit-scrollbar,
+body:has(.workspace-scroll-root)::-webkit-scrollbar {
+  height: 0;
+  width: 0;
+}
+
 #root {
   min-height: 100dvh;
 }
@@ -114,5 +138,38 @@ body {
 
   .workspace-nqcharts-tooltips .rounded-md.border.text-sm.shadow-md p {
     @apply !text-popover-foreground;
+  }
+
+  /*
+   * Keep gutter dimensions stable: thumb fades in/out via color only.
+   * Toggling scrollbar width (0 → 10px) shrinks scrollport content and shifts wide tables.
+   */
+  .nqui-scrollbar-on-scroll {
+    scrollbar-color: transparent transparent;
+    scrollbar-width: thin;
+  }
+
+  .nqui-scrollbar-on-scroll[data-scrolling="true"] {
+    scrollbar-color: color-mix(in oklch, var(--muted-foreground) 45%, transparent) transparent;
+  }
+
+  .nqui-scrollbar-on-scroll::-webkit-scrollbar {
+    height: 10px;
+    width: 10px;
+  }
+
+  .nqui-scrollbar-on-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .nqui-scrollbar-on-scroll::-webkit-scrollbar-thumb {
+    background: transparent;
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background-clip: content-box;
+  }
+
+  .nqui-scrollbar-on-scroll[data-scrolling="true"]::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklch, var(--muted-foreground) 45%, transparent);
   }
 }

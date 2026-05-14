@@ -13,6 +13,7 @@ nqui uses Tailwind CSS v4 with semantic CSS variables. See customization docs fo
 - No manual dark: color overrides
 - Use cn() for conditional classes
 - No manual z-index on overlay components (use elevation.css)
+- Scroll, flex height, overflow (Card & panels)
 
 ---
 
@@ -190,3 +191,9 @@ Reference: [elevation.css](../src/styles/elevation.css)
 | `--z-modal` | 50 | Modal content |
 | `--z-popover` | 60 | Dropdowns, select menus |
 | `--z-tooltip` | 70 | Tooltips |
+
+---
+
+## Scroll, flex height, overflow (Card & panels)
+
+Layout classes (`flex`, `min-h-0`, `max-h-*`, `overflow-hidden`) for **scrollable regions** belong here as **structural styling**. Full symptom → fix guide: **`rules/scroll-layout.md`**. Component pitfalls: **`node_modules/@nqlib/nqui/docs/components/nqui-scroll-area.md`** (**§0** routing, **§1–§6**). Do not “fix” scroll bugs only by recoloring components.

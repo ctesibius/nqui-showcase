@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -16,6 +16,11 @@ import { BarChart, DonutChart } from "@nqlib/nqcharts";
 import {
   Badge,
   Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -27,7 +32,7 @@ import {
   cn,
 } from "@nqlib/nqui";
 import {
-  mockFlights,
+  mockFlightsOperations,
   mockPortfolio,
   mockProjects,
   type FlightRow,
@@ -62,14 +67,16 @@ function ExampleTile({
   icon?: typeof Folder01Icon;
 }) {
   return (
-    <div className="rounded-lg border border-border/55 bg-background/40 p-4 shadow-inner dark:bg-background/30">
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+    <Card>
+      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+        <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</CardTitle>
         {Icon ? <HugeiconsIcon icon={Icon} className="size-4 shrink-0 text-muted-foreground opacity-80" aria-hidden /> : null}
-      </div>
-      <p className="mt-1 text-xl font-semibold tabular-nums text-foreground">{value}</p>
-      <p className="text-xs text-muted-foreground">{hint}</p>
-    </div>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <p className="text-xl font-semibold tabular-nums text-foreground">{value}</p>
+        <CardDescription className="mt-1 text-xs">{hint}</CardDescription>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -109,6 +116,8 @@ export function HomeWorkspaceView() {
   const [projectScope, setProjectScope] = useState<"all" | "active" | "risk">("all");
   const [portfolioSector, setPortfolioSector] = useState<string>("all");
   const [flightScope, setFlightScope] = useState<"all" | FlightRow["status"]>("all");
+  const [contentScrolling, setContentScrolling] = useState(false);
+  const scrollTimerRef = useRef<number | null>(null);
 
   const filteredProjects = useMemo(() => {
     if (projectScope === "active") return mockProjects.filter((p) => p.status === "active");
@@ -140,11 +149,11 @@ export function HomeWorkspaceView() {
   }, [filteredPortfolio]);
 
   const filteredFlights = useMemo(() => {
-    if (flightScope === "all") return mockFlights;
-    return mockFlights.filter((f) => f.status === flightScope);
+    if (flightScope === "all") return mockFlightsOperations;
+    return mockFlightsOperations.filter((f) => f.status === flightScope);
   }, [flightScope]);
 
-  const flightCounts = useMemo(() => flightStatusCounts(mockFlights), []);
+  const flightCounts = useMemo(() => flightStatusCounts(mockFlightsOperations), []);
   const flightBarData = useMemo(
     () => [
       { gate: "Boarding", n: flightCounts.boarding },
@@ -155,8 +164,14 @@ export function HomeWorkspaceView() {
     [flightCounts],
   );
 
+  const handleContentScroll = () => {
+    setContentScrolling(true);
+    if (scrollTimerRef.current) window.clearTimeout(scrollTimerRef.current);
+    scrollTimerRef.current = window.setTimeout(() => setContentScrolling(false), 650);
+  };
+
   return (
-    <div className="flex min-h-[min(720px,calc(100dvh-6rem))] flex-col gap-0 md:flex-row">
+    <div className="flex h-full min-h-0 flex-col gap-0 md:flex-row">
       <aside className="shrink-0 md:w-52 lg:w-56">
         <nav className="flex flex-row gap-0.5 overflow-x-auto p-2 md:flex-col md:overflow-visible" aria-label="Examples workspace">
           {navItems.map((item) => {
@@ -181,7 +196,11 @@ export function HomeWorkspaceView() {
         </nav>
       </aside>
 
-      <div className="min-w-0 flex-1 space-y-8 p-4 sm:p-6">
+      <div
+        className="nqui-scrollbar-on-scroll min-w-0 flex-1 space-y-8 overflow-y-auto p-4 sm:p-6"
+        data-scrolling={contentScrolling ? "true" : "false"}
+        onScroll={handleContentScroll}
+      >
         {active === "overview" ? (
           <>
             <ExampleToolbar
@@ -237,7 +256,7 @@ export function HomeWorkspaceView() {
                 },
                 {
                   title: "Projects",
-                  body: "Expandable rows, selection, pagination.",
+                  body: "Expandable rows, selection, infinite scroll.",
                   nav: "projects" as const,
                 },
                 {
@@ -246,15 +265,16 @@ export function HomeWorkspaceView() {
                   nav: "operations" as const,
                 },
               ].map((c) => (
-                <button
+                <Button
                   key={c.nav}
                   type="button"
+                  variant="outline"
                   onClick={() => setActive(c.nav)}
-                  className="rounded-lg border border-border/55 bg-muted/15 p-4 text-left transition-colors hover:bg-muted/35"
+                  className="h-auto min-h-0 flex-col items-stretch justify-start gap-1 rounded-lg p-4 text-left font-normal whitespace-normal"
                 >
-                  <p className="text-sm font-semibold text-foreground">{c.title}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{c.body}</p>
-                </button>
+                  <span className="text-sm font-semibold text-foreground">{c.title}</span>
+                  <span className="text-xs font-normal text-muted-foreground">{c.body}</span>
+                </Button>
               ))}
             </div>
 
@@ -334,7 +354,7 @@ export function HomeWorkspaceView() {
                 <h3 className="text-sm font-semibold text-foreground">Projects</h3>
                 <p className="text-xs text-muted-foreground">
                   Showing {filteredProjects.length} row{filteredProjects.length === 1 ? "" : "s"} — selection, sorting,
-                  pagination, row expansion.
+                  infinite rows, row selection, sorting, row expansion.
                 </p>
               </div>
               <div className="flex shrink-0 flex-wrap gap-2">
@@ -390,23 +410,27 @@ export function HomeWorkspaceView() {
             </div>
 
             <div className="flex flex-col gap-3 lg:flex-row lg:items-stretch">
-              <div className="min-h-[220px] min-w-0 flex-1 rounded-lg border border-border/55 bg-background/40 p-4 shadow-inner dark:bg-background/30">
-                <h3 className="text-sm font-semibold text-foreground">Allocation (mock)</h3>
-                <p className="text-xs text-muted-foreground">Donut uses scaled weights for the filtered set.</p>
-                <div className="mx-auto mt-2 h-52 max-w-sm">
-                  <DonutChart
-                    className="h-full w-full"
-                    data={portfolioDonut.map((r) => ({ ...r, key: r.kind }))}
-                    category="kind"
-                    value="hours"
-                    colors={["blue", "violet", "amber", "pink", "cyan", "emerald", "orange", "rose", "lime"]}
-                    valueFormatter={(n) => `${(n / 10).toFixed(1)}%`}
-                    variant="donut"
-                    showLabel
-                    showTooltip
-                  />
-                </div>
-              </div>
+              <Card className="min-h-[220px] min-w-0 flex-1">
+                <CardHeader>
+                  <CardTitle className="text-sm">Allocation (mock)</CardTitle>
+                  <CardDescription>Donut uses scaled weights for the filtered set.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="mx-auto h-52 max-w-sm">
+                    <DonutChart
+                      className="h-full w-full"
+                      data={portfolioDonut.map((r) => ({ ...r, key: r.kind }))}
+                      category="kind"
+                      value="hours"
+                      colors={["blue", "violet", "amber", "pink", "cyan", "emerald", "orange", "rose", "lime"]}
+                      valueFormatter={(n) => `${(n / 10).toFixed(1)}%`}
+                      variant="donut"
+                      showLabel
+                      showTooltip
+                    />
+                  </div>
+                </CardContent>
+              </Card>
               <div className="flex min-w-0 flex-1 flex-col gap-2 lg:max-w-md">
                 <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Sector focus</p>
                 <ToggleGroup
@@ -455,7 +479,8 @@ export function HomeWorkspaceView() {
               <div className="space-y-1">
                 <h2 className="text-lg font-semibold tracking-tight">Operations board</h2>
                 <p className="text-sm text-muted-foreground">
-                  Flight desk — status tiles, a compact status chart, and a filter for the table below.
+                  Flight desk — <span className="font-medium text-foreground">500 rows</span>, wide ops columns, search,
+                  column visibility, sticky row keys, status tiles, chart, and filters.
                 </p>
               </div>
             </ExampleToolbar>
@@ -467,22 +492,26 @@ export function HomeWorkspaceView() {
               <ExampleTile label="Cancelled" value={String(flightCounts.cancelled)} hint="rebook queue" />
             </div>
 
-            <div className="rounded-lg border border-border/55 bg-background/40 p-4 shadow-inner dark:bg-background/30">
-              <h3 className="text-sm font-semibold text-foreground">Flights by status</h3>
-              <p className="text-xs text-muted-foreground">Mock counts — horizontal bars.</p>
-              <BarChart
-                className="mt-2 h-48"
-                data={flightBarData}
-                index="gate"
-                categories={["n"]}
-                colors={["blue"]}
-                type="default"
-                layout="vertical"
-                showLegend={false}
-                allowDecimals={false}
-                yAxisWidth={88}
-              />
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Flights by status</CardTitle>
+                <CardDescription>Mock counts — horizontal bars.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <BarChart
+                  className="h-48"
+                  data={flightBarData}
+                  index="gate"
+                  categories={["n"]}
+                  colors={["blue"]}
+                  type="default"
+                  layout="vertical"
+                  showLegend={false}
+                  allowDecimals={false}
+                  yAxisWidth={88}
+                />
+              </CardContent>
+            </Card>
 
             <div className="space-y-2">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Table filter</p>

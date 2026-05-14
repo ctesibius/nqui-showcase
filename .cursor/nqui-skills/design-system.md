@@ -1,6 +1,6 @@
 ---
 name: nqui-design-system
-description: Design system conventions for nqui component library. Use when creating or modifying nqui UI components to ensure sizing, spacing, and styling consistency.
+description: Design system conventions for nqui component library. Use when creating or modifying nqui UI components (sizing, spacing, Card + ScrollArea flex scroll / min-h-0, grouped controls, density). Pair with nqui-data-tables for dashboard table shells.
 ---
 
 # nqui Design System
@@ -116,6 +116,37 @@ Never use flat `bg-muted` only for selected state; always add gradient + shadow 
 - **Flex gotcha:** `inline-flex` + icon + `whitespace-nowrap` + raw **string** children keeps an implicit **min-width: min-content**; parents need **`min-w-0`** (and often **`max-w-full`**) on the control and a truncating inner wrapper for long labels.
 - **Built-in helpers in nqui:** Shared `wrapInlineLabelTextNodes` + `min-w-0 max-w-full` on **Button**, **Toggle**, **TabsTrigger**, **Badge**, **ComboboxChip**; **SelectTrigger** uses **`min-w-0 max-w-full`** and **`min-w-0`** on the value slot with **`line-clamp-1`**. **Carousel** prev/next sit **inside** the carousel box so they don’t spill out of **Card** (override via `className` if you want outside arrows).
 - **Card:** **Card** uses **`min-w-0`** on shell + header/content/footer for flex/grid safety but keeps **`overflow-visible`** so overlays aren’t clipped; don’t rely on **`overflow-hidden`** on Card as a global “catch-all” unless you accept clipping dropdowns/focus.
+
+## Card + ScrollArea (flex scroll contract)
+
+**Symptom:** Content inside **Card** + **ScrollArea** overflows the card, ignores rounded corners, or **does not scroll** until someone adds `min-h-0` up the tree.
+
+**Cause:** Flex items default to **`min-height: auto`**: they won’t shrink below content height, so the scroll region never gets a bounded height → **no scrollport**. Normal CSS, not a ScrollArea bug.
+
+**Rules (every time you nest scrollable content in flex):**
+
+1. **Height chain:** From the page shell down to **ScrollArea**, every flex child that must shrink needs **`min-h-0`** (often with **`flex-1`** or **`flex-shrink`**).
+2. **Card root:** Keeps **`overflow-visible`** on purpose (dropdowns, popovers, focus rings). Do **not** use **`overflow-hidden`** on the outer **Card** alone as your only scroll fix — establish a **nested** scroll box.
+3. **Scrollable body:** Prefer **`CardContent`** (or a wrapper) with **`min-h-0 flex-1 overflow-hidden`**, then **ScrollArea** with **`className="min-h-0 h-full"`** or **`min-h-0 flex-1`** inside a **`flex flex-col min-h-0`** card.
+4. **Parent must constrain height:** e.g. `h-full`, `min-h-0`, or explicit `max-h-*` / `h-[...]`; otherwise “100%” has no reference.
+
+**Applies beyond Card:** **Sheet** / **Drawer** body, **sidebar** columns, **dashboard** panes, and **resizable** splits use the **same** contract — one **`flex flex-col min-h-0 overflow-hidden`** shell that owns the clip, **chrome** (header, tabs, toolbars) as **`shrink-0`**, scroll body in **`flex-1 min-h-0`**. Consumer symptom guide: **`rules/scroll-layout.md`**. Package / installed doc routing table: **`node_modules/@nqlib/nqui/docs/components/nqui-scroll-area.md` §0**.
+
+**Data tables / wide grids (same failure modes, stricter recipe):**
+
+- **`orientation="both"`** — default **`vertical`** uses **`overflow-x-hidden`** on the viewport; a **`min-w-*`** `<table>` then **cannot** scroll horizontally. See **`packages/nqui/docs/components/nqui-scroll-area.md` §6** (or **`node_modules/@nqlib/nqui/docs/components/nqui-scroll-area.md` §6** in a consumer app).
+- **ScrollArea root in a capped flex column:** **`h-0 max-h-full min-h-0 min-w-0 flex-1 overflow-hidden w-full`** so flex assigns a **finite** slot (not content-height blow-through).
+- **`viewportStyle`:** **`position: "absolute"`, `inset: 0`, `minHeight: 0`, `minWidth: 0`** — **`height: 100%`** on the Radix viewport often **does not bind** in deep flex layouts; the viewport then grows with content and overlaps a footer below. See scroll-area doc §6 and **`nqui-data-tables/SKILL.md`** in this folder.
+
+**Reference implementations:** `Card` + **`stickyHeader`** in `packages/nqui/src/components/ui/card.tsx`; `packages/nqui/src/pages/ComponentShowcase.tsx` where ScrollArea sits in a bounded layout.
+
+**Checklist before merging a scrollable card:**
+
+- [ ] Flex column from page → card includes **`min-h-0`** where the tree shrinks.
+- [ ] Card column is **`flex flex-col min-h-0`** (and **`h-full`** if filling a panel).
+- [ ] Scroll wrapper: **`flex-1 min-h-0 overflow-hidden`**.
+- [ ] **ScrollArea** has **`min-h-0`** and fills the wrapper (**`h-full`** / **`flex-1`**).
+- [ ] **Wide table in ScrollArea:** **`orientation="both"`** + **`viewportStyle`** absolute fill if `%` height failed (see scroll-area doc §6).
 
 ## Customization
 
