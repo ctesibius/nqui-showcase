@@ -1,4 +1,4 @@
-/** Mock series for @nqlib/nqcharts demos in the workspace tab. */
+/** Mock series for EvilCharts demos on the home page. */
 
 export const throughputBacklogDaily = [
   { day: "D1", throughput: 14, backlog: 62 },

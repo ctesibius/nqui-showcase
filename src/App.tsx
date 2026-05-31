@@ -33,7 +33,7 @@ function MarketingShell() {
 function App() {
   return (
     <Routes>
-      <Route path="/dashboard" element={<Navigate to="/?tab=workspace" replace />} />
+      <Route path="/dashboard" element={<Navigate to="/#charts" replace />} />
       <Route path="*" element={<MarketingShell />} />
     </Routes>
   );

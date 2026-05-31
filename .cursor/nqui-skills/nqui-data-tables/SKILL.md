@@ -9,9 +9,9 @@ Single playbook to ship a **card-wrapped** table that scrolls **inside** the car
 
 ## Load order (save tokens)
 
-1. **`node_modules/@nqlib/nqui/docs/components/nqui-scroll-area.md`** — **§0** symptom routing (Card, Sheet, sidebar), flex height chain §1, pitfalls §2–§5, **§6** tables / `viewportStyle` / `orientation="both"`, `viewportRef`.
-2. **`design-system.md`** (this folder) — **Card + ScrollArea** contract, `min-h-0`, spacing, control sizes.
-3. **`SKILL.md`** (this folder) — imports for `ScrollArea`, `Table*`, `Button`, `cn`.
+1. **`docs/components/nqui-scroll-area.md`** — **§0** symptom routing (Card, Sheet, sidebar), flex height chain §1, pitfalls §2–§5, **`§6` Data tables / wide grids** (`orientation="both"`, `h-0 flex-1`, `viewportStyle` pin), `viewportRef`.
+2. **`nqui-design-system/SKILL.md`** — **Card + ScrollArea** contract, `min-h-0`, spacing, control sizes.
+3. **`nqui-components`** — imports for `ScrollArea`, `Table*`, `Button`, `cn`.
 
 ## One-shot structure
 
@@ -121,7 +121,7 @@ Put **`min-h-0`** / **`min-w-0`** on **every** flex ancestor between the page ro
 - Footer stays **below** the scroll clip; no overlap at rest.
 - Wide table: horizontal scrollbar appears when **`table` min-width** exceeds viewport.
 
-## SSOT
+## SSOT paths
 
-- Upstream copy lives in the **nqui** package: `packages/nqui/docs/nqui-skills/nqui-data-tables/SKILL.md`.
-- Refresh this folder with `pnpm dlx @nqlib/nqui init-skills` when you bump `@nqlib/nqui`.
+- Package skills: `packages/nqui/docs/nqui-skills/nqui-data-tables/SKILL.md` (this file).
+- After `npx @nqlib/nqui init-skills`: `.cursor/nqui-skills/nqui-data-tables/SKILL.md` in consumer repos.

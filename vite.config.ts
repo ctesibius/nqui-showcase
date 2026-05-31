@@ -11,7 +11,6 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: { "@": path.resolve(__dirname, "./src") },
-    // Ensure a single Recharts instance (nqcharts + app) so categorical charts resolve graphical items.
     dedupe: ["recharts"],
   },
   // Bind to loopback only so dev does not trigger “local network” device prompts on some mobile browsers.

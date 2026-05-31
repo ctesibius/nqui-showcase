@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   Button,
   FrostedGlass,
@@ -50,16 +50,18 @@ function PrimaryAccentPicker({ onPick, className }: { onPick?: () => void; class
 const sections = [
   { href: "/#product", label: "Overview" },
   { href: "/#preview", label: "Components" },
+  { href: "/#charts", label: "Charts" },
   { href: "/#frosted-glass", label: "Frosted glass" },
 ] as const;
 
 /** Same sections as readme-page (install / CLI doc) for mobile sheet deep links */
 const docsMenu = [
-  { to: "/readme#install", label: "Install & CLI" },
+  { to: "/readme#install", label: "Install" },
   { to: "/readme#requirements", label: "Requirements" },
-  { to: "/readme#cli", label: "CLI commands" },
-  { to: "/readme#vite-tailwind", label: "Vite: Tailwind @source" },
-  { to: "/readme#suggested-order", label: "Suggested order" },
+  { to: "/readme#cli", label: "CLI" },
+  { to: "/readme#css", label: "CSS" },
+  { to: "/readme#setup", label: "Setup order" },
+  { to: "/readme#ui-patterns", label: "UI patterns" },
 ] as const;
 
 function docsMenuItemActive(pathname: string, hash: string, to: string): boolean {
@@ -74,48 +76,37 @@ function docsMenuItemActive(pathname: string, hash: string, to: string): boolean
 const pillNav = [
   { kind: "showcase" as const, label: "Home", to: "/" },
   { kind: "route" as const, label: "Docs", to: "/readme" },
+  { kind: "hash" as const, label: "Charts", href: "/#charts", hash: "#charts" },
   { kind: "hash" as const, label: "Frosted", href: "/#frosted-glass", hash: "#frosted-glass" },
-  { kind: "workspace" as const, label: "Examples", to: "/?tab=workspace" },
 ] as const;
 
 function useNavActive() {
   const { pathname, hash } = useLocation();
-  const [searchParams] = useSearchParams();
-  return { pathname, hash, tab: searchParams.get("tab") };
+  return { pathname, hash };
 }
 
-function navItemActive(
-  pathname: string,
-  hash: string,
-  tab: string | null,
-  item: (typeof pillNav)[number],
-): boolean {
+function navItemActive(pathname: string, hash: string, item: (typeof pillNav)[number]): boolean {
   if (item.kind === "showcase") {
-    return pathname === "/" && tab !== "workspace" && (hash === "" || hash === "#" || hash === "#product");
-  }
-  if (item.kind === "workspace") {
-    return pathname === "/" && tab === "workspace";
+    return pathname === "/" && (hash === "" || hash === "#" || hash === "#product");
   }
   if (item.kind === "route") {
     return pathname === item.to;
   }
-  return pathname === "/" && tab !== "workspace" && hash === item.hash;
+  return pathname === "/" && hash === item.hash;
 }
 
 function PillNavLink({
   item,
   pathname,
   hash,
-  tab,
   onNavigate,
 }: {
   item: (typeof pillNav)[number];
   pathname: string;
   hash: string;
-  tab: string | null;
   onNavigate?: () => void;
 }) {
-  const active = navItemActive(pathname, hash, tab, item);
+  const active = navItemActive(pathname, hash, item);
 
   const className = cn(
     "relative whitespace-nowrap px-2.5 py-1.5 font-mono text-xs transition-colors sm:px-3 sm:text-sm",
@@ -129,7 +120,7 @@ function PillNavLink({
     />
   );
 
-  if (item.kind === "showcase" || item.kind === "workspace" || item.kind === "route") {
+  if (item.kind === "showcase" || item.kind === "route") {
     return (
       <span className="relative inline-flex flex-col items-center pb-0.5">
         <Link to={item.to} className={className} onClick={onNavigate}>
@@ -152,7 +143,7 @@ function PillNavLink({
 
 export function SiteHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { pathname, hash, tab } = useNavActive();
+  const { pathname, hash } = useNavActive();
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-[var(--z-sticky-page)] flex justify-center px-3 pt-4">
@@ -172,7 +163,7 @@ export function SiteHeader() {
             aria-label="Primary"
           >
             {pillNav.map((item) => (
-              <PillNavLink key={item.label} item={item} pathname={pathname} hash={hash} tab={tab} />
+              <PillNavLink key={item.label} item={item} pathname={pathname} hash={hash} />
             ))}
           </nav>
 
@@ -210,7 +201,7 @@ export function SiteHeader() {
                   </Link>
                   <nav className="flex flex-col gap-1 font-mono text-sm" aria-label="Mobile primary">
                     {pillNav.map((item) => {
-                      const active = navItemActive(pathname, hash, tab, item);
+                      const active = navItemActive(pathname, hash, item);
                       if (item.kind === "hash") {
                         return (
                           <Button

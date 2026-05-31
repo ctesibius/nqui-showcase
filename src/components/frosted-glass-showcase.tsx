@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import {
   Badge,
   Card,
@@ -29,11 +28,11 @@ export function FrostedGlassShowcase() {
             <code className="rounded bg-muted px-1.5 py-0.5 text-sm text-foreground">FrostedGlass</code> ships in{" "}
             <code className="rounded bg-muted px-1.5 py-0.5 text-sm">@nqlib/nqui</code>. See{" "}
             <code className="rounded bg-muted px-1.5 py-0.5 text-sm">nqui-frosted-glass.md</code> in the package docs.
-            For a full app shell, see the{" "}
-            <Link to="/?tab=workspace" className="font-medium text-foreground underline underline-offset-4">
-              Examples
-            </Link>
-            .
+            For layout patterns, see the{" "}
+            <a href="/#charts" className="font-medium text-foreground underline underline-offset-4">
+              Charts
+            </a>{" "}
+            section on the home page.
           </p>
         </div>
 

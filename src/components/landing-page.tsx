@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   DeliveryTruck01Icon,
@@ -7,8 +6,6 @@ import {
   Mail01Icon,
   Message01Icon,
   Rocket01Icon,
-  TextBoldIcon,
-  TextItalicIcon,
   UserCircleIcon,
 } from "@hugeicons/core-free-icons";
 import { toast } from "sonner";
@@ -22,7 +19,6 @@ import {
   AvatarImage,
   Badge,
   Button,
-  ButtonGroup,
   Card,
   CardContent,
   CardDescription,
@@ -76,7 +72,6 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-  Toggle,
   ToggleGroup,
   ToggleGroupItem,
   Tooltip,
@@ -84,7 +79,7 @@ import {
   TooltipTrigger,
 } from "@nqlib/nqui";
 import { FrostedGlassShowcase } from "./frosted-glass-showcase";
-import { HomeWorkspaceView } from "./dashboard/home-workspace-view";
+import { HomeCharts } from "./home-charts";
 
 /** Mock people for avatar stack (pravatar.cc — stable demo faces). */
 const AVATAR_GROUP_USERS = [
@@ -112,8 +107,7 @@ function ComponentsShowcase({ onOpenCommandPalette }: { onOpenCommandPalette: ()
   const [otp, setOtp] = useState("4320");
   const [notify, setNotify] = useState(true);
   const [range, setRange] = useState<RangeKey>("1m");
-  const [boldOn, setBoldOn] = useState(false);
-  const [italicOn, setItalicOn] = useState(true);
+  const [formatTools, setFormatTools] = useState<string[]>(["italic"]);
   const [viewMode, setViewMode] = useState("list");
 
   const priceLabel = () =>
@@ -187,55 +181,65 @@ function ComponentsShowcase({ onOpenCommandPalette }: { onOpenCommandPalette: ()
                   <Slider value={price} onValueChange={setPrice} min={0} max={500} step={5} />
                 </div>
 
-                <ButtonGroup aria-label="Time range">
-                  {RANGE_KEYS.map((v) => (
-                    <Button
-                      key={v}
-                      type="button"
-                      size="sm"
-                      variant={range === v ? "secondary" : "ghost"}
-                      aria-pressed={range === v}
-                      onClick={() => setRange(v)}
-                    >
-                      {v.toUpperCase()}
-                    </Button>
-                  ))}
-                </ButtonGroup>
+                <div className="rounded-lg border border-input bg-muted/30 p-3">
+                  <ToggleGroup
+                    type="single"
+                    value={range}
+                    onValueChange={(v) => {
+                      if (v) setRange(v as RangeKey);
+                    }}
+                    size="sm"
+                    aria-label="Time range"
+                  >
+                    {RANGE_KEYS.map((v) => (
+                      <ToggleGroupItem key={v} value={v} className="px-2.5 text-xs uppercase">
+                        {v}
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
 
-                <div className="space-y-3">
-                  <Separator />
-                  <p className="text-xs font-medium text-muted-foreground">Toolbar</p>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs text-muted-foreground">Format</span>
-                    <Toggle size="sm" pressed={boldOn} onPressedChange={setBoldOn} aria-label="Bold">
-                      <HugeiconsIcon icon={TextBoldIcon} className="size-4" aria-hidden />
-                    </Toggle>
-                    <Toggle size="sm" pressed={italicOn} onPressedChange={setItalicOn} aria-label="Italic">
-                      <HugeiconsIcon icon={TextItalicIcon} className="size-4" aria-hidden />
-                    </Toggle>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-xs text-muted-foreground">View</p>
-                    <ToggleGroup
-                      type="single"
-                      value={viewMode}
-                      onValueChange={(v) => {
-                        if (v) setViewMode(v);
-                      }}
-                      variant="outline"
-                      size="sm"
-                      spacing={2}
-                    >
-                      <ToggleGroupItem value="list" aria-label="List view">
-                        List
-                      </ToggleGroupItem>
-                      <ToggleGroupItem value="grid" aria-label="Grid view">
-                        Grid
-                      </ToggleGroupItem>
-                      <ToggleGroupItem value="cards" aria-label="Cards view">
-                        Cards
-                      </ToggleGroupItem>
-                    </ToggleGroup>
+                  <Separator className="my-3" />
+
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">Format</span>
+                      <ToggleGroup
+                        type="multiple"
+                        size="sm"
+                        value={formatTools}
+                        onValueChange={setFormatTools}
+                        aria-label="Text format"
+                      >
+                        <ToggleGroupItem value="bold" aria-label="Bold">
+                          <span className="font-sans text-sm font-bold">B</span>
+                        </ToggleGroupItem>
+                        <ToggleGroupItem value="italic" aria-label="Italic">
+                          <span className="font-sans text-sm italic">I</span>
+                        </ToggleGroupItem>
+                        <ToggleGroupItem value="underline" aria-label="Underline">
+                          <span className="font-sans text-sm underline">U</span>
+                        </ToggleGroupItem>
+                      </ToggleGroup>
+                    </div>
+
+                    <Separator orientation="vertical" className="hidden h-5 sm:block" />
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">View</span>
+                      <ToggleGroup
+                        type="single"
+                        value={viewMode}
+                        onValueChange={(v) => {
+                          if (v) setViewMode(v);
+                        }}
+                        size="sm"
+                        aria-label="View mode"
+                      >
+                        <ToggleGroupItem value="list">List</ToggleGroupItem>
+                        <ToggleGroupItem value="grid">Grid</ToggleGroupItem>
+                        <ToggleGroupItem value="cards">Cards</ToggleGroupItem>
+                      </ToggleGroup>
+                    </div>
                   </div>
                 </div>
 
@@ -527,7 +531,7 @@ function ComponentsShowcase({ onOpenCommandPalette }: { onOpenCommandPalette: ()
                 <CardTitle>Unsaved changes</CardTitle>
                 <CardDescription>Save your work before leaving this page.</CardDescription>
               </CardHeader>
-              <CardFooter>
+              <CardFooter className="justify-end gap-2">
                 <Button variant="secondary">Discard</Button>
                 <Button type="button" onClick={() => toast("Saved (demo)")}>
                   Save changes
@@ -594,9 +598,15 @@ function LandingShowcaseTab({ onRequestOpenCommandPalette }: { onRequestOpenComm
             <HugeiconsIcon icon={Rocket01Icon} className="size-4" data-icon="inline-start" />
             <AlertTitle>Try the showcase</AlertTitle>
             <AlertDescription>
-              Interactive controls below use the same primitives as the full Storybook and docs. Open{" "}
-              <span className="font-medium text-foreground">Examples</span> in the header for TanStack data tables,
-              nested rows, and portfolio layouts.
+              Interactive controls below use the same primitives as the full Storybook and docs. Scroll to{" "}
+              <a href="#charts" className="font-medium text-foreground underline underline-offset-4">
+                Charts
+              </a>{" "}
+              for EvilCharts on nqui cards, or jump to{" "}
+              <a href="#preview" className="font-medium text-foreground underline underline-offset-4">
+                Components
+              </a>
+              .
             </AlertDescription>
           </Alert>
 
@@ -638,37 +648,17 @@ function LandingShowcaseTab({ onRequestOpenCommandPalette }: { onRequestOpenComm
       </section>
 
       <ComponentsShowcase onOpenCommandPalette={onRequestOpenCommandPalette} />
+      <HomeCharts />
       <FrostedGlassShowcase />
     </>
   );
 }
 
 export function LandingPage({ onRequestOpenCommandPalette }: { onRequestOpenCommandPalette: () => void }) {
-  const [searchParams] = useSearchParams();
-  const examples = searchParams.get("tab") === "workspace";
-
-  useEffect(() => {
-    if (!examples) return;
-
-    document.documentElement.classList.add("workspace-scroll-lock");
-    document.body.classList.add("workspace-scroll-lock");
-
-    return () => {
-      document.documentElement.classList.remove("workspace-scroll-lock");
-      document.body.classList.remove("workspace-scroll-lock");
-    };
-  }, [examples]);
-
   return (
-    <div className={examples ? "workspace-scroll-root h-[calc(100dvh-4.5rem)] overflow-hidden bg-background text-foreground" : "flex min-h-dvh flex-col bg-background text-foreground"}>
-      <main className={examples ? "h-full min-h-0" : "flex min-h-0 flex-1 flex-col"}>
-        {examples ? (
-          <div className="mx-auto h-full min-h-0 w-full max-w-[120rem] bg-background">
-            <HomeWorkspaceView />
-          </div>
-        ) : (
-          <LandingShowcaseTab onRequestOpenCommandPalette={onRequestOpenCommandPalette} />
-        )}
+    <div className="flex min-h-dvh flex-col bg-background text-foreground">
+      <main className="flex min-h-0 flex-1 flex-col">
+        <LandingShowcaseTab onRequestOpenCommandPalette={onRequestOpenCommandPalette} />
       </main>
     </div>
   );

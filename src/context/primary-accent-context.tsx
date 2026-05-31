@@ -26,7 +26,7 @@ function themeModeFromResolved(resolved: string | undefined): ThemeMode {
   return "light";
 }
 
-/** Override primary scale + ring (same curve as showcase preview). */
+/** Override primary scale for the accent picker (ring stays nqui’s neutral token). */
 export function previewPrimaryVars(hue: number, mode: ThemeMode): CSSProperties {
   const fg = "oklch(0.98 0 0)";
   const primary = `oklch(0.55 0.22 ${hue})`;
@@ -41,7 +41,6 @@ export function previewPrimaryVars(hue: number, mode: ThemeMode): CSSProperties 
       "--primary": primary,
       "--primary-foreground": fg,
       "--primary-hover": `oklch(0.72 0.18 ${hue})`,
-      "--ring": primary,
     } as CSSProperties;
   }
   return {
@@ -54,7 +53,6 @@ export function previewPrimaryVars(hue: number, mode: ThemeMode): CSSProperties 
     "--primary": primary,
     "--primary-foreground": fg,
     "--primary-hover": `oklch(0.48 0.2 ${hue})`,
-    "--ring": primary,
   } as CSSProperties;
 }
 

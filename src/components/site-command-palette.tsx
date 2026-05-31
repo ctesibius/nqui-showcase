@@ -36,15 +36,6 @@ export function SiteCommandPalette({
         <CommandEmpty>No matches.</CommandEmpty>
         <CommandGroup heading="Pages">
           <CommandItem
-            keywords={["examples", "workspace", "tables", "dashboard", "tanstack"]}
-            onSelect={() => {
-              close();
-              navigate("/?tab=workspace");
-            }}
-          >
-            Examples — data tables & workspace
-          </CommandItem>
-          <CommandItem
             keywords={["home", "components", "marketing", "showcase"]}
             onSelect={() => {
               close();
@@ -52,6 +43,15 @@ export function SiteCommandPalette({
             }}
           >
             Home — component preview
+          </CommandItem>
+          <CommandItem
+            keywords={["charts", "evilcharts", "analytics", "recharts"]}
+            onSelect={() => {
+              close();
+              navigate("/#charts");
+            }}
+          >
+            Charts — EvilCharts on nqui cards
           </CommandItem>
           <CommandItem
             keywords={["readme", "docs", "documentation"]}
@@ -65,6 +65,15 @@ export function SiteCommandPalette({
         </CommandGroup>
         <CommandSeparator />
         <CommandGroup heading="On this page">
+          <CommandItem
+            keywords={["charts", "scroll", "anchor", "evilcharts"]}
+            onSelect={() => {
+              close();
+              navigate("/#charts");
+            }}
+          >
+            Jump to charts
+          </CommandItem>
           <CommandItem
             keywords={["preview", "scroll", "anchor"]}
             onSelect={() => {

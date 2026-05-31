@@ -1,116 +1,118 @@
 ---
-name: nqui Components
-description: Component implementation guide for nqui. Use when building UI, designing app layouts, or implementing components with @nqlib/nqui.
+name: nqui
+description: Hub for nqui component library skills and impeccable design skills. Use /nqui-components, /nqui-design-system, /impeccable, /audit, or specific skill names to invoke them.
 ---
 
-# nqui Components Guide
+# nqui Skills (Hub)
 
-Reference `packages/nqui/docs/components/README.md` for the full component index and implementation rules.
+SSOT: `packages/nqui/docs/nqui-skills/`
 
-## Quick Reference
+Installed into `.cursor/nqui-skills/` via `npx @nqlib/nqui init-skills`.
 
-1. **Main index:** `packages/nqui/docs/components/README.md` - all components, use cases, prerequisites
-2. **Per-component:** `packages/nqui/docs/components/nqui-<name>.md` - import, examples, variants
-3. **Design system:** this folder — **`design-system.md`** (sizing, grouped controls, **Card + ScrollArea**)
-4. **Scroll / flex / overflow (Card, Sheet, panels):** **`rules/scroll-layout.md`** — stuck scroll, overlap, double scrollbar, `min-h-0` chain; plus **`node_modules/@nqlib/nqui/docs/components/nqui-scroll-area.md`** (**§0** symptom routing, **§1–§6**)
-5. **Data tables + ScrollArea:** **`nqui-data-tables/SKILL.md`** — bounded tables (TanStack/native), sticky header, HV scroll, IO or paging
+> **Token discipline:** Before loading multiple files, read **[READ_BUDGET.md](./READ_BUDGET.md)** — it routes any task to 1–3 files. The skills folder is ~5000 lines; don't bulk-read.
 
-## App Design Rule: Inline Selection → ToggleGroup
+---
 
-When designing app UI (toolbars, headers, inline controls):
+## Agent Build Protocol
 
-| Context | Use | NOT |
-|---------|-----|-----|
-| View mode (List/Grid/Table), scale (Linear/Log), size (S/M/L) | **ToggleGroup** `type="single"` | RadioGroup |
-| Format toolbar (Bold/Italic/Underline), multi-toggle | **ToggleGroup** `type="multiple"` | Multiple Checkboxes |
-| Toolbar actions (Undo/Redo, align) | **ButtonGroup** | - |
-| Single on/off (Bold, Mute) | **Toggle** | - |
+When asked to **build a new view, page, or feature**, follow this order:
 
-**Rule:** Inline/toolbar selection = ToggleGroup. Use RadioGroup only for form context (settings page, modal form, stacked list).
+1. **Load design context** — Check `.impeccable.md` in project root. If missing, run `/impeccable teach` before any design work.
+2. **Understand the user's job** — One outcome, one primary action. What moves to a secondary surface? (See `nqui-composition/SKILL.md` checklist.)
+3. **Pick a layout pattern** — Read `COMPOSITION.md` (named patterns: app shell, settings, dashboard, wizard, master-detail). Match the pattern to the job.
+4. **Look up combos** — Read `RECIPES.md` for the specific situations you need (status pill, bulk actions, filter toolbar, the three states, etc.). Don't reinvent.
+5. **Select components** — Use `HUMAN_GUIDE.md` (task → doc) and `COMPONENTS_INDEX.md` decision tables. Load one `nqui-<name>.md` per component.
+6. **Apply the design system** — Load `nqui-design-system/SKILL.md` for sizing, spacing, and scroll contracts.
+7. **Cover all states** — Walk `STATES.md` for every interactive surface. Empty, loading, error are mandatory.
+8. **Write the copy properly** — Apply `WRITING.md` rules to every button, label, error, empty state, and toast. No "Submit", no "An error occurred", no exclamation marks.
+9. **Add motion only with intent** — If you animate anything, consult `MOTION.md` for timing/easing/choreography. Default to no motion unless it serves comprehension.
+10. **Build, then verify** — Run the pre-ship checklist in `COMPOSITION.md`. Run `/audit` on complex views.
 
-## App Design Rule: Context-First (Toolbar in Real Environment)
+**Never skip step 1.** Generic output comes from missing design context, not missing components.
+**Never skip step 4** for product UI. The recipes encode lessons learned — bypassing them produces busy, AI-flavored work.
+**Never skip steps 7-9.** Missing states, lazy copy, and noisy motion are the three things that make AI-built UI feel AI-built.
 
-**Rule:** Never show Toggle/ToggleGroup/ButtonGroup in isolation. Always place them in realistic app context.
+## The 30-second Linear designer test (mandatory before declaring done)
 
-| Context | Layout | Reference |
-|---------|--------|-----------|
-| Document editor | Toolbar above content; `bg-muted/30` container; `Separator` between groups | ComponentShowcase → Toggle & ToggleGroup |
-| Chart/settings | Label + inline controls; `rounded-lg border bg-muted/30 p-3` | ComponentShowcase → Chart settings |
-| Standalone | Inline with related UI | ComponentShowcase → Standalone toggle |
+Before saying "this is complete," do this thought experiment:
 
-**Canonical implementation:** `packages/nqui/src/pages/ComponentShowcase.tsx` — Toggle & ToggleGroup section.
+> *If I showed this view to a senior designer at Linear, Vercel, or Things 3 — someone who builds product UI all day — what would they change in the first 30 seconds?*
 
-## Design System Conventions
+The honest answer is almost always one or more of these:
 
-See **`design-system.md`** in this folder for sizing, grouped controls (including pill **ButtonGroup** / **ToggleGroup** shells), file paths under `packages/nqui/src/components/ui/`, and **Card + ScrollArea**.
+1. **Hierarchy is weak** — too many same-weight elements competing
+2. **Empty/loading/error states are missing** or generic
+3. **Copy is lazy** — "Submit", "An error occurred", "Are you sure?"
+4. **Toolbar floats** instead of sitting in a `bg-muted/30` container
+5. **Multiple primary buttons** competing for attention
+6. **Spacing is monotonous** — same padding everywhere, no rhythm
+7. **Cards wrap everything** including things that don't need a card
+8. **No keyboard navigation** — buttons but no focus styles, no shortcuts
+9. **Decorative shadows / gradients** on flat elements that don't need depth
+10. **Motion is missing or busy** — either no transitions at all, or too many
 
-### Scroll, overflow, and flex height (any bounded panel)
+If you can name 2+ items from that list, the view isn't done. Fix them BEFORE asking the user. The point is to ship work that doesn't trigger any of these — not to ask the user "is this OK?" when you already know it isn't.
 
-When **`ScrollArea`** or **`overflow-auto`** inside **Card**, **Sheet**, **sidebar**, or **grid** cells misbehaves (**stuck scroll**, **footer overlap**, **bleed past radius**, **double scrollbar**, **`h-full` useless**), use **`rules/scroll-layout.md`** first, then **`node_modules/@nqlib/nqui/docs/components/nqui-scroll-area.md`** (**§0**–**§6**). Tables: **`nqui-data-tables/SKILL.md`**.
+---
 
-### Control Sizing
-- sm = h-6
-- default = h-7
-- lg = h-8
+## nqui Component Library
 
-### Z-Index
-Always use CSS variables from elevation.css:
-- `--z-content` (10) - standard content
-- `--z-sticky-content` (15) - sticky within containers
-- `--z-sticky-page` (20) - page-level sticky
-- `--z-floating` (30) - floating panels
-- `--z-modal-backdrop` (40)
-- `--z-modal` (50)
-- `--z-popover` (60)
-- `--z-tooltip` (70)
+| Skill                           | When to use                                                        |
+| ------------------------------- | ------------------------------------------------------------------ |
+| **nqui-composition**            | Apple-inspired craft for composing screens (clarity / deference / depth). Read before building new views. |
+| **COMPOSITION.md**              | Named layout patterns, three-surface cap, anti-patterns, pre-ship checklist — read before building any view |
+| **RECIPES.md**                  | Component combos for common product situations (status pill, bulk actions, the three states, etc.) |
+| **STATES.md**                   | The 12-state matrix every interactive surface must cover. Mandatory checklist per view. |
+| **WRITING.md**                  | UX copy rules — buttons, errors, empty states, microcopy. The differentiator between AI-built and human-built. |
+| **MOTION.md**                   | Motion as a system — timing scale, easing vocabulary, choreography, reduced-motion. Read before animating anything. |
+| **ELEVATION.md**                | The 2+1 surface hybrid model — cap inline nesting at 2 surfaces, use spacing for the rest. Read before any layered UI. |
+| **HUMAN_GUIDE.md**              | Task → component doc routing (forms, toolbar, dashboard, overlays, states) |
+| **AGENT_PROMPT.md**             | Canonical system prompt for AI agents using nqui. Reference this in your agent setup. |
+| **EVAL.md**                     | 12-prompt eval set + grading rubric. Run before releases. |
+| **THEMING.md**                  | Brand customization without breaking the rules. |
+| **MIGRATION.md**                | Breaking changes per release. Scan before upgrading. |
+| **nqui-components**             | Implementing UI, choosing components, component props and examples |
+| **nqui-design-system**          | Design token conventions, spacing, Card + ScrollArea / bounded panels (see `nqui-scroll-area.md` §0)      |
+| **nqui-shadcn**                 | Managing nqui components (adding, fixing, styling, composing UI)   |
+| **nqui-install**                | Install, setup peers, CSS init, CLI commands                       |
+| **nqui-bundle-size**            | Bundle size best practices when adding deps or creating packages   |
+| **nqui-data-tables**            | TanStack/native HTML tables + ScrollArea: bounded height, sticky header, HV scroll, IO or paging |
+| **nqui-inline-tabs**            | Tabs inside page-level scrollers — scroll preservation, horizontal bar overflow |
+| **nqui-local-published-toggle** | Switching between local and published @nqlib/nqui                  |
 
-### FrostedGlass (sticky glass headers)
+---
 
-`FrostedGlass` is only the blur layer. Implementations need a **second row** with `bg-background/40`, `relative z-[var(--z-content)]`, and content that **scrolls behind** the sticky header. Full checklist, props, and troubleshooting: **`packages/nqui/docs/components/nqui-frosted-glass.md`**. Canonical page header: `AppLayout`; card: **Card** `stickyHeader`.
+## Impeccable Design Skills
 
-### Component Naming
-- Default exports are the enhanced/polished variants; use **Core\*** for plain primitives
-- Implementations are consolidated under **`ui/`** (not separate `custom/enhanced-*` per component for Button, Badge, Checkbox, Select, Combobox, Sonner)
-- File names: kebab-case
-- Component names: PascalCase
+Design quality and anti-pattern detection. Run `/impeccable teach` first to establish design context.
 
-### Hit area (optional)
+| Skill          | When to use                                                                   |
+| -------------- | ----------------------------------------------------------------------------- |
+| **impeccable** | Build distinctive, production-grade UI; avoid AI slop aesthetics              |
+| **/audit**     | Systematic quality audit (accessibility, performance, theming, anti-patterns) |
+| **/polish**    | Final cleanup — normalize inconsistencies                                     |
+| **/layout**    | Fix spacing, alignment, overflow, and grid issues                             |
+| **/colorize**  | Fix color token usage, dark mode consistency                                  |
+| **/typeset**   | Fix typography, font usage, hierarchy                                         |
+| **/shape**     | Fix border-radius, shadows, spatial layout                                    |
+| **/animate**   | Fix or improve animations and transitions                                     |
+| **/optimize**  | Performance issues (layout thrashing, bundle size)                            |
+| **/adapt**     | Responsive design fixes                                                       |
+| **/clarify**   | Improve accessibility and ARIA usage                                          |
+| **/bolder**    | Strengthen weak UI elements                                                   |
+| **/quieter**   | Reduce visual noise and clutter                                               |
+| **/delight**   | Add purposeful polish and micro-interactions                                  |
+| **/distill**   | Simplify complex UI                                                           |
+| **/critique**  | Heuristic-based UI review                                                     |
+| **/overdrive** | Push good UI to excellent                                                     |
 
-Library CSS includes [Bazza hit-area](https://bazza.dev/craft/2026/hit-area) utilities. For **Checkbox** / **Switch** in padded tables or lists, pass **`className="hit-area-6"`** (or `hit-area-4`, axis variants) on the **component root**, not on a wrapper-only parent. Opt-in only; use **`hit-area-debug`** while tuning. Details: `packages/nqui/docs/components/nqui-checkbox.md`, `nqui-switch.md`; examples: `ComponentShowcase` Checkbox + Switch sections.
+---
 
-## Data tables (TanStack + ScrollArea)
+## Usage
 
-Bounded card tables, sticky headers, horizontal + vertical scroll, flex height chain, `viewportStyle` pinning, infinite rows or paging: read **`nqui-data-tables/SKILL.md`** in this folder, **`design-system.md` § Card + ScrollArea**, and **`node_modules/@nqlib/nqui/docs/components/nqui-scroll-area.md`** (especially **§6 Data tables / wide grids** — `orientation="both"`, `h-0 flex-1`, absolute viewport pin).
+Skills are invoked by name — e.g. `/nqui-components`, `/impeccable`, `/audit input-group`.
 
-## Key Dependencies
+For component questions, always read the relevant doc first:
 
-Required peer dependencies:
-- `@hugeicons/react`
-- `@hugeicons/core-free-icons`
-
-Optional:
-- `next-themes` - for theme toggle
-- `tw-animate-css` - for animations
-
-## Installation & Setup
-
-```bash
-# Quick setup
-pnpm dlx @nqlib/nqui init-css
-
-# App setup with sidebar
-pnpm dlx @nqlib/nqui init-css --sidebar
-
-# Install peer dependencies
-pnpm dlx @nqlib/nqui install-peers
-```
-
-## CSS Variables
-
-All components use CSS variables. Key ones:
-- `--background`, `--foreground`
-- `--muted`, `--muted-foreground`
-- `--accent`, `--accent-foreground`
-- `--border`, `--ring`
-- `--primary`, `--primary-foreground`
-- `--destructive`, `--destructive-foreground`
+- `.cursor/nqui-skills/components/nqui-<name>.md` (after init-skills)
+- `node_modules/@nqlib/nqui/docs/components/nqui-<name>.md` (npm install)
