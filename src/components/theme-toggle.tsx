@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { Button } from "@nqlib/nqui";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ComputerIcon, Moon01Icon, Sun01Icon } from "@hugeicons/core-free-icons";
+import { Moon01Icon, Sun01Icon } from "@hugeicons/core-free-icons";
 
 function useIsClient() {
   return useSyncExternalStore(
@@ -12,17 +12,14 @@ function useIsClient() {
   );
 }
 
-/** Cycles: dark → light → system → dark */
+/**
+ * Single light ↔ dark toggle.
+ * Initial state inherits system preference (next-themes defaultTheme="system");
+ * once clicked, the user's pick wins.
+ */
 export function ThemeToggle() {
-  const { setTheme, theme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const isClient = useIsClient();
-
-  const cycle = () => {
-    const t = theme === "mid" ? "light" : (theme ?? "system");
-    if (t === "dark") setTheme("light");
-    else if (t === "light") setTheme("system");
-    else setTheme("dark");
-  };
 
   if (!isClient) {
     return (
@@ -30,14 +27,7 @@ export function ThemeToggle() {
     );
   }
 
-  const current = theme === "mid" ? "light" : (theme ?? "system");
-
-  const label =
-    current === "dark"
-      ? "Dark theme. Click for light."
-      : current === "light"
-        ? "Light theme. Click for system."
-        : "System theme. Click for dark.";
+  const isDark = resolvedTheme === "dark";
 
   return (
     <Button
@@ -45,25 +35,19 @@ export function ThemeToggle() {
       variant="outline"
       size="icon"
       className="relative size-9 shrink-0"
-      aria-label={label}
-      onClick={cycle}
+      aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
     >
       <HugeiconsIcon
         icon={Sun01Icon}
         className={`absolute size-4 transition-all duration-200 ${
-          current === "light" ? "scale-100 opacity-100" : "scale-0 opacity-0"
+          isDark ? "scale-0 opacity-0" : "scale-100 opacity-100"
         }`}
       />
       <HugeiconsIcon
         icon={Moon01Icon}
         className={`absolute size-4 transition-all duration-200 ${
-          current === "dark" ? "scale-100 opacity-100" : "scale-0 opacity-0"
-        }`}
-      />
-      <HugeiconsIcon
-        icon={ComputerIcon}
-        className={`absolute size-4 transition-all duration-200 ${
-          current === "system" ? "scale-100 opacity-100" : "scale-0 opacity-0"
+          isDark ? "scale-100 opacity-100" : "scale-0 opacity-0"
         }`}
       />
     </Button>

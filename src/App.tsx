@@ -15,13 +15,12 @@ function MarketingShell() {
       <SiteHeader />
       <div className="pt-[4.5rem]">
         <Routes>
-          <Route
-            path="/"
-            element={<LandingPage onRequestOpenCommandPalette={() => setCommandPaletteOpen(true)} />}
-          />
+          <Route path="/" element={<LandingPage />} />
           <Route element={<DocsLayout />}>
             <Route path="/readme" element={<ReadmePage />} />
           </Route>
+          <Route path="/showcase/*" element={<Navigate to="/" replace />} />
+          <Route path="/dashboard" element={<Navigate to="/#operations" replace />} />
         </Routes>
       </div>
       <Toaster position="bottom-right" />
@@ -33,7 +32,6 @@ function MarketingShell() {
 function App() {
   return (
     <Routes>
-      <Route path="/dashboard" element={<Navigate to="/#charts" replace />} />
       <Route path="*" element={<MarketingShell />} />
     </Routes>
   );

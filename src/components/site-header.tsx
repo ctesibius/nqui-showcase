@@ -48,10 +48,10 @@ function PrimaryAccentPicker({ onPick, className }: { onPick?: () => void; class
 }
 
 const sections = [
-  { href: "/#product", label: "Overview" },
-  { href: "/#preview", label: "Components" },
-  { href: "/#charts", label: "Charts" },
-  { href: "/#frosted-glass", label: "Frosted glass" },
+  { href: "/#product", label: "Product" },
+  { href: "/#pricing", label: "Pricing" },
+  { href: "/#customers", label: "Customers" },
+  { href: "/#faq", label: "FAQ" },
 ] as const;
 
 /** Same sections as readme-page (install / CLI doc) for mobile sheet deep links */
@@ -75,9 +75,9 @@ function docsMenuItemActive(pathname: string, hash: string, to: string): boolean
 /** Primary pill nav — short labels, monospace (reference: centered dock). */
 const pillNav = [
   { kind: "showcase" as const, label: "Home", to: "/" },
+  { kind: "hash" as const, label: "Product", href: "/#product", hash: "#product" },
+  { kind: "hash" as const, label: "Pricing", href: "/#pricing", hash: "#pricing" },
   { kind: "route" as const, label: "Docs", to: "/readme" },
-  { kind: "hash" as const, label: "Charts", href: "/#charts", hash: "#charts" },
-  { kind: "hash" as const, label: "Frosted", href: "/#frosted-glass", hash: "#frosted-glass" },
 ] as const;
 
 function useNavActive() {
@@ -87,10 +87,10 @@ function useNavActive() {
 
 function navItemActive(pathname: string, hash: string, item: (typeof pillNav)[number]): boolean {
   if (item.kind === "showcase") {
-    return pathname === "/" && (hash === "" || hash === "#" || hash === "#product");
+    return pathname === "/" && (hash === "" || hash === "#" || hash === "#top");
   }
   if (item.kind === "route") {
-    return pathname === item.to;
+    return pathname === item.to || pathname.startsWith(`${item.to}/`);
   }
   return pathname === "/" && hash === item.hash;
 }
@@ -234,7 +234,7 @@ export function SiteHeader() {
                 <Separator />
                 <div className="flex flex-col gap-1">
                   <a
-                    href="/#product"
+                    href="/#overview"
                     onClick={() => setMobileOpen(false)}
                     className="block w-full rounded-md px-2 py-1.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                   >
@@ -284,13 +284,8 @@ export function SiteHeader() {
                 </div>
                 <Separator />
                 <Button asChild>
-                  <a
-                    href="/#preview"
-                    onClick={() => {
-                      setMobileOpen(false);
-                    }}
-                  >
-                    View components
+                  <a href="/#cta" onClick={() => setMobileOpen(false)}>
+                    Start free trial
                   </a>
                 </Button>
               </SheetContent>
