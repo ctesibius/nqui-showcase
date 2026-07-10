@@ -6,17 +6,7 @@ import {
   CommandItem,
   CommandList,
   CommandPalette,
-  CommandSeparator,
-} from "@nqlib/nqui";
-
-const pageSections = [
-  { hash: "#top", label: "Hero", keywords: ["start", "top", "home"] },
-  { hash: "#product", label: "Live product preview", keywords: ["demo", "table", "calendar", "sortable"] },
-  { hash: "#pricing", label: "Pricing", keywords: ["plans", "seats", "slider"] },
-  { hash: "#customers", label: "Customers", keywords: ["testimonials", "carousel"] },
-  { hash: "#faq", label: "FAQ", keywords: ["accordion", "questions"] },
-  { hash: "#cta", label: "Sign up", keywords: ["trial", "start", "form"] },
-] as const;
+} from "@nqlib/nqui/command";
 
 export function SiteCommandPalette({
   open,
@@ -29,9 +19,9 @@ export function SiteCommandPalette({
 
   const close = () => onOpenChange(false);
 
-  const go = (path: string, hash?: string) => {
+  const go = (path: string, search?: string) => {
     close();
-    navigate(hash ? { pathname: path, hash } : path);
+    navigate(search ? { pathname: path, search } : path);
   };
 
   return (
@@ -41,30 +31,27 @@ export function SiteCommandPalette({
       shortcutEnabled
       className="site-command-palette"
       title="Command menu"
-      description="Jump to page sections"
+      description="Jump to dashboard sections"
     >
-      <CommandInput placeholder="Search sections…" />
+      <CommandInput placeholder="Search…" />
       <CommandList>
         <CommandEmpty>No matches.</CommandEmpty>
-        <CommandGroup heading="Pages">
-          <CommandItem keywords={["home", "northwind", "demo"]} onSelect={() => go("/")}>
-            Home — Northwind product preview
+        <CommandGroup heading="Navigate">
+          <CommandItem keywords={["home", "landing", "story", "tour"]} onSelect={() => go("/")}>
+            Home — product tour
+          </CommandItem>
+          <CommandItem keywords={["overview", "dashboard", "kpi"]} onSelect={() => go("/ops")}>
+            Overview — KPIs and charts
+          </CommandItem>
+          <CommandItem keywords={["schedule", "gantt", "timeline"]} onSelect={() => go("/ops", "?tab=schedule")}>
+            Schedule — milestone Gantt
+          </CommandItem>
+          <CommandItem keywords={["projects", "grid", "table"]} onSelect={() => go("/ops", "?tab=projects")}>
+            Projects — program grid
           </CommandItem>
           <CommandItem keywords={["readme", "docs", "install"]} onSelect={() => go("/readme")}>
-            Readme — install and CLI
+            Docs — install and CLI
           </CommandItem>
-        </CommandGroup>
-        <CommandSeparator />
-        <CommandGroup heading="On this page">
-          {pageSections.map((section) => (
-            <CommandItem
-              key={section.hash}
-              keywords={[...section.keywords]}
-              onSelect={() => go("/", section.hash)}
-            >
-              {section.label}
-            </CommandItem>
-          ))}
         </CommandGroup>
       </CommandList>
     </CommandPalette>

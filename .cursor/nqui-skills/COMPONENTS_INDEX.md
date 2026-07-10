@@ -102,6 +102,7 @@ Use these before opening a doc. If the answer is clear, load just that one file.
 |-----------|--------|-----|
 | `nqui-tabs` (inline) | Page scroll jumps when clicking tabs inside a vertical scroller | `InlineTabsList` + `InlineTabsTrigger` + `inlineTabsPanelsClass`. See **`nqui-inline-tabs/SKILL.md`**. |
 | `nqui-sheet` / `nqui-drawer` | The rounded panel is a `::before` overlay, not the actual element box. A full-width `border-b`/`border-t` on a child draws past the rounded corner and **leaks 1–2px outside the panel**. | Inset every internal divider: `after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-border/60` — or render `<div className="mx-4 h-px bg-border/60" />`. Never use full-width `border-b` inside a Sheet. See `nqui-sheet.md`. |
+| `nqui-sheet` body overflow | List rows, timestamps, or long strings widen past the panel; body grows taller than viewport with no scroll. | `SheetContent`: `flex flex-col overflow-hidden`; body `ScrollArea` with `min-h-0 min-w-0 flex-1`; text rows `min-w-0 break-words`. See `nqui-sheet.md` + `nqui-scroll-area.md` §0. |
 
 ---
 

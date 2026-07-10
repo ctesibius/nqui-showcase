@@ -6,6 +6,7 @@
 @custom-variant mid (&:where(.mid, .mid *));
 
 @import "@nqlib/nqui/styles";
+@import "./nqgantt/gantt-theme.css";
 
 /* Primary brand: same blue as marketing accent chip (oklch 0.55 0.22 240). */
 :root {
@@ -15,6 +16,15 @@
   --primary-400: oklch(0.72 0.18 240);
   --primary-500: oklch(0.55 0.22 240);
   --primary-600: oklch(0.45 0.24 240);
+  --primary: var(--primary-500);
+  --primary-foreground: oklch(0.99 0.01 240);
+
+  /* nqchart categorical palette — aligned with @nqlib/nqchart / nqui docs. */
+  --chart-1: oklch(0.55 0.23 275);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
 }
 
 .dark {
@@ -24,11 +34,21 @@
   --primary-400: oklch(0.48 0.2 240);
   --primary-500: oklch(0.55 0.22 240);
   --primary-600: oklch(0.62 0.2 240);
+  --primary: var(--primary-500);
+  --primary-foreground: oklch(0.99 0.01 240);
+
+  --chart-1: oklch(0.58 0.21 275);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.72 0.12 220);
+  --chart-4: oklch(0.82 0.16 84);
+  --chart-5: oklch(0.72 0.19 55);
 }
 
 @source "./**/*.{js,ts,jsx,tsx,mdx}";
 @source "../components/**/*.{js,ts,jsx,tsx,mdx}";
 @source "../node_modules/@nqlib/nqui/dist/**/*.js";
+@source "../node_modules/@nqlib/nqgantt/dist/**/*.js";
+@source "../node_modules/@nqlib/nqchart/dist/**/*.{js,mjs,cjs}";
 @source "./registry/**/*.{js,ts,jsx,tsx}";
 /* App-level: full-bleed marketing layout */
 html {
@@ -42,6 +62,92 @@ body {
 
 #root {
   min-height: 100dvh;
+}
+
+/*
+ * nqchart flicker-control (hover-focus): HTML tooltips sit over the canvas.
+ * Keep them non-interactive so the pointer never lands on the tooltip DOM and
+ * bounces item hover on/off (pie / radar glitter). Library also sets this —
+ * belt-and-suspenders for the showcase shell.
+ */
+.nq-echarts-tooltip {
+  pointer-events: none !important;
+}
+
+/*
+ * Floating frosted nav pill (story landing). Backdrop blur is load-bearing here:
+ * the pill sits over content that shifts from an empty hero to saturated charts,
+ * a dense grid, and a gantt — the frost keeps it legible over all of them.
+ * saturate() is what makes color behind read as tinted glass, not a gray smear.
+ */
+.story-nav-pill {
+  /* Lower fill + stronger blur/saturate = more glass, less frosted slab. */
+  --pill-bg: color-mix(in oklch, var(--background) 38%, transparent);
+  --pill-edge: color-mix(in oklch, var(--foreground) 10%, transparent);
+  --pill-sheen: color-mix(in oklch, white 70%, transparent);
+  position: relative;
+  background: var(--pill-bg);
+  border: 1px solid var(--pill-edge);
+  -webkit-backdrop-filter: blur(28px) saturate(2.1);
+  backdrop-filter: blur(28px) saturate(2.1);
+  /* Top glass-edge highlight; the float shadow lives on ::before so we can
+     fade its strength on scroll without animating box-shadow on the pill. */
+  box-shadow: inset 0 1px 0 0 var(--pill-sheen);
+  transition:
+    background-color 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.story-nav-pill::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  box-shadow:
+    0 2px 6px -2px color-mix(in oklch, var(--foreground) 14%, transparent),
+    0 12px 32px -12px color-mix(in oklch, var(--foreground) 26%, transparent);
+  opacity: 0.45;
+  transition: opacity 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.story-nav-pill[data-scrolled="true"] {
+  --pill-bg: color-mix(in oklch, var(--background) 58%, transparent);
+  --pill-edge: color-mix(in oklch, var(--foreground) 14%, transparent);
+}
+
+.story-nav-pill[data-scrolled="true"]::before {
+  opacity: 0.85;
+}
+
+.dark .story-nav-pill,
+.mid .story-nav-pill {
+  --pill-sheen: color-mix(in oklch, white 18%, transparent);
+  --pill-edge: color-mix(in oklch, white 12%, transparent);
+}
+
+.dark .story-nav-pill {
+  --pill-bg: color-mix(in oklch, var(--background) 32%, transparent);
+}
+
+.dark .story-nav-pill[data-scrolled="true"] {
+  --pill-bg: color-mix(in oklch, var(--background) 52%, transparent);
+  --pill-edge: color-mix(in oklch, white 16%, transparent);
+}
+
+/* Accessibility + capability fallbacks: solid pill, no blur. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .story-nav-pill {
+    --pill-bg: var(--background);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .story-nav-pill {
+    --pill-bg: var(--background);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 
 /*
@@ -77,6 +183,67 @@ body {
   .site-command-palette [data-slot="command-item"][data-selected="true"],
   .site-command-palette [data-slot="command-item"][aria-selected="true"] {
     @apply !bg-muted text-foreground;
+  }
+
+  /*
+   * Calendar — selected day uses brand primary. Ghost day buttons + today cell
+   * muted background can otherwise hide data-[selected-single] utilities.
+   */
+  [data-slot="calendar"] button[data-selected-single="true"],
+  [data-slot="calendar"] button[data-range-start="true"],
+  [data-slot="calendar"] button[data-range-end="true"] {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  [data-slot="calendar"] button[data-selected-single="true"]:hover,
+  [data-slot="calendar"] button[data-range-start="true"]:hover,
+  [data-slot="calendar"] button[data-range-end="true"]:hover {
+    background-color: color-mix(in oklch, var(--primary) 88%, black);
+    color: var(--primary-foreground);
+  }
+
+  [data-slot="calendar"] button[data-range-middle="true"] {
+    background-color: var(--muted);
+    color: var(--foreground);
+    border-radius: 0;
+  }
+
+  /*
+   * Dashboard icon rail — inverted vs page: dark rail in light mode, light rail in dark mode.
+   */
+  .dashboard-icon-rail {
+    --sidebar: var(--foreground);
+    --sidebar-foreground: var(--background);
+    --sidebar-accent: color-mix(in oklch, var(--background) 14%, var(--foreground));
+    --sidebar-accent-foreground: var(--background);
+    --sidebar-border: color-mix(in oklch, var(--background) 18%, var(--foreground));
+    --sidebar-ring: var(--background);
+  }
+
+  .dark .dashboard-icon-rail {
+    /* Page is dark — rail uses nqui light sidebar pairing (not --background, which stays dark). */
+    --sidebar: oklch(0.988 0.004 95);
+    --sidebar-foreground: oklch(0.2416 0.0219 57);
+    --sidebar-accent: oklch(0.940 0.007 95);
+    --sidebar-accent-foreground: oklch(0.205 0.015 55);
+    --sidebar-border: oklch(0.920 0.006 95);
+    --sidebar-ring: oklch(0.2416 0.0219 57);
+  }
+
+  .dashboard-resize-handle[data-slot="resizable-handle"] {
+    @apply z-20 shrink-0 cursor-col-resize touch-none;
+    width: 0.5rem !important;
+  }
+
+  .dashboard-resize-handle[data-slot="resizable-handle"]::after {
+    width: 1.25rem !important;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .dashboard-resize-handle[data-slot="resizable-handle"] > div {
+    @apply z-10 h-10 w-1.5 rounded-full border border-border/80 bg-background shadow-sm;
   }
 
   /*

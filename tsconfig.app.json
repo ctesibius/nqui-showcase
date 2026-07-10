@@ -5,7 +5,7 @@
     "useDefineForClassFields": true,
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "types": ["vite/client"],
+    "types": ["vite/client", "node"],
     "skipLibCheck": true,
 
     /* Bundler mode */
@@ -18,7 +18,40 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      /*
+       * DEV-ONLY while @nqlib/nqui is `link:../nqui`: the linked repo carries its
+       * own @types/react copy, so nqui's d.ts and this app would otherwise see two
+       * incompatible React type instances. Force a single copy. Remove (or keep,
+       * it's harmless) once nqui 0.7.0 is consumed from npm again.
+       */
+      "react": ["./node_modules/@types/react"],
+      "react/jsx-runtime": ["./node_modules/@types/react/jsx-runtime"],
+      "react-dom": ["./node_modules/@types/react-dom"],
+      /*
+       * DEV-ONLY: type-resolve @nqlib/nqgrid against the sibling ../nqgrid/src so
+       * the editor/typecheck match the engine API that `pnpm dev:local` runs with.
+       * The published @nqlib/nqgrid@0.1.0 is STALE and lacks this API. Before the
+       * showcase can build/deploy against the published package, publish a current
+       * nqgrid and REMOVE these eight mappings (see NQGRID-WORKSPACE.md).
+       */
+      "@nqlib/nqgrid": ["../nqgrid/src/index.ts"],
+      "@nqlib/nqgrid/engine": ["../nqgrid/src/engine/index.ts"],
+      "@nqlib/nqgrid/grid": ["../nqgrid/src/grid/index.ts"],
+      "@nqlib/nqgrid/sheet": ["../nqgrid/src/sheet/index.ts"],
+      "@nqlib/nqgrid/spreadsheet": ["../nqgrid/src/spreadsheet/index.ts"],
+      "@nqlib/nqgrid/advanced": ["../nqgrid/src/advanced/index.ts"],
+      "@nqlib/nqgrid/configurator": ["../nqgrid/src/configurator/index.ts"],
+      "@nqlib/nqgrid/fixtures": ["../nqgrid/src/fixtures/index.ts"],
+      /*
+       * DEV-ONLY: type-resolve @nqlib/nqgantt against sibling source when iterating
+       * with `pnpm dev:local`. Remove or gate when deploy tracks published only.
+       */
+      "@nqlib/nqgantt": ["../nqgantt/packages/nqgantt/src/index.ts"],
+      "@nqlib/nqgantt/ui": ["../nqgantt/packages/nqgantt/src/ui.ts"],
+      "@nqlib/nqgantt/engine": ["../nqgantt/packages/nqgantt/src/engine.ts"],
+      "@nqlib/nqgantt/mock": ["../nqgantt/packages/nqgantt/src/mock.ts"],
+      "@nqlib/nqgantt/item-gantt-adapter": ["../nqgantt/packages/nqgantt/src/item-gantt-adapter.ts"]
     },
 
     /* Linting */
@@ -29,5 +62,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/nqgantt/lib"]
 }

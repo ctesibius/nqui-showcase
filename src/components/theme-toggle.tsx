@@ -17,13 +17,20 @@ function useIsClient() {
  * Initial state inherits system preference (next-themes defaultTheme="system");
  * once clicked, the user's pick wins.
  */
-export function ThemeToggle() {
+export function ThemeToggle({ className }: { className?: string }) {
   const { setTheme, resolvedTheme } = useTheme();
   const isClient = useIsClient();
 
   if (!isClient) {
     return (
-      <Button type="button" variant="outline" size="icon" className="size-9 shrink-0" aria-label="Theme" disabled />
+      <Button
+        type="button"
+        variant="outline"
+        size="icon"
+        className={className ?? "size-9 shrink-0"}
+        aria-label="Theme"
+        disabled
+      />
     );
   }
 
@@ -34,7 +41,7 @@ export function ThemeToggle() {
       type="button"
       variant="outline"
       size="icon"
-      className="relative size-9 shrink-0"
+      className={className ?? "relative size-9 shrink-0"}
       aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
       onClick={() => setTheme(isDark ? "light" : "dark")}
     >

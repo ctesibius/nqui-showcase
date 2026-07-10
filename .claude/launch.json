@@ -1,0 +1,26 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "showcase",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev"],
+      "port": 5174,
+      "autoPort": true
+    },
+    {
+      "name": "showcase-local-nqgrid",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev:local"],
+      "port": 5174,
+      "autoPort": true
+    },
+    {
+      "name": "showcase-preview-dist",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["preview"],
+      "port": 4173,
+      "autoPort": true
+    }
+  ]
+}

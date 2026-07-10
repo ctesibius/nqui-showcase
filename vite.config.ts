@@ -1,22 +1,125 @@
+import { existsSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import tailwindcss from "@tailwindcss/vite"
 import react from "@vitejs/plugin-react"
-import { defineConfig } from "vite"
+import { defineConfig, type Alias } from "vite"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+/**
+ * Local nqgrid source toggle (`USE_LOCAL_NQGRID=true pnpm dev`, or `pnpm dev:local`).
+ *
+ * Local nqgantt source toggle (`USE_LOCAL_NQGANTT=true`, or `pnpm dev:local` which sets both).
+ *
+ * Points `@nqlib/nqgrid` + its public sub-barrels at the sibling `../nqgrid/src`
+ * so engine edits are picked up live with no rebuild. A plain `pnpm dev` /
+ * `pnpm build` uses the PUBLISHED `@nqlib/nqgrid` from node_modules, so deploys
+ * never depend on a checked-out sibling repo. Deep imports beyond the public
+ * barrels deliberately have no alias and won't resolve — same contract the
+ * nqgrid playground enforces.
+ */
+function localNqgridAliases(): Alias[] {
+  if (process.env.USE_LOCAL_NQGRID !== "true") return []
+  const base = process.env.NQGRID_DIR ?? path.resolve(__dirname, "../nqgrid")
+  const src = path.join(base, "src")
+  if (!existsSync(src)) {
+    console.warn(`[nqui-showcase] USE_LOCAL_NQGRID=true but no src at ${src}; using published @nqlib/nqgrid.`)
+    return []
+  }
+  console.info(`[nqui-showcase] @nqlib/nqgrid → ${src}`)
+  const barrel = (name: string) => path.join(src, name, "index.ts")
+  return [
+    { find: /^@nqlib\/nqgrid$/, replacement: path.join(src, "index.ts") },
+    { find: /^@nqlib\/nqgrid\/engine$/, replacement: barrel("engine") },
+    { find: /^@nqlib\/nqgrid\/grid$/, replacement: barrel("grid") },
+    { find: /^@nqlib\/nqgrid\/sheet$/, replacement: barrel("sheet") },
+    { find: /^@nqlib\/nqgrid\/spreadsheet$/, replacement: barrel("spreadsheet") },
+    { find: /^@nqlib\/nqgrid\/advanced$/, replacement: barrel("advanced") },
+    { find: /^@nqlib\/nqgrid\/configurator$/, replacement: barrel("configurator") },
+    { find: /^@nqlib\/nqgrid\/fixtures$/, replacement: barrel("fixtures") },
+  ]
+}
+
+function localNqganttAliases(): Alias[] {
+  if (process.env.USE_LOCAL_NQGANTT !== "true") return []
+  const base = process.env.NQGANTT_DIR ?? path.resolve(__dirname, "../nqgantt/packages/nqgantt")
+  const src = path.join(base, "src")
+  if (!existsSync(src)) {
+    console.warn(`[nqui-showcase] USE_LOCAL_NQGANTT=true but no src at ${src}; using published @nqlib/nqgantt.`)
+    return []
+  }
+  console.info(`[nqui-showcase] @nqlib/nqgantt → ${src}`)
+  return [
+    { find: /^@nqlib\/nqgantt$/, replacement: path.join(src, "index.ts") },
+    { find: /^@nqlib\/nqgantt\/ui$/, replacement: path.join(src, "ui.ts") },
+    { find: /^@nqlib\/nqgantt\/mock$/, replacement: path.join(src, "mock.ts") },
+    { find: /^@nqlib\/nqgantt\/engine$/, replacement: path.join(src, "engine.ts") },
+    { find: /^@nqlib\/nqgantt\/item-gantt-adapter$/, replacement: path.join(src, "item-gantt-adapter.ts") },
+  ]
+}
+
+/**
+ * Local nqchart source toggle (`USE_LOCAL_NQCHART=true`, or `pnpm dev:local`).
+ *
+ * nqchart ships no single `src` barrel (its source lives under registry/ and
+ * needs a build), so — unlike nqgrid/nqgantt which alias raw `src` — local mode
+ * points `@nqlib/nqchart` and its per-chart subpaths at the sibling built
+ * `../becocharts/dist`. Rebuild becocharts to pick up engine changes. A plain
+ * `pnpm dev`/`pnpm build` uses the PUBLISHED `@nqlib/nqchart` from node_modules.
+ */
+function localNqchartAliases(): Alias[] {
+  if (process.env.USE_LOCAL_NQCHART !== "true") return []
+  const base = process.env.NQCHART_DIR ?? path.resolve(__dirname, "../becocharts")
+  const dist = path.join(base, "dist")
+  if (!existsSync(path.join(dist, "index.mjs"))) {
+    console.warn(`[nqui-showcase] USE_LOCAL_NQCHART=true but no dist at ${dist}; using published @nqlib/nqchart.`)
+    return []
+  }
+  console.info(`[nqui-showcase] @nqlib/nqchart → ${dist}`)
+  return [
+    { find: /^@nqlib\/nqchart$/, replacement: path.join(dist, "index.mjs") },
+    { find: /^@nqlib\/nqchart\/(.+)$/, replacement: path.join(dist, "$1.mjs") },
+  ]
+}
+
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react(), tailwindcss()],
+  // The local @nqlib/nqchart alias points at `../becocharts/dist` (pre-bundled
+  // ESM outside node_modules, so vite's optimizer doesn't shim it). That dist
+  // references `process.env.{NODE_ENV,NEXT_PUBLIC_APP_URL}`; define them so the
+  // local toggle runs in the browser. Harmless for the published-package path.
+  define: {
+    "process.env.NODE_ENV": JSON.stringify(mode === "production" ? "production" : "development"),
+    "process.env.NEXT_PUBLIC_APP_URL": JSON.stringify(""),
+  },
+  // @nqlib/nqui is consumed via `link:../nqui` while 0.7.0 is unpublished; the
+  // dep optimizer mangles the symlinked package's named exports (e.g.
+  // InlineTabsList disappears), so serve its ESM dist unbundled in dev.
+  optimizeDeps: {
+    exclude: ["@nqlib/nqui"],
+  },
   resolve: {
-    alias: { "@": path.resolve(__dirname, "./src") },
-    dedupe: ["recharts"],
+    alias: [
+      ...localNqgridAliases(),
+      ...localNqganttAliases(),
+      ...localNqchartAliases(),
+      { find: "@", replacement: path.resolve(__dirname, "./src") },
+    ],
+    // Single copies of the engine's peers when running against local nqgrid src.
+    dedupe: ["recharts", "echarts", "motion", "react", "react-dom", "@tanstack/react-table", "@tanstack/react-virtual"],
   },
   // Bind to loopback only so dev does not trigger “local network” device prompts on some mobile browsers.
+  // PORT env (set by preview tooling) wins over the default so parallel dev servers don't collide.
   server: {
     host: "127.0.0.1",
     strictPort: true,
-    port: 5173,
+    port: Number(process.env.PORT) || 5173,
   },
-})
+  preview: {
+    host: "127.0.0.1",
+    strictPort: true,
+    port: Number(process.env.PORT) || 4173,
+  },
+}))

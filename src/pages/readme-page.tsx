@@ -211,7 +211,8 @@ pnpm add tw-animate-css next-themes`}</CodeBlock>
         <Card>
           <CardContent className="pt-6">
             <CodeBlock>{`import { ThemeProvider } from "next-themes";
-import { TooltipProvider, Toaster } from "@nqlib/nqui";
+import { TooltipProvider } from "@nqlib/nqui";
+import { Toaster } from "@nqlib/nqui/sonner";
 
 <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
   <TooltipProvider delayDuration={200}>

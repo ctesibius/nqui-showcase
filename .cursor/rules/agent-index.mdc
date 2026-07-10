@@ -1,0 +1,11 @@
+---
+description: CLAUDE.md is the primary agent index; route via READ_BUDGET
+alwaysApply: true
+---
+
+# Agent index
+
+Read **`CLAUDE.md`** first, then route via **`.cursor/READ_BUDGET.md`**.
+
+- Load **1–3 files** per task — never bulk-read skill folders
+- Cross-repo edits: read **`.cursor/NQLIB.md`** before touching `../nqui`, `../nqgrid`, `../nqgantt`, `../becocharts`

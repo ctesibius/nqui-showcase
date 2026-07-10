@@ -1,39 +1,54 @@
-import { useState } from "react";
+import { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { Toaster } from "@nqlib/nqui";
-import { SiteHeader } from "./components/site-header";
-import { LandingPage } from "./components/landing-page";
-import { SiteCommandPalette } from "./components/site-command-palette";
-import { DocsLayout } from "./layouts/docs-layout";
-import { ReadmePage } from "./pages/readme-page";
+import { Spinner } from "@nqlib/nqui";
+import { StoryLandingPage } from "./pages/story-landing-page";
 
-function MarketingShell() {
-  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+// Route-split the console and docs — they pull the ops charts, gantt, and the
+// readme's code tooling, none of which the landing needs at first paint.
+const OpsShell = lazy(() => import("./layouts/ops-shell").then((m) => ({ default: m.OpsShell })));
+const OpsCommandCenterPage = lazy(() =>
+  import("./pages/ops-command-center-page").then((m) => ({ default: m.OpsCommandCenterPage })),
+);
+const DocsLayout = lazy(() => import("./layouts/docs-layout").then((m) => ({ default: m.DocsLayout })));
+const ReadmePage = lazy(() => import("./pages/readme-page").then((m) => ({ default: m.ReadmePage })));
 
+function DocsShell() {
   return (
-    <>
-      <SiteHeader />
-      <div className="pt-[4.5rem]">
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route element={<DocsLayout />}>
-            <Route path="/readme" element={<ReadmePage />} />
-          </Route>
-          <Route path="/showcase/*" element={<Navigate to="/" replace />} />
-          <Route path="/dashboard" element={<Navigate to="/#operations" replace />} />
-        </Routes>
-      </div>
-      <Toaster position="bottom-right" />
-      <SiteCommandPalette open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
-    </>
+    <div className="min-h-dvh bg-background">
+      <DocsLayout />
+    </div>
+  );
+}
+
+function RouteFallback() {
+  return (
+    <div className="flex min-h-dvh items-center justify-center bg-background">
+      <Spinner className="size-6" />
+    </div>
   );
 }
 
 function App() {
   return (
-    <Routes>
-      <Route path="*" element={<MarketingShell />} />
-    </Routes>
+    <Suspense fallback={<RouteFallback />}>
+      <Routes>
+        <Route path="/" element={<StoryLandingPage />} />
+        <Route path="/app/sheets" element={<Navigate to="/ops?tab=projects" replace />} />
+        <Route path="/app/projects" element={<Navigate to="/ops?tab=projects" replace />} />
+        <Route path="/app/analytics" element={<Navigate to="/ops" replace />} />
+        <Route path="/app/timeline" element={<Navigate to="/ops?tab=schedule" replace />} />
+        <Route path="/app" element={<Navigate to="/ops" replace />} />
+        <Route path="/dashboard/*" element={<Navigate to="/ops" replace />} />
+        <Route path="/showcase/*" element={<Navigate to="/" replace />} />
+        <Route element={<OpsShell />}>
+          <Route path="/ops" element={<OpsCommandCenterPage />} />
+        </Route>
+        <Route element={<DocsShell />}>
+          <Route path="/readme" element={<ReadmePage />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 }
 
