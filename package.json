@@ -30,7 +30,7 @@
     "@nqlib/nqchart": "^0.1.5",
     "@nqlib/nqgantt": "^0.2.1",
     "@nqlib/nqgrid": "^0.2.0",
-    "@nqlib/nqui": "link:../nqui",
+    "@nqlib/nqui": "^0.7.2",
     "@remixicon/react": "^4.9.0",
     "@tailwindcss/vite": "^4.2.2",
     "@tanstack/react-table": "^8.21.3",

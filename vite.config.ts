@@ -94,9 +94,10 @@ export default defineConfig(({ mode }) => ({
     "process.env.NODE_ENV": JSON.stringify(mode === "production" ? "production" : "development"),
     "process.env.NEXT_PUBLIC_APP_URL": JSON.stringify(""),
   },
-  // @nqlib/nqui is consumed via `link:../nqui` while 0.7.0 is unpublished; the
-  // dep optimizer mangles the symlinked package's named exports (e.g.
-  // InlineTabsList disappears), so serve its ESM dist unbundled in dev.
+  // nqui is published (^0.7.2) by default, but `USE_LOCAL_NQUI=true` still
+  // dev-links the sibling repo — the dep optimizer mangles a symlinked
+  // package's named exports (e.g. InlineTabsList disappears), so keep this
+  // exclude to serve its ESM dist unbundled whenever local mode is active.
   optimizeDeps: {
     exclude: ["@nqlib/nqui"],
   },

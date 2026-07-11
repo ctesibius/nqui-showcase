@@ -42,7 +42,7 @@ export function ReadmePage() {
             @nqlib/nqui
           </Badge>
           <Badge variant="outline" className="w-fit font-mono text-xs">
-            0.7.1
+            0.7.2
           </Badge>
         </div>
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Install guide</h1>

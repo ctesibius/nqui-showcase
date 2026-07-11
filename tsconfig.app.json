@@ -20,15 +20,6 @@
     "paths": {
       "@/*": ["./src/*"],
       /*
-       * DEV-ONLY while @nqlib/nqui is `link:../nqui`: the linked repo carries its
-       * own @types/react copy, so nqui's d.ts and this app would otherwise see two
-       * incompatible React type instances. Force a single copy. Remove (or keep,
-       * it's harmless) once nqui 0.7.0 is consumed from npm again.
-       */
-      "react": ["./node_modules/@types/react"],
-      "react/jsx-runtime": ["./node_modules/@types/react/jsx-runtime"],
-      "react-dom": ["./node_modules/@types/react-dom"],
-      /*
        * DEV-ONLY: type-resolve @nqlib/nqgrid against the sibling ../nqgrid/src so
        * the editor/typecheck match the engine API that `pnpm dev:local` runs with.
        * The published @nqlib/nqgrid@0.1.0 is STALE and lacks this API. Before the

@@ -12,9 +12,9 @@
  *   node scripts/toggle-nqui.js --check                # status only
  *   SKIP_BUILD=true      skip `pnpm build:lib` in ../nqui when dist exists
  */
-import { existsSync, lstatSync, readFileSync, realpathSync, writeFileSync } from "node:fs"
+import { existsSync, readFileSync, realpathSync, writeFileSync } from "node:fs"
 import { execSync } from "node:child_process"
-import { dirname, join, relative, resolve } from "node:path"
+import { dirname, isAbsolute, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -23,7 +23,7 @@ const pkgPath = join(root, "package.json")
 const installedDir = join(root, "node_modules", "@nqlib", "nqui")
 
 // --- CUSTOMIZE ---
-const PUBLISHED_VERSION = "^0.6.3" // bump to ^0.7.0 once published
+const PUBLISHED_VERSION = "^0.7.2"
 // --- END CUSTOMIZE ---
 
 const nquiDir = resolve(process.env.NQUI_DIR ?? join(root, "..", "nqui"))
@@ -42,21 +42,36 @@ function installedVersion() {
   }
 }
 
+/**
+ * pnpm ALWAYS symlinks packages into node_modules/.pnpm (even registry
+ * installs), so "is it a symlink" can't tell dev-linked from published —
+ * only the resolved realpath can. A naive string-prefix check is also unsafe
+ * here (e.g. ".../nqui-showcase" starts with ".../nqui"); compare via
+ * path.relative instead.
+ */
+function resolvesInsideSiblingRepo() {
+  try {
+    const installed = realpathSync(installedDir)
+    const sibling = realpathSync(nquiDir)
+    const rel = relative(sibling, installed)
+    return rel !== "" && !rel.startsWith("..") && !isAbsolute(rel)
+  } catch {
+    return false
+  }
+}
+
 function isLinked() {
-  return declared.startsWith("link:") || (existsSync(installedDir) && lstatSync(installedDir).isSymbolicLink())
+  return declared.startsWith("link:") || resolvesInsideSiblingRepo()
 }
 
 /**
  * pnpm can silently re-resolve `link:` to the published store copy (e.g. a
- * stale lockfile after another `pnpm add`). Detect drift by resolving the real
- * path — the declared spec alone lies.
+ * stale lockfile after another `pnpm add`). Detect drift by checking whether
+ * the resolved package still lives inside the sibling repo — the declared
+ * spec alone lies.
  */
 function linkDrifted() {
-  try {
-    return realpathSync(installedDir) !== realpathSync(nquiDir)
-  } catch {
-    return true
-  }
+  return !resolvesInsideSiblingRepo()
 }
 
 if (checkOnly) {
