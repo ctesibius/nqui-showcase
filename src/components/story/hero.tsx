@@ -205,7 +205,7 @@ function ReelHero({ reducedMotion }: { reducedMotion: boolean }) {
           transition={{ duration: 0.3, ease: STORY_EASE }}
           className="absolute bottom-6 left-1/2 -translate-x-1/2 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground"
         >
-          Scroll — 4 libraries · 4 chapters
+          Scroll — 4 libraries · 6 chapters
         </motion.p>
       </div>
     </section>

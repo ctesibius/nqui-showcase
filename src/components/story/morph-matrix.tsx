@@ -27,14 +27,27 @@ const VERT = /* glsl */ `
   attribute float aAccent;
   varying float vBrightness;
   varying float vAccent;
+  varying float vSweep;
   uniform float uSize;
   uniform float uPixelRatio;
+  uniform float uTime;
   void main() {
     vBrightness = aBrightness;
     vAccent = aAccent;
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
     gl_Position = projectionMatrix * mv;
-    gl_PointSize = uSize * uPixelRatio * (0.4 + aBrightness) / max(0.1, -mv.z);
+
+    // A soft band of light rakes across the field on a slow diagonal — the
+    // dim panel dots briefly catch the light like brushed metal.
+    float proj = dot(position.xy, vec2(0.8, 0.6)) * 0.5 + 0.5;
+    float head = mod(uTime * 0.09, 1.7) - 0.35;
+    float sweep = exp(-pow((proj - head) / 0.14, 2.0));
+    vSweep = sweep;
+
+    // Gentle breathing keeps the cloud alive at rest.
+    float breathe = 1.0 + 0.035 * sin(uTime * 1.1);
+    float size = uSize * uPixelRatio * (0.42 + aBrightness + sweep * 0.85) * breathe;
+    gl_PointSize = size / max(0.1, -mv.z);
   }
 `;
 
@@ -44,10 +57,16 @@ const FRAG = /* glsl */ `
   uniform vec3 uAccent;
   varying float vBrightness;
   varying float vAccent;
+  varying float vSweep;
   void main() {
+    // Soft, round dot — a masked disc reads far more crafted than a hard square.
+    vec2 uv = gl_PointCoord - 0.5;
+    float mask = smoothstep(0.5, 0.36, length(uv));
+    if (mask <= 0.001) discard;
+
     vec3 c = mix(uFg, uAccent, vAccent);
-    float a = clamp(vBrightness * 0.9 + 0.12, 0.0, 1.0);
-    gl_FragColor = vec4(c, a);
+    float a = clamp(vBrightness * 0.9 + 0.1 + vSweep * 0.65, 0.0, 1.0);
+    gl_FragColor = vec4(c, a * mask);
   }
 `;
 
@@ -115,10 +134,11 @@ export function MorphMatrix({
       transparent: true,
       depthWrite: false,
       uniforms: {
-        uSize: { value: 8.5 },
+        uSize: { value: 10 },
         uPixelRatio: { value: dpr },
         uFg: { value: new THREE.Vector3(0.05, 0.05, 0.05) },
         uAccent: { value: new THREE.Vector3(0.3, 0.5, 0.95) },
+        uTime: { value: 0 },
       },
     });
 
@@ -133,6 +153,13 @@ export function MorphMatrix({
     const pz = new Float32Array(TOTAL);
     const vx = new Float32Array(TOTAL);
     const vy = new Float32Array(TOTAL);
+    // Per-dot spring stiffness — a hash-based spread so a morph settles like a
+    // liquid (dots arriving at slightly different rates) instead of in lockstep.
+    const stiff = new Float32Array(TOTAL);
+    for (let i = 0; i < TOTAL; i++) {
+      const h = (Math.sin(i * 12.9898) * 43758.5453) % 1;
+      stiff[i] = 0.1 + 0.09 * Math.abs(h);
+    }
     let seeded = false;
 
     // Shape helpers — normalized 0..1 → world [-1, 1]; brighter dots forward.
@@ -178,8 +205,8 @@ export function MorphMatrix({
               vy[i] += (dy / dist) * force * 0.03;
             }
           }
-          vx[i] += (hx - px[i]) * 0.14;
-          vy[i] += (hy - py[i]) * 0.14;
+          vx[i] += (hx - px[i]) * stiff[i];
+          vy[i] += (hy - py[i]) * stiff[i];
           vx[i] *= 0.82; vy[i] *= 0.82;
           px[i] += vx[i]; py[i] += vy[i];
           pz[i] += (hz - pz[i]) * 0.12;
@@ -238,7 +265,9 @@ export function MorphMatrix({
     boot();
 
     let raf = 0;
+    const start = performance.now();
     const loop = () => {
+      material.uniforms.uTime.value = (performance.now() - start) / 1000;
       step(true);
       raf = requestAnimationFrame(loop);
     };

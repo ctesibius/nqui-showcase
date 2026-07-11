@@ -8,16 +8,17 @@
 @import "@nqlib/nqui/styles";
 @import "./nqgantt/gantt-theme.css";
 
-/* Primary brand: same blue as marketing accent chip (oklch 0.55 0.22 240). */
+/* Primary brand: monochrome. Near-black primary in light, near-white in dark —
+ * semantic accents (badges) and the chart palette carry all the color. */
 :root {
-  --primary-100: oklch(0.95 0.08 240);
-  --primary-200: oklch(0.9 0.1 240);
-  --primary-300: oklch(0.85 0.12 240);
-  --primary-400: oklch(0.72 0.18 240);
-  --primary-500: oklch(0.55 0.22 240);
-  --primary-600: oklch(0.45 0.24 240);
+  --primary-100: oklch(0.95 0 0);
+  --primary-200: oklch(0.9 0 0);
+  --primary-300: oklch(0.8 0 0);
+  --primary-400: oklch(0.55 0 0);
+  --primary-500: oklch(0.24 0 0);
+  --primary-600: oklch(0.18 0 0);
   --primary: var(--primary-500);
-  --primary-foreground: oklch(0.99 0.01 240);
+  --primary-foreground: oklch(0.985 0 0);
 
   /* nqchart categorical palette — aligned with @nqlib/nqchart / nqui docs. */
   --chart-1: oklch(0.55 0.23 275);
@@ -28,14 +29,14 @@
 }
 
 .dark {
-  --primary-100: oklch(0.32 0.14 240);
-  --primary-200: oklch(0.36 0.16 240);
-  --primary-300: oklch(0.42 0.18 240);
-  --primary-400: oklch(0.48 0.2 240);
-  --primary-500: oklch(0.55 0.22 240);
-  --primary-600: oklch(0.62 0.2 240);
+  --primary-100: oklch(0.3 0 0);
+  --primary-200: oklch(0.4 0 0);
+  --primary-300: oklch(0.55 0 0);
+  --primary-400: oklch(0.75 0 0);
+  --primary-500: oklch(0.97 0 0);
+  --primary-600: oklch(0.9 0 0);
   --primary: var(--primary-500);
-  --primary-foreground: oklch(0.99 0.01 240);
+  --primary-foreground: oklch(0.2 0 0);
 
   --chart-1: oklch(0.58 0.21 275);
   --chart-2: oklch(0.696 0.17 162.48);

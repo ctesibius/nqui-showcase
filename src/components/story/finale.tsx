@@ -28,9 +28,6 @@ export function StoryFinale() {
         </Reveal>
         <Reveal delay={0.16} margin="0px" className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Button asChild>
-            <Link to="/ops">Open the live console</Link>
-          </Button>
-          <Button variant="outline" asChild>
             <Link to="/readme">Read the install guide</Link>
           </Button>
         </Reveal>

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- accent context: the provider co-locates its shared constants (ACCENT_CHIPS, previewPrimaryVars) and hook (usePrimaryAccent) by design. */
 import {
   createContext,
   useContext,
@@ -57,17 +58,23 @@ export function previewPrimaryVars(hue: number, mode: ThemeMode): CSSProperties 
 }
 
 type PrimaryAccentContextValue = {
-  accentHue: number;
-  setAccentHue: (hue: number) => void;
+  /** null = the monochrome brand default (no hue override); a number picks an accent. */
+  accentHue: number | null;
+  setAccentHue: (hue: number | null) => void;
 };
 
 const PrimaryAccentContext = createContext<PrimaryAccentContextValue | null>(null);
 
 export function PrimaryAccentProvider({ children }: { children: ReactNode }) {
-  const [accentHue, setAccentHue] = useState(240);
+  // Default null → monochrome brand primary from index.css. Picking an accent
+  // (setAccentHue) overrides it with a hue-based scale.
+  const [accentHue, setAccentHue] = useState<number | null>(null);
   const { resolvedTheme } = useTheme();
   const themeMode = useMemo(() => themeModeFromResolved(resolvedTheme), [resolvedTheme]);
-  const previewStyle = useMemo(() => previewPrimaryVars(accentHue, themeMode), [accentHue, themeMode]);
+  const previewStyle = useMemo<CSSProperties | undefined>(
+    () => (accentHue === null ? undefined : previewPrimaryVars(accentHue, themeMode)),
+    [accentHue, themeMode],
+  );
   const value = useMemo(() => ({ accentHue, setAccentHue }), [accentHue]);
 
   return (

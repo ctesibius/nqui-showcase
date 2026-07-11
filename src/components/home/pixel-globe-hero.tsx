@@ -145,7 +145,8 @@ export function PixelGlobeHero({ className }: PixelGlobeHeroProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
-  const { accentHue } = usePrimaryAccent();
+  const { accentHue: accentHueRaw } = usePrimaryAccent();
+  const accentHue = accentHueRaw ?? 240; // fall back to blue when monochrome (globe needs a hue)
   const { resolvedTheme } = useTheme();
 
   useEffect(() => {

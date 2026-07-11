@@ -6,10 +6,12 @@ import { ThemeToggle } from "../theme-toggle";
 import { STORY_EASE } from "./scroll-hooks";
 
 const CHAPTERS = [
+  { href: "#product", label: "Product" },
   { href: "#components", label: "Components" },
   { href: "#charts", label: "Charts" },
   { href: "#grid", label: "Grid" },
   { href: "#timeline", label: "Timeline" },
+  { href: "#blocks", label: "Blocks" },
 ];
 
 export function StoryNav() {
@@ -57,11 +59,8 @@ export function StoryNav() {
 
         <div className="ml-auto flex items-center gap-1.5 md:ml-0">
           <ThemeToggle />
-          <Button size="sm" variant="ghost" className="hidden rounded-full sm:inline-flex" asChild>
-            <Link to="/readme">Docs</Link>
-          </Button>
           <Button size="sm" className="rounded-full" asChild>
-            <Link to="/ops">Live console</Link>
+            <Link to="/readme">Docs</Link>
           </Button>
         </div>
       </nav>

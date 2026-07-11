@@ -431,6 +431,7 @@ export const NQCHART_GALLERY: GalleryChart[] = [
         <SparklineC.Fill dataKey="value" />
         <SparklineC.Sparkline dataKey="value" />
         <SparklineC.EndDot />
+        <SparklineC.Tooltip />
       </SparklineC.NQSparklineChart>
     ),
   },

@@ -1,5 +1,6 @@
 /**
- * In-app install guide — mirrors @nqlib/nqui 0.6.3 INSTALLATION.md (pnpm examples).
+ * In-app install guide — mirrors @nqlib/nqui INSTALLATION.md (pnpm examples).
+ * Per-package docs (nqgrid, nqgantt, nqchart) ship separately later.
  */
 import { Link } from "react-router-dom";
 import {
@@ -41,44 +42,19 @@ export function ReadmePage() {
             @nqlib/nqui
           </Badge>
           <Badge variant="outline" className="w-fit font-mono text-xs">
-            0.6.3
+            0.7.1
           </Badge>
         </div>
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Install, CLI, and CSS</h1>
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Install guide</h1>
         <p className="text-muted-foreground">
-          Quick reference for this showcase. Canonical source:{" "}
+          How to add <code className="rounded bg-muted px-1.5 py-0.5 text-sm">@nqlib/nqui</code> to a React + Tailwind v4
+          app. Canonical source:{" "}
           <code className="rounded bg-muted px-1.5 py-0.5 text-sm">node_modules/@nqlib/nqui/INSTALLATION.md</code>
         </p>
+        <p className="text-sm text-muted-foreground">
+          nqgrid, nqgantt, and nqchart install docs will get their own pages later — this route is nqui setup only.
+        </p>
       </div>
-
-      <Card className={scrollAnchor}>
-        <CardHeader>
-          <CardTitle>What changed in 0.6.3</CardTitle>
-          <CardDescription>Highlights that affect how you install and build UI.</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-2 text-sm text-muted-foreground">
-          <p>
-            <strong className="font-medium text-foreground">Bundled SVG icons</strong> — nqui components ship inline SVG.
-            Hugeicons is optional; add it only for app-level icons (this demo still uses{" "}
-            <code className="text-foreground">@hugeicons/react</code> in marketing views).
-          </p>
-          <p>
-            <strong className="font-medium text-foreground">ToggleGroup defaults</strong> —{" "}
-            <code className="text-foreground">type=&quot;single&quot;</code> renders segmented pills;{" "}
-            <code className="text-foreground">type=&quot;multiple&quot;</code> renders outline format bars. Place toolbars in{" "}
-            <code className="text-foreground">rounded-lg border border-input bg-muted/30 p-3</code> (see Charts on the home page).
-          </p>
-          <p>
-            <strong className="font-medium text-foreground">Focus rings</strong> —{" "}
-            <code className="text-foreground">--ring</code> is neutral gray, not brand primary. Override primary for actions,
-            not for focus halos.
-          </p>
-          <p>
-            <strong className="font-medium text-foreground">Inline tabs + ScrollArea</strong> — pill tab lists inside page
-            scrollers; see <code className="text-foreground">docs/components/nqui-tabs.md</code>.
-          </p>
-        </CardContent>
-      </Card>
 
       <Card id="postinstall" className={scrollAnchor}>
         <CardHeader>
@@ -206,6 +182,25 @@ pnpm add tw-animate-css next-themes`}</CodeBlock>
         </Card>
       </section>
 
+      <section id="imports" className={`flex flex-col gap-4 ${scrollAnchor}`}>
+        <h2 className="text-xl font-semibold tracking-tight">Subpath imports</h2>
+        <p className="text-sm text-muted-foreground">
+          Most components import from <code className="text-foreground">@nqlib/nqui</code>. These use dedicated subpaths
+          (and matching optional peers from <code className="text-foreground">install-peers</code>):
+        </p>
+        <Card>
+          <CardContent className="pt-6">
+            <CodeBlock>{`import { Button, Card, Input } from "@nqlib/nqui";
+import { Command } from "@nqlib/nqui/command";
+import { Toaster } from "@nqlib/nqui/sonner";
+import { Drawer } from "@nqlib/nqui/drawer";
+import { Carousel } from "@nqlib/nqui/carousel";
+import { Calendar } from "@nqlib/nqui/calendar";
+import { Sortable } from "@nqlib/nqui/sortable";`}</CodeBlock>
+          </CardContent>
+        </Card>
+      </section>
+
       <section id="app-shell" className={`flex flex-col gap-4 ${scrollAnchor}`}>
         <h2 className="text-xl font-semibold tracking-tight">App shell</h2>
         <Card>
@@ -222,40 +217,8 @@ import { Toaster } from "@nqlib/nqui/sonner";
 </ThemeProvider>`}</CodeBlock>
             <p className="mt-3 text-sm text-muted-foreground">
               Next.js App Router: add <code className="text-foreground">&quot;use client&quot;</code> to pages that import
-              interactive nqui components.
-            </p>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section id="ui-patterns" className={`flex flex-col gap-4 ${scrollAnchor}`}>
-        <h2 className="text-xl font-semibold tracking-tight">Building UI with nqui</h2>
-        <Card>
-          <CardContent className="flex flex-col gap-2 pt-6 text-sm text-muted-foreground">
-            <p>
-              Load <code className="text-foreground">.cursor/nqui-skills/SKILL.md</code> or{" "}
-              <code className="text-foreground">AGENTS.md</code> in your agent. Component index:{" "}
-              <code className="text-foreground">node_modules/@nqlib/nqui/docs/components/README.md</code>
-            </p>
-            <ul className="list-disc space-y-1 pl-5">
-              <li>
-                Inline toolbar selection → <strong className="font-medium text-foreground">ToggleGroup</strong>, never
-                RadioGroup
-              </li>
-              <li>Form stacked choices → RadioGroup or Select (5+ options)</li>
-              <li>Toolbar actions (undo, export) → ButtonGroup</li>
-              <li>Card footers with multiple buttons → add gap (CardFooter has no default gap)</li>
-            </ul>
-            <p>
-              Live examples:{" "}
-              <Link to="/#preview" className="font-medium text-primary underline-offset-4 hover:underline">
-                Component preview
-              </Link>{" "}
-              and{" "}
-              <Link to="/#charts" className="font-medium text-primary underline-offset-4 hover:underline">
-                Charts
-              </Link>{" "}
-              on the home page.
+              interactive nqui components. After <code className="text-foreground">init-cursor</code>, component docs live in{" "}
+              <code className="text-foreground">.cursor/nqui-skills/</code>.
             </p>
           </CardContent>
         </Card>
@@ -273,8 +236,8 @@ import { Toaster } from "@nqlib/nqui/sonner";
             lines (Vite section above) and confirm styles.css is imported.
           </p>
           <p>
-            <strong className="font-medium text-foreground">Agent builds wrong toolbar UI</strong> — refresh init-skills after
-            upgrading nqui; read COMPOSITION.md toolbar recipe in .cursor/nqui-skills.
+            <strong className="font-medium text-foreground">Command / Toaster / Drawer not found on main entry</strong> — import
+            from subpaths (see Subpath imports above).
           </p>
         </div>
       </section>

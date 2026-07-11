@@ -11,6 +11,8 @@ import { NquiChapter } from "../components/story/nqui-chapter";
 import { ChartsChapter } from "../components/story/charts-chapter";
 import { GridChapter } from "../components/story/grid-chapter";
 import { GanttChapter } from "../components/story/gantt-chapter";
+import { BlocksChapter } from "../components/story/blocks-chapter";
+import { ProductChapter } from "../components/story/product-chapter";
 import { StoryFinale } from "../components/story/finale";
 
 export function StoryLandingPage() {
@@ -23,10 +25,14 @@ export function StoryLandingPage() {
       <StoryNav />
       <main className="relative z-10">
         <StoryHero />
+        {/* Hook → proof → detail → close: lead with the real product, then the
+            per-library deep dives, then the composition play, then the CTA. */}
+        <ProductChapter />
         <NquiChapter />
         <ChartsChapter />
         <GridChapter />
         <GanttChapter />
+        <BlocksChapter />
         <StoryFinale />
       </main>
     </div>
