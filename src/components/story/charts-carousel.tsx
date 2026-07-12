@@ -16,6 +16,9 @@ export function ChartsCarousel() {
       items={ITEMS}
       label="chart types"
       bodyClassName="h-[280px]"
+      // Embla drag shares the pointer with ECharts item tooltips — disable it
+      // so pie hover focus does not glitter (nqchart flicker-control).
+      watchDrag={false}
     />
   );
 }

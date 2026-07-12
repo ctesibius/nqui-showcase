@@ -43,19 +43,32 @@ function localNqgridAliases(): Alias[] {
 
 function localNqganttAliases(): Alias[] {
   if (process.env.USE_LOCAL_NQGANTT !== "true") return []
-  const base = process.env.NQGANTT_DIR ?? path.resolve(__dirname, "../nqgantt/packages/nqgantt")
+  const workspaceRoot = process.env.NQGANTT_DIR ?? path.resolve(__dirname, "../nqgantt/packages")
+  const base = path.join(workspaceRoot, "nqgantt")
   const src = path.join(base, "src")
   if (!existsSync(src)) {
     console.warn(`[nqui-showcase] USE_LOCAL_NQGANTT=true but no src at ${src}; using published @nqlib/nqgantt.`)
     return []
   }
   console.info(`[nqui-showcase] @nqlib/nqgantt → ${src}`)
+
+  // packages/nqgantt imports the schedule kernel as `@nqlib/nqgantt-engine`
+  // (a separate workspace package, framework-free, no build step needed —
+  // it's plain TS Vite can transpile directly). Alias it alongside nqgantt
+  // itself so local-mode testing doesn't fall back to the published engine.
+  const engineSrc = path.join(workspaceRoot, "nqgantt-engine", "src", "index.ts")
+  const engineAlias: Alias[] = existsSync(engineSrc)
+    ? [{ find: /^@nqlib\/nqgantt-engine$/, replacement: engineSrc }]
+    : (console.warn(`[nqui-showcase] USE_LOCAL_NQGANTT=true but no src at ${engineSrc}; using published @nqlib/nqgantt-engine.`), [])
+  if (engineAlias.length) console.info(`[nqui-showcase] @nqlib/nqgantt-engine → ${engineSrc}`)
+
   return [
     { find: /^@nqlib\/nqgantt$/, replacement: path.join(src, "index.ts") },
     { find: /^@nqlib\/nqgantt\/ui$/, replacement: path.join(src, "ui.ts") },
     { find: /^@nqlib\/nqgantt\/mock$/, replacement: path.join(src, "mock.ts") },
     { find: /^@nqlib\/nqgantt\/engine$/, replacement: path.join(src, "engine.ts") },
     { find: /^@nqlib\/nqgantt\/item-gantt-adapter$/, replacement: path.join(src, "item-gantt-adapter.ts") },
+    ...engineAlias,
   ]
 }
 

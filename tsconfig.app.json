@@ -37,12 +37,17 @@
       /*
        * DEV-ONLY: type-resolve @nqlib/nqgantt against sibling source when iterating
        * with `pnpm dev:local`. Remove or gate when deploy tracks published only.
+       * @nqlib/nqgantt-engine is mapped alongside it — nqgantt/src imports the
+       * engine as a bare specifier, so without this tsc would typecheck local
+       * nqgantt source against the PUBLISHED (possibly older) engine's .d.ts
+       * instead of the matching local engine version being tested pre-publish.
        */
       "@nqlib/nqgantt": ["../nqgantt/packages/nqgantt/src/index.ts"],
       "@nqlib/nqgantt/ui": ["../nqgantt/packages/nqgantt/src/ui.ts"],
       "@nqlib/nqgantt/engine": ["../nqgantt/packages/nqgantt/src/engine.ts"],
       "@nqlib/nqgantt/mock": ["../nqgantt/packages/nqgantt/src/mock.ts"],
-      "@nqlib/nqgantt/item-gantt-adapter": ["../nqgantt/packages/nqgantt/src/item-gantt-adapter.ts"]
+      "@nqlib/nqgantt/item-gantt-adapter": ["../nqgantt/packages/nqgantt/src/item-gantt-adapter.ts"],
+      "@nqlib/nqgantt-engine": ["../nqgantt/packages/nqgantt-engine/src/index.ts"]
     },
 
     /* Linting */

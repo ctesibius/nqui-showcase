@@ -74,15 +74,24 @@ export function AccountsConsole() {
     setSelected((prev) => (prev.size === ACCOUNTS.length ? new Set() : new Set(ACCOUNTS.map((a) => a.id))));
 
   return (
-    <div className="flex flex-col gap-5 p-5 md:p-6">
+    // @container: this card renders inside a bounded-width DemoFrame, not the
+    // raw viewport — every breakpoint below reacts to the space actually
+    // available to the card, not the window.
+    <div className="@container flex flex-col gap-5 p-5 md:p-6">
       {/* KPI row */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 @2xl:grid-cols-4">
         {KPIS.map((k) => (
           <StatTile key={k.label} label={k.label} value={k.value} delta={k.delta} deltaGood={k.deltaGood} sub={k.sub} />
         ))}
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[1.7fr_1fr]">
+      {/*
+        Table gets a guaranteed floor (34rem) so it's never squeezed — any
+        slack space grows the table, not the chart. The chart column is capped
+        at 22rem so it can't balloon past what a funnel actually needs. Below
+        the floor, both tracks can't fit side by side, so it stacks (1 column).
+      */}
+      <div className="grid gap-5 @4xl:grid-cols-[minmax(34rem,1fr)_minmax(16rem,22rem)]">
         {/* ── Accounts table ─────────────────────────────────────────────── */}
         <div className="flex min-w-0 flex-col rounded-xl border">
           {/* Toolbar */}
@@ -185,7 +194,13 @@ export function AccountsConsole() {
             </span>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">Lead-to-committed conversion, all owners.</p>
-          <div className="mt-3 h-[240px]">
+          {/*
+            Fluid instead of a fixed pixel height: aspect-ratio derives the
+            chart's height from whatever width its column actually renders at,
+            so it scales down on a narrow column and up on a wide one. min/max
+            keep it from ever getting too cramped or too tall.
+          */}
+          <div className="mt-3 aspect-[16/10] min-h-44 max-h-64 w-full">
             <FunnelC.NQFunnelChart
               config={PIPE_CONFIG}
               data={PIPE}

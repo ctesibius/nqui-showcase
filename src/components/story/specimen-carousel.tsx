@@ -38,6 +38,7 @@ const OWN_DRAG_SELECTOR = [
   '[data-slot="slider-thumb"]',
   '[data-slot="slider-range"]',
   '[data-slot="resizable-handle"]',
+  '[data-slot="chart"]', // nqchart ECharts host is a div, not <canvas>
   '[role="slider"]',
   "input",
   "textarea",
@@ -158,7 +159,14 @@ export function SpecimenCarousel({
                 </span>
               </figcaption>
 
-              <div className={`mt-5 min-h-0 ${bodyClassName}`}>
+              {/*
+                Stop Embla / parent gesture handlers from seeing pointer moves
+                over chart canvases (hover-focus glitter on pie / radar).
+              */}
+              <div
+                className={`mt-5 min-h-0 ${bodyClassName}`}
+                onPointerDownCapture={(event) => event.stopPropagation()}
+              >
                 <item.Render />
               </div>
 

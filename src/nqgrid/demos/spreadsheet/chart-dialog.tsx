@@ -227,12 +227,17 @@ export function ChartDialog({ open, onOpenChange, data }: ChartDialogProps) {
             <NQPieChart
               data={points}
               config={pieConfig}
-              className="h-full w-full"
+              className="h-full w-full p-4"
               nameKey="category"
             >
-              <PieLegend />
               <PieTooltip />
-              <Pie dataKey="value" innerRadius="45%" />
+              <PieLegend />
+              {/*
+                Leader labels steal hit-testing between adjacent wedges and glitter
+                the item tooltip (nqchart hover-focus / flicker-control). Legend
+                already names slices.
+              */}
+              <Pie dataKey="value" innerRadius="45%" showLabels={false} />
             </NQPieChart>
           )}
         </div>
