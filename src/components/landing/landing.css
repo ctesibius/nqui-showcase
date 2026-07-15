@@ -1,0 +1,243 @@
+/*
+ * Landing chrome — the frame around the components, nothing more.
+ *
+ * Design philosophy borrowed from ../factory-site (one viewport, grid wallpaper
+ * that fades before the edges, a two-column deck, a living app window). The
+ * execution is pure nqui: every value below is a RAW nqui token — --ease-out,
+ * --radius-*, --duration-*, --shadow-elevated, --chart-N, --border, --muted —
+ * so the page is literally styled by the library it's selling. Nothing inside
+ * the window is drawn here; those are real nqui components.
+ *
+ * Classes are fl- prefixed so Tailwind's own .grid/.scene utilities are never
+ * shadowed.
+ */
+
+.fl-page {
+  /* The only bespoke values: wallpaper geometry, which is page furniture. */
+  --fl-line: color-mix(in oklch, var(--foreground) 5%, transparent);
+  --fl-cell: 46px;
+  --fl-shell: min(1140px, 92vw);
+
+  position: relative;
+  min-height: 100dvh;
+  background: var(--background);
+  color: var(--foreground);
+  overflow-x: hidden;
+}
+
+.fl-grid {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-background);
+  background-image:
+    linear-gradient(to right, var(--fl-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--fl-line) 1px, transparent 1px);
+  background-size: var(--fl-cell) var(--fl-cell);
+  -webkit-mask-image: radial-gradient(115% 105% at 32% 18%, #000 26%, transparent 76%);
+  mask-image: radial-gradient(115% 105% at 32% 18%, #000 26%, transparent 76%);
+}
+
+/* One soft bloom, tinted by the chart-1 brand hue. */
+.fl-glow {
+  position: fixed;
+  z-index: var(--z-background);
+  top: -18vh;
+  left: -6vw;
+  width: 62vw;
+  height: 62vw;
+  max-width: 760px;
+  max-height: 760px;
+  background: radial-gradient(circle, color-mix(in oklch, var(--chart-1) 12%, transparent), transparent 62%);
+  filter: blur(12px);
+  pointer-events: none;
+}
+
+.fl-shell {
+  position: relative;
+  z-index: var(--z-base);
+  width: var(--fl-shell);
+  margin-inline: auto;
+  min-height: 100dvh;
+  padding-block: clamp(2rem, 6vh, 5rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.fl-deck {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.06fr);
+  align-items: center;
+  gap: clamp(2rem, 5vw, 4.5rem);
+}
+
+.fl-lead {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.1rem, 3vh, 1.9rem);
+}
+
+/* Staggered entrance, driven from the page (DOM order = reading order). */
+[data-fl-reveal] {
+  opacity: 0;
+  transform: translateY(10px);
+}
+[data-fl-reveal].fl-shown {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+}
+
+/* ══ The living window ════════════════════════════════════════════════════════ */
+.fl-win {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
+  background: var(--card);
+  box-shadow: var(--shadow-elevated);
+  overflow: hidden;
+}
+
+.fl-win__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid var(--fl-line);
+  background: color-mix(in oklch, var(--muted) 40%, transparent);
+}
+.fl-win__lights {
+  display: inline-flex;
+  gap: 0.42rem;
+}
+.fl-win__lights i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.fl-win__lights i:nth-child(1) { background: var(--destructive); }
+.fl-win__lights i:nth-child(2) { background: var(--warning); }
+.fl-win__lights i:nth-child(3) { background: var(--success); }
+.fl-win__crumb {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.72rem;
+  color: var(--muted-foreground);
+}
+.fl-win__spark {
+  margin-left: auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--chart-2);
+  animation: fl-spark 2.6s var(--ease-out) infinite;
+}
+
+.fl-win__body {
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  height: clamp(300px, 42vh, 360px);
+}
+
+.fl-rail {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.7rem 0;
+  border-right: 1px solid var(--fl-line);
+  background: color-mix(in oklch, var(--background) 55%, transparent);
+}
+.fl-rail__ink {
+  position: absolute;
+  left: 0;
+  top: 0.7rem;
+  width: 2px;
+  height: 32px;
+  border-radius: 0 2px 2px 0;
+  background: var(--foreground);
+  transform: translateY(var(--y, 0));
+  transition: transform var(--duration-slow) var(--ease-out);
+}
+.fl-rail__tab {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: color-mix(in oklch, var(--muted-foreground) 75%, transparent);
+  cursor: pointer;
+  transition:
+    color var(--duration-standard) var(--ease-out),
+    background var(--duration-standard) var(--ease-out);
+}
+.fl-rail__tab:hover { color: var(--muted-foreground); }
+.fl-rail__tab:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus, 0 0 0 2px var(--ring));
+}
+.fl-rail__tab.is-active {
+  color: var(--foreground);
+  background: color-mix(in oklch, var(--foreground) 8%, transparent);
+}
+
+.fl-scenes {
+  position: relative;
+  padding: clamp(0.95rem, 2vw, 1.35rem);
+  overflow: hidden;
+}
+.fl-scene {
+  position: absolute;
+  inset: clamp(0.95rem, 2vw, 1.35rem);
+  opacity: 0;
+  transform: translateY(9px) scale(0.992);
+  pointer-events: none;
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+}
+.fl-scene.is-on {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+@keyframes fl-spark {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--chart-2) 55%, transparent); }
+  70% { box-shadow: 0 0 0 7px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-fl-reveal],
+  [data-fl-reveal].fl-shown {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .fl-scene { transition: none; }
+  .fl-win__spark { animation: none; }
+}
+
+@media (max-width: 920px) {
+  .fl-deck {
+    grid-template-columns: 1fr;
+    gap: clamp(2rem, 6vh, 3rem);
+  }
+  .fl-stage {
+    order: 2;
+    max-width: 520px;
+  }
+  .fl-shell {
+    justify-content: flex-start;
+    padding-top: clamp(3rem, 10vh, 6rem);
+  }
+}
+
+@media (max-width: 560px) {
+  .fl-page { --fl-cell: 34px; --fl-shell: 88vw; }
+}

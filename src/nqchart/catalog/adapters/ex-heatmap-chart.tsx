@@ -1,0 +1,47 @@
+import {
+  NQHeatmapChart,
+  Heatmap,
+  Tooltip,
+  Legend,
+} from "@nqlib/nqchart/heatmap-chart";
+import { prepareHeatmapCells } from "@nqlib/nqchart/recipes";
+import { type ChartConfig } from "@nqlib/nqchart";
+
+const rowLabels = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+const colLabels = ["9am", "12pm", "3pm", "6pm"];
+const matrix = [
+  [12, 28, 45, 22],
+  [18, 35, 52, 30],
+  [10, 22, 38, 18],
+  [24, 42, 58, 36],
+  [15, 30, 48, 26],
+];
+
+const { cells, min, max } = prepareHeatmapCells(rowLabels, colLabels, matrix);
+
+const chartConfig = {
+  intensity: {
+    label: "Sessions",
+    colors: {
+      light: ["#fff7ed", "#f97316", "#9a3412"],
+      dark: ["#431407", "#ea580c", "#fdba74"],
+    },
+  },
+} satisfies ChartConfig;
+
+export function NQExampleHeatmapChart() {
+  return (
+    <NQHeatmapChart config={chartConfig} className="h-full w-full p-4">
+      <Heatmap
+        dataKey="intensity"
+        data={cells}
+        xLabels={colLabels}
+        yLabels={rowLabels}
+        min={min}
+        max={max}
+      />
+      <Legend />
+      <Tooltip />
+    </NQHeatmapChart>
+  );
+}

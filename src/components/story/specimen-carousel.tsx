@@ -1,19 +1,5 @@
-import { type ComponentType, useEffect, useState } from "react";
-import type { UseEmblaCarouselType } from "embla-carousel-react";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@nqlib/nqui/carousel";
-
-/** The subpath entry doesn't export CarouselApi; it's embla's api handle. */
-type CarouselApi = UseEmblaCarouselType[1];
-/** Embla `opts.watchDrag` — boolean or predicate over the pointer event. */
-type WatchDrag = NonNullable<
-  NonNullable<Parameters<typeof import("embla-carousel-react").default>[0]>["watchDrag"]
->;
+import { type ComponentType, type SVGProps, useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "motion/react";
 
 /** A single showcase slide: a live specimen plus metadata. */
 export interface Specimen {
@@ -28,107 +14,105 @@ export interface Specimen {
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-/**
- * Pointer targets that own their own horizontal drag — Embla must not steal
- * these, or sliders / resizers / chart canvases break.
- */
-const OWN_DRAG_SELECTOR = [
-  '[data-slot="slider"]',
-  '[data-slot="slider-track"]',
-  '[data-slot="slider-thumb"]',
-  '[data-slot="slider-range"]',
-  '[data-slot="resizable-handle"]',
-  '[data-slot="chart"]', // nqchart ECharts host is a div, not <canvas>
-  '[role="slider"]',
-  "input",
-  "textarea",
-  "select",
-  "canvas",
-].join(",");
-
-/** Allow carousel swipe except when the gesture starts on an interactive control. */
-const watchDragUnlessInteractive: WatchDrag = (_api, event) => {
-  const target = event.target;
-  if (!(target instanceof Element)) return true;
-  return !target.closest(OWN_DRAG_SELECTOR);
-};
-
-/** Trackpad / shift+wheel → one slide step (debounced per gesture). */
-function useHorizontalWheel(api: CarouselApi | undefined) {
-  useEffect(() => {
-    if (!api) return;
-    const root = api.rootNode();
-    let locked = false;
-    let unlockTimer = 0;
-
-    const onWheel = (event: WheelEvent) => {
-      const horizontal =
-        Math.abs(event.deltaX) > Math.abs(event.deltaY)
-          ? event.deltaX
-          : event.shiftKey
-            ? event.deltaY
-            : 0;
-      if (!horizontal) return;
-
-      event.preventDefault();
-      if (locked) return;
-      locked = true;
-      if (horizontal > 0) api.scrollNext();
-      else api.scrollPrev();
-      window.clearTimeout(unlockTimer);
-      unlockTimer = window.setTimeout(() => {
-        locked = false;
-      }, 450);
-    };
-
-    root.addEventListener("wheel", onWheel, { passive: false });
-    return () => {
-      root.removeEventListener("wheel", onWheel);
-      window.clearTimeout(unlockTimer);
-    };
-  }, [api]);
+function Chevron({ dir, ...p }: { dir: "left" | "right" } & SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      className={dir === "left" ? "rotate-180" : undefined}
+      {...p}
+    >
+      <path d="m6 3.5 5 4.5-5 4.5" />
+    </svg>
+  );
 }
 
+/**
+ * A native, scroll-snapped horizontal gallery — deliberately NOT a JS drag
+ * library (Embla). A drag-to-scroll layer has to intercept pointerdown on the
+ * whole track to decide "is this a swipe or a click", and that interception
+ * is exactly what fights sliders, resizable handles, and chart canvases for
+ * the pointer (hover-focus glitter, dead clicks). Native overflow-x scrolling
+ * never captures pointer events on children — there's nothing to exclude.
+ */
 export function SpecimenCarousel({
   items,
   label,
   bodyClassName = "",
-  /**
-   * Embla drag. Default skips sliders/charts so specimens stay interactive
-   * while empty card chrome still swipes.
-   */
-  watchDrag = watchDragUnlessInteractive,
 }: {
   items: Specimen[];
   /** Short noun for the counter, e.g. "components" or "chart types". */
   label: string;
   /** Classes for the specimen viewport (height/centering differs per chapter). */
   bodyClassName?: string;
-  watchDrag?: WatchDrag;
 }) {
-  const [api, setApi] = useState<CarouselApi>();
+  const reducedMotion = useReducedMotion() ?? false;
+  const trackRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef(new Map<string, HTMLElement>());
+  const ratiosRef = useRef(new Map<string, number>());
   const [current, setCurrent] = useState(1);
 
-  useHorizontalWheel(api);
-
   useEffect(() => {
-    if (!api) return;
-    const update = () => setCurrent(api.selectedScrollSnap() + 1);
-    update();
-    api.on("select", update);
-    api.on("reInit", update);
-    return () => {
-      api.off("select", update);
-      api.off("reInit", update);
-    };
-  }, [api]);
+    const track = trackRef.current;
+    if (!track) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const id = (entry.target as HTMLElement).dataset.specimenId;
+          if (id) ratiosRef.current.set(id, entry.intersectionRatio);
+        }
+        let bestId: string | null = null;
+        let bestRatio = -1;
+        for (const [id, ratio] of ratiosRef.current) {
+          if (ratio > bestRatio) {
+            bestRatio = ratio;
+            bestId = id;
+          }
+        }
+        if (bestId) {
+          const idx = items.findIndex((it) => it.id === bestId);
+          if (idx >= 0) setCurrent(idx + 1);
+        }
+      },
+      { root: track, threshold: [0, 0.25, 0.5, 0.75, 0.9, 1] },
+    );
+
+    for (const el of itemRefs.current.values()) observer.observe(el);
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- items identity is stable per chapter
+  }, []);
+
+  const scrollToIndex = (idx: number) => {
+    const clamped = Math.max(0, Math.min(items.length - 1, idx));
+    const target = itemRefs.current.get(items[clamped].id);
+    target?.scrollIntoView({
+      behavior: reducedMotion ? "auto" : "smooth",
+      inline: "start",
+      block: "nearest",
+    });
+  };
+
+  const goPrev = () => scrollToIndex(current - 2);
+  const goNext = () => scrollToIndex(current);
+
+  const onKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      goPrev();
+    } else if (event.key === "ArrowRight") {
+      event.preventDefault();
+      goNext();
+    }
+  };
 
   return (
-    <Carousel
-      setApi={setApi}
-      opts={{ align: "start", loop: false, watchDrag }}
-      className="mt-14 md:mt-20"
-    >
+    <div className="group/carousel relative mt-14 md:mt-20">
       <div className="mb-6 flex items-end justify-between gap-4">
         <div className="flex items-baseline gap-3">
           <span className="font-mono text-sm tabular-nums">
@@ -136,20 +120,52 @@ export function SpecimenCarousel({
             <span className="text-muted-foreground"> / {pad(items.length)}</span>
           </span>
           <span className="text-sm text-muted-foreground">
-            {label} — swipe, scroll, or step through
+            {label} — swipe or step through
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <CarouselPrevious className="static translate-y-0" />
-          <CarouselNext className="static translate-y-0" />
+          <button
+            type="button"
+            aria-label="Previous"
+            disabled={current <= 1}
+            onClick={goPrev}
+            className="flex size-8 items-center justify-center rounded-full border text-foreground opacity-60 transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-25"
+          >
+            <Chevron dir="left" className="size-4" />
+          </button>
+          <button
+            type="button"
+            aria-label="Next"
+            disabled={current >= items.length}
+            onClick={goNext}
+            className="flex size-8 items-center justify-center rounded-full border text-foreground opacity-60 transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-25"
+          >
+            <Chevron dir="right" className="size-4" />
+          </button>
         </div>
       </div>
 
-      <CarouselContent className="-ml-4">
-        {items.map((item) => (
-          <CarouselItem
+      <div
+        ref={trackRef}
+        role="region"
+        aria-roledescription="carousel"
+        aria-label={label}
+        tabIndex={0}
+        onKeyDown={onKeyDown}
+        className="carousel-scrollbar -mx-1 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-1 px-1 pb-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:rounded-xl"
+      >
+        {items.map((item, i) => (
+          <div
             key={item.id}
-            className="pl-4 basis-[86%] sm:basis-[62%] lg:basis-[46%]"
+            ref={(el) => {
+              if (el) itemRefs.current.set(item.id, el);
+              else itemRefs.current.delete(item.id);
+            }}
+            data-specimen-id={item.id}
+            role="group"
+            aria-roledescription="slide"
+            aria-label={`${i + 1} of ${items.length}`}
+            className="w-[86%] shrink-0 snap-start sm:w-[62%] lg:w-[46%]"
           >
             <figure className="flex h-full flex-col rounded-xl border bg-background/60 p-6 backdrop-blur-md">
               <figcaption className="flex items-baseline justify-between gap-3">
@@ -159,14 +175,7 @@ export function SpecimenCarousel({
                 </span>
               </figcaption>
 
-              {/*
-                Stop Embla / parent gesture handlers from seeing pointer moves
-                over chart canvases (hover-focus glitter on pie / radar).
-              */}
-              <div
-                className={`mt-5 min-h-0 ${bodyClassName}`}
-                onPointerDownCapture={(event) => event.stopPropagation()}
-              >
+              <div className={`mt-5 min-h-0 ${bodyClassName}`}>
                 <item.Render />
               </div>
 
@@ -183,9 +192,9 @@ export function SpecimenCarousel({
                 ))}
               </ul>
             </figure>
-          </CarouselItem>
+          </div>
         ))}
-      </CarouselContent>
-    </Carousel>
+      </div>
+    </div>
   );
 }

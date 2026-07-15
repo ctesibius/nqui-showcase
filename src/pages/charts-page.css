@@ -1,0 +1,41 @@
+.charts-stage--tall {
+  /* Taller than 16:10 so block KPI chrome still leaves room for the plot. */
+  aspect-ratio: 1 / 1;
+}
+
+.charts-stage--dashboard {
+  aspect-ratio: auto;
+  min-height: 28rem;
+  height: auto;
+}
+
+/*
+ * Frosted tooltip preview — same glass recipe as .story-nav-pill:
+ * thin fill + strong blur/saturate so chart color shows through as tinted glass.
+ * Overrides the library default (bg-background/70 + blur-sm) which reads as a slab.
+ */
+html[data-nq-tooltip="frosted-glass"] .nq-echarts-tooltip {
+  background: color-mix(in oklch, var(--background) 42%, transparent) !important;
+  border-color: color-mix(in oklch, var(--foreground) 12%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in oklch, white 55%, transparent),
+    0 8px 24px -10px color-mix(in oklch, var(--foreground) 22%, transparent) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.85);
+  backdrop-filter: blur(20px) saturate(1.85);
+}
+
+html.dark[data-nq-tooltip="frosted-glass"] .nq-echarts-tooltip {
+  background: color-mix(in oklch, var(--background) 48%, transparent) !important;
+  border-color: color-mix(in oklch, var(--foreground) 16%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in oklch, white 18%, transparent),
+    0 8px 24px -10px color-mix(in oklch, black 45%, transparent) !important;
+}
+
+html[data-nq-tooltip="hidden"] .nq-echarts-tooltip {
+  display: none !important;
+}
+
+.nq-echarts-tooltip {
+  pointer-events: none !important;
+}

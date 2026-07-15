@@ -76,6 +76,37 @@ body {
 }
 
 /*
+ * Specimen carousels (nqui / nqchart galleries): native scroll-snap, not a
+ * drag library — see specimen-carousel.tsx. Trackpad swipe, shift+wheel, and
+ * touch all move it with zero JS; a mouse with no trackpad has no native way
+ * to drag plain overflow content, so the scrollbar stays real (never hidden)
+ * as that path's drag handle — thinned and theme-tinted instead of the raw
+ * OS default. Being actual browser chrome, it can never fight a child
+ * component for the pointer the way a JS drag layer does.
+ */
+.carousel-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--foreground) 22%, transparent) transparent;
+}
+
+.carousel-scrollbar::-webkit-scrollbar {
+  height: 6px;
+}
+
+.carousel-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.carousel-scrollbar::-webkit-scrollbar-thumb {
+  background-color: color-mix(in oklch, var(--foreground) 22%, transparent);
+  border-radius: 999px;
+}
+
+.carousel-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in oklch, var(--foreground) 38%, transparent);
+}
+
+/*
  * Floating frosted nav pill (story landing). Backdrop blur is load-bearing here:
  * the pill sits over content that shifts from an empty hero to saturated charts,
  * a dense grid, and a gantt — the frost keeps it legible over all of them.

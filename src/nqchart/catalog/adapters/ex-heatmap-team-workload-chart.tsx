@@ -1,0 +1,35 @@
+import {
+  NQHeatmapChart,
+  Heatmap,
+  Tooltip,
+  Legend,
+} from "@nqlib/nqchart/heatmap-chart";
+import { prepareTeamWorkloadMatrix } from "@nqlib/nqchart/recipes";
+import {
+  WORKLOAD_TEAM_ROWS,
+  WORKLOAD_UTILIZATION_CONFIG,
+  WORKLOAD_WEEK_DATES,
+} from "./workload-demo-data";
+
+const { cells, min, max, rowLabels, colLabels } = prepareTeamWorkloadMatrix(
+  [...WORKLOAD_WEEK_DATES],
+  WORKLOAD_TEAM_ROWS,
+);
+
+export function NQExampleHeatmapTeamWorkloadChart() {
+  return (
+    <NQHeatmapChart config={WORKLOAD_UTILIZATION_CONFIG} className="h-full w-full p-4">
+      <Heatmap
+        dataKey="utilization"
+        data={cells}
+        xLabels={colLabels}
+        yLabels={rowLabels}
+        min={min}
+        max={max}
+        enableZoom={false}
+      />
+      <Legend />
+      <Tooltip />
+    </NQHeatmapChart>
+  );
+}

@@ -1,9 +1,13 @@
 import { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Spinner } from "@nqlib/nqui";
-import { StoryLandingPage } from "./pages/story-landing-page";
+import { LandingPage } from "./pages/landing-page";
 
-// Route-split docs — the readme's code tooling isn't needed at first paint.
+// Route-split everything past the landing: the blocks gallery (nqchart pulls
+// echarts) and the readme's code tooling load on navigation, so the landing
+// stays a featherweight first paint.
+const BlocksPage = lazy(() => import("./pages/blocks-page").then((m) => ({ default: m.BlocksPage })));
+const ChartsPage = lazy(() => import("./pages/charts-page").then((m) => ({ default: m.ChartsPage })));
 const DocsLayout = lazy(() => import("./layouts/docs-layout").then((m) => ({ default: m.DocsLayout })));
 const ReadmePage = lazy(() => import("./pages/readme-page").then((m) => ({ default: m.ReadmePage })));
 
@@ -27,7 +31,13 @@ function App() {
   return (
     <Suspense fallback={<RouteFallback />}>
       <Routes>
-        <Route path="/" element={<StoryLandingPage />} />
+        <Route path="/" element={<LandingPage />} />
+        {/* The tour: a shelf of live nqlib blocks. */}
+        <Route path="/blocks" element={<BlocksPage />} />
+        {/* Full NQChart registry catalog with global preview controls. */}
+        <Route path="/charts" element={<ChartsPage />} />
+        {/* The scroll-story was replaced by the blocks gallery. */}
+        <Route path="/story" element={<Navigate to="/blocks" replace />} />
         {/* The live console was retired — send its old paths home. */}
         <Route path="/ops" element={<Navigate to="/" replace />} />
         <Route path="/app/*" element={<Navigate to="/" replace />} />

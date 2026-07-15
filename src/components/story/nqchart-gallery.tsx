@@ -194,7 +194,16 @@ export const NQCHART_GALLERY: GalleryChart[] = [
     blurb: "Cumulative trends with stacked bands and an optional range brush.",
     settings: ["stacked", "grid", "tooltip"],
     render: () => (
-      <AreaC.NQAreaChart config={TREND_CONFIG} data={TREND} xDataKey="month" stackType="stacked" className="h-full w-full">
+      // Docs pattern: h-full w-full p-4 keeps ChartContainer aspect-video.
+      // showBrush off for compact specimens (docs KPI blocks do the same).
+      <AreaC.NQAreaChart
+        config={TREND_CONFIG}
+        data={TREND}
+        xDataKey="month"
+        stackType="stacked"
+        showBrush={false}
+        className="h-full w-full p-4"
+      >
         <AreaC.Grid />
         <AreaC.XAxis dataKey="month" />
         <AreaC.YAxis />
@@ -211,7 +220,15 @@ export const NQCHART_GALLERY: GalleryChart[] = [
     blurb: "Grouped or stacked, vertical or horizontal, with a histogram variant.",
     settings: ["horizontal", "stacked", "radius"],
     render: () => (
-      <BarC.NQBarChart config={WORKLOAD_CONFIG} data={WORKLOAD} layout="horizontal" stackType="stacked" xDataKey="team" className="h-full w-full">
+      <BarC.NQBarChart
+        config={WORKLOAD_CONFIG}
+        data={WORKLOAD}
+        layout="horizontal"
+        stackType="stacked"
+        xDataKey="team"
+        showBrush={false}
+        className="h-full w-full p-4"
+      >
         <BarC.Grid />
         <BarC.XAxis tickFormatter={(v) => `${v}%`} />
         <BarC.YAxis />
@@ -228,7 +245,13 @@ export const NQCHART_GALLERY: GalleryChart[] = [
     blurb: "Multi-series lines with linear, monotone, or stepped curves.",
     settings: ["curve: monotone", "grid", "tooltip"],
     render: () => (
-      <LineC.NQLineChart config={TREND_CONFIG} data={TREND} xDataKey="month" className="h-full w-full">
+      <LineC.NQLineChart
+        config={TREND_CONFIG}
+        data={TREND}
+        xDataKey="month"
+        showBrush={false}
+        className="h-full w-full p-4"
+      >
         <LineC.Grid />
         <LineC.XAxis dataKey="month" />
         <LineC.YAxis />
@@ -245,7 +268,13 @@ export const NQCHART_GALLERY: GalleryChart[] = [
     blurb: "Bars and lines on one canvas with independent left/right axes.",
     settings: ["dual axis", "bar + line"],
     render: () => (
-      <ComposedC.NQComposedChart config={REVENUE_CONFIG} data={REVENUE} xDataKey="month" className="h-full w-full">
+      <ComposedC.NQComposedChart
+        config={REVENUE_CONFIG}
+        data={REVENUE}
+        xDataKey="month"
+        showBrush={false}
+        className="h-full w-full p-4"
+      >
         <ComposedC.Grid />
         <ComposedC.XAxis dataKey="month" />
         <ComposedC.YAxis yAxisId="left" orientation="left" />
@@ -263,25 +292,16 @@ export const NQCHART_GALLERY: GalleryChart[] = [
     blurb: "Share of total as a pie or donut — legend for slice names, tooltip for values.",
     settings: ["donut", "legend", "tooltip"],
     render: () => (
+      // Legend names slices; leader labels glitter wedge hover (fixed / chart-dialog).
       <PieC.NQPieChart
         config={TRAFFIC_CONFIG}
         data={TRAFFIC}
         nameKey="source"
         className="h-full w-full p-4"
       >
-        <PieC.Tooltip />
         <PieC.Legend />
-        {/*
-          Leader labels steal hit-testing between adjacent wedges and glitter
-          the item tooltip (nqchart hover-focus / flicker-control). Legend
-          already names slices.
-        */}
-        <PieC.Pie
-          dataKey="visitors"
-          nameKey="source"
-          innerRadius="55%"
-          showLabels={false}
-        />
+        <PieC.Tooltip />
+        <PieC.Pie dataKey="visitors" nameKey="source" innerRadius="40%" showLabels={false} />
       </PieC.NQPieChart>
     ),
   },
@@ -292,17 +312,18 @@ export const NQCHART_GALLERY: GalleryChart[] = [
     blurb: "Compare multiple series across shared axes on a polar grid.",
     settings: ["polar grid", "2 series", "legend"],
     render: () => (
+      // Mirrors NQExampleRadarChart (docs): polygon grid, filled series, p-4.
       <RadarC.NQRadarChart
         config={RADAR_CONFIG}
         data={RADAR}
         className="h-full w-full p-4"
       >
-        <RadarC.PolarGrid />
+        <RadarC.PolarGrid variant="polygon" />
         <RadarC.PolarAngleAxis dataKey="metric" />
+        <RadarC.Legend isClickable />
         <RadarC.Tooltip />
-        <RadarC.Legend />
-        <RadarC.Radar dataKey="web" />
-        <RadarC.Radar dataKey="native" />
+        <RadarC.Radar dataKey="web" variant="filled" />
+        <RadarC.Radar dataKey="native" variant="filled" />
       </RadarC.NQRadarChart>
     ),
   },
@@ -313,7 +334,7 @@ export const NQCHART_GALLERY: GalleryChart[] = [
     blurb: "Concentric progress rings for KPI dials and gauges.",
     settings: ["concentric", "rounded", "legend"],
     render: () => (
-      <RadialC.NQRadialChart config={GAUGE_CONFIG} data={GAUGE} nameKey="series" innerRadius="30%" outerRadius="100%" className="h-full w-full">
+      <RadialC.NQRadialChart config={GAUGE_CONFIG} data={GAUGE} nameKey="series" innerRadius="30%" outerRadius="100%" className="h-full w-full p-4">
         <RadialC.RadialBar dataKey="value" cornerRadius={6} />
         <RadialC.Tooltip />
         <RadialC.Legend />
@@ -327,7 +348,7 @@ export const NQCHART_GALLERY: GalleryChart[] = [
     blurb: "Point clouds over numeric x/y axes for correlation views.",
     settings: ["x/y axes", "grid", "tooltip"],
     render: () => (
-      <ScatterC.NQScatterChart config={SCATTER_CONFIG} className="h-full w-full">
+      <ScatterC.NQScatterChart config={SCATTER_CONFIG} className="h-full w-full p-4">
         <ScatterC.Grid />
         <ScatterC.XAxis dataKey="x" name="Load" />
         <ScatterC.YAxis dataKey="y" name="Latency" />
@@ -343,7 +364,7 @@ export const NQCHART_GALLERY: GalleryChart[] = [
     blurb: "Stage-by-stage conversion with tapered, connected segments.",
     settings: ["taper: soft", "connection", "legend"],
     render: () => (
-      <FunnelC.NQFunnelChart config={FUNNEL_CONFIG} data={FUNNEL} stageKey="stage" valueKey="value" taper="soft" className="h-full w-full">
+      <FunnelC.NQFunnelChart config={FUNNEL_CONFIG} data={FUNNEL} stageKey="stage" valueKey="value" taper="soft" className="h-full w-full p-4">
         <FunnelC.Stages />
         <FunnelC.Tooltip />
         <FunnelC.Legend />
@@ -357,7 +378,7 @@ export const NQCHART_GALLERY: GalleryChart[] = [
     blurb: "Running totals with signed increases, decreases, and subtotals.",
     settings: ["typed bars", "grid", "tooltip"],
     render: () => (
-      <WaterfallC.NQWaterfallChart config={WATERFALL_CONFIG} data={WATERFALL} nameKey="name" valueKey="value" className="h-full w-full">
+      <WaterfallC.NQWaterfallChart config={WATERFALL_CONFIG} data={WATERFALL} nameKey="name" valueKey="value" showBrush={false} className="h-full w-full p-4">
         <WaterfallC.Bars />
         <WaterfallC.Grid />
         <WaterfallC.Tooltip />
@@ -372,7 +393,7 @@ export const NQCHART_GALLERY: GalleryChart[] = [
     blurb: "Nested rectangles sized by value for part-to-whole hierarchies.",
     settings: ["nested", "labels", "tooltip"],
     render: () => (
-      <TreemapC.NQTreemapChart config={TREEMAP_CONFIG} data={TREEMAP} className="h-full w-full">
+      <TreemapC.NQTreemapChart config={TREEMAP_CONFIG} data={TREEMAP} className="h-full w-full p-4">
         <TreemapC.Tiles showLabels />
         <TreemapC.Tooltip />
       </TreemapC.NQTreemapChart>
@@ -385,7 +406,7 @@ export const NQCHART_GALLERY: GalleryChart[] = [
     blurb: "Density matrix with a two-stop color ramp — great for schedules.",
     settings: ["x/y labels", "color ramp"],
     render: () => (
-      <HeatmapC.NQHeatmapChart config={HEAT_CONFIG} className="h-full w-full">
+      <HeatmapC.NQHeatmapChart config={HEAT_CONFIG} className="h-full w-full p-4">
         <HeatmapC.Heatmap
           dataKey="intensity"
           data={HEAT.cells}
@@ -406,7 +427,7 @@ export const NQCHART_GALLERY: GalleryChart[] = [
     blurb: "Day-grid utilization heatmap for capacity across a date range.",
     settings: ["range", "day labels", "ramp"],
     render: () => (
-      <CalendarC.NQCalendarChart config={CAL_CONFIG} className="h-full w-full">
+      <CalendarC.NQCalendarChart config={CAL_CONFIG} className="h-full w-full p-4">
         <CalendarC.Calendar
           dataKey="utilization"
           data={CAL.cells}
@@ -427,7 +448,7 @@ export const NQCHART_GALLERY: GalleryChart[] = [
     blurb: "Compact inline trend with a fill band and end-point marker.",
     settings: ["fill", "end dot"],
     render: () => (
-      <SparklineC.NQSparklineChart config={SPARK_CONFIG} data={SPARK} valueDataKey="value" className="h-full w-full">
+      <SparklineC.NQSparklineChart config={SPARK_CONFIG} data={SPARK} valueDataKey="value" className="h-full w-full p-4">
         <SparklineC.Fill dataKey="value" />
         <SparklineC.Sparkline dataKey="value" />
         <SparklineC.EndDot />

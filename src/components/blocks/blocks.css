@@ -1,0 +1,82 @@
+/*
+ * Blocks gallery chrome. Same rule as the landing: the shelf is furniture, the
+ * blocks inside are real nqui components. Every value here is a raw nqui token
+ * (--radius-*, --border, --card, --duration-*, --ease-out, --shadow-elevated).
+ */
+
+.blk-shelf {
+  display: grid;
+  /* Breakpoint-free: cards claim a column when there's room for one. */
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  /* Tuned to a single-row card with a 4:3 chart stage + chrome.
+     Forms that need more are marked `tall` and span two rows.
+     NB: a few px of scrollHeight past this is nqui's `hit-area-*` pseudo-element
+     on Button (an invisible, enlarged tap target) — not visible content. */
+  grid-auto-rows: auto;
+  gap: 1rem;
+}
+
+.blk-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: color-mix(in oklch, var(--card) 82%, transparent);
+  /* Shadow/border only — a CSS transform here desyncs ECharts hit-testing. */
+  transition:
+    border-color var(--duration-standard) var(--ease-out),
+    box-shadow var(--duration-standard) var(--ease-out);
+}
+
+.blk-card:hover {
+  border-color: color-mix(in oklch, var(--foreground) 18%, transparent);
+  box-shadow: var(--shadow-elevated);
+}
+
+/* Dense forms need a taller card; chart cards stay content-sized (4:3 stage). */
+.blk-card--tall {
+  min-height: 28rem;
+}
+
+/* Default stage: grow to fill leftover card height (nqui blocks). */
+.blk-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/*
+ * Chart stage — 4:3 — a touch taller than aspect-video so pie labels fit in narrow cards.
+ * Cards are ~310px wide; a fixed rem height forced ~1:1 canvases that
+ * stretched the plot and broke ECharts hit-testing (stuck hover, pie glitter).
+ */
+.blk-stage--chart {
+  flex: none;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  height: auto;
+  overflow: hidden;
+}
+
+/* Shared with /charts — HTML tooltips must never steal hits (flicker / stuck axis line). */
+.nq-echarts-tooltip {
+  pointer-events: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blk-card,
+  .blk-card:hover {
+    transition: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .blk-shelf {
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+  }
+}

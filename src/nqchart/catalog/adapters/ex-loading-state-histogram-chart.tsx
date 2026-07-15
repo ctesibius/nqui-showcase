@@ -1,0 +1,34 @@
+import { NQBarChart, Bar, Grid, XAxis, YAxis, Tooltip, Legend } from "@nqlib/nqchart/bar-chart";
+import { binForHistogram } from "@nqlib/nqchart/recipes";
+import { type ChartConfig } from "@nqlib/nqchart";
+
+const chartConfig = {
+  count: {
+    label: "Frequency",
+    colors: {
+      light: ["#059669"],
+      dark: ["#34d399"],
+    },
+  },
+} satisfies ChartConfig;
+
+export function NQExampleLoadingStateHistogramChart() {
+  return (
+    <NQBarChart
+      config={chartConfig}
+      data={binForHistogram([12, 18, 24, 30, 36, 42, 48, 54], 4)}
+      xDataKey="bin"
+      variant="histogram"
+      showBrush={false}
+      className="h-full w-full p-4"
+      isLoading
+    >
+      <Grid />
+      <XAxis dataKey="bin" />
+      <YAxis />
+      <Legend />
+      <Tooltip />
+      <Bar dataKey="count" />
+    </NQBarChart>
+  );
+}
