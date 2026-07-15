@@ -131,7 +131,7 @@ function patchElement(
   }
 
   const props = el.props;
-  const rawKids = Children.toArray(props.children);
+  const rawKids = Children.toArray(props.children as ReactNode);
   let sawBackground = false;
 
   const mappedKids: ReactNode[] = rawKids.flatMap((child) => {
