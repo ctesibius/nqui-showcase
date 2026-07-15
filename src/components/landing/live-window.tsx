@@ -17,7 +17,6 @@ import {
   TableRow,
   ToggleGroup,
   ToggleGroupItem,
-  Tracker,
 } from "@nqlib/nqui";
 import { PEOPLE } from "../story/avatar-stack";
 
@@ -41,7 +40,7 @@ import { PEOPLE } from "../story/avatar-stack";
  */
 const SCENES = [
   { id: "components", crumb: "nqui / deploy panel", label: "Components" },
-  { id: "charts", crumb: "nqchart / revenue", label: "Charts" },
+  { id: "charts", crumb: "nqchart / area", label: "Charts" },
   { id: "grid", crumb: "nqui / table", label: "Table" },
   { id: "plan", crumb: "nqui / schedule", label: "Schedule" },
 ] as const;
@@ -142,18 +141,20 @@ function ComponentsScene() {
   );
 }
 
-/* ── Scene 2 — nqchart: a real chart, loaded only when this scene first runs ── */
+/* ── Scene 2 — nqchart: catalog area series, compact living-window chrome ─── */
 function ChartsScene({ mounted }: { mounted: boolean }) {
   return (
-    <div className="flex h-full flex-col gap-3">
-      <div className="flex items-baseline justify-between">
-        <div>
+    <div className="flex h-full min-h-0 flex-col gap-2">
+      <div className="flex shrink-0 items-baseline justify-between gap-3">
+        <div className="min-w-0">
           <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-            Revenue · 6 months
+            Traffic · desktop + mobile
           </p>
-          <p className="mt-0.5 text-lg font-semibold tabular-nums">$341K</p>
+          <p className="mt-0.5 text-lg font-semibold tabular-nums">12 months</p>
         </div>
-        <Badge variant="outline" className="shrink-0">+18%</Badge>
+        <Badge variant="outline" className="shrink-0">
+          Live
+        </Badge>
       </div>
       <div className="min-h-0 flex-1">
         {mounted ? (
@@ -162,14 +163,6 @@ function ChartsScene({ mounted }: { mounted: boolean }) {
           </Suspense>
         ) : null}
       </div>
-      <Tracker
-        className="shrink-0"
-        data={[
-          ...Array.from({ length: 9 }, () => ({ color: "bg-emerald-500", tooltip: "Operational" })),
-          { color: "bg-amber-500", tooltip: "Degraded" },
-          ...Array.from({ length: 2 }, () => ({ color: "bg-emerald-500", tooltip: "Operational" })),
-        ]}
-      />
     </div>
   );
 }

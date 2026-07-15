@@ -1,41 +1,34 @@
-import type { ChartConfig } from "@nqlib/nqchart";
-import * as AreaC from "@nqlib/nqchart/area-chart";
+import { NQAreaChart, Area, XAxis, Grid, Legend, Tooltip } from "@nqlib/nqchart/area-chart";
+import {
+  DUAL_SERIES_CHART_CONFIG,
+  TRAFFIC_MONTHLY_DATA,
+  formatMonthTickShort,
+} from "../../nqchart/catalog/adapters/example-shared";
 
 /*
- * A real nqchart area chart for the landing's chart scene. Split into its own
- * module so echarts is fetched only when that scene first runs — the landing's
- * first paint never pays for it.
+ * Same series/composition as `/charts` → `ex-area-chart`, tuned for the landing
+ * living window (~300–360px tall):
+ * - showBrush={false} — NQChartBrush defaults to 52px+chrome (~76px) with no
+ *   public height prop; in this frame it crushed the plot into a hairline.
+ * - aspect-auto — without a brush footer, ChartContainer would force aspect-video.
  */
-
-const DATA = [
-  { month: "Jan", revenue: 186 },
-  { month: "Feb", revenue: 245 },
-  { month: "Mar", revenue: 213 },
-  { month: "Apr", revenue: 298 },
-  { month: "May", revenue: 316 },
-  { month: "Jun", revenue: 341 },
-];
-
-const CONFIG = {
-  revenue: {
-    label: "Revenue",
-    colors: { light: ["var(--chart-1)"], dark: ["var(--chart-1)"] },
-  },
-} satisfies ChartConfig;
 
 export function MiniChart() {
   return (
-    <AreaC.NQAreaChart
-      config={CONFIG}
-      data={DATA}
+    <NQAreaChart
+      data={[...TRAFFIC_MONTHLY_DATA]}
+      config={DUAL_SERIES_CHART_CONFIG}
+      className="aspect-auto h-full min-h-0 w-full p-2"
       xDataKey="month"
+      stackType="default"
       showBrush={false}
-      className="h-full w-full p-4"
     >
-      <AreaC.Grid />
-      <AreaC.XAxis dataKey="month" />
-      <AreaC.Tooltip />
-      <AreaC.Area dataKey="revenue" curveType="monotone" />
-    </AreaC.NQAreaChart>
+      <Grid />
+      <XAxis dataKey="month" tickFormatter={formatMonthTickShort} />
+      <Legend isClickable />
+      <Tooltip />
+      <Area dataKey="desktop" variant="gradient" curveType="monotone" />
+      <Area dataKey="mobile" variant="gradient" curveType="monotone" />
+    </NQAreaChart>
   );
 }
