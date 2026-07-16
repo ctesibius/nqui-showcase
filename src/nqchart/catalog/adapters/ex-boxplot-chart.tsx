@@ -13,7 +13,11 @@ import { prepareBoxPlotRow } from "@nqlib/nqchart/recipes";
 import { type ChartConfig } from "@nqlib/nqchart";
 import type { ComponentType } from "react";
 
-/** Local nqchart exports `Whiskers`; published ^0.1.5 types may lag until the next release. */
+/**
+ * `Whiskers` lands typed on this subpath in nqchart 0.1.7. Until that version is
+ * installed here, the published types lack it — hence the cast. Once `pnpm install`
+ * picks up 0.1.7, delete this and import `Whiskers` with the others above.
+ */
 const Whiskers = (
   Composed as typeof Composed & {
     Whiskers: ComponentType<{

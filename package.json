@@ -32,7 +32,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@hugeicons/core-free-icons": "^4.0.0",
     "@hugeicons/react": "^1.1.6",
-    "@nqlib/nqchart": "^0.1.6",
+    "@nqlib/nqchart": "^0.1.7",
     "@nqlib/nqgantt": "^0.3.1",
     "@nqlib/nqgantt-engine": "^0.3.1",
     "@nqlib/nqgrid": "^0.2.0",
