@@ -204,7 +204,7 @@ export function ChartsPage() {
 
         <div className="mt-14 max-w-[52ch] md:mt-20">
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground/80">
-            {CATALOG_COUNT} examples · synced from becocharts registry
+            {CATALOG_COUNT} examples · synced from the nqchart registry
           </p>
           <h1 className="mt-3 text-[clamp(1.9rem,3.6vw,2.55rem)] font-semibold leading-[1.07] tracking-[-0.028em]">
             Every NQChart, live.

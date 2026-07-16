@@ -19,7 +19,7 @@ export type CatalogEntry = {
   component: string;
 };
 
-export const CATALOG_SOURCE = "becocharts" as const;
+export const CATALOG_SOURCE = "nqchart" as const;
 export const CATALOG_COUNT = 95 as const;
 
 export const NQCHART_CATALOG: CatalogEntry[] = [

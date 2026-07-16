@@ -1,6 +1,6 @@
 /**
  * In-app NQChart guide — mirrors the consumer agent skill
- * (`skills/consumer/nqchart/` in becocharts): install, compose, wallpaper XOR Grid.
+ * (`skills/consumer/nqchart/` in the nqchart repo): install, compose, wallpaper XOR Grid.
  */
 import { Link } from "react-router-dom";
 import {
@@ -67,7 +67,7 @@ export function NqchartDocsPage() {
           </div>
           <div>
             <p className="mb-1 font-medium text-foreground">Agent skill (CLI)</p>
-            <CodeBlock>{`npx skills add ctesibius/nqchart --skill nqchart -y`}</CodeBlock>
+            <CodeBlock>{`npx skills add nqlib/nqchart --skill nqchart -y`}</CodeBlock>
             <p className="mt-2">
               Copies guidance into{" "}
               <code className="text-foreground">.agents/skills/nqchart/</code>. Charts do not require the skills CLI.

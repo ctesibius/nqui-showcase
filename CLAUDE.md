@@ -38,7 +38,7 @@ Refresh nqui skills: `npx @nqlib/nqui init-skills --force`
 | Components | `@nqlib/nqui` | Tabbed component gallery |
 | Grid | `@nqlib/nqgrid` | Spreadsheet + work-management previews |
 | Timeline | `@nqlib/nqgantt` | Roadmap gantt |
-| Charts | BeeCharts registry | Analytics dashboard (12 chart types) |
+| Charts | `@nqlib/nqchart` | Charts catalog + analytics dashboard |
 
 Product routes under `/app/*` (sheets, projects, timeline) reuse the same embeds in the app shell.
 
@@ -55,7 +55,7 @@ Sibling libraries are separate checkouts next to this repo (not submodules).
 | nqui | `../nqui` | `@nqlib/nqui` | `../nqui/src/` |
 | nqgrid | `../nqgrid` | `@nqlib/nqgrid` | `../nqgrid/src/` |
 | nqgantt | `../nqgantt` | `@nqlib/nqgantt` | `../nqgantt/packages/nqgantt/src/` |
-| BeeCharts | `../becocharts` | `beecharts` (private) | `../becocharts/lib/` |
+| nqchart | `../becocharts` (repo: `nqlib/nqchart`) | `@nqlib/nqchart` | `../becocharts/src/registry/` |
 
 Before editing engine/library internals, read the sibling guide (`../nqgrid/CLAUDE.md`,
 `../nqgantt/CLAUDE.md`, etc.) and **`.cursor/NQLIB.md`**.
@@ -72,7 +72,7 @@ nqui-showcase/
 │   ├── nqgantt/demos/           # roadmap gantt + tasks-to-gantt bridge
 │   ├── nqgantt/lib/             # bar UI reference copies (sync, not runtime)
 │   ├── nqgantt/gantt-theme.css  # showcase gantt CSS overrides
-│   ├── registry/charts/         # BeeCharts vendored components
+│   ├── nqchart/catalog/         # charts catalog + adapters (consumes the npm package)
 │   ├── pages/                   # route wrappers
 │   └── config/site-nav.ts       # app shell nav
 ├── vite.config.ts               # nqgrid local alias (USE_LOCAL_NQGRID)
@@ -86,7 +86,7 @@ nqui-showcase/
 - **nqgantt demo + theme** → `src/nqgantt/` (not `../nqgantt` except releases)
 - **nqgantt bar SVG/TS chrome** → edit `src/nqgantt/lib/`, port upstream when releasing (`NQGANTT-WORKSPACE.md`)
 - **nqui components** → `../nqui/src/components/`
-- **BeeCharts source** → `../becocharts/lib/`; sync `src/registry/charts/` when needed
+- **nqchart source** → `../becocharts/src/registry/`; the showcase consumes `@nqlib/nqchart` from npm (nothing vendored)
 - **Showcase UI only** → `src/components/`, `src/pages/`
 
 ---
@@ -98,7 +98,7 @@ nqui-showcase/
 | `@nqlib/nqgrid` | `pnpm dev:local` / `USE_LOCAL_NQGRID=true` → `../nqgrid/src` (`NQGRID_DIR` override) | `pnpm nqgrid:status` |
 | `@nqlib/nqui` | `USE_LOCAL_NQUI=true` + toggle script | `nqui-local-published-toggle` skill |
 | `@nqlib/nqgantt` | published npm; bar UI reference in `src/nqgantt/lib/` | `pnpm nqgantt:sync-lib` |
-| BeeCharts | vendored in `src/registry/charts/` | compare `../becocharts/lib/` |
+| `@nqlib/nqchart` | published npm; source in `../becocharts/src/registry/` | `npm view @nqlib/nqchart version` |
 
 ⚠️ Published `@nqlib/nqgrid@0.1.0` is stale — see `NQGRID-WORKSPACE.md` before deploying.
 

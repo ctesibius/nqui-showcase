@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 
 /**
- * Docs-app pattern (becocharts LazyMount): defer heavy chart mounts until the
+ * Docs-app pattern (nqchart LazyMount): defer heavy chart mounts until the
  * card is near the viewport. Mounting 14 ECharts instances at once floods
  * zrender animation and breaks hover (stuck tooltip / pie glitter).
  */
