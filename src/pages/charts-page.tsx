@@ -89,7 +89,15 @@ function ChartPreview({
    * (hooks attach to this fiber; Comp is stable per card) and patch the returned tree.
    */
   const tree = (Comp as (props: Record<string, never>) => ReactNode)({});
-  return <>{applyChartPreviewControls(tree, { background, tooltip })}</>;
+  return (
+    <>
+      {applyChartPreviewControls(tree, {
+        background,
+        tooltip,
+        family: entry.family,
+      })}
+    </>
+  );
 }
 
 function ChartCard({
@@ -188,7 +196,7 @@ export function ChartsPage() {
               <Link to="/blocks">Blocks</Link>
             </Button>
             <Button size="sm" variant="ghost" className="rounded-full" asChild>
-              <Link to="/readme">Docs</Link>
+              <Link to="/readme/nqchart">Docs</Link>
             </Button>
             <ThemeToggle />
           </div>
@@ -226,7 +234,16 @@ export function ChartsPage() {
                 setFamily(v);
                 setPage(0);
               }}
-              className="flex flex-wrap gap-1"
+              /* No flex-wrap: nqui's ToggleGroup is deliberately a single row
+                 that scrolls horizontally (hidden scrollbar) when it runs out
+                 of width. Adding flex-wrap defeats that — the pill wraps and
+                 grows tall, and because nqui sets overflow-x:auto, CSS forces
+                 overflow-y to auto too, so the wrapped rows become draggable
+                 and slide out of alignment.
+                 No gap-* either: spacing=0 is nqui's segmented mode, where items are
+                 rounded-none because they're meant to sit flush. A gap re-exposes the
+                 shell between them, so a hover fill stops short of its neighbour and
+                 reads as a sliver. Use the `spacing` prop if separation is ever wanted. */
             >
               <ToggleGroupItem value="all" className="h-7 rounded-full px-2.5 text-[11px]">
                 All families
@@ -251,7 +268,16 @@ export function ChartsPage() {
                 setCategory(v as typeof category);
                 setPage(0);
               }}
-              className="flex flex-wrap gap-1"
+              /* No flex-wrap: nqui's ToggleGroup is deliberately a single row
+                 that scrolls horizontally (hidden scrollbar) when it runs out
+                 of width. Adding flex-wrap defeats that — the pill wraps and
+                 grows tall, and because nqui sets overflow-x:auto, CSS forces
+                 overflow-y to auto too, so the wrapped rows become draggable
+                 and slide out of alignment.
+                 No gap-* either: spacing=0 is nqui's segmented mode, where items are
+                 rounded-none because they're meant to sit flush. A gap re-exposes the
+                 shell between them, so a hover fill stops short of its neighbour and
+                 reads as a sliver. Use the `spacing` prop if separation is ever wanted. */
             >
               {CATEGORIES.map((c) => (
                 <ToggleGroupItem key={c.id} value={c.id} className="h-7 rounded-full px-2.5 text-[11px]">
@@ -284,7 +310,6 @@ export function ChartsPage() {
               type="single"
               value={tooltip}
               onValueChange={(v) => v && setTooltip(v as TooltipPreviewMode)}
-              className="gap-1"
             >
               {TIP_OPTIONS.map((t) => (
                 <ToggleGroupItem key={t.id} value={t.id} className="h-7 rounded-full px-2.5 text-[11px]">

@@ -122,7 +122,9 @@ export default defineConfig(({ mode }) => ({
       { find: "@", replacement: path.resolve(__dirname, "./src") },
     ],
     // Single copies of the engine's peers when running against local nqgrid src.
-    dedupe: ["recharts", "echarts", "motion", "react", "react-dom", "@tanstack/react-table", "@tanstack/react-virtual"],
+    // `@nqlib/nqchart` too — duplicate copies break Grid reference equality in
+    // apply-preview-controls (pattern XOR Grid strip).
+    dedupe: ["recharts", "echarts", "motion", "react", "react-dom", "@tanstack/react-table", "@tanstack/react-virtual", "@nqlib/nqchart"],
   },
   // Bind to loopback only so dev does not trigger “local network” device prompts on some mobile browsers.
   // PORT env (set by preview tooling) wins over the default so parallel dev servers don't collide.

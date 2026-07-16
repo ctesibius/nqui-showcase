@@ -21,11 +21,18 @@ import {
  * nqlib components, tagged with the library it leans on and a bill of
  * materials — so a visitor can read a block and know exactly what to import.
  *
- * nqchart blocks are lazy: echarts lives in its own chunk and only loads once
- * a chart block is actually rendered.
+ * nqchart / report / grid / gantt blocks are lazy: heavy engines only load
+ * once the card is actually rendered.
  */
 
-export type Lib = "nqui" | "nqchart";
+export type Lib = "nqui" | "nqchart" | "nqgrid" | "nqgantt" | "report";
+
+/**
+ * Stage size follows the component's job — never force a timeline into a
+ * postage stamp. Compact = nqui chrome; chart = 4:3 specimen; table = dense
+ * grid that may scroll horizontally; gantt/report = full shelf width.
+ */
+export type BlockStage = "compact" | "chart" | "table" | "gantt" | "report";
 
 export interface Block {
   id: string;
@@ -33,23 +40,55 @@ export interface Block {
   /** What job this pattern does — one line, no restating the name. */
   blurb: string;
   lib: Lib;
+  /** Extra filter membership (report patterns that span packages). */
+  libs?: Lib[];
   /** The nqlib pieces it's assembled from. */
   bom: string[];
-  /** Taller blocks (charts, forms) get two rows in the masonry-ish grid. */
+  /**
+   * How much room the live surface needs. Drives card span + stage CSS.
+   * Prefer this over guessing from `lib`.
+   */
+  stage?: BlockStage;
+  /** @deprecated Prefer `stage: "gantt" | "report"`. Kept for callers. */
   tall?: boolean;
+  /** @deprecated Prefer `stage`. */
+  wide?: boolean;
   Render: ComponentType | LazyExoticComponent<ComponentType>;
 }
 
 const chart = (name: keyof typeof import("./blocks-charts")) =>
   lazy(() => import("./blocks-charts").then((m) => ({ default: m[name] as ComponentType })));
 
+const report = (name: keyof typeof import("./blocks-report")) =>
+  lazy(() => import("./blocks-report").then((m) => ({ default: m[name] as ComponentType })));
+
 export const BLOCKS: Block[] = [
+  {
+    id: "sales-ledger",
+    name: "Sales ledger",
+    blurb: "Full-bleed ink report — pivot, trend, and a real campaign timeline.",
+    lib: "report",
+    libs: ["report", "nqgrid", "nqchart", "nqgantt"],
+    bom: ["computePivot", "NQAreaChart", "NQBarChart", "NQSparklineChart", "GanttRoot"],
+    stage: "report",
+    Render: report("SalesLedgerBlock"),
+  },
+  {
+    id: "category-pivot",
+    name: "Category pivot",
+    blurb: "Category × year totals — a dense table, not a chart thumbnail.",
+    lib: "nqgrid",
+    bom: ["computePivot"],
+    stage: "table",
+    Render: report("CategoryPivotBlock"),
+  },
   {
     id: "sign-in",
     name: "Sign in",
     blurb: "Passwordless email with a field description and SSO footnote.",
     lib: "nqui",
     bom: ["Field", "Input", "Button", "Separator"],
+    stage: "compact",
     tall: true,
     Render: SignInBlock,
   },
@@ -290,6 +329,32 @@ export const BLOCKS: Block[] = [
 
 export const LIBS: { id: Lib | "all"; label: string }[] = [
   { id: "all", label: "All" },
+  { id: "report", label: "report" },
   { id: "nqui", label: "nqui" },
   { id: "nqchart", label: "nqchart" },
+  { id: "nqgrid", label: "nqgrid" },
+  { id: "nqgantt", label: "nqgantt" },
 ];
+
+export function blockMatchesLib(b: Block, lib: Lib | "all"): boolean {
+  if (lib === "all") return true;
+  if (b.libs?.includes(lib)) return true;
+  return b.lib === lib;
+}
+
+export function libCount(lib: Lib | "all"): number {
+  if (lib === "all") return BLOCKS.length;
+  return BLOCKS.filter((b) => blockMatchesLib(b, lib)).length;
+}
+
+/** Resolve display stage from explicit intent, else from the package. */
+export function resolveStage(b: Block): BlockStage {
+  if (b.stage) return b.stage;
+  if (b.lib === "nqchart") return "chart";
+  return "compact";
+}
+
+/** Timelines and multi-surface reports claim the full shelf — never a 310px tile. */
+export function isFullBleed(stage: BlockStage): boolean {
+  return stage === "gantt" || stage === "report";
+}

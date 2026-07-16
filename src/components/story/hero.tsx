@@ -55,7 +55,7 @@ function HeroKicker({ reducedMotion }: { reducedMotion: boolean }) {
       transition={{ duration: 0.5, ease: STORY_EASE }}
       className="flex flex-wrap items-center gap-3"
     >
-      <Badge variant="secondary">nqui 0.7.2</Badge>
+      <Badge variant="secondary">nqui 0.7.3</Badge>
       <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
         nqlib · the product interface stack
       </span>

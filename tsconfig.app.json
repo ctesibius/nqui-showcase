@@ -23,6 +23,16 @@
     "paths": {
       "@/*": ["./src/*"],
       /*
+       * Needed whenever @nqlib/nqui is `link:../nqui` (pnpm nqui:local): the linked
+       * repo carries its own @types/react, so nqui's .d.ts and this app would see two
+       * incompatible React type instances (`--radix-${string}` index-signature errors
+       * in the nqgrid shells). Pin one copy. Harmless on the published path — keep it
+       * so switching to local never re-breaks typecheck.
+       */
+      "react": ["./node_modules/@types/react"],
+      "react/jsx-runtime": ["./node_modules/@types/react/jsx-runtime"],
+      "react-dom": ["./node_modules/@types/react-dom"],
+      /*
        * DEV-ONLY: type-resolve @nqlib/nqgrid against the sibling ../nqgrid/src so
        * the editor/typecheck match the engine API that `pnpm dev:local` runs with.
        * The published @nqlib/nqgrid@0.1.0 is STALE and lacks this API. Before the

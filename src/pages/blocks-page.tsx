@@ -10,7 +10,7 @@ import {
   cn,
 } from "@nqlib/nqui";
 import { ThemeToggle } from "../components/theme-toggle";
-import { BLOCKS, LIBS, type Lib } from "../components/blocks/registry";
+import { BLOCKS, LIBS, blockMatchesLib, isFullBleed, libCount, resolveStage, type Lib } from "../components/blocks/registry";
 import { LazyMount } from "../components/blocks/lazy-mount";
 import "../components/landing/landing.css";
 import "../components/blocks/blocks.css";
@@ -21,11 +21,18 @@ import "../components/blocks/blocks.css";
  * shows the whole shelf: every block is a real, interactive pattern built only
  * from nqlib components. Filter by library; each card names its bill of
  * materials so you can read a block and know what to import.
+ *
+ * Card size follows the component's job (`stage`): charts stay 4:3 tiles,
+ * tables get vertical room, gantt/report claim the full shelf — never cram a
+ * timeline into minmax(310px).
  */
 
 export function BlocksPage() {
   const [lib, setLib] = useState<Lib | "all">("all");
-  const shown = useMemo(() => (lib === "all" ? BLOCKS : BLOCKS.filter((b) => b.lib === lib)), [lib]);
+  const shown = useMemo(
+    () => (lib === "all" ? BLOCKS : BLOCKS.filter((b) => blockMatchesLib(b, lib))),
+    [lib],
+  );
 
   return (
     <div className="fl-page">
@@ -66,12 +73,11 @@ export function BlocksPage() {
         </div>
 
         {/* ── Filter ─────────────────────────────────────────────────────── */}
-        <div className="sticky top-3 z-[var(--z-sticky-content)] mt-8 flex w-fit rounded-full border bg-background/70 p-1 backdrop-blur-md">
+        <div className="sticky top-3 z-[var(--z-sticky-content)] mt-8 flex max-w-full w-fit flex-wrap rounded-full border bg-background/70 p-1 backdrop-blur-md">
           <ToggleGroup
             type="single"
             value={lib}
             onValueChange={(v) => v && setLib(v as Lib | "all")}
-            className="gap-1"
           >
             {LIBS.map((l) => (
               <ToggleGroupItem
@@ -80,9 +86,7 @@ export function BlocksPage() {
                 className="rounded-full px-3 text-xs data-[state=on]:bg-foreground data-[state=on]:text-background"
               >
                 {l.label}
-                <span className="ml-1.5 tabular-nums opacity-60">
-                  {l.id === "all" ? BLOCKS.length : BLOCKS.filter((b) => b.lib === l.id).length}
-                </span>
+                <span className="ml-1.5 tabular-nums opacity-60">{libCount(l.id)}</span>
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
@@ -90,45 +94,67 @@ export function BlocksPage() {
 
         {/* ── The shelf ──────────────────────────────────────────────────── */}
         <div className="blk-shelf mt-8">
-          {shown.map((b) => (
-            <figure key={b.id} className={cn("blk-card", b.tall && "blk-card--tall")}>
-              <figcaption className="flex items-baseline justify-between gap-3">
-                <span className="text-sm font-medium">{b.name}</span>
-                <Badge variant="outline" className="shrink-0 font-mono text-[10px] font-normal">
-                  {b.lib}
-                </Badge>
-              </figcaption>
-
-              {/* The live block. Charts suspend on their own chunk.
-                  Chart stages use a fixed docs-sized height — not flex-fill. */}
-              <div className={cn("blk-stage", b.lib === "nqchart" && "blk-stage--chart")}>
-                {b.lib === "nqchart" ? (
-                  <LazyMount fallback={<Skeleton className="size-full rounded-lg" />}>
-                    {/* Match /charts: size-full min-h-0 so ECharts gets a stable box. */}
-                    <div className="size-full min-h-0">
-                      <b.Render />
-                    </div>
-                  </LazyMount>
-                ) : (
-                  <Suspense fallback={<Skeleton className="size-full rounded-lg" />}>
-                    <b.Render />
-                  </Suspense>
+          {shown.map((b) => {
+            const stage = resolveStage(b);
+            const fullBleed = isFullBleed(stage);
+            const heavy =
+              b.lib === "nqchart" || b.lib === "report" || b.lib === "nqgrid" || b.lib === "nqgantt";
+            return (
+              <figure
+                key={b.id}
+                className={cn(
+                  "blk-card",
+                  fullBleed && "blk-card--wide",
+                  stage === "gantt" && "blk-card--gantt",
+                  stage === "report" && "blk-card--report",
+                  stage === "table" && "blk-card--table",
+                  (b.tall || stage === "compact") &&                   b.tall && "blk-card--tall",
                 )}
-              </div>
+              >
+                <figcaption className="flex items-baseline justify-between gap-3">
+                  <span className="text-sm font-medium">{b.name}</span>
+                  <Badge variant="outline" className="shrink-0 font-mono text-[10px] font-normal">
+                    {b.lib}
+                  </Badge>
+                </figcaption>
 
-              <p className="text-xs leading-relaxed text-muted-foreground">{b.blurb}</p>
-              <ul className="flex flex-wrap gap-1">
-                {b.bom.map((p) => (
-                  <li
-                    key={p}
-                    className="rounded-full bg-foreground/5 px-2 py-0.5 font-mono text-[10px] text-muted-foreground"
-                  >
-                    {p}
-                  </li>
-                ))}
-              </ul>
-            </figure>
-          ))}
+                {/* Live surface. Stage CSS is intentional: size follows the job. */}
+                <div
+                  className={cn(
+                    "blk-stage",
+                    stage === "chart" && "blk-stage--chart",
+                    stage === "table" && "blk-stage--table",
+                    stage === "gantt" && "blk-stage--gantt",
+                    stage === "report" && "blk-stage--report",
+                  )}
+                >
+                  {heavy ? (
+                    <LazyMount fallback={<Skeleton className="size-full rounded-lg" />}>
+                      <div className="size-full min-h-0">
+                        <b.Render />
+                      </div>
+                    </LazyMount>
+                  ) : (
+                    <Suspense fallback={<Skeleton className="size-full rounded-lg" />}>
+                      <b.Render />
+                    </Suspense>
+                  )}
+                </div>
+
+                <p className="text-xs leading-relaxed text-muted-foreground">{b.blurb}</p>
+                <ul className="flex flex-wrap gap-1">
+                  {b.bom.map((p) => (
+                    <li
+                      key={p}
+                      className="rounded-full bg-foreground/5 px-2 py-0.5 font-mono text-[10px] text-muted-foreground"
+                    >
+                      {p}
+                    </li>
+                  ))}
+                </ul>
+              </figure>
+            );
+          })}
         </div>
 
         <footer className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t pt-6">

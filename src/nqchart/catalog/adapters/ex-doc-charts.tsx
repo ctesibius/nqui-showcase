@@ -50,6 +50,11 @@ export function NQExampleBubbleChart() {
 export function NQExampleBubbleSizedChart() {
   return (
     <NQScatterChart config={DUAL_SERIES_CHART_CONFIG} className="h-full w-full p-4">
+      <ScatterGrid />
+      <ScatterXAxis />
+      <YAxis />
+      <ScatterLegend />
+      <ScatterTooltip />
       <Scatter dataKey="desktop" data={SCATTER_DESKTOP} variant="bubble" />
     </NQScatterChart>
   );

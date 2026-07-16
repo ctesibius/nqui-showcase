@@ -42,7 +42,7 @@ export function ReadmePage() {
             @nqlib/nqui
           </Badge>
           <Badge variant="outline" className="w-fit font-mono text-xs">
-            0.7.2
+            0.7.3
           </Badge>
         </div>
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Install guide</h1>
@@ -52,7 +52,11 @@ export function ReadmePage() {
           <code className="rounded bg-muted px-1.5 py-0.5 text-sm">node_modules/@nqlib/nqui/INSTALLATION.md</code>
         </p>
         <p className="text-sm text-muted-foreground">
-          nqgrid, nqgantt, and nqchart install docs will get their own pages later — this route is nqui setup only.
+          Also:{" "}
+          <Link to="/readme/nqchart" className="font-medium text-foreground underline-offset-4 hover:underline">
+            NQChart guide
+          </Link>{" "}
+          (install, compose, background vs Grid, agent skill).
         </p>
       </div>
 
@@ -88,6 +92,35 @@ export function ReadmePage() {
             <p className="mb-1 font-medium text-foreground">Full optional peers</p>
             <CodeBlock>{`pnpm dlx @nqlib/nqui install-peers`}</CodeBlock>
             <p className="mt-2">Sortable, Carousel, DataTable, Calendar, Command, Sonner, Drawer, and related deps.</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card id="skills" className={scrollAnchor}>
+        <CardHeader>
+          <CardTitle>Agent skills</CardTitle>
+          <CardDescription>
+            Markdown guidance for coding agents — component rules, layout patterns, copy and states. Optional: components
+            work without it.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4 text-sm text-muted-foreground">
+          <div>
+            <p className="mb-1 font-medium text-foreground">Any agent (skills CLI)</p>
+            <CodeBlock>{`npx skills add nqlib/nqui --skill nqui -y`}</CodeBlock>
+            <p className="mt-2">
+              Copies the hub plus its references into{" "}
+              <code className="text-foreground">.agents/skills/nqui/</code>.
+            </p>
+          </div>
+          <div>
+            <p className="mb-1 font-medium text-foreground">Cursor (nqui CLI)</p>
+            <CodeBlock>{`pnpm dlx @nqlib/nqui init-skills`}</CodeBlock>
+            <p className="mt-2">
+              Copies the same guidance plus per-component docs into{" "}
+              <code className="text-foreground">.cursor/nqui-skills/</code>. Add{" "}
+              <code className="text-foreground">--force</code> to refresh after upgrading.
+            </p>
           </div>
         </CardContent>
       </Card>

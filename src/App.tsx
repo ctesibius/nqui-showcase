@@ -10,6 +10,9 @@ const BlocksPage = lazy(() => import("./pages/blocks-page").then((m) => ({ defau
 const ChartsPage = lazy(() => import("./pages/charts-page").then((m) => ({ default: m.ChartsPage })));
 const DocsLayout = lazy(() => import("./layouts/docs-layout").then((m) => ({ default: m.DocsLayout })));
 const ReadmePage = lazy(() => import("./pages/readme-page").then((m) => ({ default: m.ReadmePage })));
+const NqchartDocsPage = lazy(() =>
+  import("./pages/nqchart-docs-page").then((m) => ({ default: m.NqchartDocsPage })),
+);
 
 function DocsShell() {
   return (
@@ -45,6 +48,7 @@ function App() {
         <Route path="/showcase/*" element={<Navigate to="/" replace />} />
         <Route element={<DocsShell />}>
           <Route path="/readme" element={<ReadmePage />} />
+          <Route path="/readme/nqchart" element={<NqchartDocsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

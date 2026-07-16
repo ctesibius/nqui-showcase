@@ -8,8 +8,23 @@ import {
   Tooltip,
   Legend,
 } from "@nqlib/nqchart/composed-chart";
+import * as Composed from "@nqlib/nqchart/composed-chart";
 import { prepareBoxPlotRow } from "@nqlib/nqchart/recipes";
 import { type ChartConfig } from "@nqlib/nqchart";
+import type { ComponentType } from "react";
+
+/** Local nqchart exports `Whiskers`; published ^0.1.5 types may lag until the next release. */
+const Whiskers = (
+  Composed as typeof Composed & {
+    Whiskers: ComponentType<{
+      minKey: string;
+      q1Key: string;
+      q3Key: string;
+      maxKey: string;
+      dataKey?: string;
+    }>;
+  }
+).Whiskers;
 
 const raw = [
   prepareBoxPlotRow("Team A", [12, 14, 15, 18, 19, 21, 22, 24, 28, 32, 45]),
@@ -23,6 +38,8 @@ const data = raw.map((row) => ({
   iqr: Math.max(row.q3 - row.q1, 1),
   median: row.median,
   min: row.min,
+  q1: row.q1,
+  q3: row.q3,
   max: row.max,
 }));
 
@@ -31,7 +48,8 @@ const yMax = Math.max(...raw.map((row) => row.max)) + 4;
 const chartConfig = {
   iqrFloor: {
     label: "Q1 floor",
-    colors: { light: ["#e7e5e4"], dark: ["#27272a"] },
+    // Transparent spacer so stacked IQR boxes float — opaque stone was covering `<Grid />`.
+    colors: { light: ["transparent"], dark: ["transparent"] },
   },
   iqr: {
     label: "IQR (Q1–Q3)",
@@ -40,6 +58,10 @@ const chartConfig = {
   median: {
     label: "Median",
     colors: { light: ["#0f172a"], dark: ["#f8fafc"] },
+  },
+  whiskers: {
+    label: "Whiskers",
+    colors: { light: ["#64748b"], dark: ["#94a3b8"] },
   },
 } satisfies ChartConfig;
 
@@ -57,6 +79,7 @@ export function NQExampleBoxplotChart() {
       <YAxis domain={[0, yMax]} />
       <Legend />
       <Tooltip />
+      <Whiskers minKey="min" q1Key="q1" q3Key="q3" maxKey="max" />
       <Bar dataKey="iqrFloor" stackId="box" radius={0} showInLegend={false} />
       <Bar dataKey="iqr" stackId="box" radius={4} />
       <Line dataKey="median" variant="points" />

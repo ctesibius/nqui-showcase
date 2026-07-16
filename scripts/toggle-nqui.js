@@ -23,7 +23,7 @@ const pkgPath = join(root, "package.json")
 const installedDir = join(root, "node_modules", "@nqlib", "nqui")
 
 // --- CUSTOMIZE ---
-const PUBLISHED_VERSION = "^0.7.2"
+const PUBLISHED_VERSION = "^0.7.3"
 // --- END CUSTOMIZE ---
 
 const nquiDir = resolve(process.env.NQUI_DIR ?? join(root, "..", "nqui"))
@@ -48,13 +48,18 @@ function installedVersion() {
  * only the resolved realpath can. A naive string-prefix check is also unsafe
  * here (e.g. ".../nqui-showcase" starts with ".../nqui"); compare via
  * path.relative instead.
+ *
+ * NB: a `link:` dep resolves the installed dir to EXACTLY the sibling repo, so
+ * relative() returns "" — that is the normal linked state, not a miss. Treating
+ * "" as "not linked" made --check cry DRIFTED on a perfectly good link.
  */
 function resolvesInsideSiblingRepo() {
   try {
     const installed = realpathSync(installedDir)
     const sibling = realpathSync(nquiDir)
     const rel = relative(sibling, installed)
-    return rel !== "" && !rel.startsWith("..") && !isAbsolute(rel)
+    if (rel === "") return true // installed *is* the sibling repo
+    return !rel.startsWith("..") && !isAbsolute(rel)
   } catch {
     return false
   }
