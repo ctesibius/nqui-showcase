@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ScrollArea, cn } from "@nqlib/nqui";
 import type * as PageTree from "fumadocs-core/page-tree";
@@ -129,15 +128,5 @@ export function DocsSidebar({ className }: { className?: string }) {
         </div>
       </ScrollArea>
     </nav>
-  );
-}
-
-export function DocsSidebarMobile(): ReactNode {
-  return (
-    <DocsSidebar
-      className={cn(
-        "relative top-0 mb-8 flex h-64 max-h-64 w-full overflow-hidden xl:hidden",
-      )}
-    />
   );
 }

@@ -1,6 +1,20 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Button, FrostedGlass, Tabs, TabsList, TabsTrigger, cn } from "@nqlib/nqui";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowDown01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  FrostedGlass,
+  ScrollArea,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  cn,
+} from "@nqlib/nqui";
 import { ThemeControls } from "./showcase/theme-tokens/theme-token-sheet";
 import {
   contrastSlidingTabsListClass,
@@ -40,7 +54,8 @@ type ShowcaseTopBarProps = {
 };
 
 /**
- * Shared product top bar — nqui Tabs sliding segment (contrast pill) + ThemeControls.
+ * Shared product top bar — segment is a menu + ScrollArea on small screens,
+ * contrast sliding Tabs from `md` up.
  */
 export function ShowcaseTopBar({
   brand,
@@ -56,7 +71,7 @@ export function ShowcaseTopBar({
   return (
     <header
       className={cn(
-        "flex items-center justify-between gap-4",
+        "flex items-center justify-between gap-3",
         // sticky already creates a positioning context for FrostedGlass.
         // Do NOT also add `relative` — tailwind-merge keeps the last position
         // utility and drops `sticky`, which made the docs header scroll away.
@@ -73,37 +88,24 @@ export function ShowcaseTopBar({
       {frosted ? (
         <FrostedGlass blur={16} borderRadius={0} className="z-[var(--z-background,0)]" />
       ) : null}
+
       <div
         className={cn(
-          "flex min-w-0 items-center gap-2 sm:gap-3",
+          "flex min-w-0 flex-1 items-center gap-2 sm:gap-3",
           frosted && "relative z-[var(--z-content,1)]",
         )}
       >
         {brand}
         {leading}
         {segment ? (
-          <Tabs
-            value={segment.value}
-            onValueChange={segment.onValueChange}
-            className="w-fit max-w-full min-w-0"
-          >
-            <TabsList
-              aria-label={segment["aria-label"] ?? "Section"}
-              className={contrastSlidingTabsListClass(
-                "max-w-full overflow-x-auto bg-background/80 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-              )}
-            >
-              {segment.items.map((item) => (
-                <TabsTrigger
-                  key={item.value}
-                  value={item.value}
-                  className={contrastSlidingTabsTriggerClass()}
-                >
-                  {item.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+          <>
+            <div className="hidden min-w-0 flex-1 md:block">
+              <SegmentTabs segment={segment} />
+            </div>
+            <div className="min-w-0 max-w-[11rem] flex-1 sm:max-w-[13rem] md:hidden">
+              <SegmentSelect segment={segment} />
+            </div>
+          </>
         ) : null}
       </div>
 
@@ -121,5 +123,93 @@ export function ShowcaseTopBar({
         {trailing ?? <ThemeControls />}
       </div>
     </header>
+  );
+}
+
+function SegmentSelect({ segment }: { segment: ShowcaseTopBarSegment }) {
+  const label = segment["aria-label"] ?? "Section";
+  const current =
+    segment.items.find((item) => item.value === segment.value)?.label ?? label;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          aria-label={label}
+          className="h-8 w-full min-w-0 justify-between gap-1.5 px-2.5 font-medium"
+        >
+          <span className="truncate">{current}</span>
+          <HugeiconsIcon
+            icon={ArrowDown01Icon}
+            size={14}
+            strokeWidth={2}
+            className="shrink-0 opacity-70"
+          />
+        </Button>
+      </DropdownMenuTrigger>
+      {/* nqui SelectContent uses native overflow — menu + ScrollArea instead */}
+      <DropdownMenuContent
+        align="start"
+        className="min-w-[10rem] overflow-hidden p-0"
+      >
+        <ScrollArea
+          fadeMask={false}
+          className="h-fit max-h-[min(16rem,var(--radix-dropdown-menu-content-available-height,16rem))]"
+          viewportStyle={{ height: "fit-content", maxHeight: "inherit" }}
+        >
+          <div className="p-1">
+            {segment.items.map((item) => {
+              const active = item.value === segment.value;
+              return (
+                <DropdownMenuItem
+                  key={item.value}
+                  className="gap-2"
+                  onSelect={() => segment.onValueChange(item.value)}
+                >
+                  <HugeiconsIcon
+                    icon={Tick02Icon}
+                    size={14}
+                    strokeWidth={2}
+                    className={cn("shrink-0", active ? "opacity-100" : "opacity-0")}
+                    aria-hidden
+                  />
+                  {item.label}
+                </DropdownMenuItem>
+              );
+            })}
+          </div>
+        </ScrollArea>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+function SegmentTabs({ segment }: { segment: ShowcaseTopBarSegment }) {
+  return (
+    <Tabs
+      value={segment.value}
+      onValueChange={segment.onValueChange}
+      className="w-fit max-w-full min-w-0"
+    >
+      <TabsList
+        aria-label={segment["aria-label"] ?? "Section"}
+        className={contrastSlidingTabsListClass(
+          "w-max max-w-full overflow-x-auto overscroll-x-contain touch-pan-x bg-background/80 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        )}
+      >
+        {segment.items.map((item) => (
+          <TabsTrigger
+            key={item.value}
+            value={item.value}
+            className={contrastSlidingTabsTriggerClass()}
+          >
+            {item.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
   );
 }

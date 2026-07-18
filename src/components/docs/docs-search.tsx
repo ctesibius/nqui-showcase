@@ -35,7 +35,7 @@ export function DocsSearch({ className }: { className?: string }) {
   }, [query]);
 
   return (
-    <div className={cn("relative w-full max-w-xs", className)}>
+    <div className={cn("relative w-full max-w-xs shrink-0 self-center", className)}>
       <label className="sr-only" htmlFor={listId}>
         Search docs
       </label>
@@ -53,28 +53,29 @@ export function DocsSearch({ className }: { className?: string }) {
         className="h-8 w-full rounded-full border border-input bg-background px-3 text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
       />
       {open && hits.length > 0 ? (
-        <ScrollArea
-          fadeMask={false}
-          className="absolute right-0 z-50 mt-1 h-72 max-h-72 w-[min(100vw-2rem,20rem)] rounded-lg border border-border bg-popover shadow-(--shadow-elevated)"
+        <div
+          className="absolute top-full right-0 z-[var(--z-popover)] mt-1 w-[min(100vw-2rem,20rem)] overflow-hidden rounded-lg border border-border bg-popover shadow-(--shadow-elevated)"
         >
-          <ul role="listbox" className="p-1">
-            {hits.map((hit) => (
-              <li key={`${hit.id}-${hit.url}`}>
-                <Link
-                  to={hit.url}
-                  className="block rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
-                  onClick={() => {
-                    setOpen(false);
-                    setQuery("");
-                  }}
-                >
-                  <span className="line-clamp-1 font-medium">{hit.content ?? hit.url}</span>
-                  <span className="line-clamp-1 text-xs text-muted-foreground">{hit.url}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </ScrollArea>
+          <ScrollArea fadeMask={false} className="h-72 max-h-72">
+            <ul role="listbox" className="p-1">
+              {hits.map((hit) => (
+                <li key={`${hit.id}-${hit.url}`}>
+                  <Link
+                    to={hit.url}
+                    className="block rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
+                    onClick={() => {
+                      setOpen(false);
+                      setQuery("");
+                    }}
+                  >
+                    <span className="line-clamp-1 font-medium">{hit.content ?? hit.url}</span>
+                    <span className="line-clamp-1 text-xs text-muted-foreground">{hit.url}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </ScrollArea>
+        </div>
       ) : null}
     </div>
   );

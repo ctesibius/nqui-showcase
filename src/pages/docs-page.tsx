@@ -3,8 +3,10 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { Spinner } from "@nqlib/nqui";
 import browserCollections from "collections/browser";
 import { DocsArticle } from "@/components/docs/docs-article";
-import { DocsSidebar, DocsSidebarMobile } from "@/components/docs/docs-sidebar";
+import { DocsMobileNav } from "@/components/docs/docs-mobile-nav";
+import { DocsSidebar } from "@/components/docs/docs-sidebar";
 import { mdxComponents } from "@/components/docs/mdx";
+import { pageTitle, pagesInSameLibrary } from "@/lib/docs-nav";
 import { source } from "@/lib/docs-source";
 
 type DocModule = {
@@ -37,27 +39,6 @@ function DocsMdxBody({ path }: { path: string }) {
   return clientLoader.useContent(path);
 }
 
-function pageTitle(page: NonNullable<ReturnType<typeof source.getPage>>): string {
-  const data = page.data as { title?: string };
-  return typeof data.title === "string" ? data.title : "Page";
-}
-
-/** `/docs/nqui/...` → `nqui`; hub `/docs` → null */
-function docsLibraryKey(url: string): string | null {
-  const match = url.match(/^\/docs\/([^/]+)/);
-  return match?.[1] ?? null;
-}
-
-function pagesInSameLibrary(pageUrl: string) {
-  const lib = docsLibraryKey(pageUrl);
-  const all = source.getPages();
-  if (!lib) {
-    return all.filter((p) => p.url === "/docs");
-  }
-  const prefix = `/docs/${lib}`;
-  return all.filter((p) => p.url === prefix || p.url.startsWith(`${prefix}/`));
-}
-
 function DocsPageInner({ slugs }: { slugs: string[] }) {
   const page = source.getPage(slugs);
   if (!page) {
@@ -66,6 +47,7 @@ function DocsPageInner({ slugs }: { slugs: string[] }) {
 
   const [ready, setReady] = useState(false);
   useEffect(() => {
+    setReady(false);
     let cancelled = false;
     void clientLoader.preload(page.path).then(() => {
       if (!cancelled) setReady(true);
@@ -74,6 +56,14 @@ function DocsPageInner({ slugs }: { slugs: string[] }) {
       cancelled = true;
     };
   }, [page.path]);
+
+  // SPA keeps window scroll across in-docs navigations (prev/next, sidebar).
+  // Jump to top once the new page is ready so reading starts at the title.
+  useEffect(() => {
+    if (!ready) return;
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    document.documentElement.scrollTop = 0;
+  }, [ready, page.url]);
 
   if (!ready) {
     return (
@@ -90,7 +80,7 @@ function DocsPageInner({ slugs }: { slugs: string[] }) {
 
   return (
     <DocsArticle>
-      <DocsSidebarMobile />
+      <DocsMobileNav pageUrl={page.url} />
       <Suspense
         fallback={
           <div className="flex min-h-[40vh] items-center justify-center">
