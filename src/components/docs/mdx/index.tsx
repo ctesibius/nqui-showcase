@@ -1,10 +1,26 @@
+import type { ReactNode } from "react";
 import type { MDXComponents } from "mdx/types";
-import { Link } from "react-router-dom";
 import { cn } from "@nqlib/nqui";
+import { MDXLink } from "./link";
+import { Steps, Step, StepTitle, StepContent, StepDescription } from "./steps";
+import { CodeTabs, Tabs, TabsList, TabsTab, TabsPanel, Tab } from "./tabs";
+import {
+  Alert,
+  AlertContent,
+  ApiHeading,
+  ApiRow,
+  ApiTable,
+  CliBlock,
+  CommandBlock,
+  ComponentPreview,
+  ComponentProps,
+  ComponentSource,
+  ShowcaseGrid,
+  SkillsBlock,
+} from "./nqchart-blocks";
 
 /**
- * Minimal MDX component map for showcase docs.
- * Expanded in Phase 3 for nqchart-specific blocks.
+ * MDX component map for showcase docs (nqui + synced nqchart pages).
  */
 export const mdxComponents: MDXComponents = {
   h1: (props) => (
@@ -23,26 +39,8 @@ export const mdxComponents: MDXComponents = {
     <h4 className="scroll-m-24 mt-6 text-base font-semibold text-foreground" {...props} />
   ),
   p: (props) => <p className="leading-7 text-muted-foreground [&:not(:first-child)]:mt-4" {...props} />,
-  a: ({ href, children, ...props }) => {
-    if (href?.startsWith("/")) {
-      return (
-        <Link to={href} className="font-medium text-foreground underline-offset-4 hover:underline" {...props}>
-          {children}
-        </Link>
-      );
-    }
-    return (
-      <a
-        href={href}
-        className="font-medium text-foreground underline-offset-4 hover:underline"
-        target={href?.startsWith("http") ? "_blank" : undefined}
-        rel={href?.startsWith("http") ? "noreferrer" : undefined}
-        {...props}
-      >
-        {children}
-      </a>
-    );
-  },
+  a: MDXLink,
+  Link: MDXLink,
   ul: (props) => <ul className="my-4 ml-6 list-disc space-y-2 text-muted-foreground" {...props} />,
   ol: (props) => <ol className="my-4 ml-6 list-decimal space-y-2 text-muted-foreground" {...props} />,
   li: (props) => <li className="leading-7" {...props} />,
@@ -89,4 +87,31 @@ export const mdxComponents: MDXComponents = {
     // eslint-disable-next-line jsx-a11y/alt-text -- MDX authors supply alt
     <img className="my-4 rounded-lg border border-border" {...props} />
   ),
+
+  // nqchart / fumadocs-style blocks
+  Steps,
+  Step,
+  StepTitle,
+  StepContent,
+  StepDescription,
+  CodeTabs,
+  Tabs,
+  Tab,
+  TabsList,
+  TabsTab,
+  TabsPanel,
+  CommandBlock,
+  CliBlock,
+  SkillsBlock,
+  ComponentPreview,
+  ComponentSource,
+  ComponentProps,
+  Alert,
+  AlertContent,
+  ApiHeading,
+  ApiTable,
+  ApiRow,
+  ShowcaseGrid,
+  // Rare live tag outside fences in upstream MDX
+  Radar: ({ children }: { children?: ReactNode }) => <>{children}</>,
 };

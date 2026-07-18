@@ -1,4 +1,29 @@
 {
-  "title": "nqchart",
-  "pages": ["index"]
+  "pages": [
+    "index",
+    "installation",
+    "changelog",
+    "components",
+    "area-chart",
+    "line-chart",
+    "bar-chart",
+    "composed-chart",
+    "radar-chart",
+    "pie-chart",
+    "heatmap-chart",
+    "calendar-chart",
+    "radial-chart",
+    "scatter-chart",
+    "treemap-chart",
+    "funnel-chart",
+    "waterfall-chart",
+    "sparkline-chart",
+    "ui/background",
+    "ui/tooltip",
+    "ui/legend",
+    "chart-config",
+    "hover-focus",
+    "chart-recipes"
+  ],
+  "title": "nqchart"
 }

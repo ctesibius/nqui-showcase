@@ -1,0 +1,51 @@
+---
+title: Chart recipes
+description: Data helpers for histogram, Pareto, heatmap, bullet, gauge, and box plot patterns
+image: /og/chart-config.png
+---
+
+BI-style charts are built from **primitives** plus small data helpers in `chart-recipes`. Install the helpers once via the shadcn registry, then compose the matching `NQ*Chart` as documented on each chart page.
+
+## Installation
+
+<CliBlock commands={["@nqchart/chart-recipes"]} />
+
+This runs `shadcn add` and copies `lib/chart-recipes.ts` into your project. Chart components are installed separately (e.g. `@nqchart/bar-chart`).
+
+## Helpers
+
+| Helper | Use with | Doc examples |
+|--------|----------|----------------|
+| `binForHistogram(values, binCount?)` | `NQBarChart` | [Bar chart](/docs/nqchart/bar-chart/static) → Histogram |
+| `prepareBulletRow(label, { actual, target, max? })` | `NQBarChart` `layout="horizontal"` | [Bar chart](/docs/nqchart/bar-chart/static) → Bullet chart |
+| `prepareParetoData(rows, nameKey, valueKey)` | `NQComposedChart` | [Composed chart](/docs/nqchart/composed-chart/static) → Pareto |
+| `prepareBoxPlotRow(category, samples)` | `NQComposedChart` stacked bars + line | [Composed chart](/docs/nqchart/composed-chart/static) → Box plot |
+| `prepareHeatmapCells(rowLabels, colLabels, matrix)` | `NQHeatmapChart` | [Heatmap chart](/docs/nqchart/heatmap-chart/static) |
+| `workloadUtilization(assigned, available)` | any workload view | Returns utilization % |
+| `prepareCalendarWorkloadCells(days)` | `NQCalendarChart` | [Calendar chart](/docs/nqchart/calendar-chart/static) → Employee workload |
+| `prepareTeamWorkloadMatrix(dates, rows)` | `NQHeatmapChart` | [Calendar chart](/docs/nqchart/calendar-chart/static) → Team workload |
+| `normalizeGaugeValue(value, min?, max?)` | `NQRadialChart` `variant="semi"` | [Radial chart](/docs/nqchart/radial-chart/static) → Gauge with target |
+| `prepareGaugeRows({ score, target?, … })` | `NQRadialChart` `nameKey="series"` | Same — `series` keys must match `chartConfig` |
+
+## Import
+
+```tsx
+import {
+  binForHistogram,
+  prepareBulletRow,
+  prepareParetoData,
+  prepareBoxPlotRow,
+  prepareHeatmapCells,
+  workloadUtilization,
+  prepareCalendarWorkloadCells,
+  prepareTeamWorkloadMatrix,
+  normalizeGaugeValue,
+  prepareGaugeRows,
+} from "@/lib/chart-recipes";
+```
+
+Inside this repo, examples use `@/registry/lib/chart-recipes`.
+
+## When not to add a new chart file
+
+If the visualization only changes **data shape** or **props** on an existing primitive, extend `chart-recipes` and add an `ex-*` example on the primitive doc page — do not create a separate `NQHistogramChart` package.

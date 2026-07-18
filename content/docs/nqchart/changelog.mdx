@@ -1,0 +1,125 @@
+---
+title: Changelog
+description: Release notes and notable changes to NQChart
+---
+
+## 0.1.8 — 2026-07-18
+
+### Hover & intro
+
+- **Intro × axisPointer** — hovering during a staggered area/line L→R enter could cancel unfinished tweens (clipped bands) and leave a stuck dashed axis cursor. During `introLock`, zrender hit-testing is silenced (`getZr().silent = true`) and tip / axisPointer are cleared; on release and `globalout`, tip + axisPointer leave + `downplay` run again.
+- **Post-intro snap** — after the lock lifts, series are set with `animation: false` so any interrupted enter geometry finishes as full paths (most visible on multi-series stacked areas).
+
+See the fixed note `hover-focus-intro-axis-pointer-clip` and [hover-focus](/docs/nqchart/hover-focus).
+
+---
+
+## 0.1.7 — 2026-07-16
+
+### Background & grid
+
+- **`ChartBackground` clips to the real plot rect** — the wallpaper now takes its box from ECharts at runtime (`coordinateSystem.getRect()`) instead of static CSS. `containLabel: true` sizes the grid by *measuring rendered axis label text*, so the plot box depends on the consumer's data — `1,250,000` pushes it further in than `100`. Anything percentage-based drifted outside the axes.
+- **`ChartPlotInsets` gains `top` / `bottom`** — previously `left` / `right` only.
+- **Background XOR Grid** — wallpaper and `<Grid />` are two chrome layers that were never meant to stack; together they render a pattern under wide dotted guides that read as a second, inconsistent grid. Documented as a rule in the new `background-and-grid.md` skill, including which chart families expose a plot rect (cartesian only — not `pie`, `radar`, `radial`, `treemap`, `funnel`, `calendar`).
+
+### Composed chart
+
+- **`Whiskers` part** — box-plot whiskers for `@nqlib/nqchart/composed-chart`: stems from min↔Q1 and Q3↔max with end caps, driven by `minKey` / `q1Key` / `q3Key` / `maxKey`. Participates in the legend like any other series.
+
+### Motion
+
+- **Motion tokens mirror the nqui scale** — instant / micro / quick / standard and friends, with chart intros kept on their own duration. Values are *copied* from `@nqlib/nqui`'s `motion.css`, not imported, so nqchart stays free of an `@nqlib/nqui` dependency.
+
+---
+
+## 0.1.6 — 2026-07-15
+
+### Hover & tooltip
+
+- **Tooltip trigger** — preserve compiler-selected `item` / `axis` triggers during option merge; infer `item` for radar, treemap, and scatter.
+- **Radar tooltip** — format vector values as joined numbers instead of raw arrays.
+- **`globalout`** — dispatch `hideTip` on chart exit so append-to-body tooltips do not linger.
+- **Tooltip chrome** — `pointer-events: none`, zero transition, and cursor offset to reduce hover glitter.
+
+### Public API
+
+- Export **`ChartContainer`**, **`ChartStyle`**, and **`getColorsCount`** from `@nqlib/nqchart` root.
+
+---
+
+## 0.1.5 — 2026-07-10
+
+### Charts & engine
+
+- **Sparkline tooltip** — series name resolves from `chartConfig` label (or data key) instead of ECharts default `"series0"`.
+- **Sparkline runtime** — disable series animation so gradient `areaStyle` does not crash zrender during tween (`Cannot read properties of undefined (reading 'length')`).
+
+---
+
+## 0.1.4 — 2026-07-04
+
+### Charts & engine
+
+- **Cartesian grid** — tighter default margins so plots fill preview containers; bottom padding reduced when no brush slider.
+- **Split lines** — value-axis guides use dotted lines aligned to tick values (light + line compilers).
+
+### Dependencies
+
+- **hono** — pnpm override to `>=4.12.25` (fixes [GHSA-88fw-hqm2-52qc](https://github.com/advisories/GHSA-88fw-hqm2-52qc) in dev tooling via `shadcn` → `@modelcontextprotocol/sdk`).
+
+### Design context
+
+- **PRODUCT.md** and **DESIGN.md** — strategic and visual system docs for agent-assisted UI work.
+- **`.impeccable/design.json`** — machine-readable design sidecar (tokens, components, rules).
+- **`impeccable` agent skill** under `.agents/skills/impeccable/`.
+
+---
+
+## 0.1.1 — 2026-06-27
+
+### Hover focus
+
+Unified hover behavior across every chart: one mark at full opacity, everything else at `0.2`. See the new [Hover Focus](/docs/nqchart/hover-focus) doc and `emphasis-presets.ts`.
+
+- **Scatter** — runtime repair for Symbol path blur and stale multi-focus (`scatter-hover-focus.ts`).
+- **Treemap** — disabled native emphasis, instant layout updates, blur-only sibling sync (`treemap-hover-focus.ts`).
+- **Funnel** — same repair pattern for adjacent stage hover (`funnel-hover-focus.ts`).
+- **Waterfall** — index-focus repair on stacked `__wf_values__` bars (`waterfall-hover-focus.ts`).
+- **Radial bar / rose** — series-level focus with instant state transitions (no gradient tween flicker).
+- **Tooltip** — pointer-events none, zero transition, cursor offset to prevent hover flicker on all charts.
+
+### Charts & engine
+
+- Shared **chart corner radius** token and bar radius helpers.
+- **Composed**, **bar**, **gauge**, **radial**, **area**, **line**, and **pie** compiler polish and animation tokens.
+- **Scatter** merged into a single ECharts series with per-row `itemFocus` for Symbol compatibility.
+- **Treemap** compiler rebuilt — borders on levels only, no `colorSaturation` / `colorAlpha`, `sort: false`.
+- Vitest coverage added for scatter, treemap, funnel, waterfall, and radial compilers.
+
+### Removed
+
+- **Sankey chart** — registry entry, docs page, and compiler removed (not ready for release quality).
+
+### Docs & site
+
+- README hero dashboard and chart gallery screenshots.
+- CI workflow to capture README assets (`capture-readme.yml`).
+- Landing demo dashboard and header tweaks.
+
+### Maintainer
+
+- **`fixed` agent skill** — searchable regression index (domain + semantic) for past hover-focus fixes.
+- **ECharts AI skill** — internal dev reference for option shapes (not published to consumer index).
+- Skill frontmatter validation extended for `fixed/` skill files.
+
+---
+
+## 0.1.0 — 2026-06-27
+
+Initial release of NQChart.
+
+- Migrated chart engine from Recharts to Apache ECharts
+- Added Vitest baseline for compiler and LLM pipeline tests
+- Landing page accessibility and lazy-loaded demo dashboard
+- MCP endpoint JSON-RPC error handling
+- Contributor docs rewritten for pnpm and ECharts workflow
