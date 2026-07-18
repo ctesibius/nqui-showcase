@@ -25,6 +25,7 @@ import {
   Separator,
   ToggleGroup,
   ToggleGroupItem,
+  ScrollArea,
 } from "@nqlib/nqui";
 import { groupRowsByColumn, type ColumnSchema } from "@nqlib/nqgrid/engine";
 import {
@@ -351,7 +352,8 @@ function BoardView({
   const cardFields = schema.filter((c) => c.id !== TITLE_FIELD && c.id !== boardColumn.id && c.id !== "status");
 
   return (
-    <div className="flex h-full gap-3 overflow-x-auto p-3">
+    <ScrollArea orientation="horizontal" fadeMask={false} className="h-full w-full">
+      <div className="flex h-full gap-3 p-3">
       {groups.map((group) => (
         <div key={group.key} className="flex w-72 shrink-0 flex-col gap-2">
           <div className="flex items-center gap-2 px-1">
@@ -384,6 +386,7 @@ function BoardView({
           </div>
         </div>
       ))}
-    </div>
+      </div>
+    </ScrollArea>
   );
 }

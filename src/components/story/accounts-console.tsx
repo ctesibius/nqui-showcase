@@ -15,6 +15,7 @@ import {
   TableRow,
   ToggleGroup,
   ToggleGroupItem,
+  ScrollArea,
   cn,
 } from "@nqlib/nqui";
 import {
@@ -120,7 +121,7 @@ export function AccountsConsole() {
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto">
+          <ScrollArea orientation="horizontal" fadeMask={false} className="w-full">
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
@@ -182,7 +183,7 @@ export function AccountsConsole() {
                 })}
               </TableBody>
             </Table>
-          </div>
+          </ScrollArea>
         </div>
 
         {/* ── Pipeline funnel ────────────────────────────────────────────── */}

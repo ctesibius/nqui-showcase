@@ -102,11 +102,27 @@
   overflow: hidden;
 }
 
-/* Multi-surface report: allow vertical scroll inside the stage. */
+/* Multi-surface report: one scrollport (not the chart islands inside). */
 .blk-stage--report {
   flex: 1;
   min-height: 40rem;
   overflow: auto;
+  /* Stable gutter — scrollbar appearing on hover must not resize ECharts. */
+  scrollbar-gutter: stable;
+}
+
+/*
+ * Chart island inside a scrolling report — same contract as .blk-stage--chart.
+ * overflow:hidden + contain keeps ECharts hit-testing off the scrollport;
+ * without this, axisPointer freezes on first hover (charts page is fine).
+ */
+.blk-ledger-chart {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  height: auto;
+  overflow: hidden;
+  contain: layout paint;
 }
 
 /* Timeless ledger ink — dark mode flips to paper-on-slate. */

@@ -15,8 +15,11 @@ import { NQExamplePieChart } from "../../nqchart/catalog/adapters/ex-pie-chart";
  * Area / pie / radar use the same adapters as /charts — hand-rolled compact
  * variants were glittering under hover (brush, leader labels, mismatched polar data).
  *
- *   className="h-full w-full p-4"  — keeps ChartContainer aspect-video
+ *   className="h-full w-full p-4"  — docs ChartContainer mount
  *   showBrush={false}             — omit range strip on compact cards (bar/funnel)
+ *
+ * Stuck dashed cursor / series clipped mid-plot → see
+ * `.cursor/skills/nqchart-embed/SKILL.md` (intro×hover race vs hit-test desync).
  */
 
 const DOCS = "h-full w-full p-4";

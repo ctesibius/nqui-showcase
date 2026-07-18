@@ -23,8 +23,11 @@ export default function RecipesHub() {
       <div className="flex flex-col gap-2 max-w-2xl">
         <h1 className="text-3xl font-bold tracking-tight">Recipes</h1>
         <p className="text-muted-foreground">
-          Learn how to compose nqui into product UI — when to use each pattern, and how to
-          avoid busy layouts. Open the catalog only when you need variants or props.
+          Full-page composition demos. Compact patterns (settings, toolbar, forms) live on{" "}
+          <Link to="/blocks" className="underline-offset-4 hover:underline">
+            /blocks
+          </Link>
+          .
         </p>
       </div>
 
@@ -32,13 +35,20 @@ export default function RecipesHub() {
         <AlertTitle>How to use this app</AlertTitle>
         <AlertDescription className="flex flex-col gap-2">
           <p>
-            <strong>Recipes</strong> show realistic screens. <strong>Catalog</strong> lists every
-            component variant. <strong>Design system</strong> documents tokens. Start with a recipe,
-            then dip into the catalog for one component at a time.
+            <strong>Blocks</strong> are paste-ready composed patterns. <strong>Recipes</strong>{" "}
+            here are full screens. <strong>Catalog</strong> lists every component variant.{" "}
+            <strong>Design system</strong> documents tokens.
           </p>
           <p className="text-sm">
-            Docs: composition skills in the nqui package, live catalog in this app at{" "}
-            <code className="text-xs">/catalog</code>.
+            Start at{" "}
+            <Link to="/blocks" className="underline-offset-4 hover:underline">
+              /blocks
+            </Link>
+            , then dip into{" "}
+            <Link to="/catalog" className="underline-offset-4 hover:underline">
+              /catalog
+            </Link>{" "}
+            for props.
           </p>
         </AlertDescription>
       </Alert>
@@ -68,6 +78,23 @@ export default function RecipesHub() {
               </div>
             </Card>
           ))}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Blocks gallery</CardTitle>
+              <CardDescription>
+                Compact composed patterns — settings, toolbar, sign-in, tables, and more.
+              </CardDescription>
+            </CardHeader>
+            <div className="flex flex-col gap-3 px-6 pb-6">
+              <p className="text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">Teaches: </span>
+                Paste-ready product chrome without a full-page shell.
+              </p>
+              <Button size="sm" className="w-fit" asChild>
+                <Link to="/blocks">Open /blocks</Link>
+              </Button>
+            </div>
+          </Card>
         </div>
       </section>
 
@@ -78,18 +105,20 @@ export default function RecipesHub() {
             Look up APIs and tokens — not day-to-day composition.
           </p>
         </div>
-        <ItemGroup>
+        <ItemGroup className="max-w-xl">
           {referenceEntries.map((entry) => (
-            <Item key={entry.path} variant="outline">
-              <ItemContent>
-                <ItemTitle>{entry.title}</ItemTitle>
-                <ItemDescription>{entry.description}</ItemDescription>
-              </ItemContent>
-              <ItemActions>
-                <Button variant="outline" size="sm" asChild>
-                  <Link to={entry.path}>Open</Link>
-                </Button>
-              </ItemActions>
+            <Item key={entry.path} variant="outline" size="sm" asChild>
+              <Link to={entry.path}>
+                <ItemContent>
+                  <ItemTitle>{entry.title}</ItemTitle>
+                  <ItemDescription>{entry.description}</ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  <Button size="sm" variant="ghost">
+                    Open
+                  </Button>
+                </ItemActions>
+              </Link>
             </Item>
           ))}
         </ItemGroup>

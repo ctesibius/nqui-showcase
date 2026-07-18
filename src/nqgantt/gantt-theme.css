@@ -12,8 +12,6 @@
 
 .gantt {
   --gantt-critical-color: oklch(0.58 0.28 27);
-  --gantt-critical-glow-soft: color-mix(in srgb, var(--gantt-critical-color) 42%, transparent);
-  --gantt-critical-glow-strong: color-mix(in srgb, var(--gantt-critical-color) 68%, transparent);
   --gantt-critical-tint: color-mix(in srgb, var(--gantt-critical-color) 24%, transparent);
 
   /*
@@ -34,25 +32,19 @@
   --gantt-bar-done-base: var(--background);
   --gantt-bar-feather-px: 6;
 
-  /* nqui Button chrome — subtle corner radius + ring + inset highlight + accent glow */
+  /* nqui Button chrome — radius + ring + inset highlight (no decorative glow) */
   --gantt-bar-radius: 0.375rem;
   --gantt-bar-ring-mix: 38%;
-  --gantt-bar-glow-mix: 22%;
-  --gantt-bar-glow-blur: 10px;
-  --gantt-bar-lift-y: 2px;
-  --gantt-bar-lift-alpha: 0.12;
+  --gantt-bar-lift-y: 1px;
+  --gantt-bar-lift-alpha: 0.1;
   --gantt-bar-inset-highlight: rgb(255 255 255 / 0.28);
 
-  /* Inline bar label legibility over tinted fills */
-  --gantt-bar-inline-label-shadow:
-    0 1px 1px rgb(255 255 255 / 0.95),
-    0 0 8px rgb(255 255 255 / 0.6);
+  /* Inline bar label legibility over tinted fills — tight shadow, no bloom */
+  --gantt-bar-inline-label-shadow: 0 1px 1px rgb(255 255 255 / 0.9);
 }
 
 .dark .gantt {
   --gantt-critical-color: oklch(0.78 0.28 25);
-  --gantt-critical-glow-soft: color-mix(in srgb, var(--gantt-critical-color) 58%, transparent);
-  --gantt-critical-glow-strong: color-mix(in srgb, var(--gantt-critical-color) 82%, transparent);
   --gantt-critical-tint: color-mix(in srgb, var(--gantt-critical-color) 34%, transparent);
 
   --gantt-bar-track-tint: 38;
@@ -62,35 +54,15 @@
   --gantt-bar-done-base: var(--card);
 
   --gantt-bar-ring-mix: 36%;
-  --gantt-bar-glow-mix: 16%;
-  --gantt-bar-glow-blur: 8px;
-  --gantt-bar-lift-y: 2px;
-  --gantt-bar-lift-alpha: 0.22;
+  --gantt-bar-lift-y: 1px;
+  --gantt-bar-lift-alpha: 0.2;
   --gantt-bar-inset-highlight: rgb(255 255 255 / 0.12);
 
-  --gantt-bar-inline-label-shadow:
-    0 1px 2px rgb(0 0 0 / 0.78),
-    0 0 3px rgb(0 0 0 / 0.32);
+  --gantt-bar-inline-label-shadow: 0 1px 2px rgb(0 0 0 / 0.75);
 }
 
 .gantt-critical-bar {
   position: relative;
-}
-
-@keyframes gantt-cp-glow-bar {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 transparent;
-  }
-  50% {
-    box-shadow: 0 0 11px 1px var(--gantt-critical-glow-strong);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .gantt[data-critical-path-style="glow"] .gantt-critical-bar {
-    animation: gantt-cp-glow-bar 4.5s ease-in-out infinite;
-  }
 }
 
 .gantt-cursor-reveal {
@@ -114,7 +86,7 @@
   }
 }
 
-/* Task bar shell — rounded track + nqui button chrome (ring, lift, glow, sheen) */
+/* Task bar shell — rounded track + ring + lift (no accent halo / box glow) */
 .gantt [data-gantt-feature-bar]:not([data-gantt-summary="true"]) {
   border-radius: var(--gantt-bar-radius) !important;
   background-color: color-mix(
@@ -128,9 +100,7 @@
     0 var(--gantt-bar-lift-y) calc(var(--gantt-bar-lift-y) * 2)
       rgb(0 0 0 / var(--gantt-bar-lift-alpha)),
     0 0 0 1px color-mix(in srgb, var(--gantt-bar-accent) var(--gantt-bar-ring-mix), transparent),
-    inset 0 1px 0 var(--gantt-bar-inset-highlight),
-    0 0 var(--gantt-bar-glow-blur)
-      color-mix(in srgb, var(--gantt-bar-accent) var(--gantt-bar-glow-mix), transparent) !important;
+    inset 0 1px 0 var(--gantt-bar-inset-highlight) !important;
 }
 
 .gantt .group\/bar:hover [data-gantt-feature-bar]:not([data-gantt-summary="true"]) {
@@ -143,9 +113,7 @@
     0 calc(var(--gantt-bar-lift-y) + 1px) calc(var(--gantt-bar-lift-y) * 3)
       rgb(0 0 0 / var(--gantt-bar-lift-alpha)),
     0 0 0 1px color-mix(in srgb, var(--gantt-bar-accent) calc(var(--gantt-bar-ring-mix) + 8%), transparent),
-    inset 0 1px 0 var(--gantt-bar-inset-highlight),
-    0 0 calc(var(--gantt-bar-glow-blur) + 4px)
-      color-mix(in srgb, var(--gantt-bar-accent) calc(var(--gantt-bar-glow-mix) + 10%), transparent) !important;
+    inset 0 1px 0 var(--gantt-bar-inset-highlight) !important;
 }
 
 /* Top-light sheen — matches nqui enhanced button gradient */
@@ -168,9 +136,7 @@
     0 calc(var(--gantt-bar-lift-y) + 1px) calc(var(--gantt-bar-lift-y) * 2)
       rgb(0 0 0 / var(--gantt-bar-lift-alpha)),
     0 0 0 1px color-mix(in srgb, var(--gantt-bar-accent) calc(var(--gantt-bar-ring-mix) + 4%), transparent),
-    inset 0 1px 0 var(--gantt-bar-inset-highlight),
-    0 0 calc(var(--gantt-bar-glow-blur) + 2px)
-      color-mix(in srgb, var(--gantt-bar-accent) calc(var(--gantt-bar-glow-mix) + 4%), transparent) !important;
+    inset 0 1px 0 var(--gantt-bar-inset-highlight) !important;
 }
 
 /* Clip progress fill to bar silhouette */
@@ -206,18 +172,18 @@
 
 /* Summary bracket bars — lift saturation so groups track sidebar dots. */
 .gantt [data-gantt-summary="true"] svg[aria-hidden="true"] {
-  filter: saturate(1.18) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.075));
+  filter: saturate(1.18);
 }
 
 .dark .gantt [data-gantt-summary="true"] svg[aria-hidden="true"] {
-  filter: saturate(1.12) drop-shadow(0 1px 1px rgb(0 0 0 / 0.28));
+  filter: saturate(1.12);
 }
 
 .dark .gantt [data-gantt-summary="true"] {
   opacity: 1 !important;
 }
 
-/* Task name + meta inside bar pills — halo for contrast over accent fills */
+/* Task name + meta inside bar pills — tight contrast, no bloom */
 .gantt .gantt-bar-inline-text {
   text-shadow: var(--gantt-bar-inline-label-shadow);
 }

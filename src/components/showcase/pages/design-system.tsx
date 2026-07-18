@@ -8,6 +8,7 @@ import {
   Button,
 } from "@nqlib/nqui"
 import { RadiusCornerDiagram } from "../design-system/radius-corner-diagram"
+import { ThemeTokenControls } from "../theme-tokens/theme-token-controls"
 
 export default function DesignSystem() {
   return (
@@ -18,6 +19,23 @@ export default function DesignSystem() {
           Foundational tokens: color, typography, radius, spacing, layout.
         </p>
       </div>
+
+      <section id="play" className="space-y-4">
+        <h2 className="text-2xl font-semibold">Play with tokens</h2>
+        <Card>
+          <CardHeader>
+            <CardTitle>Primary &amp; radius presets</CardTitle>
+            <CardDescription>
+              Changes apply app-wide — catalog, blocks, landing, and charts. Same controls are also
+              available from the floating paint button on every page. Stored in this browser until
+              you reset to Default.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ThemeTokenControls variant="full" />
+          </CardContent>
+        </Card>
+      </section>
 
       {/* Color */}
       <section id="color" className="space-y-4">

@@ -1,5 +1,6 @@
 import { type ComponentType, type SVGProps, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
+import { ScrollArea } from "@nqlib/nqui";
 
 /** A single showcase slide: a live specimen plus metadata. */
 export interface Specimen {
@@ -145,56 +146,60 @@ export function SpecimenCarousel({
         </div>
       </div>
 
-      <div
-        ref={trackRef}
+      <ScrollArea
+        orientation="horizontal"
+        fadeMask={false}
+        viewportRef={trackRef}
+        className="carousel-scrollbar -mx-1 w-auto scroll-px-1 px-1 pb-3 focus-visible:rounded-xl"
         role="region"
         aria-roledescription="carousel"
         aria-label={label}
         tabIndex={0}
         onKeyDown={onKeyDown}
-        className="carousel-scrollbar -mx-1 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-1 px-1 pb-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:rounded-xl"
       >
-        {items.map((item, i) => (
-          <div
-            key={item.id}
-            ref={(el) => {
-              if (el) itemRefs.current.set(item.id, el);
-              else itemRefs.current.delete(item.id);
-            }}
-            data-specimen-id={item.id}
-            role="group"
-            aria-roledescription="slide"
-            aria-label={`${i + 1} of ${items.length}`}
-            className="w-[86%] shrink-0 snap-start sm:w-[62%] lg:w-[46%]"
-          >
-            <figure className="flex h-full flex-col rounded-xl border bg-background/60 p-6 backdrop-blur-md">
-              <figcaption className="flex items-baseline justify-between gap-3">
-                <span className="text-base font-medium">{item.name}</span>
-                <span className="font-mono text-xs text-muted-foreground">
-                  {item.component}
-                </span>
-              </figcaption>
+        <div className="flex snap-x snap-mandatory gap-4">
+          {items.map((item, i) => (
+            <div
+              key={item.id}
+              ref={(el) => {
+                if (el) itemRefs.current.set(item.id, el);
+                else itemRefs.current.delete(item.id);
+              }}
+              data-specimen-id={item.id}
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`${i + 1} of ${items.length}`}
+              className="w-[86%] shrink-0 snap-start sm:w-[62%] lg:w-[46%]"
+            >
+              <figure className="flex h-full flex-col rounded-xl border bg-background/60 p-6 backdrop-blur-md">
+                <figcaption className="flex items-baseline justify-between gap-3">
+                  <span className="text-base font-medium">{item.name}</span>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {item.component}
+                  </span>
+                </figcaption>
 
-              <div className={`mt-5 min-h-0 ${bodyClassName}`}>
-                <item.Render />
-              </div>
+                <div className={`mt-5 min-h-0 ${bodyClassName}`}>
+                  <item.Render />
+                </div>
 
-              <p className="mt-4 text-sm text-muted-foreground">{item.blurb}</p>
+                <p className="mt-4 text-sm text-muted-foreground">{item.blurb}</p>
 
-              <ul className="mt-3 flex flex-wrap gap-1.5">
-                {item.tags.map((tag) => (
-                  <li
-                    key={tag}
-                    className="rounded-full bg-foreground/5 px-2.5 py-0.5 font-mono text-xs text-muted-foreground"
-                  >
-                    {tag}
-                  </li>
-                ))}
-              </ul>
-            </figure>
-          </div>
-        ))}
-      </div>
+                <ul className="mt-3 flex flex-wrap gap-1.5">
+                  {item.tags.map((tag) => (
+                    <li
+                      key={tag}
+                      className="rounded-full bg-foreground/5 px-2.5 py-0.5 font-mono text-xs text-muted-foreground"
+                    >
+                      {tag}
+                    </li>
+                  ))}
+                </ul>
+              </figure>
+            </div>
+          ))}
+        </div>
+      </ScrollArea>
     </div>
   );
 }

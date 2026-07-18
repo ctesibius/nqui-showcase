@@ -1,10 +1,10 @@
 import * as React from "react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
+  Book01Icon,
   FileIcon,
   HomeIcon,
   LayoutIcon,
-  CheckListIcon,
   Moon01Icon,
   SettingsIcon,
   Sun01Icon,
@@ -12,7 +12,7 @@ import {
 import { useTheme } from "next-themes"
 import { getShowcaseThemeLabel, nextShowcaseTheme } from "../lib/showcase-theme"
 import { useLocation, Link } from "react-router-dom"
-import { NQUI_HUB_PATH, showcaseRoutes } from "../config/showcase-nav"
+import { LANDING_PATH, NQUI_HUB_PATH, showcaseRoutes } from "../config/showcase-nav"
 import { NavUser } from "./nav-user"
 import {
   NquiLogo,
@@ -28,10 +28,9 @@ import {
 } from "@nqlib/nqui"
 
 const navIcons: Record<string, typeof HomeIcon> = {
-  [NQUI_HUB_PATH]: HomeIcon,
+  [LANDING_PATH]: HomeIcon,
+  [NQUI_HUB_PATH]: Book01Icon,
   "/patterns": LayoutIcon,
-  "/recipes/settings": SettingsIcon,
-  "/recipes/tracker": CheckListIcon,
   "/recipes/elevation": LayoutIcon,
   "/catalog": FileIcon,
   "/design-system": SettingsIcon,
@@ -64,7 +63,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild className="overflow-visible md:h-8 md:p-0">
-              <Link to={NQUI_HUB_PATH}>
+              <Link to={LANDING_PATH}>
                 <div className="flex aspect-square size-8 min-w-8 items-center justify-center overflow-visible rounded-lg">
                   <NquiLogo className="size-6" />
                 </div>

@@ -334,3 +334,28 @@ body {
     background-color: color-mix(in oklch, var(--muted-foreground) 45%, transparent);
   }
 }
+
+/* Fumadocs / Shiki dual-theme tokens (github-light + github-dark). */
+.docs-codeblock .shiki,
+.docs-mdx .shiki {
+  background-color: transparent !important;
+}
+
+.docs-codeblock .shiki code,
+.docs-mdx pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+.docs-codeblock .shiki span,
+.docs-mdx .shiki span {
+  color: var(--shiki-light);
+}
+
+.dark .docs-codeblock .shiki span,
+.dark .docs-mdx .shiki span {
+  color: var(--shiki-dark);
+}

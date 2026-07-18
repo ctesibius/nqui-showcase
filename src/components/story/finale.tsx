@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Button } from "@nqlib/nqui";
+import { Button, ScrollArea } from "@nqlib/nqui";
 import { Reveal } from "./motion-primitives";
 
 const INSTALL_COMMANDS = `pnpm add @nqlib/nqui @nqlib/nqchart
@@ -22,9 +22,15 @@ export function StoryFinale() {
           </p>
         </Reveal>
         <Reveal delay={0.1} margin="0px" className="mt-10 w-full max-w-md">
-          <pre className="overflow-x-auto rounded-lg border bg-muted/40 px-5 py-4 text-left font-mono text-sm leading-relaxed">
-            {INSTALL_COMMANDS}
-          </pre>
+          <ScrollArea
+            orientation="horizontal"
+            fadeMask={false}
+            className="w-full rounded-lg border bg-muted/40"
+          >
+            <pre className="px-5 py-4 text-left font-mono text-sm leading-relaxed whitespace-pre">
+              {INSTALL_COMMANDS}
+            </pre>
+          </ScrollArea>
         </Reveal>
         <Reveal delay={0.16} margin="0px" className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Button asChild>

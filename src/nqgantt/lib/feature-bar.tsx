@@ -46,7 +46,7 @@ export interface GanttFeatureBarShellProps {
   /** Group lane color — tints summary brackets and task fills. */
   groupColor?: string
   progress?: number
-  /** Subtle animated glow when the bar is on the critical path (border stays standard). */
+  /** Marks the bar as on the critical path (style via criticalPathStyle). */
   isCritical?: boolean
   /** Parent/summary row — bracket bar spanning rolled-up child schedule. */
   isSummary?: boolean
@@ -138,10 +138,8 @@ function ProjectSummaryBar({
         viewBox={`0 0 100 ${height}`}
         preserveAspectRatio="none"
         aria-hidden
-        // Lift the bracket off the surface the same way task pills do — a soft
-        // drop shadow in screen px (immune to the non-uniform viewBox stretch).
-        style={{ filter: "drop-shadow(0 1px 1.5px rgba(0,0,0,0.22))" }}
       >
+
         <defs>
           {/* Bracket silhouette = union of rail + both feet. We paint each
               layer as ONE full-bar rect and clip it to this shape, so the

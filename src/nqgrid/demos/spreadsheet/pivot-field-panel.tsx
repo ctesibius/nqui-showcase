@@ -14,6 +14,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  ScrollArea,
   cn,
 } from "@nqlib/nqui";
 import {
@@ -332,7 +333,8 @@ export function PivotFieldPanel({
         setOverZoneId(null);
       }}
     >
-      <div className="flex w-full flex-col gap-3 overflow-y-auto">
+      <ScrollArea fadeMask={false} className="min-h-0 w-full flex-1">
+        <div className="flex w-full flex-col gap-3 pr-1">
         <div className="flex flex-col gap-1">
           <span className="text-xs uppercase tracking-wider text-muted-foreground">
             Fields
@@ -384,7 +386,8 @@ export function PivotFieldPanel({
             </Zone>
           );
         })}
-      </div>
+        </div>
+      </ScrollArea>
       <DragOverlay dropAnimation={null}>
         {activeKey ? (
           <GhostChip

@@ -13,6 +13,7 @@ import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
+  ScrollArea,
 } from "@nqlib/nqui"
 import {
   CommandEmpty,
@@ -39,14 +40,6 @@ const routeToBreadcrumbs: Record<string, { label: string; path: string }[]> = {
   "/patterns": [
     { label: "Recipes", path: NQUI_HUB_PATH },
     { label: "Commerce dashboard", path: "/patterns" },
-  ],
-  "/recipes/settings": [
-    { label: "Recipes", path: NQUI_HUB_PATH },
-    { label: "Workspace settings", path: "/recipes/settings" },
-  ],
-  "/recipes/tracker": [
-    { label: "Recipes", path: NQUI_HUB_PATH },
-    { label: "Sprint tracker", path: "/recipes/tracker" },
   ],
   "/recipes/elevation": [
     { label: "Recipes", path: NQUI_HUB_PATH },
@@ -159,11 +152,12 @@ function AppLayoutContent() {
         >
           Skip to main content
         </a>
-        <div
-          ref={scrollContainerRef}
-          data-main-scroll="true"
-          className="flex-1 min-h-0 flex flex-col overflow-y-auto overflow-x-hidden"
+        <ScrollArea
+          fadeMask={false}
+          viewportRef={scrollContainerRef}
+          className="min-h-0 flex-1"
         >
+          <div data-main-scroll="true" className="flex min-h-full flex-col">
           {/* Header with FrostedGlass for content behind and reflections nearby */}
           <header className="sticky top-0 z-[var(--z-sticky-page)] flex-shrink-0 relative">
             <FrostedGlass blur={16} borderRadius={0} className="z-[var(--z-background)]" />
@@ -199,7 +193,8 @@ function AppLayoutContent() {
               <Outlet />
             </PageContentWrapper>
           </main>
-        </div>
+          </div>
+        </ScrollArea>
       </SidebarInset>
     </ScrollContainerContext.Provider>
   )

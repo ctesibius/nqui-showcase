@@ -10,27 +10,20 @@ export type RecipeEntry = ShowcaseRoute & {
   teaches: string
 }
 
-/** Recipes hub (marketing `/` stays the landing page). */
+/** Recipes hub (marketing `/` is the landing page). */
+export const LANDING_PATH = "/"
 export const NQUI_HUB_PATH = "/nqui"
 
+/**
+ * Full-page composition demos only.
+ * Compact patterns (settings, toolbar, forms) live on `/blocks` — do not duplicate them here.
+ */
 export const recipeEntries: RecipeEntry[] = [
   {
     title: "Commerce dashboard",
     path: "/patterns",
     description: "Dense product UI — tables, menus, overlays, and workspace chrome.",
     teaches: "Page hierarchy, ≤3 surfaces, composed patterns (not a card per control).",
-  },
-  {
-    title: "Workspace settings",
-    path: "/recipes/settings",
-    description: "Settings form with FieldSet, FieldGroup, and realistic field types.",
-    teaches: "Forms without a card grid — one topic, clear save/cancel.",
-  },
-  {
-    title: "Sprint tracker",
-    path: "/recipes/tracker",
-    description: "Issue tracker with master-detail split, Tracker build history, and toolbar filtering.",
-    teaches: "Resizable panels, ToggleGroup in toolbar context, Tracker in product UI, Empty + Skeleton states.",
   },
   {
     title: "Elevation philosophy",
@@ -53,8 +46,13 @@ export const referenceEntries: ShowcaseRoute[] = [
   },
 ]
 
-/** Primary sidebar destinations */
+/** Primary sidebar destinations — Home = landing; Recipes = composition hub. */
 export const showcaseRoutes: ShowcaseRoute[] = [
+  {
+    title: "Home",
+    path: LANDING_PATH,
+    description: "Marketing landing — tour, packages, and CTAs",
+  },
   {
     title: "Recipes",
     path: NQUI_HUB_PATH,
@@ -90,10 +88,9 @@ export const showcasePatternSections: ShowcaseSection[] = [
 ]
 
 const routeLabels: Record<string, string> = {
+  [LANDING_PATH]: "Home",
   [NQUI_HUB_PATH]: "Recipes",
   "/patterns": "Commerce dashboard",
-  "/recipes/settings": "Workspace settings",
-  "/recipes/tracker": "Sprint tracker",
   "/recipes/elevation": "Elevation philosophy",
   "/catalog": "Component catalog",
   "/design-system": "Design system",

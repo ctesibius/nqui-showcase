@@ -375,28 +375,30 @@ function StakeholderSelectorContent({
           ))}
         </div>
       )}
-      <div className="space-y-1 border-t pt-2">
-        <p className="text-xs font-medium">Add / remove</p>
-        <div className="space-y-1 max-h-[120px] overflow-y-auto">
-          {options.map((p) => (
-            <label
-              key={p.id}
-              className="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-muted/60 cursor-pointer text-sm"
-            >
-              <Checkbox
-                checked={selected.some((s) => s.id === p.id)}
-                onCheckedChange={(checked) => onToggle(p, checked === true)}
-              />
-              <Avatar className="h-5 w-5">
-                <AvatarFallback className="text-[8px]">
-                  {p.name.slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              {p.name}
-            </label>
-          ))}
+        <div className="space-y-1 border-t pt-2">
+          <p className="text-xs font-medium">Add / remove</p>
+          <ScrollArea fadeMask={false} className="h-[120px]">
+            <div className="space-y-1 pr-2">
+              {options.map((p) => (
+                <label
+                  key={p.id}
+                  className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-muted/60"
+                >
+                  <Checkbox
+                    checked={selected.some((s) => s.id === p.id)}
+                    onCheckedChange={(checked) => onToggle(p, checked === true)}
+                  />
+                  <Avatar className="h-5 w-5">
+                    <AvatarFallback className="text-[8px]">
+                      {p.name.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  {p.name}
+                </label>
+              ))}
+            </div>
+          </ScrollArea>
         </div>
-      </div>
     </div>
   )
 }
@@ -650,7 +652,7 @@ export default function ComponentShowcase() {
                 <Link to="/patterns">Commerce dashboard</Link>
               </Button>
               <Button variant="outline" size="sm" asChild>
-                <Link to="/recipes/settings">Workspace settings</Link>
+                <Link to="/blocks">Workspace settings</Link>
               </Button>
             </div>
           </AlertDescription>
@@ -1823,18 +1825,17 @@ export default function ComponentShowcase() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm font-semibold">Inline tabs (scrollable page)</Label>
+                <Label className="text-sm font-semibold">Inline tabs (sticky bar)</Label>
                 <p className="text-xs text-muted-foreground">
-                  Same layout — swap list/trigger only. Scroll below, switch to Tab 2; position should
-                  not jump.
+                  Tab bar stays put; only the panel body scrolls in ScrollArea.
                 </p>
-                <div className="max-h-40 overflow-y-auto">
-                  <Tabs defaultValue="tab1">
-                    <InlineTabsList>
-                      <InlineTabsTrigger value="tab1">Tab 1</InlineTabsTrigger>
-                      <InlineTabsTrigger value="tab2">Tab 2</InlineTabsTrigger>
-                      <InlineTabsTrigger value="tab3">Tab 3</InlineTabsTrigger>
-                    </InlineTabsList>
+                <Tabs defaultValue="tab1" className="flex h-40 flex-col gap-0">
+                  <InlineTabsList className="shrink-0">
+                    <InlineTabsTrigger value="tab1">Tab 1</InlineTabsTrigger>
+                    <InlineTabsTrigger value="tab2">Tab 2</InlineTabsTrigger>
+                    <InlineTabsTrigger value="tab3">Tab 3</InlineTabsTrigger>
+                  </InlineTabsList>
+                  <ScrollArea className="min-h-0 w-full flex-1">
                     <div className={inlineTabsPanelsDemoClass}>
                       <TabsContent value="tab1">
                         Content for tab 1
@@ -1845,8 +1846,8 @@ export default function ComponentShowcase() {
                       <TabsContent value="tab2">Content for tab 2</TabsContent>
                       <TabsContent value="tab3">Content for tab 3</TabsContent>
                     </div>
-                  </Tabs>
-                </div>
+                  </ScrollArea>
+                </Tabs>
               </div>
             </CardContent>
           </Card>
@@ -1966,8 +1967,10 @@ export default function ComponentShowcase() {
               <CardTitle>Pagination</CardTitle>
               <CardDescription>Adaptive — shrinks page count in narrow cards</CardDescription>
             </CardHeader>
-            <CardContent className="min-h-0 overflow-x-auto">
-              <PaginationAdaptive page={3} totalPages={10} onPageChange={() => {}} />
+            <CardContent className="min-h-0">
+              <ScrollArea orientation="horizontal" fadeMask={false} className="w-full">
+                <PaginationAdaptive page={3} totalPages={10} onPageChange={() => {}} />
+              </ScrollArea>
             </CardContent>
           </Card>
 

@@ -9,6 +9,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  ScrollArea,
 } from "@nqlib/nqui";
 import { ThemeTokenControls } from "./theme-token-controls";
 
@@ -41,9 +42,9 @@ export function ThemeTokenSheet() {
             browser.
           </SheetDescription>
         </SheetHeader>
-        <div className="flex-1 overflow-y-auto py-6">
+        <ScrollArea fadeMask={false} className="min-h-0 flex-1 py-6">
           <ThemeTokenControls variant="full" />
-        </div>
+        </ScrollArea>
       </SheetContent>
     </Sheet>
   );
