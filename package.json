@@ -21,7 +21,7 @@
     "nqgantt:status": "node scripts/toggle-nqgantt.js --check",
     "nqgantt:sync-lib": "node scripts/sync-nqgantt-lib.mjs",
     "nqgantt:sync-skill": "node scripts/sync-nqgantt-skill.mjs",
-    "build": "tsc -b && vite build",
+    "build": "fumadocs-mdx && tsc -b && vite build",
     "lint": "eslint .",
     "generate-favicon": "node scripts/generate-favicon.mjs",
     "preview": "vite preview"
