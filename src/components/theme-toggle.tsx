@@ -1,8 +1,9 @@
 import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
-import { Button } from "@nqlib/nqui";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Moon01Icon, Sun01Icon } from "@hugeicons/core-free-icons";
+import { RadioGroup, RadioGroupItem, cn } from "@nqlib/nqui";
+import { contrastSlidingRadioGroupClass } from "./contrast-sliding-segment";
 
 function useIsClient() {
   return useSyncExternalStore(
@@ -13,50 +14,30 @@ function useIsClient() {
 }
 
 /**
- * Single light ↔ dark toggle.
- * Initial state inherits system preference (next-themes defaultTheme="system");
- * once clicked, the user's pick wins.
+ * Light ↔ dark via nqui {@link RadioGroup} `variant="sliding"` (animated pill).
+ * Prefer {@link ThemeControls} in the top bar when tokens are also available.
  */
 export function ThemeToggle({ className }: { className?: string }) {
   const { setTheme, resolvedTheme } = useTheme();
   const isClient = useIsClient();
-
-  if (!isClient) {
-    return (
-      <Button
-        type="button"
-        variant="outline"
-        size="icon"
-        className={className ?? "size-9 shrink-0"}
-        aria-label="Theme"
-        disabled
-      />
-    );
-  }
-
-  const isDark = resolvedTheme === "dark";
+  const mode = resolvedTheme === "dark" ? "dark" : "light";
 
   return (
-    <Button
-      type="button"
-      variant="outline"
-      size="icon"
-      className={className ?? "relative size-9 shrink-0"}
-      aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
-      onClick={() => setTheme(isDark ? "light" : "dark")}
+    <RadioGroup
+      variant="sliding"
+      value={isClient ? mode : "light"}
+      onValueChange={(v) => {
+        if (v === "light" || v === "dark") setTheme(v);
+      }}
+      aria-label="Color theme"
+      className={contrastSlidingRadioGroupClass(cn("min-h-7", className))}
     >
-      <HugeiconsIcon
-        icon={Sun01Icon}
-        className={`absolute size-4 transition-all duration-200 ${
-          isDark ? "scale-0 opacity-0" : "scale-100 opacity-100"
-        }`}
-      />
-      <HugeiconsIcon
-        icon={Moon01Icon}
-        className={`absolute size-4 transition-all duration-200 ${
-          isDark ? "scale-100 opacity-100" : "scale-0 opacity-0"
-        }`}
-      />
-    </Button>
+      <RadioGroupItem value="light" aria-label="Light theme">
+        <HugeiconsIcon icon={Sun01Icon} className="size-4 h-4 w-4" strokeWidth={2} />
+      </RadioGroupItem>
+      <RadioGroupItem value="dark" aria-label="Dark theme">
+        <HugeiconsIcon icon={Moon01Icon} className="size-4 h-4 w-4" strokeWidth={2} />
+      </RadioGroupItem>
+    </RadioGroup>
   );
 }

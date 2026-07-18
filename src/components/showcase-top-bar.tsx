@@ -1,7 +1,11 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Button, FrostedGlass, ToggleGroup, ToggleGroupItem, cn } from "@nqlib/nqui";
-import { ThemeToggle } from "./theme-toggle";
+import { Button, FrostedGlass, Tabs, TabsList, TabsTrigger, cn } from "@nqlib/nqui";
+import { ThemeControls } from "./showcase/theme-tokens/theme-token-sheet";
+import {
+  contrastSlidingTabsListClass,
+  contrastSlidingTabsTriggerClass,
+} from "./contrast-sliding-segment";
 
 export type ShowcaseTopBarLink = {
   to: string;
@@ -24,7 +28,7 @@ type ShowcaseTopBarProps = {
   segment?: ShowcaseTopBarSegment;
   /** Ghost nav links. */
   links?: ReadonlyArray<ShowcaseTopBarLink>;
-  /** Defaults to ThemeToggle. */
+  /** Defaults to theme-tokens + light/dark toggle. */
   trailing?: ReactNode;
   /** Full-bleed border-b chrome (docs). */
   bordered?: boolean;
@@ -36,9 +40,7 @@ type ShowcaseTopBarProps = {
 };
 
 /**
- * Shared product top bar — nqui Button / ToggleGroup / ThemeToggle so radius
- * and primary tokens apply. Segment uses nested-pill chrome (flat active chip,
- * no blur/glow).
+ * Shared product top bar — nqui Tabs sliding segment (contrast pill) + ThemeControls.
  */
 export function ShowcaseTopBar({
   brand,
@@ -80,35 +82,28 @@ export function ShowcaseTopBar({
         {brand}
         {leading}
         {segment ? (
-          <ToggleGroup
-            type="single"
-            size="sm"
-            spacing={1}
-            variant="segmented"
-            separator={false}
+          <Tabs
             value={segment.value}
-            onValueChange={(v) => {
-              if (v) segment.onValueChange(v);
-            }}
-            aria-label={segment["aria-label"] ?? "Section"}
-            className="gap-0.5 rounded-full border border-input bg-background/80 p-0.5"
+            onValueChange={segment.onValueChange}
+            className="w-fit max-w-full min-w-0"
           >
-            {segment.items.map((item) => (
-              <ToggleGroupItem
-                key={item.value}
-                value={item.value}
-                className={cn(
-                  "h-7 rounded-full border-0 px-3 text-xs shadow-none",
-                  "hover:bg-transparent",
-                  "data-[state=on]:bg-foreground data-[state=on]:font-semibold data-[state=on]:text-background",
-                  "data-[state=on]:hover:bg-foreground data-[state=on]:hover:text-background",
-                  "active:data-[state=on]:shadow-none",
-                )}
-              >
-                {item.label}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+            <TabsList
+              aria-label={segment["aria-label"] ?? "Section"}
+              className={contrastSlidingTabsListClass(
+                "max-w-full overflow-x-auto bg-background/80 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+              )}
+            >
+              {segment.items.map((item) => (
+                <TabsTrigger
+                  key={item.value}
+                  value={item.value}
+                  className={contrastSlidingTabsTriggerClass()}
+                >
+                  {item.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
         ) : null}
       </div>
 
@@ -123,7 +118,7 @@ export function ShowcaseTopBar({
             <Link to={link.to}>{link.label}</Link>
           </Button>
         ))}
-        {trailing ?? <ThemeToggle />}
+        {trailing ?? <ThemeControls />}
       </div>
     </header>
   );

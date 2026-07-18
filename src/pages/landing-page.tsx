@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useReducedMotion } from "motion/react";
 import { Button, NquiLogo } from "@nqlib/nqui";
-import { ThemeToggle } from "../components/theme-toggle";
+import { ThemeControls } from "../components/showcase/theme-tokens/theme-token-sheet";
 import { LiveWindow } from "../components/landing/live-window";
 import pkg from "../../package.json";
 import "../components/landing/landing.css";
@@ -81,7 +81,7 @@ export function LandingPage() {
       <div className="fl-glow" aria-hidden />
 
       <div className="absolute right-4 top-4 z-10" data-fl-reveal>
-        <ThemeToggle />
+        <ThemeControls />
       </div>
 
       <main className="fl-shell">

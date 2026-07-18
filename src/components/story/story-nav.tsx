@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "motion/react";
 import { Button, NquiLogo } from "@nqlib/nqui";
-import { ThemeToggle } from "../theme-toggle";
+import { ThemeControls } from "../showcase/theme-tokens/theme-token-sheet";
 import { STORY_EASE } from "./scroll-hooks";
 
 const CHAPTERS = [
@@ -58,7 +58,7 @@ export function StoryNav() {
         </div>
 
         <div className="ml-auto flex items-center gap-1.5 md:ml-0">
-          <ThemeToggle />
+          <ThemeControls />
           <Button size="sm" className="rounded-full" asChild>
             <Link to="/docs">Docs</Link>
           </Button>

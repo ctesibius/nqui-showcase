@@ -3,8 +3,6 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { Spinner } from "@nqlib/nqui";
 import { LandingPage } from "./pages/landing-page";
 import { AppLayout } from "./components/showcase/layout/app-layout";
-import { ThemeTokenSheet } from "./components/showcase/theme-tokens/theme-token-sheet";
-
 // Route-split everything past the landing: the blocks gallery (nqchart pulls
 // echarts) and the readme's code tooling load on navigation, so the landing
 // stays a featherweight first paint.
@@ -77,7 +75,6 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
-      <ThemeTokenSheet />
     </>
   );
 }

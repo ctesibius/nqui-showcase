@@ -5,11 +5,16 @@ import {
   Button,
   NquiLogo,
   Skeleton,
-  ToggleGroup,
-  ToggleGroupItem,
+  Tabs,
+  TabsList,
+  TabsTrigger,
   cn,
 } from "@nqlib/nqui";
 import { ShowcaseTopBar } from "../components/showcase-top-bar";
+import {
+  contrastSlidingTabsListClass,
+  contrastSlidingTabsTriggerClass,
+} from "../components/contrast-sliding-segment";
 import { BLOCKS, LIBS, blockMatchesLib, isFullBleed, libCount, resolveStage, type Lib } from "../components/blocks/registry";
 import { LazyMount } from "../components/blocks/lazy-mount";
 import "../components/landing/landing.css";
@@ -69,42 +74,31 @@ export function BlocksPage() {
           </p>
         </div>
 
-        {/* ── Filter — nested pill shell (flat, no blur/glow) ─────────────── */}
+        {/* ── Filter — nqui Tabs sliding pill (ToggleGroup only cross-fades) ─ */}
         <div className="sticky top-3 z-[var(--z-sticky-content)] mt-8 max-w-full">
-          <ToggleGroup
-            type="single"
-            spacing={1}
-            variant="segmented"
-            separator={false}
+          <Tabs
             value={lib}
-            onValueChange={(v) => v && setLib(v as Lib | "all")}
-            aria-label="Filter blocks by library"
-            className="gap-0.5 rounded-full border border-input bg-background p-0.5"
+            onValueChange={(v) => setLib(v as Lib | "all")}
+            className="w-fit max-w-full"
           >
-            {LIBS.map((l) => (
-              <ToggleGroupItem
-                key={l.id}
-                value={l.id}
-                className={cn(
-                  "h-7 rounded-full border-0 px-3 text-xs shadow-none",
-                  "hover:bg-transparent",
-                  "data-[state=on]:bg-foreground data-[state=on]:font-semibold data-[state=on]:text-background",
-                  "data-[state=on]:hover:bg-foreground data-[state=on]:hover:text-background",
-                  "active:data-[state=on]:shadow-none",
-                )}
-              >
-                {l.label}
-                <span
-                  className={cn(
-                    "ml-1.5 tabular-nums",
-                    "text-muted-foreground group-data-[state=on]/toggle:text-background/70",
-                  )}
+            <TabsList
+              aria-label="Filter blocks by library"
+              className={contrastSlidingTabsListClass(
+                "max-w-full overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+              )}
+            >
+              {LIBS.map((l) => (
+                <TabsTrigger
+                  key={l.id}
+                  value={l.id}
+                  className={contrastSlidingTabsTriggerClass()}
                 >
-                  {libCount(l.id)}
-                </span>
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+                  {l.label}
+                  <span className="ml-1.5 tabular-nums opacity-70">{libCount(l.id)}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
         </div>
 
         {/* ── The shelf ──────────────────────────────────────────────────── */}
