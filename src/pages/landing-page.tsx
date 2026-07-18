@@ -121,6 +121,9 @@ export function LandingPage() {
                   <Link to="/blocks">See it live — take the tour</Link>
                 </Button>
                 <Button variant="outline" className="rounded-full" asChild>
+                  <Link to="/catalog">Component catalog</Link>
+                </Button>
+                <Button variant="outline" className="rounded-full" asChild>
                   <Link to="/charts">Browse all charts</Link>
                 </Button>
                 <button

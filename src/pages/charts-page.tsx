@@ -196,6 +196,9 @@ export function ChartsPage() {
               <Link to="/blocks">Blocks</Link>
             </Button>
             <Button size="sm" variant="ghost" className="rounded-full" asChild>
+              <Link to="/catalog">Catalog</Link>
+            </Button>
+            <Button size="sm" variant="ghost" className="rounded-full" asChild>
               <Link to="/readme/nqchart">Docs</Link>
             </Button>
             <ThemeToggle />

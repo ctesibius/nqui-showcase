@@ -2,6 +2,7 @@ import { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Spinner } from "@nqlib/nqui";
 import { LandingPage } from "./pages/landing-page";
+import { AppLayout } from "./components/showcase/layout/app-layout";
 
 // Route-split everything past the landing: the blocks gallery (nqchart pulls
 // echarts) and the readme's code tooling load on navigation, so the landing
@@ -13,6 +14,14 @@ const ReadmePage = lazy(() => import("./pages/readme-page").then((m) => ({ defau
 const NqchartDocsPage = lazy(() =>
   import("./pages/nqchart-docs-page").then((m) => ({ default: m.NqchartDocsPage })),
 );
+
+const RecipesHub = lazy(() => import("./components/showcase/pages/recipes-hub"));
+const ComponentShowcase = lazy(() => import("./components/showcase/pages/component-showcase"));
+const PatternsPage = lazy(() => import("./components/showcase/pages/patterns"));
+const RecipeSettings = lazy(() => import("./components/showcase/pages/recipe-settings"));
+const RecipeTracker = lazy(() => import("./components/showcase/pages/recipe-tracker"));
+const RecipeElevation = lazy(() => import("./components/showcase/pages/recipe-elevation"));
+const DesignSystemPage = lazy(() => import("./components/showcase/pages/design-system"));
 
 function DocsShell() {
   return (
@@ -45,7 +54,18 @@ function App() {
         <Route path="/ops" element={<Navigate to="/" replace />} />
         <Route path="/app/*" element={<Navigate to="/" replace />} />
         <Route path="/dashboard/*" element={<Navigate to="/" replace />} />
-        <Route path="/showcase/*" element={<Navigate to="/" replace />} />
+        {/* nqui component catalog + recipes (migrated from the nqui Vite app). */}
+        <Route path="/showcase" element={<Navigate to="/nqui" replace />} />
+        <Route path="/showcase/*" element={<Navigate to="/nqui" replace />} />
+        <Route element={<AppLayout />}>
+          <Route path="/nqui" element={<RecipesHub />} />
+          <Route path="/catalog" element={<ComponentShowcase />} />
+          <Route path="/patterns" element={<PatternsPage />} />
+          <Route path="/recipes/settings" element={<RecipeSettings />} />
+          <Route path="/recipes/tracker" element={<RecipeTracker />} />
+          <Route path="/recipes/elevation" element={<RecipeElevation />} />
+          <Route path="/design-system" element={<DesignSystemPage />} />
+        </Route>
         <Route element={<DocsShell />}>
           <Route path="/readme" element={<ReadmePage />} />
           <Route path="/readme/nqchart" element={<NqchartDocsPage />} />

@@ -50,6 +50,9 @@ export function BlocksPage() {
           </Link>
           <div className="flex items-center gap-1.5">
             <Button size="sm" variant="ghost" className="rounded-full" asChild>
+              <Link to="/catalog">Catalog</Link>
+            </Button>
+            <Button size="sm" variant="ghost" className="rounded-full" asChild>
               <Link to="/charts">Charts</Link>
             </Button>
             <Button size="sm" variant="ghost" className="rounded-full" asChild>
