@@ -13,6 +13,7 @@ import {
   CardTitle,
   Separator,
 } from "@nqlib/nqui";
+import { DocsArticle } from "../components/docs/docs-article";
 
 const scrollAnchor = "scroll-mt-28";
 
@@ -35,8 +36,8 @@ function CodeBlock({ children }: { children: string }) {
 
 export function ReadmePage() {
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-12 sm:px-6">
-      <div id="install" className={`flex flex-col gap-3 ${scrollAnchor}`}>
+    <DocsArticle>
+      <div className={`flex flex-col gap-3 ${scrollAnchor}`}>
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="secondary" className="w-fit">
             @nqlib/nqui
@@ -60,9 +61,11 @@ export function ReadmePage() {
         </p>
       </div>
 
-      <Card id="postinstall" className={scrollAnchor}>
+      <Card className={scrollAnchor}>
         <CardHeader>
-          <CardTitle>After npm install</CardTitle>
+          <h2 id="postinstall" className="text-2xl font-semibold leading-none tracking-tight">
+            After npm install
+          </h2>
           <CardDescription>Postinstall runs automatically (skipped when CI=true).</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-2 text-sm text-muted-foreground">
@@ -77,9 +80,11 @@ export function ReadmePage() {
         </CardContent>
       </Card>
 
-      <Card id="requirements" className={scrollAnchor}>
+      <Card className={scrollAnchor}>
         <CardHeader>
-          <CardTitle>Requirements</CardTitle>
+          <h2 id="requirements" className="text-2xl font-semibold leading-none tracking-tight">
+            Requirements
+          </h2>
           <CardDescription>React 18 or 19, Tailwind CSS v4, Node per your toolchain.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
@@ -96,9 +101,11 @@ export function ReadmePage() {
         </CardContent>
       </Card>
 
-      <Card id="skills" className={scrollAnchor}>
+      <Card className={scrollAnchor}>
         <CardHeader>
-          <CardTitle>Agent skills</CardTitle>
+          <h2 id="skills" className="text-2xl font-semibold leading-none tracking-tight">
+            Agent skills
+          </h2>
           <CardDescription>
             Markdown guidance for coding agents — component rules, layout patterns, copy and states. Optional: components
             work without it.
@@ -125,8 +132,10 @@ export function ReadmePage() {
         </CardContent>
       </Card>
 
-      <section id="cli" className={`flex flex-col gap-4 ${scrollAnchor}`}>
-        <h2 className="text-xl font-semibold tracking-tight">CLI commands</h2>
+      <section className={`flex flex-col gap-4 ${scrollAnchor}`}>
+        <h2 id="cli" className="text-xl font-semibold tracking-tight">
+          CLI commands
+        </h2>
         <p className="text-sm text-muted-foreground">Run from project root. npm/yarn/bun: replace pnpm dlx with npx.</p>
         <div className="flex flex-col gap-3">
           {cliTable.map((row) => (
@@ -143,8 +152,10 @@ export function ReadmePage() {
 
       <Separator />
 
-      <section id="setup" className={`flex flex-col gap-4 ${scrollAnchor}`}>
-        <h2 className="text-xl font-semibold tracking-tight">Suggested setup</h2>
+      <section className={`flex flex-col gap-4 ${scrollAnchor}`}>
+        <h2 id="setup" className="text-xl font-semibold tracking-tight">
+          Suggested setup
+        </h2>
 
         <Card>
           <CardHeader className="pb-2">
@@ -178,8 +189,10 @@ pnpm add tw-animate-css next-themes`}</CodeBlock>
         </Card>
       </section>
 
-      <section id="css" className={`flex flex-col gap-4 ${scrollAnchor}`}>
-        <h2 className="text-xl font-semibold tracking-tight">CSS setup</h2>
+      <section className={`flex flex-col gap-4 ${scrollAnchor}`}>
+        <h2 id="css" className="text-xl font-semibold tracking-tight">
+          CSS setup
+        </h2>
         <p className="text-sm text-muted-foreground">
           Run init-css, then add the nqui import near the top of your main CSS (Vite: src/index.css).
         </p>
@@ -215,8 +228,10 @@ pnpm add tw-animate-css next-themes`}</CodeBlock>
         </Card>
       </section>
 
-      <section id="imports" className={`flex flex-col gap-4 ${scrollAnchor}`}>
-        <h2 className="text-xl font-semibold tracking-tight">Subpath imports</h2>
+      <section className={`flex flex-col gap-4 ${scrollAnchor}`}>
+        <h2 id="imports" className="text-xl font-semibold tracking-tight">
+          Subpath imports
+        </h2>
         <p className="text-sm text-muted-foreground">
           Most components import from <code className="text-foreground">@nqlib/nqui</code>. These use dedicated subpaths
           (and matching optional peers from <code className="text-foreground">install-peers</code>):
@@ -234,8 +249,10 @@ import { Sortable } from "@nqlib/nqui/sortable";`}</CodeBlock>
         </Card>
       </section>
 
-      <section id="app-shell" className={`flex flex-col gap-4 ${scrollAnchor}`}>
-        <h2 className="text-xl font-semibold tracking-tight">App shell</h2>
+      <section className={`flex flex-col gap-4 ${scrollAnchor}`}>
+        <h2 id="app-shell" className="text-xl font-semibold tracking-tight">
+          App shell
+        </h2>
         <Card>
           <CardContent className="pt-6">
             <CodeBlock>{`import { ThemeProvider } from "next-themes";
@@ -257,8 +274,10 @@ import { Toaster } from "@nqlib/nqui/sonner";
         </Card>
       </section>
 
-      <section id="troubleshooting" className={`flex flex-col gap-4 ${scrollAnchor}`}>
-        <h2 className="text-xl font-semibold tracking-tight">Troubleshooting</h2>
+      <section className={`flex flex-col gap-4 ${scrollAnchor}`}>
+        <h2 id="troubleshooting" className="text-xl font-semibold tracking-tight">
+          Troubleshooting
+        </h2>
         <div className="flex flex-col gap-3 text-sm text-muted-foreground">
           <p>
             <strong className="font-medium text-foreground">Module not found @nqlib/nqui/styles</strong> — run init-css and
@@ -288,6 +307,6 @@ import { Toaster } from "@nqlib/nqui/sonner";
           </a>
         </Button>
       </div>
-    </div>
+    </DocsArticle>
   );
 }

@@ -1,4 +1,4 @@
-import { useMemo, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { ChartConfig } from "@nqlib/nqchart";
 import { NQAreaChart, Area, XAxis, Grid, Legend, Tooltip } from "@nqlib/nqchart/area-chart";
 import { NQBarChart, Bar, XAxis as BarXAxis, YAxis as BarYAxis, Grid as BarGrid, Tooltip as BarTooltip } from "@nqlib/nqchart/bar-chart";
@@ -6,7 +6,7 @@ import { NQSparklineChart, Fill, Sparkline, Tooltip as SparkTooltip } from "@nql
 import { computePivot, type PivotConfig } from "@nqlib/nqgrid";
 import { GanttRoot } from "@nqlib/nqgantt/ui";
 import { getDefaultColumnDefs, toGanttData, type PMDataInput } from "@nqlib/nqgantt";
-import { cn } from "@nqlib/nqui";
+import { cn, ScrollArea } from "@nqlib/nqui";
 
 /*
  * Timeless sales ledger — the report every cohort from Boomer → Millennial
@@ -77,13 +77,35 @@ function buildSales(): SaleRow[] {
 
 const SALES = buildSales();
 
-const INK = {
+/** Ledger ink — same keys as CATEGORIES for the weekly stacked area. */
+const TREND_CFG = {
   Home: { label: "Home", colors: { light: ["oklch(0.32 0.045 250)"], dark: ["oklch(0.78 0.04 250)"] } },
   Sports: { label: "Sports", colors: { light: ["oklch(0.40 0.04 235)"], dark: ["oklch(0.70 0.035 235)"] } },
   Clothing: { label: "Clothing", colors: { light: ["oklch(0.48 0.035 220)"], dark: ["oklch(0.62 0.03 220)"] } },
   Electronics: { label: "Electronics", colors: { light: ["oklch(0.56 0.03 205)"], dark: ["oklch(0.54 0.03 205)"] } },
   Groceries: { label: "Groceries", colors: { light: ["oklch(0.66 0.025 195)"], dark: ["oklch(0.46 0.025 195)"] } },
 } satisfies ChartConfig;
+
+/** Quarterly category revenue — same years/categories as the pivot. */
+function buildWeeklyTrendData(): Record<string, string | number>[] {
+  const rand = mulberry32(0x51a1e);
+  const points: Record<string, string | number>[] = [];
+  let t = 0;
+  for (const year of YEARS) {
+    for (const month of ["Jan", "Apr", "Jul", "Oct"]) {
+      const row: Record<string, string | number> = { period: `${month} ${year.slice(2)}` };
+      for (const cat of CATEGORIES) {
+        const base = 90_000 + CATEGORIES.indexOf(cat) * 35_000;
+        row[cat] = Math.round(base + rand() * 80_000 + t * 6_000);
+      }
+      points.push(row);
+      t += 1;
+    }
+  }
+  return points;
+}
+
+const WEEKLY_TREND_DATA = buildWeeklyTrendData();
 
 const SPARK_CFG = {
   value: {
@@ -164,7 +186,7 @@ function CategoryPivot() {
   const yearLeaves = pivot.columnLeaves.filter((l) => l.path[0] !== undefined);
 
   return (
-    <div className="min-w-0 overflow-x-auto">
+    <ScrollArea orientation="horizontal" className="w-full min-w-0" fadeMask>
       <table className="w-full min-w-[280px] border-collapse text-[12px] tabular-nums">
         <thead>
           <tr className="border-b border-[color:var(--ledger-rule)]">
@@ -231,47 +253,79 @@ function CategoryPivot() {
           })}
         </tbody>
       </table>
-    </div>
+    </ScrollArea>
   );
 }
 
+/**
+ * `/charts` stacked-area mount (host + props) with ledger category data.
+ * Keep className / stackType / children identical to NQExampleStackedTypeAreaChart —
+ * only `data` / `config` / `xDataKey` differ.
+ *
+ * No nested LazyMount (blocks-page already lazy-mounts the report). Block pointer
+ * events until the staggered area intro finishes — published nqchart can still
+ * clip bands / stick the axisPointer if hovered mid-rollout.
+ */
 function WeeklyTrend() {
-  const data = useMemo(() => {
-    const rand = mulberry32(0x51a1e);
-    const points: Record<string, string | number>[] = [];
-    let t = 0;
-    for (const year of YEARS) {
-      for (const month of ["Jan", "Apr", "Jul", "Oct"]) {
-        const row: Record<string, string | number> = { period: `${month} ${year.slice(2)}` };
-        for (const cat of CATEGORIES) {
-          // Stacked weekly-ish bands in the $80k–$400k range — report ink, not spark noise.
-          const base = 90_000 + CATEGORIES.indexOf(cat) * 35_000;
-          row[cat] = Math.round(base + rand() * 80_000 + t * 6_000);
-        }
-        points.push(row);
-        t += 1;
-      }
-    }
-    return points;
-  }, []);
+  const hostRef = useRef<HTMLDivElement>(null);
+  const seriesCount = CATEGORIES.length;
+  // Area stagger: 1200ms + (n-1)*160ms + 50ms buffer (nqchart CHART_ANIMATION.area).
+  const introMsEstimate = 1200 + Math.max(0, seriesCount - 1) * 160 + 50;
+  const [introLocked, setIntroLocked] = useState(true);
+
+  useEffect(() => {
+    setIntroLocked(true);
+    const root = hostRef.current;
+    if (!root) return;
+
+    let unlockTimer: number | undefined;
+    let started = false;
+    let unlocked = false;
+    const release = () => {
+      if (unlocked) return;
+      unlocked = true;
+      setIntroLocked(false);
+    };
+    const startGuard = () => {
+      if (started) return;
+      started = true;
+      unlockTimer = window.setTimeout(release, introMsEstimate);
+    };
+
+    if (root.querySelector("canvas")) startGuard();
+    const mo = new MutationObserver(() => {
+      if (root.querySelector("canvas")) startGuard();
+    });
+    mo.observe(root, { childList: true, subtree: true });
+    const safetyUnlock = window.setTimeout(release, introMsEstimate + 4000);
+
+    return () => {
+      mo.disconnect();
+      if (unlockTimer != null) window.clearTimeout(unlockTimer);
+      window.clearTimeout(safetyUnlock);
+    };
+  }, [introMsEstimate]);
 
   return (
-    <NQAreaChart
-      config={INK}
-      data={data}
-      xDataKey="period"
-      stackType="stacked"
-      showBrush={false}
-      className="h-full w-full"
-    >
-      <Grid />
-      <XAxis dataKey="period" />
-      <Legend />
-      <Tooltip />
-      {CATEGORIES.map((c) => (
-        <Area key={c} dataKey={c} variant="gradient" curveType="monotone" />
-      ))}
-    </NQAreaChart>
+    <div ref={hostRef} className="blk-stage blk-stage--chart">
+      <div className={cn("size-full min-h-0", introLocked && "pointer-events-none")}>
+        <NQAreaChart
+          data={WEEKLY_TREND_DATA}
+          config={TREND_CFG}
+          className="h-full w-full p-4"
+          xDataKey="period"
+          stackType="stacked"
+        >
+          <Grid />
+          <XAxis dataKey="period" />
+          <Legend isClickable />
+          <Tooltip />
+          {CATEGORIES.map((c) => (
+            <Area key={c} dataKey={c} variant="gradient" curveType="monotone" />
+          ))}
+        </NQAreaChart>
+      </div>
+    </div>
   );
 }
 
@@ -291,7 +345,7 @@ function AvgPriceBars() {
       layout="horizontal"
       xDataKey="category"
       showBrush={false}
-      className="h-full w-full"
+      className="h-full w-full p-4"
     >
       <BarGrid />
       <BarXAxis tickFormatter={(v) => `$${v}`} />
@@ -643,7 +697,7 @@ export function SalesLedgerBlock() {
 
   return (
     <div
-      className="blk-ledger flex h-full flex-col gap-5 overflow-auto p-1 text-[color:var(--ledger-ink)]"
+      className="blk-ledger flex h-full min-h-0 flex-col gap-5 p-1 text-[color:var(--ledger-ink)]"
       style={
         {
           "--ledger-ink": "oklch(0.28 0.035 250)",
@@ -680,17 +734,17 @@ export function SalesLedgerBlock() {
         </section>
         <section className="min-w-0 space-y-3">
           <SectionLabel>Weekly Sales Trend</SectionLabel>
-          <div className="h-[13.5rem]">
-            <WeeklyTrend />
-          </div>
+          <WeeklyTrend />
         </section>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2">
         <section className="min-w-0 space-y-3">
           <SectionLabel>Average Price by Category in 2024</SectionLabel>
-          <div className="h-[10.5rem]">
-            <AvgPriceBars />
+          <div className="blk-stage blk-stage--chart">
+            <div className="size-full min-h-0">
+              <AvgPriceBars />
+            </div>
           </div>
         </section>
         <section className="min-w-0 space-y-3">

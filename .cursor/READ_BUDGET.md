@@ -16,14 +16,16 @@ Load **1–3 files** per task. Do not bulk-read skill folders or sibling engine 
 
 | Task | Read THIS | Then maybe | Do NOT read |
 |------|-----------|------------|-------------|
+| **nqui catalog / recipes** | `src/components/showcase/pages/` (one page) | `src/components/showcase/layout/` | `../nqui/src/pages` (removed) |
 | **Component gallery / site chrome** | nqui `READ_BUDGET.md` | one `components/nqui-<name>.md` | all component docs |
 | **Spreadsheet / formula bar / pivot** | `NQGRID-WORKSPACE.md` | `src/nqgrid/demos/spreadsheet/spreadsheet-page.tsx` | all of `../nqgrid/src/` |
 | **Projects / PM board / columns** | `src/nqgrid/demos/projects/projects-page.tsx` | `pm-column-model.ts`, `pm-schema.ts` | nqgrid engine internals |
 | **Grid styling / rich cells** | `src/nqgrid/lib/nqgrid-styling/` (one file) | `NQGRID-WORKSPACE.md` | full playground mirror |
 | **Gantt / timeline embed** | `src/nqgantt/demos/roadmap-gantt.tsx` | `tasks-to-gantt.ts` | `../nqgantt` tree |
 | **Analytics / chart gallery** | `src/components/analytics/analytics-dashboard.tsx` | one file in `src/registry/charts/` | all 12 chart files |
+| **nqchart embed / stuck axisPointer / clipped intro** | `.cursor/skills/nqchart-embed/SKILL.md` | `blocks-report.tsx` or `charts-page.tsx` | bulk `ex-doc-charts` |
 | **Local nqgrid vs published** | `NQGRID-WORKSPACE.md` | `pnpm nqgrid:status` | `vite.config.ts` unless alias broken |
-| **Local nqui vs published** | nqui `nqui-local-published-toggle/SKILL.md` | toggle script `--check` | relink docs |
+| **Local nqui vs published** | nqui `nqui-local-published-toggle/SKILL.md` | `pnpm nqui:local` → `/catalog` | relink docs |
 | **Engine bug / patch sibling?** | `.cursor/NQLIB.md` | sibling `CLAUDE.md` | silent `../` patches |
 
 ## Rules of thumb

@@ -13,6 +13,7 @@ import {
   CardTitle,
   Separator,
 } from "@nqlib/nqui";
+import { DocsArticle } from "../components/docs/docs-article";
 
 const scrollAnchor = "scroll-mt-28";
 
@@ -26,14 +27,14 @@ function CodeBlock({ children }: { children: string }) {
 
 export function NqchartDocsPage() {
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-12 sm:px-6">
-      <div id="overview" className={`flex flex-col gap-3 ${scrollAnchor}`}>
+    <DocsArticle>
+      <div className={`flex flex-col gap-3 ${scrollAnchor}`}>
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="secondary" className="w-fit">
             @nqlib/nqchart
           </Badge>
           <Badge variant="outline" className="w-fit font-mono text-xs">
-            skill v1.3
+            0.1.8
           </Badge>
         </div>
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">NQChart guide</h1>
@@ -54,9 +55,43 @@ export function NqchartDocsPage() {
         </div>
       </div>
 
-      <Card id="install" className={scrollAnchor}>
+      <Card className={scrollAnchor}>
         <CardHeader>
-          <CardTitle>Install</CardTitle>
+          <h2 id="release-notes" className="text-2xl font-semibold leading-none tracking-tight">
+            Release notes — 0.1.8
+          </h2>
+          <CardDescription>
+            Intro hover no longer clips stacked areas or sticks the dashed axis cursor.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
+          <ul className="list-disc space-y-1.5 pl-5">
+            <li>
+              <strong className="font-medium text-foreground">introLock</strong> — during staggered area/line enter,
+              zrender hit-testing is silenced; tip and axisPointer clear on lock and leave.
+            </li>
+            <li>
+              <strong className="font-medium text-foreground">downplay</strong> on leave so index-focus emphasis does not
+              linger.
+            </li>
+            <li>
+              <strong className="font-medium text-foreground">Post-intro snap</strong> — series finish as full paths if an
+              enter tween was interrupted.
+            </li>
+          </ul>
+          <p>
+            Shipped as <code className="text-foreground">@nqlib/nqchart@0.1.8</code>. Use{" "}
+            <code className="text-foreground">pnpm dev:local:charts</code> only for unreleased engine work in{" "}
+            <code className="text-foreground">../becocharts</code>.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card className={scrollAnchor}>
+        <CardHeader>
+          <h2 id="install" className="text-2xl font-semibold leading-none tracking-tight">
+            Install
+          </h2>
           <CardDescription>Package + peers. Agent skill is optional markdown for coding agents.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4 text-sm text-muted-foreground">
@@ -76,8 +111,10 @@ export function NqchartDocsPage() {
         </CardContent>
       </Card>
 
-      <section id="compose" className={`flex flex-col gap-4 ${scrollAnchor}`}>
-        <h2 className="text-xl font-semibold tracking-tight">Compose children</h2>
+      <section className={`flex flex-col gap-4 ${scrollAnchor}`}>
+        <h2 id="compose" className="text-xl font-semibold tracking-tight">
+          Compose children
+        </h2>
         <p className="text-sm text-muted-foreground">
           Import the root and its children from the <strong className="font-medium text-foreground">same</strong> family
           subpath. Always add <code className="text-foreground">Tooltip</code> on interactive charts.
@@ -99,8 +136,10 @@ import { type ChartConfig } from "@nqlib/nqchart";
         </Card>
       </section>
 
-      <section id="background-grid" className={`flex flex-col gap-4 ${scrollAnchor}`}>
-        <h2 className="text-xl font-semibold tracking-tight">Background vs Grid</h2>
+      <section className={`flex flex-col gap-4 ${scrollAnchor}`}>
+        <h2 id="background-grid" className="text-xl font-semibold tracking-tight">
+          Background vs Grid
+        </h2>
         <p className="text-sm text-muted-foreground">
           Two chrome layers. Pick <strong className="font-medium text-foreground">one</strong> per chart — never both.
         </p>
@@ -193,8 +232,10 @@ import { NQScatterChart, Scatter, XAxis, YAxis, Tooltip, Legend } from "@nqlib/n
         </Card>
       </section>
 
-      <section id="practices" className={`flex flex-col gap-4 ${scrollAnchor}`}>
-        <h2 className="text-xl font-semibold tracking-tight">Best practices</h2>
+      <section className={`flex flex-col gap-4 ${scrollAnchor}`}>
+        <h2 id="practices" className="text-xl font-semibold tracking-tight">
+          Best practices
+        </h2>
         <div className="flex flex-col gap-3 text-sm text-muted-foreground">
           <p>
             <strong className="font-medium text-foreground">chartConfig keys</strong> — must match every series{" "}
@@ -222,8 +263,10 @@ import { NQScatterChart, Scatter, XAxis, YAxis, Tooltip, Legend } from "@nqlib/n
 
       <Separator />
 
-      <section id="links" className={`flex flex-col gap-3 ${scrollAnchor}`}>
-        <h2 className="text-xl font-semibold tracking-tight">Also see</h2>
+      <section className={`flex flex-col gap-3 ${scrollAnchor}`}>
+        <h2 id="links" className="text-xl font-semibold tracking-tight">
+          Also see
+        </h2>
         <div className="flex flex-wrap gap-2">
           <Button size="sm" variant="outline" asChild>
             <Link to="/charts">Live chart catalog</Link>
@@ -238,6 +281,6 @@ import { NQScatterChart, Scatter, XAxis, YAxis, Tooltip, Legend } from "@nqlib/n
           </Button>
         </div>
       </section>
-    </div>
+    </DocsArticle>
   );
 }
