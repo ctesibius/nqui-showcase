@@ -60,7 +60,7 @@ export function StoryNav() {
         <div className="ml-auto flex items-center gap-1.5 md:ml-0">
           <ThemeToggle />
           <Button size="sm" className="rounded-full" asChild>
-            <Link to="/readme">Docs</Link>
+            <Link to="/docs">Docs</Link>
           </Button>
         </div>
       </nav>

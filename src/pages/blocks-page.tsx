@@ -9,7 +9,7 @@ import {
   ToggleGroupItem,
   cn,
 } from "@nqlib/nqui";
-import { ThemeToggle } from "../components/theme-toggle";
+import { ShowcaseTopBar } from "../components/showcase-top-bar";
 import { BLOCKS, LIBS, blockMatchesLib, isFullBleed, libCount, resolveStage, type Lib } from "../components/blocks/registry";
 import { LazyMount } from "../components/blocks/lazy-mount";
 import "../components/landing/landing.css";
@@ -40,27 +40,21 @@ export function BlocksPage() {
       <div className="fl-glow" aria-hidden />
 
       <div className="relative z-[var(--z-base)] mx-auto w-[var(--fl-shell)] pb-24 pt-8">
-        {/* ── Header ─────────────────────────────────────────────────────── */}
-        <header className="flex items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2.5">
-            <NquiLogo className="size-[22px]" />
-            <span className="text-sm font-semibold tracking-tight">
-              nqlib<span className="font-medium text-muted-foreground"> · blocks</span>
-            </span>
-          </Link>
-          <div className="flex items-center gap-1.5">
-            <Button size="sm" variant="ghost" className="rounded-full" asChild>
-              <Link to="/catalog">Catalog</Link>
-            </Button>
-            <Button size="sm" variant="ghost" className="rounded-full" asChild>
-              <Link to="/charts">Charts</Link>
-            </Button>
-            <Button size="sm" variant="ghost" className="rounded-full" asChild>
-              <Link to="/readme">Docs</Link>
-            </Button>
-            <ThemeToggle />
-          </div>
-        </header>
+        <ShowcaseTopBar
+          brand={
+            <Link to="/" className="flex items-center gap-2.5">
+              <NquiLogo className="size-[22px]" />
+              <span className="text-sm font-semibold tracking-tight">
+                nqlib<span className="font-medium text-muted-foreground"> · blocks</span>
+              </span>
+            </Link>
+          }
+          links={[
+            { to: "/catalog", label: "Catalog" },
+            { to: "/charts", label: "Charts" },
+            { to: "/docs", label: "Docs" },
+          ]}
+        />
 
         <div className="mt-14 max-w-[46ch] md:mt-20">
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground/80">
@@ -75,21 +69,39 @@ export function BlocksPage() {
           </p>
         </div>
 
-        {/* ── Filter ─────────────────────────────────────────────────────── */}
-        <div className="sticky top-3 z-[var(--z-sticky-content)] mt-8 flex max-w-full w-fit flex-wrap rounded-full border bg-background/70 p-1 backdrop-blur-md">
+        {/* ── Filter — nested pill shell (flat, no blur/glow) ─────────────── */}
+        <div className="sticky top-3 z-[var(--z-sticky-content)] mt-8 max-w-full">
           <ToggleGroup
             type="single"
+            spacing={1}
+            variant="segmented"
+            separator={false}
             value={lib}
             onValueChange={(v) => v && setLib(v as Lib | "all")}
+            aria-label="Filter blocks by library"
+            className="gap-0.5 rounded-full border border-input bg-background p-0.5"
           >
             {LIBS.map((l) => (
               <ToggleGroupItem
                 key={l.id}
                 value={l.id}
-                className="rounded-full px-3 text-xs data-[state=on]:bg-foreground data-[state=on]:text-background"
+                className={cn(
+                  "h-7 rounded-full border-0 px-3 text-xs shadow-none",
+                  "hover:bg-transparent",
+                  "data-[state=on]:bg-foreground data-[state=on]:font-semibold data-[state=on]:text-background",
+                  "data-[state=on]:hover:bg-foreground data-[state=on]:hover:text-background",
+                  "active:data-[state=on]:shadow-none",
+                )}
               >
                 {l.label}
-                <span className="ml-1.5 tabular-nums opacity-60">{libCount(l.id)}</span>
+                <span
+                  className={cn(
+                    "ml-1.5 tabular-nums",
+                    "text-muted-foreground group-data-[state=on]/toggle:text-background/70",
+                  )}
+                >
+                  {libCount(l.id)}
+                </span>
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
@@ -165,7 +177,7 @@ export function BlocksPage() {
             nqlib · this page is built with its own packages
           </p>
           <Button size="sm" variant="outline" className="rounded-full" asChild>
-            <Link to="/readme">Install guide</Link>
+            <Link to="/docs">Install guide</Link>
           </Button>
         </footer>
       </div>

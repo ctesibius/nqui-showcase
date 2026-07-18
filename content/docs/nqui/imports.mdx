@@ -1,0 +1,44 @@
+---
+title: Imports & app shell
+description: Subpath imports and ThemeProvider / TooltipProvider wiring.
+---
+
+## Subpath imports
+
+Most components import from `@nqlib/nqui`. These use dedicated subpaths (and matching optional peers from `install-peers`):
+
+```tsx
+import { Button, Card, Input } from "@nqlib/nqui";
+import { Command } from "@nqlib/nqui/command";
+import { Toaster } from "@nqlib/nqui/sonner";
+import { Drawer } from "@nqlib/nqui/drawer";
+import { Carousel } from "@nqlib/nqui/carousel";
+import { Calendar } from "@nqlib/nqui/calendar";
+import { Sortable } from "@nqlib/nqui/sortable";
+```
+
+**Command / Toaster / Drawer not found on main entry** — import from subpaths as above.
+
+## App shell
+
+```tsx
+import { ThemeProvider } from "next-themes";
+import { TooltipProvider } from "@nqlib/nqui";
+import { Toaster } from "@nqlib/nqui/sonner";
+
+<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+  <TooltipProvider delayDuration={200}>
+    {/* routes */}
+    <Toaster />
+  </TooltipProvider>
+</ThemeProvider>
+```
+
+Next.js App Router: add `"use client"` to pages that import interactive nqui components. After `init-cursor`, component docs live in `.cursor/nqui-skills/`.
+
+## Live surfaces
+
+- [Component catalog](/catalog)
+- [Recipes hub](/nqui)
+- [Design system](/design-system)
+- [npm package](https://www.npmjs.com/package/@nqlib/nqui)

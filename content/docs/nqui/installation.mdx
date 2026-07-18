@@ -1,0 +1,76 @@
+---
+title: Installation
+description: Add @nqlib/nqui to a React + Tailwind v4 app.
+---
+
+## After npm install
+
+Postinstall runs automatically (skipped when `CI=true`).
+
+- May add a `nqui:init` script and basic Cursor rules under `.cursor/`.
+- Does **not** install peers, copy full nqui-skills, or set up CSS — run the setup below.
+- Re-print next steps anytime: `pnpm dlx @nqlib/nqui setup`
+
+## Requirements
+
+React 18 or 19, Tailwind CSS v4, Node per your toolchain.
+
+### Minimal
+
+```bash
+pnpm add @nqlib/nqui
+```
+
+Icons in library components are bundled — no icon package required.
+
+### Full optional peers
+
+```bash
+pnpm dlx @nqlib/nqui install-peers
+```
+
+Sortable, Carousel, DataTable, Calendar, Command, Sonner, Drawer, and related deps.
+
+## Agent skills
+
+Markdown guidance for coding agents — component rules, layout patterns, copy and states. Optional: components work without it.
+
+### Any agent (skills CLI)
+
+```bash
+npx skills add nqlib/nqui --skill nqui -y
+```
+
+Copies the hub plus its references into `.agents/skills/nqui/`.
+
+### Cursor (nqui CLI)
+
+```bash
+pnpm dlx @nqlib/nqui init-skills
+```
+
+Copies the same guidance plus per-component docs into `.cursor/nqui-skills/`. Add `--force` to refresh after upgrading.
+
+## Suggested setup
+
+### Option A — one command
+
+When postinstall added `nqui:init` to `package.json`:
+
+```bash
+pnpm run nqui:init
+```
+
+Runs `install-peers` → `init-cursor` → `init-skills` → `init-css --sidebar --force`. You still merge CSS imports manually ([CSS setup](/docs/nqui/css)).
+
+### Option B — step by step
+
+```bash
+pnpm add @nqlib/nqui
+pnpm dlx @nqlib/nqui init-cursor
+pnpm dlx @nqlib/nqui init-skills   # optional refresh
+pnpm dlx @nqlib/nqui init-css --sidebar
+pnpm add tw-animate-css next-themes
+```
+
+Restart Cursor after `init-cursor` so `.cursor/nqui-skills` reload. Decline init-css example file copy if you keep a custom layout.

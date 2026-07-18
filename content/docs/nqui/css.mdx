@@ -1,0 +1,34 @@
+---
+title: CSS setup
+description: Tailwind v4 styles import and @source scanning for nqui.
+---
+
+Run `init-css`, then add the nqui import near the top of your main CSS (Vite: `src/index.css`).
+
+## Required import
+
+```css
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@import "@nqlib/nqui/styles";
+```
+
+## Vite + Tailwind v4 `@source`
+
+If utilities from nqui look missing or components render unstyled:
+
+```css
+@source "./**/*.{js,ts,jsx,tsx,mdx}";
+@source "../components/**/*.{js,ts,jsx,tsx,mdx}";
+@source "../node_modules/@nqlib/nqui/dist/**/*.js";
+/* Scan any local UI you ship alongside the app, e.g. chart registry: */
+@source "./registry/**/*.{js,ts,jsx,tsx}";
+```
+
+Use `@tailwindcss/vite` in `vite.config.ts`. Paths are relative to your CSS entry file.
+
+## Troubleshooting
+
+- **Module not found `@nqlib/nqui/styles`** — run `init-css` and add the import before app styles.
+- **Components render without spacing or colors** — add `@source` lines and confirm styles.css is imported.

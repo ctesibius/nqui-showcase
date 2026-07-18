@@ -3,13 +3,21 @@ title: nqlib Docs
 description: Install guides and API docs for nqui, nqchart, nqgrid, and nqgantt — alongside the live showcase.
 ---
 
-Documentation for the nqlib workspace libraries. Use the live surfaces to try components; use these pages to install and compose them.
+Documentation for the nqlib workspace libraries. **Showcase** surfaces let you try components live; **docs** cover install and composition.
+
+## Libraries
 
 | Library | Docs | Live |
 |---------|------|------|
-| **nqui** | [Install & skills](/docs/nqui) | [/catalog](/catalog) |
-| **nqchart** | [Charts docs](/docs/nqchart) | [/charts](/charts) |
-| **nqgrid** | [Grid docs](/docs/nqgrid) | Spreadsheet / projects demos |
-| **nqgantt** | [Gantt docs](/docs/nqgantt) | Roadmap gantt demos |
+| **nqui** | [Install & skills](/docs/nqui) | [/catalog](/catalog) · [/nqui](/nqui) |
+| **nqchart** | [Charts docs](/docs/nqchart) | [/charts](/charts) · [/blocks](/blocks) |
+| **nqgrid** | [Grid docs](/docs/nqgrid) | Spreadsheet / projects demos in this app |
+| **nqgantt** | [Gantt docs](/docs/nqgantt) | Roadmap gantt demos in this app |
 
-Pick a library from the sidebar to get started.
+## How this hub works
+
+- Content lives under `content/docs/` as MDX (Fumadocs collections).
+- NQChart pages can be refreshed from the sibling becocharts repo with `pnpm docs:sync:nqchart`.
+- Old `/readme` URLs redirect here (`/readme` → `/docs/nqui`, `/readme/nqchart` → `/docs/nqchart`).
+
+Pick a library from the top bar or sidebar to get started.

@@ -137,7 +137,7 @@ export function LandingPage() {
               </div>
               <p className="mt-3 text-sm text-muted-foreground/70" data-fl-reveal>
                 <Link
-                  to="/readme"
+                  to="/docs"
                   className="underline decoration-foreground/20 underline-offset-[0.2em] transition-colors duration-150 hover:text-foreground hover:decoration-foreground/40"
                 >
                   Read the install guide

@@ -1,4 +1,10 @@
 {
   "title": "nqui",
-  "pages": ["index"]
+  "pages": [
+    "index",
+    "installation",
+    "cli",
+    "css",
+    "imports"
+  ]
 }

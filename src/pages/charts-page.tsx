@@ -11,7 +11,7 @@ import {
   cn,
 } from "@nqlib/nqui";
 import type { BackgroundVariant } from "@nqlib/nqchart";
-import { ThemeToggle } from "../components/theme-toggle";
+import { ShowcaseTopBar } from "../components/showcase-top-bar";
 import {
   CATALOG_COUNT,
   NQCHART_CATALOG,
@@ -184,26 +184,21 @@ export function ChartsPage() {
       <div className="fl-glow" aria-hidden />
 
       <div className="relative z-[var(--z-base)] mx-auto w-[var(--fl-shell)] pb-24 pt-8">
-        <header className="flex items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2.5">
-            <NquiLogo className="size-[22px]" />
-            <span className="text-sm font-semibold tracking-tight">
-              nqlib<span className="font-medium text-muted-foreground"> · charts</span>
-            </span>
-          </Link>
-          <div className="flex items-center gap-1.5">
-            <Button size="sm" variant="ghost" className="rounded-full" asChild>
-              <Link to="/blocks">Blocks</Link>
-            </Button>
-            <Button size="sm" variant="ghost" className="rounded-full" asChild>
-              <Link to="/catalog">Catalog</Link>
-            </Button>
-            <Button size="sm" variant="ghost" className="rounded-full" asChild>
-              <Link to="/readme/nqchart">Docs</Link>
-            </Button>
-            <ThemeToggle />
-          </div>
-        </header>
+        <ShowcaseTopBar
+          brand={
+            <Link to="/" className="flex items-center gap-2.5">
+              <NquiLogo className="size-[22px]" />
+              <span className="text-sm font-semibold tracking-tight">
+                nqlib<span className="font-medium text-muted-foreground"> · charts</span>
+              </span>
+            </Link>
+          }
+          links={[
+            { to: "/blocks", label: "Blocks" },
+            { to: "/catalog", label: "Catalog" },
+            { to: "/docs/nqchart", label: "Docs" },
+          ]}
+        />
 
         <div className="mt-14 max-w-[52ch] md:mt-20">
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground/80">

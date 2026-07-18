@@ -1,0 +1,17 @@
+---
+title: CLI
+description: @nqlib/nqui CLI commands from project root.
+---
+
+Run from project root. For npm/yarn/bun, replace `pnpm dlx` with `npx`.
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dlx @nqlib/nqui setup` | Re-run postinstall: Cursor rules + next steps (no peers/CSS). |
+| `pnpm dlx @nqlib/nqui install-peers` | Install optional peers (cmdk, dnd-kit, tables, calendar, sonner, …). |
+| `pnpm dlx @nqlib/nqui init-cursor` | Write `.cursor` rules/skills and copy nqui-skills → `.cursor/nqui-skills` + `AGENTS.md`. |
+| `pnpm dlx @nqlib/nqui init-skills` | Refresh `.cursor/nqui-skills` only. Use `--force` to overwrite. |
+| `pnpm dlx @nqlib/nqui init-css` | Create `nqui/index.css` + `nqui/nqui-setup.css`. Flags: `--sidebar`, `--force`, `--wizard`. |
+| `pnpm dlx @nqlib/nqui` | Same as `init-css` (default output `nqui/index.css`). |
+| `pnpm dlx @nqlib/nqui init-debug` | Scaffold CSS for DebugPanel. |
+| `pnpm run nqui:init` | If postinstall added it: install-peers → init-cursor → init-skills → init-css `--sidebar --force`. |

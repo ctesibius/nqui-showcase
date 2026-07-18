@@ -28,7 +28,7 @@ export function StoryFinale() {
         </Reveal>
         <Reveal delay={0.16} margin="0px" className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Button asChild>
-            <Link to="/readme">Read the install guide</Link>
+            <Link to="/docs">Read the install guide</Link>
           </Button>
         </Reveal>
       </div>
