@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { MDXComponents } from "mdx/types";
-import { cn } from "@nqlib/nqui";
+import { ScrollArea, cn } from "@nqlib/nqui";
 import { MDXLink } from "./link";
 import { Steps, Step, StepTitle, StepContent, StepDescription } from "./steps";
 import { CodeTabs, Tabs, TabsList, TabsTab, TabsPanel, Tab } from "./tabs";
@@ -49,27 +49,33 @@ export const mdxComponents: MDXComponents = {
   ),
   hr: (props) => <hr className="my-8 border-border" {...props} />,
   table: (props) => (
-    <div className="my-6 w-full overflow-x-auto">
-      <table className="w-full border-collapse text-sm" {...props} />
-    </div>
+    <ScrollArea orientation="both" fadeMask={false} className="my-6 w-full max-w-full">
+      <table className="w-max min-w-full border-collapse text-sm" {...props} />
+    </ScrollArea>
   ),
   th: (props) => (
     <th className="border-b border-border px-3 py-2 text-left font-semibold text-foreground" {...props} />
   ),
   td: (props) => <td className="border-b border-border px-3 py-2 text-muted-foreground" {...props} />,
   tr: (props) => <tr className="even:bg-muted/30" {...props} />,
-  pre: ({ className, ...props }) => (
-    <pre
-      className={cn(
-        "my-4 overflow-x-auto rounded-lg border border-border bg-muted p-4 text-[0.8125rem] leading-relaxed",
-        className,
-      )}
-      {...props}
-    />
+  pre: ({ className, children, ...props }) => (
+    <div className="docs-codeblock my-4 w-full max-w-full overflow-hidden rounded-lg border border-border bg-muted">
+      <ScrollArea orientation="horizontal" fadeMask={false} className="w-full max-w-full">
+        <pre
+          className={cn(
+            "shiki m-0 bg-transparent p-4 font-mono text-[0.8125rem] leading-relaxed whitespace-pre",
+            className,
+          )}
+          {...props}
+        >
+          {children}
+        </pre>
+      </ScrollArea>
+    </div>
   ),
   code: ({ className, ...props }) => {
-    const isBlock = className?.includes("language-");
-    if (isBlock) {
+    // Fenced / Shiki blocks keep bare mono; only style true inline code.
+    if (className?.includes("language-") || className?.includes("shiki")) {
       return <code className={cn("font-mono", className)} {...props} />;
     }
     return (

@@ -29,5 +29,8 @@ export function StepDescription({
   children?: ReactNode;
   className?: string;
 }) {
-  return <p className={cn("text-sm leading-relaxed text-muted-foreground", className)}>{children}</p>;
+  // div, not p: MDX children are often <p>, and <p><p> is invalid HTML.
+  return (
+    <div className={cn("text-sm leading-relaxed text-muted-foreground", className)}>{children}</div>
+  );
 }

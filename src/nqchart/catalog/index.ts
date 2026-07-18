@@ -6,3 +6,5 @@ export {
   type CatalogCategory,
 } from "./manifest";
 export { loadCatalogComponent } from "./load-entry";
+export { DOCS_EXTRA_CATALOG } from "./docs-extra-entries";
+export { resolveDocsCatalogEntry, listDocsCatalogIds } from "./resolve-entry";

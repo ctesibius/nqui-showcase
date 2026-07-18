@@ -212,15 +212,14 @@ export function DocsTocIndicator({
     Math.max(activeIndex >= 0 ? activeIndex : 0, 0),
     Math.max(resolved.centers.length - 1, 0),
   );
-  const targetY = resolved.centers[safeIndex] ?? 0;
   const targetDistance = resolved.centerDistances[safeIndex] ?? 0;
 
-  const diamondY = useSpring(targetY, springConfig);
-  const glowDistance = useSpring(targetDistance, springConfig);
+  // Ride the same offset-path as the glow so the diamond tracks rail bends (depth indent).
+  const pathDistance = useSpring(targetDistance, springConfig);
   const prevIndexRef = useRef(activeIndex);
   const tailRotate = useSpring(90, springConfig);
   const tailMarginTop = useSpring(-38, springConfig);
-  const glowOffsetDistance = useTransform(glowDistance, (v) =>
+  const offsetDistancePercent = useTransform(pathDistance, (v) =>
     resolved.totalLength > 0 ? `${(v / resolved.totalLength) * 100}%` : "0%",
   );
 
@@ -231,17 +230,8 @@ export function DocsTocIndicator({
       tailMarginTop.set(movingDown ? -38 : -38 + 70);
       prevIndexRef.current = activeIndex;
     }
-    diamondY.set(targetY);
-    glowDistance.set(targetDistance);
-  }, [
-    activeIndex,
-    targetY,
-    targetDistance,
-    diamondY,
-    glowDistance,
-    tailRotate,
-    tailMarginTop,
-  ]);
+    pathDistance.set(targetDistance);
+  }, [activeIndex, targetDistance, pathDistance, tailRotate, tailMarginTop]);
 
   if (toc.length === 0) return null;
 
@@ -312,7 +302,7 @@ export function DocsTocIndicator({
               rotate: tailRotate,
               marginLeft: 0.2,
               marginTop: tailMarginTop,
-              offsetDistance: glowOffsetDistance,
+              offsetDistance: offsetDistancePercent,
             }}
           >
             <svg width="80" height="80" viewBox="0 0 80 80" className="overflow-visible">
@@ -335,51 +325,54 @@ export function DocsTocIndicator({
       </div>
 
       {/*
-        Diamond outside CSS masks. Glow is an SVG blur of the diamond geometry
-        (expanded filter region) — not box-shadow / drop-shadow on a clipped box.
+        Diamond on the same offset-path as the glow. Match nqchart: 6×6 box at the
+        path point (marginLeft ≈ 0, marginTop −3). A 28×28 box with −14/−14 margins
+        sits left of the rail when offset-anchor is the element center.
       */}
       <motion.div
-        className="absolute left-2 overflow-visible"
+        className="absolute top-0 left-0 overflow-visible"
         style={{
-          top: diamondY,
-          width: 28,
-          height: 28,
-          marginLeft: -14,
-          marginTop: -14,
+          width: 6,
+          height: 6,
+          offsetPath: cssOffsetPath,
+          offsetRotate: "0deg",
+          offsetDistance: offsetDistancePercent,
+          marginLeft: 0.2,
+          marginTop: -3,
         }}
       >
-        <svg width="28" height="28" viewBox="0 0 28 28" className="overflow-visible" aria-hidden>
+        <svg width="6" height="6" viewBox="0 0 6 6" className="overflow-visible" aria-hidden>
           <defs>
             <filter
               id={diamondFilterId}
-              x="-120%"
-              y="-120%"
-              width="340%"
-              height="340%"
+              x="-200%"
+              y="-200%"
+              width="500%"
+              height="500%"
               filterUnits="objectBoundingBox"
             >
               <feGaussianBlur in="SourceGraphic" stdDeviation="2.4" />
             </filter>
           </defs>
           <rect
-            x="11"
-            y="11"
+            x="0"
+            y="0"
             width="6"
             height="6"
             rx="1"
             fill="var(--primary)"
             opacity="0.55"
-            transform="rotate(45 14 14)"
+            transform="rotate(45 3 3)"
             filter={`url(#${diamondFilterId})`}
           />
           <rect
-            x="11"
-            y="11"
+            x="0"
+            y="0"
             width="6"
             height="6"
             rx="1"
             fill="var(--primary)"
-            transform="rotate(45 14 14)"
+            transform="rotate(45 3 3)"
           />
         </svg>
       </motion.div>

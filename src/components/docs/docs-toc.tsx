@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
-import { cn } from "@nqlib/nqui";
+import { ScrollArea, cn } from "@nqlib/nqui";
 import { DocsTocIndicator, type DocsTocItem } from "./docs-toc-indicator";
 
 function slugifyHeading(text: string): string {
@@ -95,28 +95,30 @@ export function DocsToc({
   if (toc.length === 0) return null;
 
   return (
-    <nav className={cn("flex flex-col text-sm select-none", className)} aria-label={title}>
+    <nav className={cn("flex min-h-0 flex-col text-sm select-none", className)} aria-label={title}>
       <p className="mb-2 shrink-0 text-xs font-medium text-muted-foreground">{title}</p>
-      <div ref={railRef} className="relative flex min-h-0 flex-row overflow-visible">
-        <DocsTocIndicator toc={toc} activeIndex={activeIndex} railRef={railRef} />
-        <div className="flex h-fit min-w-0 max-h-[calc(100dvh-10rem)] flex-col gap-2 overflow-y-auto pt-2">
-          {toc.map((item) => (
-            <a
-              key={item.url}
-              href={item.url}
-              className={cn(
-                "docs-toc-item text-[0.8rem] leading-5 text-muted-foreground/75 no-underline transition-colors duration-200 hover:text-foreground",
-                "data-[active=true]:font-medium data-[active=true]:text-foreground",
-                item.depth >= 3 ? "pl-8" : "pl-5",
-              )}
-              data-active={item.url === `#${activeHeading}`}
-              data-depth={item.depth}
-            >
-              {item.title}
-            </a>
-          ))}
+      <ScrollArea className="min-h-0 flex-1 overflow-hidden">
+        <div ref={railRef} className="relative flex min-h-0 flex-row overflow-visible pb-3">
+          <DocsTocIndicator toc={toc} activeIndex={activeIndex} railRef={railRef} />
+          <div className="flex h-fit min-w-0 flex-1 flex-col gap-2 pt-2 pr-3">
+            {toc.map((item) => (
+              <a
+                key={item.url}
+                href={item.url}
+                className={cn(
+                  "docs-toc-item text-[0.8rem] leading-5 text-muted-foreground/75 no-underline transition-colors duration-200 hover:text-foreground",
+                  "data-[active=true]:font-medium data-[active=true]:text-foreground",
+                  item.depth >= 3 ? "pl-8" : "pl-5",
+                )}
+                data-active={item.url === `#${activeHeading}`}
+                data-depth={item.depth}
+              >
+                {item.title}
+              </a>
+            ))}
+          </div>
         </div>
-      </div>
+      </ScrollArea>
     </nav>
   );
 }

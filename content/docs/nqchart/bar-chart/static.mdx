@@ -146,6 +146,12 @@ The stacked preview is at the top of this page. Below is the normalized 100% var
 <ComponentPreview className="mb-0" title="variant='hatched'" name="ex-hatched-variant-bar-chart"  />
 <ComponentPreview title="variant='stripped'" name="ex-stripped-variant-bar-chart"  />
 
+### Monospace (fold + hover)
+
+Monochrome bars **load expanded**, **fold to thin** on intro, then **expand on hover**. Use `<Bar variant="monospace" />` (also on [Bar blocks](/docs/nqchart/bar-chart/blocks)).
+
+<ComponentPreview className="mb-4" title="variant='monospace'" name="monospace-bar-chart" />
+
 ### 3D bar
 
 Isometric bars with beveled faces and a highlighted peak — see [Bar blocks](/docs/nqchart/bar-chart/blocks) for the full block.
@@ -248,8 +254,8 @@ A single bar series. Each `<Bar />` is self-contained and generates its own grad
   <ApiRow name="dataKey" type="string" required>
     The series key. Must exist on both the data rows and the chart `config`.
   </ApiRow>
-  <ApiRow name="variant" type='"default" | "hatched" | "duotone" | "duotone-reverse" | "gradient" | "stripped"' default='"default"'>
-    The visual style of the bar fill. Applies to this bar only.
+  <ApiRow name="variant" type='"default" | "hatched" | "duotone" | "duotone-reverse" | "gradient" | "stripped" | "monospace" | "hover-trace"' default='"default"'>
+    Fill / interaction style for this series. `monospace` folds bars after intro and expands on hover; `hover-trace` draws a category focus guide.
   </ApiRow>
   <ApiRow name="radius" type="number">
     The corner radius of this bar, in pixels. Falls back to the chart's `barRadius` when omitted.

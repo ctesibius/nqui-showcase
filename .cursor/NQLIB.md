@@ -29,6 +29,7 @@ See `vite.config.ts`, `tsconfig.app.json`, and `NQGRID-WORKSPACE.md`.
 ### Fix in **nqui-showcase** (default)
 
 - Marketing copy, routes, app shell, command palette
+- **nqui catalog / recipes** under `src/components/showcase/` (`/catalog`, `/nqui`, …)
 - `src/nqgrid/` styling, spreadsheet/projects demos, column chrome
 - `src/nqgantt/demos/` wiring, fixtures, theme CSS
 - `src/nqgantt/lib/` bar UI reference (merge upstream on release — see `NQGANTT-WORKSPACE.md`)
@@ -40,11 +41,11 @@ See `vite.config.ts`, `tsconfig.app.json`, and `NQGRID-WORKSPACE.md`.
 - nqgrid engine API, virtualization, selection, schema
 - nqgantt scheduling math, dependency engine (showcase uses npm)
 - nqgantt `GanttRoot` / provider internals — patch via `src/nqgantt/lib/` → upstream release, not sibling edits during showcase work
-- nqui component behavior (Combobox, Sheet, ScrollArea, …)
+- nqui **component** behavior (Combobox, Sheet, ScrollArea, …) — **not** catalog pages (those stay here)
 - BeeCharts source in `../becocharts/lib/`
 
 **Do not silently patch `../nqui`, `../nqgrid`, `../nqgantt`, or `../becocharts` without explicit user approval.**
-
+**Do not add a Vite catalog back into `../nqui`.**
 ## Required workflow on suspected engine bugs
 
 1. Reproduce in the smallest showcase surface (one embed: sheets, projects, gantt, or one chart).

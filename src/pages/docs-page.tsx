@@ -42,6 +42,22 @@ function pageTitle(page: NonNullable<ReturnType<typeof source.getPage>>): string
   return typeof data.title === "string" ? data.title : "Page";
 }
 
+/** `/docs/nqui/...` → `nqui`; hub `/docs` → null */
+function docsLibraryKey(url: string): string | null {
+  const match = url.match(/^\/docs\/([^/]+)/);
+  return match?.[1] ?? null;
+}
+
+function pagesInSameLibrary(pageUrl: string) {
+  const lib = docsLibraryKey(pageUrl);
+  const all = source.getPages();
+  if (!lib) {
+    return all.filter((p) => p.url === "/docs");
+  }
+  const prefix = `/docs/${lib}`;
+  return all.filter((p) => p.url === prefix || p.url.startsWith(`${prefix}/`));
+}
+
 function DocsPageInner({ slugs }: { slugs: string[] }) {
   const page = source.getPage(slugs);
   if (!page) {
@@ -67,7 +83,7 @@ function DocsPageInner({ slugs }: { slugs: string[] }) {
     );
   }
 
-  const pages = source.getPages();
+  const pages = pagesInSameLibrary(page.url);
   const neighbors = pages.findIndex((p) => p.url === page.url);
   const prev = neighbors > 0 ? pages[neighbors - 1] : undefined;
   const next = neighbors >= 0 && neighbors < pages.length - 1 ? pages[neighbors + 1] : undefined;
@@ -111,8 +127,8 @@ export function DocsPage() {
   const slugs = splat.split("/").filter((s) => s.length > 0);
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl gap-8 px-4 sm:px-6">
-      <DocsSidebar className="hidden py-12 xl:block" />
+    <div className="mx-auto flex w-full max-w-6xl gap-8 px-4 pt-8 pb-12 sm:px-6">
+      <DocsSidebar className="hidden xl:flex" />
       <div className="min-w-0 flex-1">
         <DocsPageInner slugs={slugs} />
       </div>

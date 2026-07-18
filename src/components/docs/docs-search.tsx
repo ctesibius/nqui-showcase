@@ -1,6 +1,6 @@
 import { useEffect, useId, useState } from "react";
 import { Link } from "react-router-dom";
-import { cn } from "@nqlib/nqui";
+import { ScrollArea, cn } from "@nqlib/nqui";
 import { docsSearch } from "@/lib/docs-search";
 
 type SearchHit = {
@@ -53,26 +53,28 @@ export function DocsSearch({ className }: { className?: string }) {
         className="h-8 w-full rounded-full border border-input bg-background px-3 text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
       />
       {open && hits.length > 0 ? (
-        <ul
-          role="listbox"
-          className="absolute right-0 z-50 mt-1 max-h-72 w-[min(100vw-2rem,20rem)] overflow-y-auto rounded-lg border border-border bg-popover p-1 shadow-(--shadow-elevated)"
+        <ScrollArea
+          fadeMask={false}
+          className="absolute right-0 z-50 mt-1 h-72 max-h-72 w-[min(100vw-2rem,20rem)] rounded-lg border border-border bg-popover shadow-(--shadow-elevated)"
         >
-          {hits.map((hit) => (
-            <li key={`${hit.id}-${hit.url}`}>
-              <Link
-                to={hit.url}
-                className="block rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
-                onClick={() => {
-                  setOpen(false);
-                  setQuery("");
-                }}
-              >
-                <span className="line-clamp-1 font-medium">{hit.content ?? hit.url}</span>
-                <span className="line-clamp-1 text-xs text-muted-foreground">{hit.url}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+          <ul role="listbox" className="p-1">
+            {hits.map((hit) => (
+              <li key={`${hit.id}-${hit.url}`}>
+                <Link
+                  to={hit.url}
+                  className="block rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted"
+                  onClick={() => {
+                    setOpen(false);
+                    setQuery("");
+                  }}
+                >
+                  <span className="line-clamp-1 font-medium">{hit.content ?? hit.url}</span>
+                  <span className="line-clamp-1 text-xs text-muted-foreground">{hit.url}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </ScrollArea>
       ) : null}
     </div>
   );

@@ -28,6 +28,8 @@ export function DocsLayout() {
     <div className="min-h-dvh bg-background text-foreground">
       <ShowcaseTopBar
         bordered
+        sticky
+        frosted
         leading={
           <Button asChild variant="ghost" size="sm">
             <Link to="/">← Home</Link>

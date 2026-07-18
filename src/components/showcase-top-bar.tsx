@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Button, ToggleGroup, ToggleGroupItem, cn } from "@nqlib/nqui";
+import { Button, FrostedGlass, ToggleGroup, ToggleGroupItem, cn } from "@nqlib/nqui";
 import { ThemeToggle } from "./theme-toggle";
 
 export type ShowcaseTopBarLink = {
@@ -28,6 +28,10 @@ type ShowcaseTopBarProps = {
   trailing?: ReactNode;
   /** Full-bleed border-b chrome (docs). */
   bordered?: boolean;
+  /** Stick to the top of the scrollport (docs). */
+  sticky?: boolean;
+  /** nqui FrostedGlass backdrop (docs / catalog sticky headers). */
+  frosted?: boolean;
   className?: string;
 };
 
@@ -43,17 +47,36 @@ export function ShowcaseTopBar({
   links,
   trailing,
   bordered = false,
+  sticky = false,
+  frosted = false,
   className,
 }: ShowcaseTopBarProps) {
   return (
     <header
       className={cn(
         "flex items-center justify-between gap-4",
+        // sticky already creates a positioning context for FrostedGlass.
+        // Do NOT also add `relative` — tailwind-merge keeps the last position
+        // utility and drops `sticky`, which made the docs header scroll away.
+        sticky
+          ? "sticky top-0 z-[var(--z-sticky-page,40)]"
+          : frosted
+            ? "relative"
+            : null,
         bordered && "border-b border-border px-4 py-3",
+        frosted && bordered && "border-border/50 bg-transparent",
         className,
       )}
     >
-      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+      {frosted ? (
+        <FrostedGlass blur={16} borderRadius={0} className="z-[var(--z-background,0)]" />
+      ) : null}
+      <div
+        className={cn(
+          "flex min-w-0 items-center gap-2 sm:gap-3",
+          frosted && "relative z-[var(--z-content,1)]",
+        )}
+      >
         {brand}
         {leading}
         {segment ? (
@@ -68,7 +91,7 @@ export function ShowcaseTopBar({
               if (v) segment.onValueChange(v);
             }}
             aria-label={segment["aria-label"] ?? "Section"}
-            className="gap-0.5 rounded-full border border-input bg-background p-0.5"
+            className="gap-0.5 rounded-full border border-input bg-background/80 p-0.5"
           >
             {segment.items.map((item) => (
               <ToggleGroupItem
@@ -89,7 +112,12 @@ export function ShowcaseTopBar({
         ) : null}
       </div>
 
-      <div className="flex shrink-0 items-center gap-1.5">
+      <div
+        className={cn(
+          "flex shrink-0 items-center gap-1.5",
+          frosted && "relative z-[var(--z-content,1)]",
+        )}
+      >
         {links?.map((link) => (
           <Button key={link.to} size="sm" variant="ghost" asChild>
             <Link to={link.to}>{link.label}</Link>

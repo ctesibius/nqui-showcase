@@ -10,6 +10,9 @@ import {
 /**
  * Becocharts MDX uses TabsTab / TabsPanel naming (Base UI style).
  * Map onto nqui TabsTrigger / TabsContent.
+ *
+ * Docs tabs must show full labels — nqui's default trigger uses flex-1 + min-w-0,
+ * which compresses "CLI" / "Manual" in narrow article columns.
  */
 export function CodeTabs({
   children,
@@ -21,7 +24,7 @@ export function CodeTabs({
   defaultValue?: string;
 }) {
   return (
-    <NquiTabs defaultValue={defaultValue} className={cn("my-4", className)}>
+    <NquiTabs defaultValue={defaultValue} className={cn("my-4 w-full", className)}>
       {children}
     </NquiTabs>
   );
@@ -30,12 +33,22 @@ export function CodeTabs({
 export function TabsList({
   children,
   className,
+  variant: _variant,
 }: {
   children?: ReactNode;
   className?: string;
   variant?: string;
 }) {
-  return <NquiTabsList className={className}>{children}</NquiTabsList>;
+  return (
+    <NquiTabsList
+      className={cn(
+        "h-auto w-fit max-w-full flex-none flex-wrap justify-start gap-1",
+        className,
+      )}
+    >
+      {children}
+    </NquiTabsList>
+  );
 }
 
 export function TabsTab({
@@ -48,7 +61,13 @@ export function TabsTab({
   className?: string;
 }) {
   return (
-    <TabsTrigger value={value} className={className}>
+    <TabsTrigger
+      value={value}
+      className={cn(
+        "min-w-max max-w-none flex-none shrink-0 grow-0 basis-auto px-3 py-1.5",
+        className,
+      )}
+    >
       {children}
     </TabsTrigger>
   );
@@ -80,7 +99,7 @@ export function Tabs({
   defaultValue?: string;
 }) {
   return (
-    <NquiTabs className={className} {...props}>
+    <NquiTabs className={cn("w-full", className)} {...props}>
       {children}
     </NquiTabs>
   );
