@@ -1,25 +1,21 @@
 ---
-title: Introduction
-description: NQChart is an open-source composable chart library for React dashboards, built with Apache ECharts and shadcn/ui.
-image: /og/og-image.png
+title: nqchart
+description: Compose @nqlib/nqchart — React chart primitives on Apache ECharts.
 ---
 
-NQChart is a composable chart library for BI dashboards and analytics products. Install primitives via the shadcn registry, compose `NQ*Chart` children, and ship histograms, funnels, gauges, and more — powered by <Link href="https://echarts.apache.org/" _blank={true}>Apache ECharts</Link> and <Link href="https://ui.shadcn.com" _blank={true}>shadcn/ui</Link>.
+`@nqlib/nqchart` is the chart library for BI dashboards and analytics surfaces. Install primitives via the shadcn registry, compose `NQ*Chart` children, and ship histograms, funnels, gauges, and more.
 
-## The problem
-
-NQChart is built by Ctesibius. Most chart libraries are flexible but visually generic — teams copy default styles and dashboards end up looking the same.
-
-NQChart pairs a design-first compound API with ECharts under the hood: opinionated defaults, handcrafted motion, and BI recipes for the chart types product teams actually need.
+| Next | |
+|------|--|
+| [Installation](/docs/nqchart/installation) | CLI / registry install |
+| [Changelog](/docs/nqchart/changelog) | Release notes |
+| [Components](/docs/nqchart/components) | Chart index |
+| Live | [/charts](/charts) · [/blocks](/blocks) |
 
 ## Why NQChart?
 
-The name comes from the nq mark — a hexagonal body on a chart grid. The idea is simple:
-
 - **Composable primitives** — `NQBarChart`, `NQLineChart`, and siblings with child parts, not boolean props on one mega chart
-- **BI-ready recipes** — histogram, Pareto, waterfall, funnel, gauge helpers in `chart-recipes`
+- **BI-ready recipes** — histogram, Pareto, waterfall, funnel, gauge helpers in [chart-recipes](/docs/nqchart/chart-recipes)
 - **ECharts engine** — canvas performance and rich chart types, with shadcn-aligned tokens and tooltips
 
-## Built on Apache ECharts
-
-NQChart keeps the compound component API from the original design exploration and swaps the rendering engine to ECharts for dashboard-scale performance, richer series types, and consistent animation tokens across every primitive.
+Related: [nqui](/docs/nqui) for app chrome.

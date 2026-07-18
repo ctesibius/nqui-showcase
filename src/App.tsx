@@ -67,9 +67,13 @@ function App() {
           <Route element={<DocsShell />}>
             <Route path="/docs" element={<DocsPage />} />
             <Route path="/docs/*" element={<DocsPage />} />
-            <Route path="/readme" element={<Navigate to="/docs/nqui" replace />} />
-            <Route path="/readme/nqchart" element={<Navigate to="/docs/nqchart" replace />} />
           </Route>
+          {/* Legacy library readme URLs → docs hub */}
+          <Route path="/readme" element={<Navigate to="/docs/nqui" replace />} />
+          <Route path="/readme/nqchart" element={<Navigate to="/docs/nqchart" replace />} />
+          <Route path="/readme/nqgrid" element={<Navigate to="/docs/nqgrid" replace />} />
+          <Route path="/readme/nqgantt" element={<Navigate to="/docs/nqgantt" replace />} />
+          <Route path="/readme/*" element={<Navigate to="/docs" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

@@ -3,6 +3,8 @@
   "pages": [
     "index",
     "installation",
+    "changelog",
+    "components",
     "cli",
     "css",
     "imports"

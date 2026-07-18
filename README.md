@@ -4,7 +4,7 @@ Vite + TypeScript + **[@nqlib/nqui](https://www.npmjs.com/package/@nqlib/nqui)**
 
 - **Install:** `pnpm install`
 - **Dev:** `pnpm dev`
-- In-app **Library readme**: run `pnpm dev` and open `/readme` (install + CLI + Vite `@source`).
+- In-app **docs hub**: run `pnpm dev` and open [`/docs`](http://localhost:5173/docs) (nqui · nqchart · nqgrid · nqgantt). Legacy `/readme` URLs redirect there.
 - **[REPLICATION.md](./REPLICATION.md)** — full stack checklist and CSS notes.
 
 ---
