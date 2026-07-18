@@ -1,6 +1,8 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@nqlib/nqui";
 import { ShowcaseTopBar } from "../components/showcase-top-bar";
+import { DocsSearch } from "../components/docs/docs-search";
+import { ThemeToggle } from "../components/theme-toggle";
 
 const docsSegmentItems = [
   { value: "/docs", label: "Hub" },
@@ -37,6 +39,12 @@ export function DocsLayout() {
           items: docsSegmentItems,
           "aria-label": "Docs library",
         }}
+        trailing={
+          <div className="flex items-center gap-2">
+            <DocsSearch className="hidden sm:block" />
+            <ThemeToggle className="size-8" />
+          </div>
+        }
       />
       <Outlet />
     </div>
