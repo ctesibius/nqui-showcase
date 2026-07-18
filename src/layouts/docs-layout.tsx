@@ -1,42 +1,43 @@
-import { Link, NavLink, Outlet } from "react-router-dom";
-import { Button, cn } from "@nqlib/nqui";
-import { ThemeToggle } from "../components/theme-toggle";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Button } from "@nqlib/nqui";
+import { ShowcaseTopBar } from "../components/showcase-top-bar";
 
-const docsNav = [
-  { to: "/readme", end: true, label: "nqui" },
-  { to: "/readme/nqchart", end: true, label: "nqchart" },
+const docsSegmentItems = [
+  { value: "/docs", label: "Hub" },
+  { value: "/docs/nqui", label: "nqui" },
+  { value: "/docs/nqchart", label: "nqchart" },
+  { value: "/docs/nqgrid", label: "nqgrid" },
+  { value: "/docs/nqgantt", label: "nqgantt" },
 ] as const;
 
+function docsSegmentValue(pathname: string): string {
+  if (pathname.startsWith("/docs/nqchart")) return "/docs/nqchart";
+  if (pathname.startsWith("/docs/nqgrid")) return "/docs/nqgrid";
+  if (pathname.startsWith("/docs/nqgantt")) return "/docs/nqgantt";
+  if (pathname.startsWith("/docs/nqui")) return "/docs/nqui";
+  return "/docs";
+}
+
 export function DocsLayout() {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-dvh bg-background text-foreground">
-      <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
-        <div className="flex items-center gap-1 sm:gap-2">
+      <ShowcaseTopBar
+        bordered
+        leading={
           <Button asChild variant="ghost" size="sm">
             <Link to="/">← Home</Link>
           </Button>
-          <nav className="flex items-center gap-0.5" aria-label="Docs">
-            {docsNav.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) =>
-                  cn(
-                    "rounded-md px-2.5 py-1.5 text-sm transition-colors",
-                    isActive
-                      ? "bg-muted font-medium text-foreground"
-                      : "text-muted-foreground hover:text-foreground",
-                  )
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
-        </div>
-        <ThemeToggle className="size-8" />
-      </div>
+        }
+        segment={{
+          value: docsSegmentValue(pathname),
+          onValueChange: (value) => navigate(value),
+          items: docsSegmentItems,
+          "aria-label": "Docs library",
+        }}
+      />
       <Outlet />
     </div>
   );

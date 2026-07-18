@@ -3,7 +3,9 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 import tailwindcss from "@tailwindcss/vite"
 import react from "@vitejs/plugin-react"
-import { defineConfig, type Alias } from "vite"
+import mdx from "fumadocs-mdx/vite"
+import { defineConfig, type Alias, type PluginOption } from "vite"
+import * as MdxConfig from "./source.config"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -97,8 +99,12 @@ function localNqchartAliases(): Alias[] {
 }
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => ({
-  plugins: [react(), tailwindcss()],
+export default defineConfig(async ({ mode }) => ({
+  plugins: [
+    (await mdx(MdxConfig)) as PluginOption,
+    react(),
+    tailwindcss(),
+  ],
   // The local @nqlib/nqchart alias points at `../becocharts/dist` (pre-bundled
   // ESM outside node_modules, so vite's optimizer doesn't shim it). That dist
   // references `process.env.{NODE_ENV,NEXT_PUBLIC_APP_URL}`; define them so the
@@ -120,11 +126,27 @@ export default defineConfig(({ mode }) => ({
       ...localNqganttAliases(),
       ...localNqchartAliases(),
       { find: "@", replacement: path.resolve(__dirname, "./src") },
+      { find: "collections", replacement: path.resolve(__dirname, "./.source") },
     ],
     // Single copies of the engine's peers when running against local nqgrid src.
     // `@nqlib/nqchart` too — duplicate copies break Grid reference equality in
     // apply-preview-controls (pattern XOR Grid strip).
-    dedupe: ["recharts", "echarts", "motion", "react", "react-dom", "@tanstack/react-table", "@tanstack/react-virtual", "@nqlib/nqchart"],
+    // fumadocs packages must stay deduped / noExternal to avoid duplicate React context.
+    dedupe: [
+      "recharts",
+      "echarts",
+      "motion",
+      "react",
+      "react-dom",
+      "@tanstack/react-table",
+      "@tanstack/react-virtual",
+      "@nqlib/nqchart",
+      "fumadocs-core",
+      "fumadocs-mdx",
+    ],
+  },
+  ssr: {
+    noExternal: ["fumadocs-core", "fumadocs-mdx"],
   },
   // Bind to loopback only so dev does not trigger “local network” device prompts on some mobile browsers.
   // PORT env (set by preview tooling) wins over the default so parallel dev servers don't collide.

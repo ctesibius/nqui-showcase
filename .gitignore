@@ -9,6 +9,7 @@ lerna-debug.log*
 
 node_modules
 .nquidocs-push
+.source
 dist
 dist-ssr
 *.local

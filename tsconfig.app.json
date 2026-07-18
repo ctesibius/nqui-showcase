@@ -22,6 +22,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
+      "collections/*": ["./.source/*"],
       /*
        * Needed whenever @nqlib/nqui is `link:../nqui` (pnpm nqui:local): the linked
        * repo carries its own @types/react, so nqui's .d.ts and this app would see two

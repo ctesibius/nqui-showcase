@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { Spinner } from "@nqlib/nqui";
 import { LandingPage } from "./pages/landing-page";
 import { AppLayout } from "./components/showcase/layout/app-layout";
+import { ThemeTokenSheet } from "./components/showcase/theme-tokens/theme-token-sheet";
 
 // Route-split everything past the landing: the blocks gallery (nqchart pulls
 // echarts) and the readme's code tooling load on navigation, so the landing
@@ -10,16 +11,11 @@ import { AppLayout } from "./components/showcase/layout/app-layout";
 const BlocksPage = lazy(() => import("./pages/blocks-page").then((m) => ({ default: m.BlocksPage })));
 const ChartsPage = lazy(() => import("./pages/charts-page").then((m) => ({ default: m.ChartsPage })));
 const DocsLayout = lazy(() => import("./layouts/docs-layout").then((m) => ({ default: m.DocsLayout })));
-const ReadmePage = lazy(() => import("./pages/readme-page").then((m) => ({ default: m.ReadmePage })));
-const NqchartDocsPage = lazy(() =>
-  import("./pages/nqchart-docs-page").then((m) => ({ default: m.NqchartDocsPage })),
-);
+const DocsPage = lazy(() => import("./pages/docs-page").then((m) => ({ default: m.DocsPage })));
 
 const RecipesHub = lazy(() => import("./components/showcase/pages/recipes-hub"));
 const ComponentShowcase = lazy(() => import("./components/showcase/pages/component-showcase"));
 const PatternsPage = lazy(() => import("./components/showcase/pages/patterns"));
-const RecipeSettings = lazy(() => import("./components/showcase/pages/recipe-settings"));
-const RecipeTracker = lazy(() => import("./components/showcase/pages/recipe-tracker"));
 const RecipeElevation = lazy(() => import("./components/showcase/pages/recipe-elevation"));
 const DesignSystemPage = lazy(() => import("./components/showcase/pages/design-system"));
 
@@ -41,38 +37,44 @@ function RouteFallback() {
 
 function App() {
   return (
-    <Suspense fallback={<RouteFallback />}>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        {/* The tour: a shelf of live nqlib blocks. */}
-        <Route path="/blocks" element={<BlocksPage />} />
-        {/* Full NQChart registry catalog with global preview controls. */}
-        <Route path="/charts" element={<ChartsPage />} />
-        {/* The scroll-story was replaced by the blocks gallery. */}
-        <Route path="/story" element={<Navigate to="/blocks" replace />} />
-        {/* The live console was retired — send its old paths home. */}
-        <Route path="/ops" element={<Navigate to="/" replace />} />
-        <Route path="/app/*" element={<Navigate to="/" replace />} />
-        <Route path="/dashboard/*" element={<Navigate to="/" replace />} />
-        {/* nqui component catalog + recipes (migrated from the nqui Vite app). */}
-        <Route path="/showcase" element={<Navigate to="/nqui" replace />} />
-        <Route path="/showcase/*" element={<Navigate to="/nqui" replace />} />
-        <Route element={<AppLayout />}>
-          <Route path="/nqui" element={<RecipesHub />} />
-          <Route path="/catalog" element={<ComponentShowcase />} />
-          <Route path="/patterns" element={<PatternsPage />} />
-          <Route path="/recipes/settings" element={<RecipeSettings />} />
-          <Route path="/recipes/tracker" element={<RecipeTracker />} />
-          <Route path="/recipes/elevation" element={<RecipeElevation />} />
-          <Route path="/design-system" element={<DesignSystemPage />} />
-        </Route>
-        <Route element={<DocsShell />}>
-          <Route path="/readme" element={<ReadmePage />} />
-          <Route path="/readme/nqchart" element={<NqchartDocsPage />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Suspense>
+    <>
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          {/* The tour: a shelf of live nqlib blocks. */}
+          <Route path="/blocks" element={<BlocksPage />} />
+          {/* Full NQChart registry catalog with global preview controls. */}
+          <Route path="/charts" element={<ChartsPage />} />
+          {/* The scroll-story was replaced by the blocks gallery. */}
+          <Route path="/story" element={<Navigate to="/blocks" replace />} />
+          {/* The live console was retired — send its old paths home. */}
+          <Route path="/ops" element={<Navigate to="/" replace />} />
+          <Route path="/app/*" element={<Navigate to="/" replace />} />
+          <Route path="/dashboard/*" element={<Navigate to="/" replace />} />
+          {/* nqui component catalog + recipes (migrated from the nqui Vite app). */}
+          <Route path="/showcase" element={<Navigate to="/nqui" replace />} />
+          <Route path="/showcase/*" element={<Navigate to="/nqui" replace />} />
+          <Route element={<AppLayout />}>
+            <Route path="/nqui" element={<RecipesHub />} />
+            <Route path="/catalog" element={<ComponentShowcase />} />
+            <Route path="/patterns" element={<PatternsPage />} />
+            <Route path="/recipes/elevation" element={<RecipeElevation />} />
+            <Route path="/design-system" element={<DesignSystemPage />} />
+          </Route>
+          {/* Compact recipes → /blocks (SettingsBlock etc.). */}
+          <Route path="/recipes/settings" element={<Navigate to="/blocks" replace />} />
+          <Route path="/recipes/tracker" element={<Navigate to="/blocks" replace />} />
+          <Route element={<DocsShell />}>
+            <Route path="/docs" element={<DocsPage />} />
+            <Route path="/docs/*" element={<DocsPage />} />
+            <Route path="/readme" element={<Navigate to="/docs/nqui" replace />} />
+            <Route path="/readme/nqchart" element={<Navigate to="/docs/nqchart" replace />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+      <ThemeTokenSheet />
+    </>
   );
 }
 
