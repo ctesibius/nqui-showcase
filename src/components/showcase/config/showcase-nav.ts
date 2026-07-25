@@ -94,6 +94,8 @@ const routeLabels: Record<string, string> = {
   "/recipes/elevation": "Elevation philosophy",
   "/catalog": "Component catalog",
   "/design-system": "Design system",
+  "/command": "Command lab",
+  "/dnd": "DnD lab",
 }
 
 export function showcaseRouteLabel(pathname: string): string {

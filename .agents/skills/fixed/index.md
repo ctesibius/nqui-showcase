@@ -9,7 +9,7 @@ description: >-
 
 **Agents:** When the user asks to fix a bug here, **search this file first**. Open the fix note before changing code.
 
-Last updated: 2026-07-18
+Last updated: 2026-07-25
 
 ---
 
@@ -18,6 +18,7 @@ Last updated: 2026-07-18
 | Domain | Symptoms (short) | Domain doc | Fix notes |
 |--------|------------------|------------|-----------|
 | **docs-toc** | TOC diamond drifts down; rail/glow missing; step shorter than TOC | [domains/docs-toc.md](./domains/docs-toc.md) | [diamond step drift](./fixes/docs-toc-diamond-step-drift.md) |
+| **floating-lists** | Select/Combobox/Command scroll stuck; dual highlight; multi-line density bad | [domains/floating-lists.md](./domains/floating-lists.md) | [scroll + highlight + multiline](./fixes/floating-lists-scroll-highlight-multiline.md) |
 
 ---
 
@@ -29,6 +30,11 @@ Last updated: 2026-07-18
 | TOC rail disappeared; no diamond; glow gone; indicator null | docs TOC | [docs-toc-diamond-step-drift](./fixes/docs-toc-diamond-step-drift.md) |
 | measure `.docs-toc-item` inside overlay; empty path; fallback stride | docs-toc-indicator | [docs-toc-diamond-step-drift](./fixes/docs-toc-diamond-step-drift.md) |
 | On this page; fumadocs TOC; nqchart-style diamond glow | `/readme`, `/readme/nqchart` | [docs-toc-diamond-step-drift](./fixes/docs-toc-diamond-step-drift.md) |
+| Select scrollbar missing; SelectContent overflow; scroll chevrons | `/catalog` Select | [floating-lists-scroll-highlight-multiline](./fixes/floating-lists-scroll-highlight-multiline.md) |
+| Combobox dual highlight; hover + aria-selected; two active rows | Combobox / Command | [floating-lists-scroll-highlight-multiline](./fixes/floating-lists-scroll-highlight-multiline.md) |
+| CommandList scroll stuck; no thumb; wheel inert; h-auto viewport | Command / ⌘K | [floating-lists-scroll-highlight-multiline](./fixes/floating-lists-scroll-highlight-multiline.md) |
+| multi-line SelectItem; title + description; trigger shows description | Select / Combobox / Command | [floating-lists-scroll-highlight-multiline](./fixes/floating-lists-scroll-highlight-multiline.md) |
+| keyboard then pointer fight; scrollIntoView under cursor | Select | [floating-lists-scroll-highlight-multiline](./fixes/floating-lists-scroll-highlight-multiline.md) |
 
 ---
 
@@ -39,6 +45,10 @@ Last updated: 2026-07-18
 | `src/components/docs/docs-toc-indicator.tsx` | docs-toc |
 | `src/components/docs/docs-toc.tsx` | docs-toc |
 | `src/components/docs/docs-article.tsx` | docs-toc |
+| `src/components/showcase/pages/component-showcase.tsx` (Select/Combobox/Command) | floating-lists |
+| `src/components/showcase/layout/app-layout.tsx` (⌘K) | floating-lists |
+| `src/components/showcase/pages/command-lab.tsx` | floating-lists |
+| `../nqui/src/components/ui/{select,combobox,command}.tsx` | floating-lists (upstream) |
 
 ---
 

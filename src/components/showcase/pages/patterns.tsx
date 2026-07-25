@@ -208,8 +208,6 @@ import {
   SelectGroup,
   SelectItem,
   SelectLabel,
-  SelectScrollDownButton,
-  SelectScrollUpButton,
   SelectSeparator,
   SelectTrigger,
   SelectValue,
@@ -1189,7 +1187,9 @@ export default function Showcase2() {
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div ref={patternsComboAnchorRef} className="space-y-2">
-                      <p className="text-xs font-medium text-muted-foreground">Lanes (multi + ComboboxCollection)</p>
+                      <p className="text-xs font-medium text-muted-foreground">
+                        Lanes (multi + ComboboxCollection) — long list for ScrollArea QA
+                      </p>
                       <Combobox
                         multiple
                         value={comboLanes}
@@ -1205,6 +1205,11 @@ export default function Showcase2() {
                               <ComboboxItem value="inbound">Inbound</ComboboxItem>
                               <ComboboxItem value="outbound">Outbound</ComboboxItem>
                               <ComboboxItem value="returns">Returns</ComboboxItem>
+                              <ComboboxItem value="crossdock">Cross-dock</ComboboxItem>
+                              <ComboboxItem value="transfer">Transfer</ComboboxItem>
+                              <ComboboxItem value="willcall">Will-call</ComboboxItem>
+                              <ComboboxItem value="pickup">Store pickup</ComboboxItem>
+                              <ComboboxItem value="dropship">Dropship</ComboboxItem>
                             </ComboboxCollection>
                             <ComboboxSeparator />
                             <ComboboxGroup>
@@ -1212,6 +1217,23 @@ export default function Showcase2() {
                               <ComboboxItem value="priority">Priority</ComboboxItem>
                               <ComboboxItem value="cold">Cold chain</ComboboxItem>
                               <ComboboxItem value="bulk">Bulk</ComboboxItem>
+                              <ComboboxItem value="fragile">Fragile</ComboboxItem>
+                              <ComboboxItem value="hazmat">Hazmat</ComboboxItem>
+                              <ComboboxItem value="oversized">Oversized</ComboboxItem>
+                              <ComboboxItem value="whiteglove">White glove</ComboboxItem>
+                              <ComboboxItem value="giftwrap">Gift wrap</ComboboxItem>
+                            </ComboboxGroup>
+                            <ComboboxSeparator />
+                            <ComboboxGroup>
+                              <ComboboxLabel>Regions</ComboboxLabel>
+                              <ComboboxItem value="us-east">US East</ComboboxItem>
+                              <ComboboxItem value="us-west">US West</ComboboxItem>
+                              <ComboboxItem value="us-central">US Central</ComboboxItem>
+                              <ComboboxItem value="eu-west">EU West</ComboboxItem>
+                              <ComboboxItem value="eu-central">EU Central</ComboboxItem>
+                              <ComboboxItem value="apac">APAC</ComboboxItem>
+                              <ComboboxItem value="latam">LATAM</ComboboxItem>
+                              <ComboboxItem value="mea">MEA</ComboboxItem>
                             </ComboboxGroup>
                           </ComboboxList>
                         </ComboboxContent>
@@ -1327,21 +1349,46 @@ export default function Showcase2() {
                         <SelectValue placeholder="Choose stream" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectScrollUpButton />
+                        {/* Long list: SelectContent scrolls via nqui ScrollArea */}
                         <SelectGroup>
                           <SelectLabel>Product</SelectLabel>
                           <SelectItem value="design">Design system</SelectItem>
                           <SelectItem value="growth">Growth experiments</SelectItem>
+                          <SelectItem value="activation">Activation funnel</SelectItem>
+                          <SelectItem value="retention">Retention loops</SelectItem>
+                          <SelectItem value="pricing">Pricing research</SelectItem>
+                          <SelectItem value="onboarding">Onboarding polish</SelectItem>
+                          <SelectItem value="billing">Billing UX</SelectItem>
+                          <SelectItem value="docs">Docs & education</SelectItem>
                         </SelectGroup>
                         <SelectSeparator />
                         <SelectGroup>
                           <SelectLabel>Platform</SelectLabel>
                           <SelectItem value="infra">Infra hardening</SelectItem>
+                          <SelectItem value="observability">Observability</SelectItem>
+                          <SelectItem value="ci">CI reliability</SelectItem>
+                          <SelectItem value="auth">Auth & SSO</SelectItem>
+                          <SelectItem value="api">API platform</SelectItem>
+                          <SelectItem value="data">Data pipelines</SelectItem>
+                          <SelectItem value="search">Search indexing</SelectItem>
+                          <SelectItem value="security">Security reviews</SelectItem>
                         </SelectGroup>
-                        <SelectScrollDownButton />
+                        <SelectSeparator />
+                        <SelectGroup>
+                          <SelectLabel>Go-to-market</SelectLabel>
+                          <SelectItem value="launch">Launch readiness</SelectItem>
+                          <SelectItem value="partners">Partner enablement</SelectItem>
+                          <SelectItem value="support">Support playbooks</SelectItem>
+                          <SelectItem value="sales">Sales tooling</SelectItem>
+                          <SelectItem value="success">Customer success</SelectItem>
+                          <SelectItem value="marketing">Marketing site</SelectItem>
+                        </SelectGroup>
                       </SelectContent>
                     </Select>
-                    <FieldDescription>Determines which template we attach to new tickets.</FieldDescription>
+                    <FieldDescription>
+                      Long list to exercise Select overflow. Determines which template we attach to new
+                      tickets.
+                    </FieldDescription>
                   </Field>
 
                   <Field>

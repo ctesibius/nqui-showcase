@@ -21,6 +21,9 @@ import {
   ComboboxContent,
   ComboboxList,
   ComboboxItem,
+  ComboboxItemContent,
+  ComboboxItemTitle,
+  ComboboxItemDescription,
   ComboboxEmpty,
   ComboboxGroup,
   ComboboxLabel,
@@ -73,6 +76,27 @@ You can still render `ComboboxItem` children manually when you control filtering
   </ComboboxContent>
 </Combobox>
 ```
+
+## Multi-line (title + description)
+
+Same contract as Command search hits / Select multi-line — use slots so spacing stays calm. The **title** is the trigger/badge label; description is filterable but not shown in the closed field.
+
+```tsx
+<ComboboxItem value="pro" keywords={["billing", "plan"]}>
+  <ComboboxItemContent>
+    <ComboboxItemTitle>Pro</ComboboxItemTitle>
+    <ComboboxItemDescription>Unlimited projects and priority support.</ComboboxItemDescription>
+  </ComboboxItemContent>
+</ComboboxItem>
+```
+
+| Slot | Role |
+|------|------|
+| `ComboboxItemContent` | Vertical stack; start-aligns the row |
+| `ComboboxItemTitle` | Primary line (`text-sm font-medium`) — closed-field label |
+| `ComboboxItemDescription` | Secondary line (`text-xs`, muted, `line-clamp-2`) |
+
+Do **not** override the item with `flex-col` — put structure inside `ComboboxItemContent`.
 
 ## Clear button
 

@@ -13,13 +13,15 @@ import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-  ScrollArea,
 } from "@nqlib/nqui"
 import {
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandItemContent,
+  CommandItemDescription,
+  CommandItemTitle,
   CommandList,
   CommandPalette,
   CommandSeparator,
@@ -52,6 +54,14 @@ const routeToBreadcrumbs: Record<string, { label: string; path: string }[]> = {
   "/design-system": [
     { label: "Recipes", path: NQUI_HUB_PATH },
     { label: "Design system", path: "/design-system" },
+  ],
+  "/command": [
+    { label: "Recipes", path: NQUI_HUB_PATH },
+    { label: "Command lab", path: "/command" },
+  ],
+  "/dnd": [
+    { label: "Recipes", path: NQUI_HUB_PATH },
+    { label: "DnD lab", path: "/dnd" },
   ],
 }
 
@@ -152,12 +162,12 @@ function AppLayoutContent() {
         >
           Skip to main content
         </a>
-        <ScrollArea
-          fadeMask={false}
-          viewportRef={scrollContainerRef}
-          className="min-h-0 flex-1"
+        {/* Main shell scrollport: native overflow so the page scrollbar stays visible. */}
+        <div
+          ref={scrollContainerRef}
+          data-main-scroll="true"
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden"
         >
-          <div data-main-scroll="true" className="flex min-h-full flex-col">
           {/* Header with FrostedGlass for content behind and reflections nearby */}
           <header className="sticky top-0 z-[var(--z-sticky-page)] flex-shrink-0 relative">
             <FrostedGlass blur={16} borderRadius={0} className="z-[var(--z-background)]" />
@@ -193,8 +203,7 @@ function AppLayoutContent() {
               <Outlet />
             </PageContentWrapper>
           </main>
-          </div>
-        </ScrollArea>
+        </div>
       </SidebarInset>
     </ScrollContainerContext.Provider>
   )
@@ -225,10 +234,10 @@ function CommandPaletteContent() {
               value={`${route.title} ${route.description}`}
               onSelect={() => goTo(route.path)}
             >
-              <span className="flex flex-col gap-0.5">
-                <span>{route.title}</span>
-                <span className="text-xs text-muted-foreground">{route.description}</span>
-              </span>
+              <CommandItemContent>
+                <CommandItemTitle>{route.title}</CommandItemTitle>
+                <CommandItemDescription>{route.description}</CommandItemDescription>
+              </CommandItemContent>
             </CommandItem>
           ))}
         </CommandGroup>
