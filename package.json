@@ -42,7 +42,7 @@
     "@nqlib/nqgantt": "^0.3.1",
     "@nqlib/nqgantt-engine": "^0.3.1",
     "@nqlib/nqgrid": "^0.2.0",
-    "@nqlib/nqui": "link:../nqui",
+    "@nqlib/nqui": "^0.7.4",
     "@remixicon/react": "^4.9.0",
     "@tailwindcss/vite": "^4.2.2",
     "@tanstack/react-table": "^8.21.3",
