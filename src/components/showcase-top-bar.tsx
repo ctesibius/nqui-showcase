@@ -150,7 +150,6 @@ function SegmentSelect({ segment }: { segment: ShowcaseTopBarSegment }) {
           />
         </Button>
       </DropdownMenuTrigger>
-      {/* nqui SelectContent uses native overflow — menu + ScrollArea instead */}
       <DropdownMenuContent
         align="start"
         className="min-w-[10rem] overflow-hidden p-0"

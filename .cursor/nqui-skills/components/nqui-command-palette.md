@@ -5,7 +5,9 @@
 ## Import
 
 ```tsx
-import { CommandPalette } from "@nqlib/nqui"
+import {
+  CommandPalette, CommandInput, CommandList, CommandItem,
+} from "@nqlib/nqui/command"
 ```
 
 ## Basic
@@ -33,4 +35,4 @@ If an older nqui version still shows all rows filled: upgrade to **0.6.1+** or s
 
 - Keyboard listener on window. May conflict with other global shortcuts.
 - Custom title/description for accessibility.
-- Prefer plain `CommandList` in the showcase; wrap in `ScrollArea` only when you need a bounded height — scroll behavior is separate from row highlight.
+- `CommandList` already composes nqui `ScrollArea` + `ScrollBar` — do **not** wrap it in another `ScrollArea`. See `nqui-command.md` for multi-line search slots, list padding, and `maxHeight`.

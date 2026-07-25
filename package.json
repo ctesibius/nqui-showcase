@@ -27,6 +27,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@atlaskit/pragmatic-drag-and-drop": "^2.0.1",
+    "@atlaskit/pragmatic-drag-and-drop-auto-scroll": "^3.0.0",
+    "@atlaskit/pragmatic-drag-and-drop-hitbox": "^2.0.0",
+    "@atlaskit/pragmatic-drag-and-drop-live-region": "^2.0.0",
     "@base-ui/react": "^1.3.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/modifiers": "^9.0.0",
@@ -38,7 +42,7 @@
     "@nqlib/nqgantt": "^0.3.1",
     "@nqlib/nqgantt-engine": "^0.3.1",
     "@nqlib/nqgrid": "^0.2.0",
-    "@nqlib/nqui": "^0.7.3",
+    "@nqlib/nqui": "^0.7.4",
     "@remixicon/react": "^4.9.0",
     "@tailwindcss/vite": "^4.2.2",
     "@tanstack/react-table": "^8.21.3",

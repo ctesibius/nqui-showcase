@@ -1,17 +1,18 @@
 # nqui Command
 
-> Command palette filter list. CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandSeparator, CommandShortcut. CommandDialog for modal.
+> Command palette filter list. CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem (plus search-result slots), CommandSeparator, CommandShortcut. CommandDialog for modal.
 
 ## Import
 
 ```tsx
 import {
   Command, CommandInput, CommandList, CommandEmpty, CommandGroup,
-  CommandItem, CommandSeparator, CommandShortcut, CommandDialog
-} from "@nqlib/nqui"
+  CommandItem, CommandItemContent, CommandItemTitle, CommandItemMeta,
+  CommandItemDescription, CommandSeparator, CommandShortcut, CommandDialog
+} from "@nqlib/nqui/command"
 ```
 
-## Basic
+## Basic (command menu)
 
 ```tsx
 <Command>
@@ -27,6 +28,44 @@ import {
     </CommandGroup>
   </CommandList>
 </Command>
+```
+
+## Search results (multi-line)
+
+Default `CommandItem` is a single-line command-menu row (`min-h-7`, `items-center`, `px-2.5 py-1.5`). For search hits, compose slots — the row shell keeps **constant** vertical padding while `CommandItemContent` grows:
+
+```tsx
+<CommandItem value="keyboard-shortcuts">
+  <IconBook />
+  <CommandItemContent>
+    <CommandItemTitle>Keyboard shortcuts</CommandItemTitle>
+    <CommandItemMeta>Help › Reference</CommandItemMeta>
+    <CommandItemDescription>
+      Open the shortcut reference from any page
+    </CommandItemDescription>
+  </CommandItemContent>
+</CommandItem>
+```
+
+| Slot | Role |
+|------|------|
+| `CommandItemContent` | Vertical stack (`flex-1 min-w-0`); presence opts the row into start-aligned layout |
+| `CommandItemTitle` | Primary line |
+| `CommandItemMeta` | Breadcrumb / path (optional) |
+| `CommandItemDescription` | Snippet (optional, `line-clamp-2`) |
+
+Do **not** override the item with `flex-col` — that fights `min-h-7` and stretches the highlight. Put structure inside `CommandItemContent`.
+
+## CommandList chrome
+
+- **Padding:** `CommandList` includes `p-1`. A bare list (no `CommandGroup`) no longer sits flush under `CommandInput`. Groups do not add a second outer `p-1`.
+- **Scroll:** List composes nqui `ScrollArea` + `ScrollBar`. The **viewport** is the scroll container (cmdk `scrollIntoView` and the thumb stay aligned). Do not wrap `CommandList` in another `ScrollArea` or add `overflow-y-auto` on the list.
+- **Max height:** defaults to `18rem` via `--command-list-max-height`. Raise it without `!`:
+
+```tsx
+<CommandList maxHeight="24rem" />
+// or
+<CommandList style={{ "--command-list-max-height": "70vh" } as React.CSSProperties} />
 ```
 
 ## CommandDialog

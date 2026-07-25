@@ -27,6 +27,18 @@ When designing app UI (toolbars, headers, inline controls):
 
 **Rule:** Inline/toolbar selection = ToggleGroup. Use RadioGroup only for form context (settings page, modal form, stacked list).
 
+### ToggleGroup owns its own layout — don't restyle it
+
+`ToggleGroup` is a **single row** that scrolls horizontally (hidden scrollbar) when its parent is too narrow, and in `spacing={0}` (the default) its items sit **flush** inside one pill shell. Both are deliberate. Passing layout utilities fights them:
+
+| Reflex | What actually happens | Correct |
+|--------|----------------------|---------|
+| `className="flex-wrap"` "so it won't overflow" | Pill grows tall, pushes content down, loses its shape — and becomes drag-scrollable on the cross axis, sliding items out of alignment | Delete it. Narrow parents already scroll sideways. |
+| `className="gap-1"` "to separate the items" | In `spacing={0}` items are `rounded-none` and must touch; a gap re-exposes the shell so hover fills stop short and read as a sliver | `spacing={2}` |
+| `className="overflow-y-auto"` | The cross axis is pinned `hidden` on purpose — items' `hit-area-*` `::before` overhangs the row as a larger tap target and would become "scrollable content" | Delete it. |
+
+**Rule:** reach for the `spacing` prop, never `gap-*` / `flex-wrap` / `overflow-*`. Full detail → `components/nqui-toggle-group.md`.
+
 ## App Design Rule: Tabs in scrollable pages → InlineTabs
 
 When `Tabs` sit inside a **page-level** vertical scroller (`overflow-y-auto` on the view, expanded cards, guide pages):
@@ -52,17 +64,18 @@ When `Tabs` sit inside a **page-level** vertical scroller (`overflow-y-auto` on 
 | Chart/settings | Label + inline controls; `rounded-lg border bg-muted/30 p-3` | `/catalog` → Chart settings |
 | Standalone | Inline with related UI | `/catalog` → Standalone toggle |
 
-**Canonical implementation:** `/catalog` Toggle section, or full pages at `/patterns` and `/recipes/settings`.
+**Canonical implementation:** `/catalog` Toggle section, or full pages at `/patterns` and `/blocks` (settings / toolbar).
 
 ## Composition (product UI)
 
-Before picking components, read **`../COMPOSITION.md`** (or `docs/nqui-skills/COMPOSITION.md`). Dev app: **Recipes** at `/`, catalog at `/catalog`.
+Before picking components, read **`../COMPOSITION.md`** (or `docs/nqui-skills/COMPOSITION.md`). Live demos: **Recipes** at `/nqui`, catalog at `/catalog` in **nqui-showcase**.
 
 ### Pre-ship checklist
 
 - [ ] One user goal and primary action on the screen
 - [ ] ≤3 major surfaces (chrome + primary + optional secondary)
 - [ ] Toolbars use ToggleGroup in context (`bg-muted/30`), not isolated in Cards
+- [ ] No `flex-wrap` / `gap-*` / `overflow-*` passed to a ToggleGroup (use `spacing`); toolbar still one row when the parent narrows
 - [ ] Forms use FieldSet + FieldGroup (not a card per field)
 - [ ] Cards only for bounded topics, not every control
 - [ ] Loading / empty / error states use Skeleton, Empty, Alert
@@ -81,6 +94,8 @@ Before picking components, read **`../COMPOSITION.md`** (or `docs/nqui-skills/CO
 
 - React 18+ and 19 supported
 - **cmdk list rows:** nqui ≥ 0.6.1 uses `aria-selected:bg-accent` in `floatingListItemInteractive`. Do not add custom `data-selected:bg-accent` on `CommandItem` (React 19 + `[data-selected]` highlights every row). See `docs/components/nqui-command-palette.md`.
+- **Multi-line list rows (nqui ≥ 0.7.4):** use slots — `CommandItemContent` / `Title` / `Meta` / `Description`, `SelectItemContent` / `Title` / `Description`, `ComboboxItemContent` / `Title` / `Description`. Do **not** stack raw `<div>`/`<p>` or put `flex-col` on the item shell. Title is the closed-field label for Select/Combobox.
+- **Floating list scroll:** `CommandList`, `SelectContent`, and Combobox lists compose nqui `ScrollArea` — do not wrap them in another `ScrollArea` or add `overflow-y-auto` on the list. Raise Command list height with `maxHeight` / `--command-list-max-height`.
 - Control sizes: sm=h-6, default=h-7, lg=h-8
 - Enhanced vs Core: default is enhanced; use Core* for plain
 - Z-index: CSS vars from elevation.css only

@@ -16,6 +16,8 @@ const ComponentShowcase = lazy(() => import("./components/showcase/pages/compone
 const PatternsPage = lazy(() => import("./components/showcase/pages/patterns"));
 const RecipeElevation = lazy(() => import("./components/showcase/pages/recipe-elevation"));
 const DesignSystemPage = lazy(() => import("./components/showcase/pages/design-system"));
+const DndLab = lazy(() => import("./components/showcase/pages/dnd-lab"));
+const CommandLab = lazy(() => import("./components/showcase/pages/command-lab"));
 
 function DocsShell() {
   return (
@@ -58,6 +60,8 @@ function App() {
             <Route path="/patterns" element={<PatternsPage />} />
             <Route path="/recipes/elevation" element={<RecipeElevation />} />
             <Route path="/design-system" element={<DesignSystemPage />} />
+            <Route path="/dnd" element={<DndLab />} />
+            <Route path="/command" element={<CommandLab />} />
           </Route>
           {/* Compact recipes → /blocks (SettingsBlock etc.). */}
           <Route path="/recipes/settings" element={<Navigate to="/blocks" replace />} />
