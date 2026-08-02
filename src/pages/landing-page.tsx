@@ -5,27 +5,28 @@ import { Button, NquiLogo } from "@nqlib/nqui";
 import { ThemeControls } from "../components/showcase/theme-tokens/theme-token-sheet";
 import { LiquidGlassBar } from "../components/liquid-glass-bar";
 import { LiveWindow } from "../components/landing/live-window";
-import pkg from "../../package.json";
+import nquiPkg from "../../node_modules/@nqlib/nqui/package.json";
+import nqchartPkg from "../../node_modules/@nqlib/nqchart/package.json";
+import nqgridPkg from "../../node_modules/@nqlib/nqgrid/package.json";
+import nqganttPkg from "../../node_modules/@nqlib/nqgantt/package.json";
 import "../components/landing/landing.css";
 
 /*
  * nqlib landing — one viewport: pitch on the left, a living library window on
  * the right, where every scene is REAL nqui. Design philosophy borrowed from
  * ../factory-site; the execution is all nqui components + raw nqui tokens.
- * Versions below are read from package.json so they can never go stale; the
- * full shelf of patterns lives at /blocks.
+ * Versions below are the installed package.json versions (not the caret range
+ * in this app's package.json), so the landing always matches what ships.
+ * The full shelf of patterns lives at /blocks.
  */
 
 const INSTALL_CMD = "pnpm add @nqlib/nqui";
 
-const clean = (range?: string) => (range ?? "").replace(/^[\^~]/, "");
-const deps = pkg.dependencies as Record<string, string>;
-
 const PACKAGES = [
-  { name: "nqui", version: clean(deps["@nqlib/nqui"]), blurb: "50+ components, tree-shakeable subpath entries" },
-  { name: "nqchart", version: clean(deps["@nqlib/nqchart"]), blurb: "14 chart types on one composable API" },
-  { name: "nqgrid", version: clean(deps["@nqlib/nqgrid"]), blurb: "a real spreadsheet engine — formulas, pivots" },
-  { name: "nqgantt", version: clean(deps["@nqlib/nqgantt"]), blurb: "schedule kernel with critical paths & EVM" },
+  { name: "nqui", version: nquiPkg.version, blurb: "50+ components, tree-shakeable subpath entries" },
+  { name: "nqchart", version: nqchartPkg.version, blurb: "14 chart types on one composable API" },
+  { name: "nqgrid", version: nqgridPkg.version, blurb: "a real spreadsheet engine — formulas, pivots" },
+  { name: "nqgantt", version: nqganttPkg.version, blurb: "schedule kernel with critical paths & EVM" },
 ];
 
 /** Staggered entrance for everything tagged data-fl-reveal, DOM order. */
