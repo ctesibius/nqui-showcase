@@ -244,11 +244,14 @@ The root container. It owns the data, the shared selection state, the loading sk
   <ApiRow name="layout" type='"concentric" | "rose"' default='"concentric"'>
     Polar layout. `"concentric"` — one ring per row, arc length is the value. `"rose"` — category petals radiating from the center (nightingale rose).
   </ApiRow>
-  <ApiRow name="innerRadius" type="number | string" default='"30%"'>
-    The inner radius of the radial bars. Can be a number (pixels) or percentage string.
+  <ApiRow name="startAngle" type="number" default="90 (full) / 180 (semi)">
+    Polar start angle in degrees (`0` = 3 o&apos;clock, `90` = 12 o&apos;clock). Ring names sit on this spoke; label baseline is perpendicular to it so glyph height fits the ring (`rotate = startAngle − 90`). Sweep stays full (360°) or semi (180°) clockwise.
   </ApiRow>
-  <ApiRow name="outerRadius" type="number | string" default='"100%"'>
-    The outer radius of the radial bars. Can be a number (pixels) or percentage string.
+  <ApiRow name="innerRadius" type="number | string" default='"18%"'>
+    The inner radius of the radial bars. Can be a number (pixels) or percentage string. Smaller defaults leave more annular span for rings + gaps.
+  </ApiRow>
+  <ApiRow name="outerRadius" type="number | string" default="auto">
+    Outer radius of the polar plot. When omitted, charts fill most of the card with a gutter for labels (`90%` full labeled, `85%` semi labeled, `78%` rose labeled for leaders).
   </ApiRow>
   <ApiRow name="defaultSelectedDataKey" type="string | null" default="null">
     The bar name that should be selected by default.
