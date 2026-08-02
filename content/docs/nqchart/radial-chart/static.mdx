@@ -1,6 +1,6 @@
 ---
 title: Radial Chart
-description: Beautiful radial bar charts with full and semi-circle variants, gradient colors, and glow effects
+description: Beautiful radial bar charts with full and semi-circle variants and gradient colors
 image: /og/radial-chart.png
 links:
   github: https://github.com/ctesibius/nqchart/blob/main/src/registry/charts/radial-chart.tsx
@@ -82,7 +82,7 @@ links:
 
 ## Usage
 
-The radial chart is composible. `<NQRadialChart>` is the container, and you compose only the parts you need — `<Legend>`, `<Tooltip>`, and a `<RadialBar>` — as its children. The `<RadialBar>` carries its own `glowingBars` and `isClickable`, so styling and interactivity live with the series itself.
+The radial chart is composible. `<NQRadialChart>` is the container, and you compose only the parts you need — `<Legend>`, `<Tooltip>`, and a `<RadialBar>` — as its children. The `<RadialBar>` carries its own `isClickable`, so styling and interactivity live with the series itself.
 
 ```tsx
 import {
@@ -120,7 +120,7 @@ const chartConfig = {
 <NQRadialChart data={data} nameKey="browser" config={chartConfig} variant="full">
   <Legend isClickable />
   <Tooltip />
-  <RadialBar dataKey="visitors" isClickable glowingBars={["chrome"]} />
+  <RadialBar dataKey="visitors" isClickable />
 </NQRadialChart>
 ```
 
@@ -214,16 +214,6 @@ Single KPI row plus `<RadialBar target={80} />` — same dial compiler as the ba
 
 <ComponentPreview title="gradient colors" name="ex-gradient-colors-radial-chart"  />
 
-### Glowing Bars
-
-<ComponentPreview className="mb-0" title="glowingBars={['chrome', 'safari']}" name="ex-glowing-radial-chart"  />
-<Alert> 
-  <AlertContent>
-    Add a subtle glow effect to specific bars using the `glowingBars` prop on `<RadialBar>`. Pass an array of bar names (the values from your `nameKey` field) to specify which bars should glow.
-  </AlertContent>
-</Alert>
-
-
 ## API Reference
 
 The chart is composed of several parts. The props below are grouped by the component they belong to.
@@ -279,7 +269,7 @@ The root container. It owns the data, the shared selection state, the loading sk
 
 <ApiHeading>RadialBar</ApiHeading>
 
-The radial bar series. Each data row becomes one bar. It generates its own glow filter definitions, so glow effects never collide with other charts on the page.
+The radial bar series. Each data row becomes one bar.
 
 <ApiTable>
   <ApiRow name="dataKey" type="string" required>
@@ -296,9 +286,6 @@ The radial bar series. Each data row becomes one bar. It generates its own glow 
   </ApiRow>
   <ApiRow name="isClickable" type="boolean" default="false">
     Enables interactive clicking on bars to select/deselect them. Unselected bars dim while a selection is active.
-  </ApiRow>
-  <ApiRow name="glowingBars" type="string[]" default="[]">
-    Array of bar names (values from your `nameKey` field) that should have a glowing effect applied. Creates a smooth outer glow around the specified bars.
   </ApiRow>
   <ApiRow name="radialBarProps" type='Omit<ComponentProps<typeof RadialBar>, "dataKey">'>
     Additional ECharts options merged into the compiled `option` by NQChart. Read the <Link href="https://echarts.apache.org/en/option.html#series-bar" _blank>ECharts RadialBar documentation</Link> for available props.

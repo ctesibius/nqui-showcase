@@ -19,8 +19,8 @@ export type CatalogEntry = {
   component: string;
 };
 
-export const CATALOG_SOURCE = "nqchart" as const;
-export const CATALOG_COUNT = 95 as const;
+export const CATALOG_SOURCE = "becocharts" as const;
+export const CATALOG_COUNT = 96 as const;
 
 export const NQCHART_CATALOG: CatalogEntry[] = [
   {
@@ -231,15 +231,6 @@ export const NQCHART_CATALOG: CatalogEntry[] = [
     "component": "radar-chart"
   },
   {
-    "id": "ex-glowing-radial-chart",
-    "name": "Glowing Radial",
-    "exportName": "NQExampleGlowingRadialChart",
-    "adapterFile": "ex-doc-charts.tsx",
-    "family": "radial",
-    "category": "variant",
-    "component": "radial-chart"
-  },
-  {
     "id": "ex-glowing-scatter-chart",
     "name": "Glowing Scatter",
     "exportName": "NQExampleGlowingScatterChart",
@@ -256,15 +247,6 @@ export const NQCHART_CATALOG: CatalogEntry[] = [
     "family": "line",
     "category": "variant",
     "component": "sparkline-chart"
-  },
-  {
-    "id": "ex-glowing-treemap-chart",
-    "name": "Glowing Treemap",
-    "exportName": "NQExampleGlowingTreemapChart",
-    "adapterFile": "ex-doc-charts.tsx",
-    "family": "treemap",
-    "category": "variant",
-    "component": "treemap-chart"
   },
   {
     "id": "ex-glowing-waterfall-chart",
@@ -409,6 +391,15 @@ export const NQCHART_CATALOG: CatalogEntry[] = [
     "family": "bar",
     "category": "recipe",
     "component": "bar-chart"
+  },
+  {
+    "id": "ex-horizontal-funnel-chart",
+    "name": "Horizontal Funnel",
+    "exportName": "NQExampleHorizontalFunnelChart",
+    "adapterFile": "ex-doc-charts.tsx",
+    "family": "funnel",
+    "category": "example",
+    "component": "funnel-chart"
   },
   {
     "id": "ex-horizontal-layout-bar-chart",
@@ -681,6 +672,15 @@ export const NQCHART_CATALOG: CatalogEntry[] = [
     "component": "pie-chart"
   },
   {
+    "id": "ex-pipe-funnel-chart",
+    "name": "Pipe Funnel",
+    "exportName": "NQExamplePipeFunnelChart",
+    "adapterFile": "ex-doc-charts.tsx",
+    "family": "funnel",
+    "category": "example",
+    "component": "funnel-chart"
+  },
+  {
     "id": "ex-radar-chart",
     "name": "Radar",
     "exportName": "NQExampleRadarChart",
@@ -823,6 +823,15 @@ export const NQCHART_CATALOG: CatalogEntry[] = [
     "family": "treemap",
     "category": "example",
     "component": "treemap-chart"
+  },
+  {
+    "id": "ex-vertical-pipe-funnel-chart",
+    "name": "Vertical Pipe Funnel",
+    "exportName": "NQExampleVerticalPipeFunnelChart",
+    "adapterFile": "ex-doc-charts.tsx",
+    "family": "funnel",
+    "category": "example",
+    "component": "funnel-chart"
   },
   {
     "id": "ex-waterfall-chart",

@@ -1,5 +1,10 @@
 import * as React from "react";
 import { motion } from "motion/react";
+import {
+  DURATION_DRAMATIC_MS,
+  DURATION_STANDARD_MS,
+  EASE_OUT,
+} from "./motion-constants";
 import { type ChartConfig } from "@nqlib/nqchart";
 import { CatalogChartContainer as ChartContainer } from "../catalog-chart-container.tsx";
 
@@ -33,8 +38,7 @@ const HIGHLIGHT_COLOR_DARK = "#15803d";
 
 const MARGIN = { top: 28, right: 36, left: 8, bottom: 36 };
 const VIEW_W = 640;
-/** Match ~square stage plot area so `meet` fills height instead of letterboxing. */
-const VIEW_H = 380;
+const VIEW_H = 280;
 const Y_MAX = 57;
 
 type ShapeProps = {
@@ -77,9 +81,10 @@ function IsoBar({ x, y, width, height, index, payload, maxValue, idPrefix, hover
         scaleX: isHovered ? 1.06 : 1,
       }}
       transition={{
-        duration: isHovered || dimmed ? 0.2 : 0.7,
+        duration:
+          (isHovered || dimmed ? DURATION_STANDARD_MS : DURATION_DRAMATIC_MS) / 1000,
         delay: hoveredIndex === null ? index * 0.08 : 0,
-        ease: [0.16, 1, 0.3, 1],
+        ease: EASE_OUT,
       }}
       style={{ transformBox: "fill-box", transformOrigin: "50% 100%" }}
     >
@@ -202,8 +207,8 @@ export function NQIsometricBarChart() {
         </div>
       </div>
       <hr className="my-4 border-t border-dashed" />
-      <ChartContainer config={chartConfig} className="relative min-h-0 flex-1">
-        <div className="absolute inset-0">
+      <ChartContainer config={chartConfig} className="min-h-0 flex-1 [&_[data-slot=chart]]:aspect-auto">
+        <div className="relative h-full min-h-[220px] w-full">
           {hover ? (
             <div className="bg-background/95 text-foreground border-border/50 pointer-events-none absolute right-2 top-0 z-10 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl">
               <div className="font-medium">{hover.month}</div>
@@ -212,7 +217,6 @@ export function NQIsometricBarChart() {
           ) : null}
           <svg
             viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
-            preserveAspectRatio="xMidYMid meet"
             className="h-full w-full"
             role="img"
             aria-label="Isometric revenue bar chart"

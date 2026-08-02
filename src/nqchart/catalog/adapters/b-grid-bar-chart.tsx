@@ -33,8 +33,7 @@ const chartConfig = {
 
 const MARGIN = { top: 12, right: 16, left: 8, bottom: 36 };
 const VIEW_W = 720;
-/** Match ~square stage plot area so `meet` fills height instead of letterboxing. */
-const VIEW_H = 420;
+const VIEW_H = 260;
 
 function renderSquareColumn(
   x: number,
@@ -110,15 +109,9 @@ export function NQGridBarChart() {
         </div>
       </div>
       <hr className="my-4 border-t border-dashed" />
-      <ChartContainer config={chartConfig} className="relative min-h-0 flex-1">
-        <div className="absolute inset-0">
-          <svg
-            viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
-            preserveAspectRatio="xMidYMid meet"
-            className="h-full w-full"
-            role="img"
-            aria-label="Grid bar chart"
-          >
+      <ChartContainer config={chartConfig} className="min-h-0 flex-1 [&_[data-slot=chart]]:aspect-auto">
+        <div className="relative h-full min-h-[220px] w-full">
+          <svg viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} className="h-full w-full" role="img" aria-label="Grid bar chart">
             {chartData.map((row, index) => {
               const x = MARGIN.left + index * band;
               const valueHeight = (row.desktop / yMax) * innerH;

@@ -242,6 +242,14 @@ import {
 } from "@hugeicons/core-free-icons"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import {
+  catalogDemoWell,
+  catalogGridLedger,
+  catalogGridMatrix,
+  catalogHeading,
+  catalogSection,
+  catalogShell,
+} from "../catalog-layout"
 
 type Person = { id: string; name: string; avatarUrl?: string }
 
@@ -885,11 +893,11 @@ export default function ComponentShowcase() {
   const tocContentRef3 = React.useRef<HTMLDivElement>(null)
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6 min-w-0 overflow-x-hidden">
+    <div className={catalogShell}>
       <Toaster />
 
       {/* Header Section */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div>
           <h1 className="text-3xl font-bold">Component catalog</h1>
           <p className="text-muted-foreground">
@@ -930,10 +938,10 @@ export default function ComponentShowcase() {
       </div>
 
       {/* Buttons & Actions Section */}
-      <section className="space-y-4">
-        <h2 id="buttons-actions" className="text-2xl font-semibold">Buttons & Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Card>
+      <section className={catalogSection}>
+        <h2 id="buttons-actions" className={catalogHeading}>Buttons & Actions</h2>
+        <div className={catalogGridLedger}>
+          <Card className="md:col-span-2">
             <CardHeader>
               <CardTitle>Button Variants</CardTitle>
               <CardDescription>
@@ -1069,14 +1077,14 @@ export default function ComponentShowcase() {
             <CardHeader>
               <CardTitle>Toggle & ToggleGroup</CardTitle>
               <CardDescription>
-                In context: format toolbar, chart settings. Off = subtle border+shadow. On = secondary/primary + gradient+shadow.
+                In context: format toolbar, chart settings. Off = subtle border. On = secondary/primary fill (flat under Look: next).
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Document editor toolbar */}
               <div className="space-y-2">
                 <Label className="text-xs text-muted-foreground">Document editor — format toolbar</Label>
-                <div className="rounded-lg border border-input bg-muted/30 p-3">
+                <div className={catalogDemoWell}>
                   <div className="flex flex-wrap items-center gap-1">
                     <ToggleGroup type="multiple" value={formatActive} onValueChange={setFormatActive}>
                       <ToggleGroupItem value="bold" aria-label="Bold">
@@ -1111,7 +1119,7 @@ export default function ComponentShowcase() {
               {/* Chart settings toolbar */}
               <div className="space-y-2">
                 <Label className="text-xs text-muted-foreground">Chart settings — scale & size</Label>
-                <div className="rounded-lg border border-input bg-muted/30 p-3">
+                <div className={catalogDemoWell}>
                   <div className="flex flex-wrap items-center gap-4">
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-muted-foreground">Y-axis:</span>
@@ -1148,9 +1156,9 @@ export default function ComponentShowcase() {
       </section>
 
       {/* Form Components Section */}
-      <section className="space-y-4">
-        <h2 id="form-components" className="text-2xl font-semibold">Form Components</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <section className={catalogSection}>
+        <h2 id="form-components" className={catalogHeading}>Form Components</h2>
+        <div className={catalogGridLedger}>
           <Card>
             <CardHeader>
               <CardTitle>Input</CardTitle>
@@ -1176,7 +1184,7 @@ export default function ComponentShowcase() {
               {/* Billing / Settings panel */}
               <div className="space-y-2">
                 <Label className="text-xs text-muted-foreground">Billing — amount with currency</Label>
-                <div className="rounded-lg border border-input bg-muted/30 p-3">
+                <div className={catalogDemoWell}>
                   <div className="space-y-3">
                     <InputGroupBudgetField />
                   </div>
@@ -1186,7 +1194,7 @@ export default function ComponentShowcase() {
               {/* Profile / Social */}
               <div className="space-y-2">
                 <Label className="text-xs text-muted-foreground">Profile — @handle (e.g. Twitter, GitHub)</Label>
-                <div className="rounded-lg border border-input bg-muted/30 p-3">
+                <div className={catalogDemoWell}>
                   <Field>
                     <FieldLabel>Username</FieldLabel>
                     <InputGroup>
@@ -1202,7 +1210,7 @@ export default function ComponentShowcase() {
               {/* Site URL */}
               <div className="space-y-2">
                 <Label className="text-xs text-muted-foreground">Site settings — URL with prefix</Label>
-                <div className="rounded-lg border border-input bg-muted/30 p-3">
+                <div className={catalogDemoWell}>
                   <Field>
                     <FieldLabel>Base URL</FieldLabel>
                     <InputGroup>
@@ -1368,7 +1376,7 @@ export default function ComponentShowcase() {
                 </p>
                 <table className="w-full max-w-md border border-border text-sm">
                   <thead>
-                    <tr className="border-b border-border bg-muted/40">
+                    <tr className="border-b border-border bg-background">
                       <th className="w-14 p-2 text-left font-medium" scope="col">
                         Select
                       </th>
@@ -1640,11 +1648,11 @@ export default function ComponentShowcase() {
       </section>
 
       {/* Display Components Section */}
-      <section className="space-y-4">
-        <h2 id="display-components" className="text-2xl font-semibold">Display Components</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <section className={catalogSection}>
+        <h2 id="display-components" className={catalogHeading}>Display Components</h2>
+        <div className={catalogGridMatrix}>
           {/* Design System link */}
-          <Card className="lg:col-span-3">
+          <Card className="xl:col-span-3">
             <CardHeader>
               <CardTitle>Design System</CardTitle>
               <CardDescription>
@@ -2085,9 +2093,9 @@ export default function ComponentShowcase() {
       </section>
 
       {/* Navigation & Menus Section */}
-      <section className="space-y-4">
-        <h2 id="navigation-menus" className="text-2xl font-semibold">Navigation & Menus</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <section className={catalogSection}>
+        <h2 id="navigation-menus" className={catalogHeading}>Navigation & Menus</h2>
+        <div className={catalogGridLedger}>
           <Card>
             <CardHeader>
               <CardTitle>Breadcrumb</CardTitle>
@@ -2404,9 +2412,9 @@ export default function ComponentShowcase() {
       </section>
 
       {/* Overlays & Dialogs Section */}
-      <section className="space-y-4">
-        <h2 id="overlays-dialogs" className="text-2xl font-semibold">Overlays & Dialogs</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <section className={catalogSection}>
+        <h2 id="overlays-dialogs" className={catalogHeading}>Overlays & Dialogs</h2>
+        <div className={catalogGridLedger}>
           <Card>
             <CardHeader>
               <CardTitle>Dialog · Alert Dialog · Drawer · Sheet</CardTitle>
@@ -2587,6 +2595,40 @@ export default function ComponentShowcase() {
                     </Tooltip>
                   </TooltipProvider>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Sides—arrow points toward the trigger
+                </p>
+                <TooltipProvider>
+                  <div className="flex flex-wrap items-center justify-center gap-3 py-8">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="outline">Top</Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">Tooltip on top</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="outline">Right</Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="right">Tooltip on right</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="outline">Bottom</Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">Tooltip on bottom</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="outline">Left</Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="left">Tooltip on left</TooltipContent>
+                    </Tooltip>
+                  </div>
+                </TooltipProvider>
               </div>
 
               <div className="space-y-2">
@@ -2801,9 +2843,9 @@ export default function ComponentShowcase() {
       </section>
 
       {/* Data Visualization Section */}
-      <section className="space-y-4">
-        <h2 id="data-visualization" className="text-2xl font-semibold">Data Visualization</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <section className={catalogSection}>
+        <h2 id="data-visualization" className={catalogHeading}>Data Visualization</h2>
+        <div className={catalogGridMatrix}>
           <Card>
             <CardHeader>
               <CardTitle>Tracker</CardTitle>
@@ -2888,9 +2930,9 @@ export default function ComponentShowcase() {
       </section>
 
       {/* Brand Section */}
-      <section className="space-y-4">
-        <h2 id="brand" className="text-2xl font-semibold">Brand</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <section className={catalogSection}>
+        <h2 id="brand" className={catalogHeading}>Brand</h2>
+        <div className={catalogGridLedger}>
           <Card>
             <CardHeader>
               <CardTitle>Kbd</CardTitle>
@@ -2925,9 +2967,9 @@ export default function ComponentShowcase() {
       </section>
 
       {/* Layout Components Section */}
-      <section className="space-y-4">
-        <h2 id="layout-components" className="text-2xl font-semibold">Layout Components</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <section className={catalogSection}>
+        <h2 id="layout-components" className={catalogHeading}>Layout Components</h2>
+        <div className={catalogGridLedger}>
           <Card>
             <CardHeader>
               <CardTitle>Accordion</CardTitle>
@@ -3188,9 +3230,9 @@ export default function ComponentShowcase() {
       </section>
 
       {/* Advanced Components Section */}
-      <section className="space-y-4">
-        <h2 id="advanced-components" className="text-2xl font-semibold">Advanced Components</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <section className={catalogSection}>
+        <h2 id="advanced-components" className={catalogHeading}>Advanced Components</h2>
+        <div className={catalogGridLedger}>
           <Card>
             <CardHeader>
               <CardTitle>Calendar - Single</CardTitle>
@@ -3316,9 +3358,9 @@ export default function ComponentShowcase() {
       </section>
 
       {/* Table of Contents Section - Full Width */}
-      <section className="space-y-4">
+      <section className={catalogSection}>
         <div>
-          <h2 id="table-of-contents" className="text-2xl font-semibold">Table of Contents</h2>
+          <h2 id="table-of-contents" className={catalogHeading}>Table of Contents</h2>
           <p className="text-muted-foreground">
             Auto-detect headings or use manual items with scroll spy functionality
           </p>
@@ -3607,9 +3649,9 @@ export default function ComponentShowcase() {
       </section>
 
       {/* Horizontal Scroll Demo Section */}
-      <section className="space-y-4">
+      <section className={catalogSection}>
         <div>
-          <h2 id="horizontal-scroll" className="text-2xl font-semibold">Horizontal Scroll</h2>
+          <h2 id="horizontal-scroll" className={catalogHeading}>Horizontal Scroll</h2>
           <p className="text-muted-foreground">
             Wide content inside ScrollArea — shrink the browser to test horizontal scrolling with styled scrollbar
           </p>

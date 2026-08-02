@@ -204,7 +204,6 @@ export function ChartDialog({ open, onOpenChange, data }: ChartDialogProps) {
               config={valueConfig}
               className="h-full w-full"
               xDataKey="category"
-              barRadius={6}
             >
               <BarGrid />
               <BarXAxis dataKey="category" />

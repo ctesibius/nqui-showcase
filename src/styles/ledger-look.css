@@ -1,0 +1,129 @@
+/**
+ * Showcase-only “Ledger” Appearance preset.
+ * Overrides published @nqlib/nqui tokens on <html> when Look = Ledger.
+ * Not part of the library — consumers copy this pattern (or Copy CSS from Appearance).
+ *
+ * Model: card = paper (lightest); background = bench. Neutrals H=70.
+ */
+
+:root {
+  --background: oklch(0.925 0.006 70);
+  --foreground: oklch(0.22 0.025 55);
+
+  --card: oklch(0.968 0.007 70);
+  --card-foreground: var(--foreground);
+
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+
+  --muted: oklch(0.888 0.009 70);
+  --muted-foreground: oklch(0.45 0.02 55);
+
+  --surface-a: var(--background);
+  --surface-b: var(--muted);
+  --surface-elevated: var(--popover);
+
+  --secondary: oklch(0.865 0.01 70);
+  --secondary-foreground: oklch(0.28 0.025 55);
+
+  --accent: oklch(0.845 0.011 70);
+  --accent-foreground: var(--foreground);
+
+  --border: oklch(0.795 0.012 70);
+  --input: oklch(0.795 0.012 70);
+
+  --primary: oklch(0.3 0.024 55);
+  --primary-hover: oklch(0.38 0.024 55);
+  --primary-foreground: oklch(0.97 0.006 70);
+
+  --sidebar: var(--background);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-accent: oklch(0.872 0.01 70);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: oklch(0.835 0.011 70);
+
+  --radius: 0.3rem;
+
+  --ring: oklch(0.48 0.014 70);
+  --overlay: oklch(0.25 0.018 70 / 0.5);
+
+  --info-100: oklch(0.95 0.05 175);
+  --info-200: oklch(0.9 0.07 175);
+  --info-300: oklch(0.8 0.09 175);
+  --info-400: oklch(0.68 0.1 175);
+  --info-500: oklch(0.55 0.11 175);
+  --info-600: oklch(0.45 0.11 175);
+  --info: var(--info-500);
+
+  --chart-4: oklch(0.55 0.07 55);
+
+  --button-gradient: none;
+  --button-shadow: none;
+}
+
+.dark {
+  --background: oklch(0.17 0.01 70);
+  --foreground: oklch(0.93 0.006 70);
+
+  --card: oklch(0.215 0.011 70);
+  --card-foreground: var(--foreground);
+
+  --popover: oklch(0.245 0.011 70);
+  --popover-foreground: var(--foreground);
+
+  --muted: oklch(0.275 0.012 70);
+  --muted-foreground: oklch(0.705 0.012 70);
+
+  --surface-a: var(--background);
+  --surface-b: var(--muted);
+  --surface-elevated: var(--popover);
+
+  --secondary: oklch(0.3 0.012 70);
+  --secondary-foreground: var(--foreground);
+
+  --accent: oklch(0.325 0.013 70);
+  --accent-foreground: var(--foreground);
+
+  --border: oklch(0.36 0.013 70);
+  --input: oklch(0.34 0.012 70);
+
+  --overlay: oklch(0.1 0.012 70 / 0.65);
+
+  --chart-4: oklch(0.65 0.06 55);
+
+  --primary: oklch(0.91 0.01 70);
+  --primary-foreground: oklch(0.2 0.012 70);
+  --primary-hover: oklch(0.84 0.01 70);
+  --ring: oklch(0.62 0.012 70);
+
+  --sidebar: var(--background);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-accent: oklch(0.26 0.012 70);
+  --sidebar-border: oklch(0.36 0.013 70);
+
+  --button-gradient: none;
+  --button-shadow: none;
+
+  --info-100: oklch(0.38 0.09 175);
+  --info-200: oklch(0.44 0.1 175);
+  --info-300: oklch(0.5 0.11 175);
+  --info-400: oklch(0.56 0.11 175);
+  --info-500: oklch(0.64 0.11 175);
+  --info-600: oklch(0.7 0.11 175);
+  --info: var(--info-500);
+}
+
+/* Flat actions under Ledger (published kit may still paint gradient/shadow vars). */
+.toast-icon-success,
+.toast-icon-loading,
+.toast-icon-warning,
+.toast-icon-error,
+.toast-icon-info {
+  filter: none;
+}
+
+.nqui-button-gradient:not([data-state="off"]),
+.nqui-button-shadow:not([data-state="off"]) {
+  background-image: none;
+  box-shadow: none;
+}

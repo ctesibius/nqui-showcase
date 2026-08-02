@@ -234,7 +234,7 @@ export const NQCHART_GALLERY: GalleryChart[] = [
         <BarC.YAxis />
         <BarC.Tooltip />
         <BarC.Bar dataKey="allocated" />
-        <BarC.Bar dataKey="available" radius={4} />
+        <BarC.Bar dataKey="available" />
       </BarC.NQBarChart>
     ),
   },
@@ -280,7 +280,7 @@ export const NQCHART_GALLERY: GalleryChart[] = [
         <ComposedC.YAxis yAxisId="left" orientation="left" />
         <ComposedC.YAxis yAxisId="right" orientation="right" />
         <ComposedC.Tooltip />
-        <ComposedC.Bar dataKey="revenue" barProps={{ yAxisId: "left" }} radius={4} />
+        <ComposedC.Bar dataKey="revenue" barProps={{ yAxisId: "left" }} />
         <ComposedC.Line dataKey="orders" curveType="monotone" lineProps={{ yAxisId: "right" }} />
       </ComposedC.NQComposedChart>
     ),
@@ -335,7 +335,7 @@ export const NQCHART_GALLERY: GalleryChart[] = [
     settings: ["concentric", "rounded", "legend"],
     render: () => (
       <RadialC.NQRadialChart config={GAUGE_CONFIG} data={GAUGE} nameKey="series" innerRadius="30%" outerRadius="100%" className="h-full w-full p-4">
-        <RadialC.RadialBar dataKey="value" cornerRadius={6} />
+        <RadialC.RadialBar dataKey="value" />
         <RadialC.Tooltip />
         <RadialC.Legend />
       </RadialC.NQRadialChart>

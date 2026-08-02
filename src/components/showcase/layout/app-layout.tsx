@@ -36,6 +36,7 @@ import {
   showcaseRouteLabel,
   showcaseRoutes,
 } from "../config/showcase-nav"
+import { ThemeControls } from "../theme-tokens/theme-token-sheet"
 
 const routeToBreadcrumbs: Record<string, { label: string; path: string }[]> = {
   [NQUI_HUB_PATH]: [{ label: "Recipes", path: NQUI_HUB_PATH }],
@@ -55,13 +56,17 @@ const routeToBreadcrumbs: Record<string, { label: string; path: string }[]> = {
     { label: "Recipes", path: NQUI_HUB_PATH },
     { label: "Design system", path: "/design-system" },
   ],
+  "/studio": [
+    { label: "Recipes", path: NQUI_HUB_PATH },
+    { label: "Theme Studio", path: "/studio" },
+  ],
+  "/settings/appearance": [
+    { label: "Recipes", path: NQUI_HUB_PATH },
+    { label: "Appearance", path: "/settings/appearance" },
+  ],
   "/command": [
     { label: "Recipes", path: NQUI_HUB_PATH },
     { label: "Command lab", path: "/command" },
-  ],
-  "/dnd": [
-    { label: "Recipes", path: NQUI_HUB_PATH },
-    { label: "DnD lab", path: "/dnd" },
   ],
 }
 
@@ -174,7 +179,7 @@ function AppLayoutContent() {
             <div className="relative z-[var(--z-content)] border-b transition-colors bg-background/40 flex h-12 items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />
-              <Breadcrumb className="flex-1">
+              <Breadcrumb className="min-w-0 flex-1">
                 <BreadcrumbList>
                   {breadcrumbs.map((crumb, index) => (
                     <React.Fragment key={crumb.path}>
@@ -196,6 +201,7 @@ function AppLayoutContent() {
                   ))}
                 </BreadcrumbList>
               </Breadcrumb>
+              <ThemeControls className="shrink-0" />
             </div>
           </header>
           <main id="main" tabIndex={-1} className="outline-none">

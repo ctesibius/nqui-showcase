@@ -8,9 +8,11 @@ import {
   Button,
 } from "@nqlib/nqui"
 import { RadiusCornerDiagram } from "../design-system/radius-corner-diagram"
-import { ThemeTokenControls } from "../theme-tokens/theme-token-controls"
+import { useThemeStudio } from "@/context/theme-studio-context"
 
 export default function DesignSystem() {
+  const { openStudio } = useThemeStudio()
+
   return (
     <div className="flex flex-1 flex-col gap-8 p-6">
       <div>
@@ -21,18 +23,24 @@ export default function DesignSystem() {
       </div>
 
       <section id="play" className="space-y-4">
-        <h2 className="text-2xl font-semibold">Play with tokens</h2>
+        <h2 className="text-2xl font-semibold">Theme Studio</h2>
         <Card>
           <CardHeader>
-            <CardTitle>Primary &amp; radius presets</CardTitle>
+            <CardTitle>Floating design panel</CardTitle>
             <CardDescription>
-              Changes apply app-wide — catalog, blocks, landing, and charts. Same controls are also
-              available from the floating paint button on every page. Stored in this browser until
-              you reset to Default.
+              Theme Studio floats over every route — tune look, accent, and paper while
+              you browse catalog or blocks, then export{" "}
+              <code className="text-xs">colors.css</code>. Settings → Appearance stays a
+              thin preferences specimen.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <ThemeTokenControls variant="full" />
+          <CardContent className="flex flex-wrap gap-2">
+            <Button type="button" onClick={openStudio}>
+              Open Theme Studio
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/studio">Studio hub</Link>
+            </Button>
           </CardContent>
         </Card>
       </section>

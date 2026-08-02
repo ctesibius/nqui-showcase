@@ -2,33 +2,15 @@ import {
   NQComposedChart,
   Bar,
   Line,
+  Whiskers,
   Grid,
   XAxis,
   YAxis,
   Tooltip,
   Legend,
 } from "@nqlib/nqchart/composed-chart";
-import * as Composed from "@nqlib/nqchart/composed-chart";
 import { prepareBoxPlotRow } from "@nqlib/nqchart/recipes";
 import { type ChartConfig } from "@nqlib/nqchart";
-import type { ComponentType } from "react";
-
-/**
- * `Whiskers` lands typed on this subpath in nqchart 0.1.7. Until that version is
- * installed here, the published types lack it — hence the cast. Once `pnpm install`
- * picks up 0.1.7, delete this and import `Whiskers` with the others above.
- */
-const Whiskers = (
-  Composed as typeof Composed & {
-    Whiskers: ComponentType<{
-      minKey: string;
-      q1Key: string;
-      q3Key: string;
-      maxKey: string;
-      dataKey?: string;
-    }>;
-  }
-).Whiskers;
 
 const raw = [
   prepareBoxPlotRow("Team A", [12, 14, 15, 18, 19, 21, 22, 24, 28, 32, 45]),

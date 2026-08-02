@@ -127,6 +127,12 @@ function rewriteSource(source, fileName) {
       /import\s+\{\s*peakBarIndex\s*\}\s+from\s+"@\/registry\/echarts-core\/hover-trace-bar";\s*/g,
       'import { peakBarIndex } from "./peak-bar-index";\n',
     )
+    // `@/globals/*` resolves in becocharts but not here — point at the copy
+    // emitted alongside the adapters.
+    .replace(
+      /from\s+"@\/globals\/constants\/motion"/g,
+      'from "./motion-constants"',
+    )
     // Published package may not export ChartContainer yet — use catalog shell.
     .replace(
       /import\s+\{\s*([^}]*ChartContainer[^}]*)\s*\}\s+from\s+"@nqlib\/nqchart";?/g,
@@ -225,6 +231,18 @@ function main() {
 
   // Shared support modules first.
   for (const abs of listExtraSharedFiles(BECO)) writeAdapter(abs);
+
+  // Motion tokens live behind becocharts' `@/globals` alias, which does not
+  // resolve here. Copy the module verbatim so the values cannot drift.
+  if (!CHECK) {
+    const motionSrc = path.join(BECO, "src/globals/constants/motion.ts");
+    if (existsSync(motionSrc)) {
+      writeFileSync(
+        path.join(ADAPTERS_DIR, "motion-constants.ts"),
+        readFileSync(motionSrc, "utf8"),
+      );
+    }
+  }
 
   // Local peak helper for hover-trace block (not public npm API).
   if (!CHECK) {
@@ -351,6 +369,8 @@ export async function loadCatalogComponent(
   type CatalogCategory,
 } from "./manifest";
 export { loadCatalogComponent } from "./load-entry";
+export { DOCS_EXTRA_CATALOG } from "./docs-extra-entries";
+export { resolveDocsCatalogEntry, listDocsCatalogIds } from "./resolve-entry";
 `,
     );
   } else {

@@ -40,6 +40,17 @@ export const referenceEntries: ShowcaseRoute[] = [
     description: "All variants and states — use when you need props, not layout advice.",
   },
   {
+    title: "Theme Studio",
+    path: "/studio",
+    description:
+      "Floating token designer — open on any page, export colors.css or an AI prompt.",
+  },
+  {
+    title: "Appearance",
+    path: "/settings/appearance",
+    description: "Look, accent, corners — SaaS preferences specimen.",
+  },
+  {
     title: "Design system",
     path: "/design-system",
     description: "Tokens, radius, spacing, and theme surfaces.",
@@ -93,9 +104,10 @@ const routeLabels: Record<string, string> = {
   "/patterns": "Commerce dashboard",
   "/recipes/elevation": "Elevation philosophy",
   "/catalog": "Component catalog",
+  "/studio": "Theme Studio",
+  "/settings/appearance": "Appearance",
   "/design-system": "Design system",
   "/command": "Command lab",
-  "/dnd": "DnD lab",
 }
 
 export function showcaseRouteLabel(pathname: string): string {

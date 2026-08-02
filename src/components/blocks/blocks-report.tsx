@@ -7,6 +7,7 @@ import { computePivot, type PivotConfig } from "@nqlib/nqgrid";
 import { GanttRoot } from "@nqlib/nqgantt/ui";
 import { getDefaultColumnDefs, toGanttData, type PMDataInput } from "@nqlib/nqgantt";
 import { cn, ScrollArea } from "@nqlib/nqui";
+import { useGanttPinScrollSignal } from "@/nqgantt/demos/use-gantt-pin-scroll-signal";
 
 /*
  * Timeless sales ledger — the report every cohort from Boomer → Millennial
@@ -351,7 +352,7 @@ function AvgPriceBars() {
       <BarXAxis tickFormatter={(v) => `$${v}`} />
       <BarYAxis />
       <BarTooltip />
-      <Bar dataKey="price" radius={0} />
+      <Bar dataKey="price" />
     </NQBarChart>
   );
 }
@@ -405,6 +406,9 @@ function TopItems() {
 }
 
 function CampaignGantt() {
+  const ganttPinRef = useRef<HTMLDivElement>(null);
+  useGanttPinScrollSignal(ganttPinRef);
+
   const { data, groups } = useMemo(() => {
     // Retail campaign plan — three workstreams, mixed statuses, milestones.
     // Groups are lanes (not status), so the sidebar reads like a real program board.
@@ -659,7 +663,10 @@ function CampaignGantt() {
   }, []);
 
   return (
-    <div className="ledger-gantt ledger-gantt--embed overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--ledger-rule)] bg-[color:var(--ledger-paper)]">
+    <div
+      ref={ganttPinRef}
+      className="ledger-gantt ledger-gantt--embed overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--ledger-rule)] bg-[color:var(--ledger-paper)]"
+    >
       <GanttRoot
         className="min-h-0 h-full"
         data={data}

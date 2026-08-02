@@ -1,78 +1,105 @@
-import { useState, useSyncExternalStore } from "react";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { Moon01Icon, PaintBoardIcon, Sun01Icon } from "@hugeicons/core-free-icons";
-import { useTheme } from "next-themes";
+import { useSyncExternalStore } from "react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { Moon01Icon, PaintBoardIcon, Sun01Icon } from "@hugeicons/core-free-icons"
+import { useTheme } from "next-themes"
 import {
   Button,
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  ScrollArea,
   RadioGroup,
   RadioGroupItem,
   cn,
-} from "@nqlib/nqui";
-import { contrastSlidingRadioGroupClass } from "@/components/contrast-sliding-segment";
-import { ThemeTokenControls } from "./theme-token-controls";
+} from "@nqlib/nqui"
+import { contrastSlidingRadioGroupClass } from "@/components/contrast-sliding-segment"
+import { useThemeStudio } from "@/context/theme-studio-context"
+import { useThemeTokens } from "@/context/primary-accent-context"
 
 function useIsClient() {
   return useSyncExternalStore(
     () => () => {},
     () => true,
     () => false,
-  );
+  )
 }
 
 /**
- * Icon trigger for primary / radius presets (must sit under {@link ThemeControls} Sheet).
+ * Icon trigger for the app-wide floating Theme Studio.
  */
 export function ThemeTokenSheet({
   className,
   pressed,
+  embedded,
 }: {
-  className?: string;
-  pressed?: boolean;
+  className?: string
+  pressed?: boolean
+  /** Sit on liquid-glass chrome — drop opaque chip fill. */
+  embedded?: boolean
 }) {
+  const { isDirty } = useThemeTokens()
+  const { open, toggleStudio } = useThemeStudio()
+  const active = pressed ?? open
+
   return (
-    <SheetTrigger asChild>
-      <Button
-        type="button"
-        size="icon"
-        variant="ghost"
-        className={cn(
-          "size-7 shrink-0 rounded-full border border-input bg-background text-foreground",
-          "hover:bg-accent hover:text-accent-foreground",
-          "transition-colors motion-safe:duration-[var(--duration-quick)]",
-          pressed && "border-foreground bg-foreground text-background hover:bg-foreground hover:text-background",
-          className,
-        )}
-        aria-label="Open theme tokens"
-        title="Theme tokens"
-      >
+    <Button
+      type="button"
+      size="icon"
+      variant="ghost"
+      className={cn(
+        "size-7 shrink-0 rounded-full text-foreground",
+        "transition-colors motion-safe:duration-[var(--duration-quick)]",
+        embedded
+          ? "border-transparent bg-transparent hover:bg-[color-mix(in_oklch,var(--accent)_70%,transparent)] hover:text-accent-foreground"
+          : "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        active &&
+          (embedded
+            ? "bg-[color-mix(in_oklch,var(--foreground)_12%,transparent)] text-foreground"
+            : "border-foreground bg-foreground text-background hover:bg-foreground hover:text-background"),
+        className,
+      )}
+      aria-label="Open Theme Studio"
+      aria-pressed={active}
+      title="Theme Studio"
+      onClick={toggleStudio}
+    >
+      <span className="relative">
         <HugeiconsIcon icon={PaintBoardIcon} className="size-4 h-4 w-4" strokeWidth={2} />
-      </Button>
-    </SheetTrigger>
-  );
+        {isDirty ? (
+          <span
+            className="absolute -right-0.5 -top-0.5 size-1.5 rounded-full bg-primary"
+            aria-hidden
+          />
+        ) : null}
+      </span>
+    </Button>
+  )
 }
 
 /** Light / dark with nqui sliding-pill RadioGroup (same motion as Tabs). */
-function ThemeModeSwitch({ className }: { className?: string }) {
-  const { setTheme, resolvedTheme } = useTheme();
-  const isClient = useIsClient();
-  const mode = resolvedTheme === "dark" ? "dark" : "light";
+function ThemeModeSwitch({
+  className,
+  embedded,
+}: {
+  className?: string
+  embedded?: boolean
+}) {
+  const { setTheme, resolvedTheme } = useTheme()
+  const isClient = useIsClient()
+  const mode = resolvedTheme === "dark" ? "dark" : "light"
 
   return (
     <RadioGroup
       variant="sliding"
       value={isClient ? mode : "light"}
       onValueChange={(v) => {
-        if (v === "light" || v === "dark") setTheme(v);
+        if (v === "light" || v === "dark") setTheme(v)
       }}
       aria-label="Color theme"
-      className={contrastSlidingRadioGroupClass(cn("min-h-7", className))}
+      className={contrastSlidingRadioGroupClass(
+        cn(
+          "min-h-7",
+          embedded &&
+            "border-[color-mix(in_oklch,var(--border)_45%,transparent)] bg-[color-mix(in_oklch,var(--muted)_35%,transparent)]",
+          className,
+        ),
+      )}
     >
       <RadioGroupItem value="light" aria-label="Light theme">
         <HugeiconsIcon icon={Sun01Icon} className="size-4 h-4 w-4" strokeWidth={2} />
@@ -81,42 +108,27 @@ function ThemeModeSwitch({ className }: { className?: string }) {
         <HugeiconsIcon icon={Moon01Icon} className="size-4 h-4 w-4" strokeWidth={2} />
       </RadioGroupItem>
     </RadioGroup>
-  );
+  )
 }
 
 /**
- * Theme tokens + light/dark — nqui sliding pill on the mode switch
- * (`RadioGroup variant="sliding"`), paintboard opens the token sheet.
+ * Theme Studio trigger + light/dark — panel is {@link ThemeStudioHost} (app-wide).
  */
 export function ThemeControls({
   className,
   toggleClassName,
+  embedded,
 }: {
-  className?: string;
+  className?: string
   /** Applied to the paintboard trigger (mode switch uses nqui size-7 chips). */
-  toggleClassName?: string;
+  toggleClassName?: string
+  /** Transparent chips for use inside {@link LiquidGlassBar}. */
+  embedded?: boolean
 }) {
-  const [open, setOpen] = useState(false);
-
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <div className={cn("flex w-fit items-center gap-1.5", className)}>
-        <ThemeTokenSheet className={toggleClassName} pressed={open} />
-        <ThemeModeSwitch />
-      </div>
-
-      <SheetContent side="right" className="flex w-full flex-col gap-0 sm:max-w-md">
-        <SheetHeader className="border-b pb-4 text-left">
-          <SheetTitle>Theme tokens</SheetTitle>
-          <SheetDescription>
-            Primary color and radius presets apply across the whole app. Choices are saved in this
-            browser.
-          </SheetDescription>
-        </SheetHeader>
-        <ScrollArea fadeMask={false} className="min-h-0 flex-1 py-6">
-          <ThemeTokenControls variant="full" />
-        </ScrollArea>
-      </SheetContent>
-    </Sheet>
-  );
+    <div className={cn("flex w-fit items-center gap-1.5", className)}>
+      <ThemeTokenSheet className={toggleClassName} embedded={embedded} />
+      <ThemeModeSwitch embedded={embedded} />
+    </div>
+  )
 }

@@ -16,6 +16,7 @@ import {
   cn,
 } from "@nqlib/nqui";
 import { ThemeControls } from "./showcase/theme-tokens/theme-token-sheet";
+import { LiquidGlassBar } from "./liquid-glass-bar";
 import {
   contrastSlidingTabsListClass,
   contrastSlidingTabsTriggerClass,
@@ -50,6 +51,12 @@ type ShowcaseTopBarProps = {
   sticky?: boolean;
   /** nqui FrostedGlass backdrop (docs / catalog sticky headers). */
   frosted?: boolean;
+  /**
+   * Wrap links + theme controls in a floating liquid-glass pill
+   * (token-wired blur wash). Default on unless bordered docs chrome.
+   * Uses `position: fixed` — sticky cannot pierce `.fl-page` overflow-x.
+   */
+  floatingActions?: boolean;
   className?: string;
 };
 
@@ -66,15 +73,38 @@ export function ShowcaseTopBar({
   bordered = false,
   sticky = false,
   frosted = false,
+  floatingActions = !bordered,
   className,
 }: ShowcaseTopBarProps) {
+  const actions = (
+    <>
+      {links?.map((link) => (
+        <Button
+          key={link.to}
+          size="sm"
+          variant="ghost"
+          asChild
+          className={cn(
+            floatingActions &&
+              "rounded-full px-3 text-foreground hover:bg-[color-mix(in_oklch,var(--accent)_70%,transparent)]",
+          )}
+        >
+          <Link to={link.to}>{link.label}</Link>
+        </Button>
+      ))}
+      {trailing ?? (
+        <ThemeControls
+          embedded={floatingActions}
+          className={floatingActions ? "gap-0.5" : undefined}
+        />
+      )}
+    </>
+  );
+
   return (
     <header
       className={cn(
         "flex items-center justify-between gap-3",
-        // sticky already creates a positioning context for FrostedGlass.
-        // Do NOT also add `relative` — tailwind-merge keeps the last position
-        // utility and drops `sticky`, which made the docs header scroll away.
         sticky
           ? "sticky top-0 z-[var(--z-sticky-page,40)]"
           : frosted
@@ -82,6 +112,8 @@ export function ShowcaseTopBar({
             : null,
         bordered && "border-b border-border px-4 py-3",
         frosted && bordered && "border-border/50 bg-transparent",
+        /* Reserve trailing width so brand doesn't jump when the pill is fixed. */
+        floatingActions && !bordered && "pr-[min(22rem,48vw)]",
         className,
       )}
     >
@@ -111,16 +143,19 @@ export function ShowcaseTopBar({
 
       <div
         className={cn(
-          "flex shrink-0 items-center gap-1.5",
+          "flex shrink-0 items-center",
           frosted && "relative z-[var(--z-content,1)]",
+          !floatingActions && "gap-1.5",
+          /* Fixed float — sticky fails under .fl-page overflow-x:hidden. */
+          floatingActions &&
+            "fixed right-4 top-3 z-[var(--z-sticky-page,40)] pointer-events-auto",
         )}
       >
-        {links?.map((link) => (
-          <Button key={link.to} size="sm" variant="ghost" asChild>
-            <Link to={link.to}>{link.label}</Link>
-          </Button>
-        ))}
-        {trailing ?? <ThemeControls />}
+        {floatingActions ? (
+          <LiquidGlassBar>{actions}</LiquidGlassBar>
+        ) : (
+          actions
+        )}
       </div>
     </header>
   );

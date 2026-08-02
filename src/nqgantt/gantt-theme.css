@@ -33,7 +33,9 @@
   --gantt-bar-feather-px: 6;
 
   /* nqui Button chrome — radius + ring + inset highlight (no decorative glow) */
-  --gantt-bar-radius: 0.375rem;
+  /* Track the nqui radius ladder (package default) so the appearance
+     configurator reaches gantt bars — a literal here shadows it. */
+  --gantt-bar-radius: var(--radius-md);
   --gantt-bar-ring-mix: 38%;
   --gantt-bar-lift-y: 1px;
   --gantt-bar-lift-alpha: 0.1;
@@ -88,7 +90,10 @@
 
 /* Task bar shell — rounded track + ring + lift (no accent halo / box glow) */
 .gantt [data-gantt-feature-bar]:not([data-gantt-summary="true"]) {
-  border-radius: var(--gantt-bar-radius) !important;
+  /* No `!important`: the component sets an inline
+     `min(var(--gantt-bar-radius), w/2, h/2)` so short bars stay pill-capped
+     instead of over-rounding. This stands as the fallback. */
+  border-radius: var(--gantt-bar-radius);
   background-color: color-mix(
     in srgb,
     var(--gantt-bar-accent) calc(var(--gantt-bar-track-tint) * 1%),
@@ -186,4 +191,90 @@
 /* Task name + meta inside bar pills — tight contrast, no bloom */
 .gantt .gantt-bar-inline-text {
   text-shadow: var(--gantt-bar-inline-label-shadow);
+}
+
+/*
+ * Pin edge — spreadsheet-style last-pinned column (canvas layout).
+ *
+ * Header + body are separate sticky cells. Opaque group bands / header cells
+ * paint over an *inset* box-shadow, so the hairline must be a `::after` with
+ * z-index above in-panel content (not a shadow under the fill).
+ *
+ * When `.gantt[data-pin-scrolled]`: stronger hairline + quiet cast on the body.
+ * Resize handle stays transparent at rest; grip on hover/drag.
+ */
+.gantt [data-gantt-sidebar-header-cell],
+.gantt [data-roadmap-ui="gantt-sidebar"] {
+  border-right-color: transparent;
+}
+
+.gantt [data-gantt-sidebar-header-cell]::after,
+.gantt [data-roadmap-ui="gantt-sidebar"]::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  right: 0;
+  width: 1px;
+  background-color: color-mix(in oklch, var(--border) 55%, transparent);
+  pointer-events: none;
+  /* Above group bands / header cells inside the panel; below modal chrome */
+  z-index: var(--z-floating);
+  transition: background-color 150ms ease-out;
+}
+
+.gantt[data-pin-scrolled] [data-gantt-sidebar-header-cell]::after,
+.gantt[data-pin-scrolled] [data-roadmap-ui="gantt-sidebar"]::after {
+  background-color: var(--border);
+}
+
+.gantt[data-pin-scrolled] [data-roadmap-ui="gantt-sidebar"] {
+  box-shadow: 2px 0 3px -2px color-mix(in oklch, var(--foreground) 16%, transparent);
+  transition: box-shadow 150ms ease-out;
+}
+
+.gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"] {
+  width: 1px;
+  background-color: transparent;
+  /* Above the hairline so the grip/hit target stays usable */
+  z-index: calc(var(--z-floating) + 1);
+  transition: background-color 150ms ease-out, width 150ms ease-out;
+}
+
+.gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: 3px;
+  height: 24px;
+  border-radius: 9999px;
+  background-color: color-mix(in oklch, var(--foreground) 40%, transparent);
+  opacity: 0;
+  transition:
+    opacity 150ms ease-out,
+    height 150ms ease-out,
+    background-color 150ms ease-out;
+}
+
+.gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]:hover,
+.gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]:focus-visible {
+  background-color: color-mix(in oklch, var(--foreground) 22%, transparent);
+}
+
+.gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]:hover::after,
+.gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]:focus-visible::after {
+  opacity: 1;
+}
+
+.gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]:active {
+  width: 2px;
+  background-color: color-mix(in oklch, var(--primary) 80%, transparent);
+  box-shadow: 0 0 6px color-mix(in oklch, var(--primary) 40%, transparent);
+}
+
+.gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]:active::after {
+  opacity: 1;
+  height: 32px;
+  background-color: var(--primary);
 }

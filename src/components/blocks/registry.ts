@@ -62,6 +62,9 @@ const chart = (name: keyof typeof import("./blocks-charts")) =>
 const report = (name: keyof typeof import("./blocks-report")) =>
   lazy(() => import("./blocks-report").then((m) => ({ default: m[name] as ComponentType })));
 
+const grid = (name: keyof typeof import("./blocks-grid")) =>
+  lazy(() => import("./blocks-grid").then((m) => ({ default: m[name] as ComponentType })));
+
 export const BLOCKS: Block[] = [
   {
     id: "sales-ledger",
@@ -72,6 +75,26 @@ export const BLOCKS: Block[] = [
     bom: ["computePivot", "NQAreaChart", "NQBarChart", "NQSparklineChart", "GanttRoot"],
     stage: "report",
     Render: report("SalesLedgerBlock"),
+  },
+  {
+    id: "initiatives",
+    name: "Initiatives tree",
+    blurb: "Hierarchical rollup — health, project counts, and expandable rows.",
+    lib: "nqgrid",
+    bom: ["useReactTable", "getExpandedRowModel", "getSubRows", "ToggleGroup"],
+    stage: "table",
+    wide: true,
+    Render: grid("InitiativesBlock"),
+  },
+  {
+    id: "work-breakdown",
+    name: "Work breakdown",
+    blurb: "Drag rows across phases (WBS renumbers) or reorder columns — pinned + resizable headers, shift-click ranges, inline status/priority/date edits.",
+    lib: "nqgrid",
+    bom: ["Sortable", "useSortableTableDropIndicators", "sortableDropTargetProps", "Calendar", "AvatarStack"],
+    stage: "table",
+    wide: true,
+    Render: grid("WorkBreakdownBlock"),
   },
   {
     id: "category-pivot",
@@ -183,6 +206,26 @@ export const BLOCKS: Block[] = [
     bom: ["Field", "Select", "RadioGroup"],
     tall: true,
     Render: SettingsBlock,
+  },
+  {
+    id: "stage-flow",
+    name: "Stage flow",
+    blurb: "Horizontal pipe funnel — NQFunnelChart connection=\"pipe\" with S-curve joins and progressive stage colors.",
+    lib: "nqchart",
+    bom: ["NQFunnelChart", "Stages connection=pipe", "Tooltip", "chart tokens"],
+    stage: "table",
+    wide: true,
+    Render: chart("StageFlowBlock"),
+  },
+  {
+    id: "funnel-story",
+    name: "Funnel story",
+    blurb: "A report figure: carry-through rates sit on the rules between acts, and those rules become the funnel's seams.",
+    lib: "nqchart",
+    bom: ["NQFunnelChart", "Stages", "Tooltip", "tabular-nums"],
+    stage: "table",
+    wide: true,
+    Render: chart("FunnelStoryBlock"),
   },
   {
     id: "funnel",

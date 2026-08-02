@@ -7,35 +7,67 @@ import {
   useMemo,
   useState,
   type ReactNode,
-} from "react";
-import { useTheme } from "next-themes";
+} from "react"
+import { useTheme } from "next-themes"
+import {
+  LOOK_PAPER_DEFAULTS,
+  SURFACE_VARS,
+  contrastHintOk,
+  deriveSurfaceVars,
+  paperForMode,
+  type LookId,
+  type PaperSeed,
+  type ThemeMode,
+} from "../lib/appearance/derive-surface"
+import {
+  applyLookStylesheet,
+  lookFromStorage,
+  persistLook,
+} from "../lib/appearance/look-skin"
+import {
+  downloadThemeCss,
+  serializeThemeCss,
+  serializeThemePrompt,
+} from "../lib/appearance/serialize-theme"
+import {
+  ACCENT_CHIPS,
+  RADIUS_PRESETS,
+  previewMenuAccentVars,
+  previewPrimaryVars,
+  previewRadiusVars,
+  radiusValue,
+  type RadiusPresetId,
+} from "../lib/appearance/token-preview"
 
-const STORAGE_ACCENT = "nqui-showcase:accent-hue";
-const STORAGE_RADIUS = "nqui-showcase:radius-preset";
+export {
+  ACCENT_CHIPS,
+  RADIUS_PRESETS,
+  previewMenuAccentVars,
+  previewPrimaryVars,
+  previewRadiusVars,
+  type RadiusPresetId,
+}
 
-/** Accent chips: hue (deg) matches nqui primary scale shape in colors.css */
-export const ACCENT_CHIPS = [
-  { hue: 240, label: "Blue" },
-  { hue: 280, label: "Violet" },
-  { hue: 150, label: "Emerald" },
-  { hue: 75, label: "Amber" },
-  { hue: 350, label: "Rose" },
-  { hue: 195, label: "Cyan" },
-] as const;
+const STORAGE_APPEARANCE = "nqui-showcase:appearance-v1"
+const STORAGE_ACCENT = "nqui-showcase:accent-hue"
+const STORAGE_RADIUS = "nqui-showcase:radius-preset"
 
-export type RadiusPresetId = "sharp" | "default" | "soft" | "pill";
-
-export const RADIUS_PRESETS: ReadonlyArray<{
-  id: RadiusPresetId;
-  label: string;
-  /** Base `--radius` value; sm/md/lg/xl derive via calc in nqui CSS. */
-  value: string;
+export const LOOK_PRESETS: ReadonlyArray<{
+  id: LookId
+  label: string
+  description: string
 }> = [
-  { id: "sharp", label: "Sharp", value: "0.15rem" },
-  { id: "default", label: "Default", value: "0.45rem" },
-  { id: "soft", label: "Soft", value: "0.75rem" },
-  { id: "pill", label: "Pill", value: "1.1rem" },
-] as const;
+  {
+    id: "default",
+    label: "Default",
+    description: "Published nqui 0.7 soft cream surfaces",
+  },
+  {
+    id: "ledger",
+    label: "Ledger",
+    description: "Showcase preset — paper on bench, graphite folds",
+  },
+] as const
 
 const PRIMARY_VARS = [
   "--primary-100",
@@ -47,7 +79,20 @@ const PRIMARY_VARS = [
   "--primary",
   "--primary-foreground",
   "--primary-hover",
-] as const;
+] as const
+
+/**
+ * Menu highlight tokens. nqui menus (dropdown, menubar, context-menu, select,
+ * command, sidebar) style `data-[highlighted]` / `aria-selected` from
+ * `--accent`, never `--primary` — so the accent picker cannot reach them
+ * unless we tint these too.
+ */
+const MENU_ACCENT_VARS = [
+  "--accent",
+  "--accent-foreground",
+  "--sidebar-accent",
+  "--sidebar-accent-foreground",
+] as const
 
 const RADIUS_VARS = [
   "--radius",
@@ -58,178 +103,446 @@ const RADIUS_VARS = [
   "--radius-2xl",
   "--radius-3xl",
   "--radius-4xl",
-] as const;
+] as const
 
-type ThemeMode = "light" | "dark" | "mid";
+export type AppearanceState = {
+  look: LookId
+  accentHue: number | null
+  /** 0 = outer (richest) … 4 = inner on the brand wheel. Ignored when accentHue is null. */
+  accentShade: number
+  radiusPreset: RadiusPresetId
+  /** null = kit look only (no paper overrides). */
+  paper: PaperSeed | null
+  /** Mode the paper seed was authored in (for cross-mode remap). */
+  paperMode: ThemeMode | null
+  /** Scales ΔL from background → muted/border/… (1 = look default). */
+  ladderStrength: number
+  /**
+   * Shifts the monochromatic shade scale darker (−) or lighter (+).
+   * Applied to wheel rings and primary L (same hue).
+   */
+  shadeBias: number
+}
 
 function themeModeFromResolved(resolved: string | undefined): ThemeMode {
-  if (resolved === "dark") return "dark";
-  if (resolved === "mid") return "mid";
-  return "light";
+  return resolved === "dark" ? "dark" : "light"
 }
 
-/** Override primary scale for the accent picker (ring stays nqui’s neutral token). */
-export function previewPrimaryVars(hue: number, mode: ThemeMode): Record<string, string> {
-  const fg = "oklch(0.98 0 0)";
-  const primary = `oklch(0.55 0.22 ${hue})`;
-  if (mode === "light" || mode === "mid") {
-    return {
-      "--primary-100": `oklch(0.95 0.08 ${hue})`,
-      "--primary-200": `oklch(0.9 0.1 ${hue})`,
-      "--primary-300": `oklch(0.85 0.12 ${hue})`,
-      "--primary-400": `oklch(0.72 0.18 ${hue})`,
-      "--primary-500": primary,
-      "--primary-600": `oklch(0.45 0.24 ${hue})`,
-      "--primary": primary,
-      "--primary-foreground": fg,
-      "--primary-hover": `oklch(0.72 0.18 ${hue})`,
-    };
+function clearHtmlVars(names: readonly string[]) {
+  const root = document.documentElement
+  for (const name of names) root.style.removeProperty(name)
+}
+
+function applyHtmlVars(vars: Record<string, string>) {
+  const root = document.documentElement
+  for (const [name, value] of Object.entries(vars)) {
+    root.style.setProperty(name, value)
   }
-  return {
-    "--primary-100": `oklch(0.32 0.14 ${hue})`,
-    "--primary-200": `oklch(0.36 0.16 ${hue})`,
-    "--primary-300": `oklch(0.42 0.18 ${hue})`,
-    "--primary-400": `oklch(0.48 0.2 ${hue})`,
-    "--primary-500": primary,
-    "--primary-600": `oklch(0.62 0.2 ${hue})`,
-    "--primary": primary,
-    "--primary-foreground": fg,
-    "--primary-hover": `oklch(0.48 0.2 ${hue})`,
-  };
 }
 
-/** Explicit radius ladder so `var(--radius-xl)` (blocks cards) updates even if calc inheritance is sticky. */
-export function previewRadiusVars(base: string): Record<string, string> {
+function paperEqual(a: PaperSeed | null, b: PaperSeed | null) {
+  if (a === null && b === null) return true
+  if (!a || !b) return false
+  return a.h === b.h && a.c === b.c && a.l === b.l
+}
+
+export function appearanceEqual(a: AppearanceState, b: AppearanceState) {
+  return (
+    a.look === b.look &&
+    a.accentHue === b.accentHue &&
+    a.accentShade === b.accentShade &&
+    a.radiusPreset === b.radiusPreset &&
+    paperEqual(a.paper, b.paper) &&
+    a.paperMode === b.paperMode &&
+    a.ladderStrength === b.ladderStrength &&
+    a.shadeBias === b.shadeBias
+  )
+}
+
+function defaultAppearance(): AppearanceState {
   return {
-    "--radius": base,
-    "--radius-sm": `calc(${base} - 4px)`,
-    "--radius-md": `calc(${base} - 2px)`,
-    "--radius-lg": base,
-    "--radius-xl": `calc(${base} + 4px)`,
-    "--radius-2xl": `calc(${base} + 8px)`,
-    "--radius-3xl": `calc(${base} + 12px)`,
-    "--radius-4xl": `calc(${base} + 16px)`,
-  };
+    look: typeof window === "undefined" ? "default" : lookFromStorage(),
+    accentHue: null,
+    accentShade: 2,
+    radiusPreset: "default",
+    paper: null,
+    paperMode: null,
+    ladderStrength: 1,
+    shadeBias: 0,
+  }
 }
 
 function readStoredAccent(): number | null {
   try {
-    const raw = localStorage.getItem(STORAGE_ACCENT);
-    if (raw === null || raw === "" || raw === "null") return null;
-    const n = Number(raw);
-    return Number.isFinite(n) ? n : null;
+    const raw = localStorage.getItem(STORAGE_ACCENT)
+    if (raw === null || raw === "" || raw === "null") return null
+    const n = Number(raw)
+    return Number.isFinite(n) ? n : null
   } catch {
-    return null;
+    return null
   }
 }
 
 function readStoredRadius(): RadiusPresetId {
   try {
-    const raw = localStorage.getItem(STORAGE_RADIUS);
-    if (raw && RADIUS_PRESETS.some((p) => p.id === raw)) return raw as RadiusPresetId;
+    const raw = localStorage.getItem(STORAGE_RADIUS)
+    if (raw && RADIUS_PRESETS.some((p) => p.id === raw)) return raw as RadiusPresetId
   } catch {
     /* ignore */
   }
-  return "default";
+  return "default"
 }
 
-function radiusValue(id: RadiusPresetId): string {
-  return RADIUS_PRESETS.find((p) => p.id === id)?.value ?? "0.45rem";
+function readSavedAppearance(): AppearanceState {
+  const base = defaultAppearance()
+  try {
+    const raw = localStorage.getItem(STORAGE_APPEARANCE)
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<AppearanceState>
+      return {
+        look: parsed.look === "ledger" || parsed.look === "default" ? parsed.look : base.look,
+        accentHue:
+          typeof parsed.accentHue === "number"
+            ? parsed.accentHue
+            : parsed.accentHue === null
+              ? null
+              : base.accentHue,
+        accentShade:
+          typeof parsed.accentShade === "number" &&
+          parsed.accentShade >= 0 &&
+          parsed.accentShade <= 4
+            ? parsed.accentShade
+            : 2,
+        radiusPreset:
+          parsed.radiusPreset && RADIUS_PRESETS.some((p) => p.id === parsed.radiusPreset)
+            ? parsed.radiusPreset
+            : base.radiusPreset,
+        paper:
+          parsed.paper &&
+          typeof parsed.paper.h === "number" &&
+          typeof parsed.paper.c === "number" &&
+          typeof parsed.paper.l === "number"
+            ? parsed.paper
+            : null,
+        paperMode:
+          parsed.paperMode === "light" || parsed.paperMode === "dark"
+            ? parsed.paperMode
+            : parsed.paper
+              ? "light"
+              : null,
+        ladderStrength:
+          typeof parsed.ladderStrength === "number" &&
+          parsed.ladderStrength >= 0.5 &&
+          parsed.ladderStrength <= 1.6
+            ? parsed.ladderStrength
+            : 1,
+        shadeBias:
+          typeof parsed.shadeBias === "number" &&
+          parsed.shadeBias >= -0.14 &&
+          parsed.shadeBias <= 0.14
+            ? parsed.shadeBias
+            : 0,
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  // Migrate legacy keys
+  return {
+    look: lookFromStorage(),
+    accentHue: readStoredAccent(),
+    accentShade: 2,
+    radiusPreset: readStoredRadius(),
+    paper: null,
+    paperMode: null,
+    ladderStrength: 1,
+    shadeBias: 0,
+  }
 }
 
-function clearHtmlVars(names: readonly string[]) {
-  const root = document.documentElement;
-  for (const name of names) root.style.removeProperty(name);
+function persistSaved(state: AppearanceState) {
+  try {
+    localStorage.setItem(STORAGE_APPEARANCE, JSON.stringify(state))
+    persistLook(state.look)
+    if (state.accentHue === null) localStorage.removeItem(STORAGE_ACCENT)
+    else localStorage.setItem(STORAGE_ACCENT, String(state.accentHue))
+    if (state.radiusPreset === "default") localStorage.removeItem(STORAGE_RADIUS)
+    else localStorage.setItem(STORAGE_RADIUS, state.radiusPreset)
+  } catch {
+    /* ignore */
+  }
 }
 
-function applyHtmlVars(vars: Record<string, string>) {
-  const root = document.documentElement;
-  for (const [name, value] of Object.entries(vars)) {
-    root.style.setProperty(name, value);
+function applyAppearance(state: AppearanceState, mode: ThemeMode) {
+  applyLookStylesheet(state.look)
+
+  const paperDrivesSurface = Boolean(state.paper && state.paperMode)
+  if (state.paper && state.paperMode) {
+    const seed = paperForMode(state.paper, state.look, state.paperMode, mode)
+    applyHtmlVars(
+      deriveSurfaceVars(seed, state.look, mode, state.ladderStrength),
+    )
+  } else {
+    clearHtmlVars(SURFACE_VARS)
+  }
+
+  if (state.accentHue === null) {
+    clearHtmlVars(PRIMARY_VARS)
+    // deriveSurfaceVars owns the accent keys when paper is active; clearing
+    // here would wipe the values just applied above.
+    if (!paperDrivesSurface) clearHtmlVars(MENU_ACCENT_VARS)
+  } else {
+    applyHtmlVars(
+      previewPrimaryVars(
+        state.accentHue,
+        mode,
+        state.accentShade,
+        state.shadeBias,
+      ),
+    )
+    // After the surface pass on purpose: an explicit accent hue outranks
+    // paper's neutral accent derivation.
+    applyHtmlVars(previewMenuAccentVars(state.accentHue, mode))
+  }
+
+  if (state.radiusPreset === "default") {
+    clearHtmlVars(RADIUS_VARS)
+  } else {
+    applyHtmlVars(previewRadiusVars(radiusValue(state.radiusPreset)))
   }
 }
 
 type ThemeTokensContextValue = {
-  /** null = the monochrome brand default (no hue override); a number picks an accent. */
-  accentHue: number | null;
-  setAccentHue: (hue: number | null) => void;
-  radiusPreset: RadiusPresetId;
-  setRadiusPreset: (id: RadiusPresetId) => void;
-};
+  draft: AppearanceState
+  saved: AppearanceState
+  isDirty: boolean
+  contrastOk: boolean
+  themeMode: ThemeMode
+  setLook: (look: LookId) => void
+  setAccentHue: (hue: number | null, shade?: number) => void
+  setAccentShade: (shade: number) => void
+  setShadeBias: (bias: number) => void
+  setRadiusPreset: (id: RadiusPresetId) => void
+  setPaper: (paper: PaperSeed | null) => void
+  setLadderStrength: (n: number) => void
+  enableCustomize: () => void
+  apply: () => void
+  reset: () => void
+  copyCss: () => Promise<void>
+  downloadCss: () => void
+  copyAiPrompt: () => Promise<void>
+  /** @deprecated Prefer draft.accentHue */
+  accentHue: number | null
+  /** @deprecated Prefer draft.radiusPreset */
+  radiusPreset: RadiusPresetId
+}
 
-const ThemeTokensContext = createContext<ThemeTokensContextValue | null>(null);
+const ThemeTokensContext = createContext<ThemeTokensContextValue | null>(null)
 
 export function ThemeTokensProvider({ children }: { children: ReactNode }) {
-  const [accentHue, setAccentHueState] = useState<number | null>(() =>
-    typeof window === "undefined" ? null : readStoredAccent(),
-  );
-  const [radiusPreset, setRadiusPresetState] = useState<RadiusPresetId>(() =>
-    typeof window === "undefined" ? "default" : readStoredRadius(),
-  );
-  const { resolvedTheme } = useTheme();
-  const themeMode = useMemo(() => themeModeFromResolved(resolvedTheme), [resolvedTheme]);
+  const [saved, setSaved] = useState<AppearanceState>(() =>
+    typeof window === "undefined" ? defaultAppearance() : readSavedAppearance(),
+  )
+  const [draft, setDraft] = useState<AppearanceState>(() =>
+    typeof window === "undefined" ? defaultAppearance() : readSavedAppearance(),
+  )
+  const { resolvedTheme } = useTheme()
+  const themeMode = useMemo(() => themeModeFromResolved(resolvedTheme), [resolvedTheme])
 
-  const setAccentHue = useCallback((hue: number | null) => {
-    setAccentHueState(hue);
-    try {
-      if (hue === null) localStorage.removeItem(STORAGE_ACCENT);
-      else localStorage.setItem(STORAGE_ACCENT, String(hue));
-    } catch {
-      /* ignore quota / private mode */
-    }
-  }, []);
+  const isDirty = !appearanceEqual(draft, saved)
+
+  const contrastOk = useMemo(() => {
+    if (!draft.paper || !draft.paperMode) return true
+    const seed = paperForMode(draft.paper, draft.look, draft.paperMode, themeMode)
+    return contrastHintOk(seed, draft.look, themeMode)
+  }, [draft.paper, draft.paperMode, draft.look, themeMode])
+
+  const setLook = useCallback((look: LookId) => {
+    setDraft((d) => ({
+      ...d,
+      look,
+      // Switching look clears paper customize so kit CSS leads.
+      paper: null,
+      paperMode: null,
+    }))
+  }, [])
+
+  const setAccentHue = useCallback((hue: number | null, shade?: number) => {
+    setDraft((d) => ({
+      ...d,
+      accentHue: hue,
+      accentShade: hue === null ? d.accentShade : (shade ?? d.accentShade),
+    }))
+  }, [])
+
+  const setAccentShade = useCallback((shade: number) => {
+    setDraft((d) => ({
+      ...d,
+      accentShade: Math.max(0, Math.min(4, shade)),
+    }))
+  }, [])
+
+  const setShadeBias = useCallback((bias: number) => {
+    setDraft((d) => ({
+      ...d,
+      shadeBias: Math.max(-0.14, Math.min(0.14, bias)),
+    }))
+  }, [])
 
   const setRadiusPreset = useCallback((id: RadiusPresetId) => {
-    setRadiusPresetState(id);
+    setDraft((d) => ({ ...d, radiusPreset: id }))
+  }, [])
+
+  const setPaper = useCallback((paper: PaperSeed | null) => {
+    setDraft((d) => ({
+      ...d,
+      paper,
+      paperMode: paper ? (d.paperMode ?? themeMode) : null,
+    }))
+  }, [themeMode])
+
+  const setLadderStrength = useCallback((n: number) => {
+    setDraft((d) => ({
+      ...d,
+      ladderStrength: Math.min(1.6, Math.max(0.5, n)),
+    }))
+  }, [])
+
+  const enableCustomize = useCallback(() => {
+    setDraft((d) => {
+      if (d.paper) return d
+      return {
+        ...d,
+        paper: { ...LOOK_PAPER_DEFAULTS[d.look][themeMode] },
+        paperMode: themeMode,
+      }
+    })
+  }, [themeMode])
+
+  // Keep paper seed in the active mode so sliders edit absolute L for what you see.
+  useLayoutEffect(() => {
+    setDraft((d) => {
+      if (!d.paper || !d.paperMode || d.paperMode === themeMode) return d
+      return {
+        ...d,
+        paper: paperForMode(d.paper, d.look, d.paperMode, themeMode),
+        paperMode: themeMode,
+      }
+    })
+  }, [themeMode])
+
+  const apply = useCallback(() => {
+    setSaved(draft)
+    persistSaved(draft)
+  }, [draft])
+
+  const reset = useCallback(() => {
+    const next: AppearanceState = {
+      look: "default",
+      accentHue: null,
+      accentShade: 2,
+      radiusPreset: "default",
+      paper: null,
+      paperMode: null,
+      ladderStrength: 1,
+      shadeBias: 0,
+    }
+    setDraft(next)
+    setSaved(next)
     try {
-      if (id === "default") localStorage.removeItem(STORAGE_RADIUS);
-      else localStorage.setItem(STORAGE_RADIUS, id);
+      localStorage.removeItem(STORAGE_APPEARANCE)
+      localStorage.removeItem(STORAGE_ACCENT)
+      localStorage.removeItem(STORAGE_RADIUS)
+      persistLook("default")
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [])
 
-  // Apply on <html> so portaled UI (Sheet / Dialog / Dropdown) and page content
-  // all see the same tokens — a wrapper div is outside portals.
+  const copyCss = useCallback(async () => {
+    await navigator.clipboard.writeText(serializeThemeCss(draft))
+  }, [draft])
+
+  const downloadCss = useCallback(() => {
+    downloadThemeCss(serializeThemeCss(draft))
+  }, [draft])
+
+  const copyAiPrompt = useCallback(async () => {
+    await navigator.clipboard.writeText(serializeThemePrompt(draft))
+  }, [draft])
+
+  // Live preview: draft drives tokens. Apply only persists.
   useLayoutEffect(() => {
-    if (accentHue === null) {
-      clearHtmlVars(PRIMARY_VARS);
-    } else {
-      applyHtmlVars(previewPrimaryVars(accentHue, themeMode));
-    }
-
-    if (radiusPreset === "default") {
-      clearHtmlVars(RADIUS_VARS);
-    } else {
-      applyHtmlVars(previewRadiusVars(radiusValue(radiusPreset)));
-    }
-  }, [accentHue, radiusPreset, themeMode]);
+    applyAppearance(draft, themeMode)
+  }, [draft, themeMode])
 
   const value = useMemo(
-    () => ({ accentHue, setAccentHue, radiusPreset, setRadiusPreset }),
-    [accentHue, setAccentHue, radiusPreset, setRadiusPreset],
-  );
+    () => ({
+      draft,
+      saved,
+      isDirty,
+      contrastOk,
+      themeMode,
+      setLook,
+      setAccentHue,
+      setAccentShade,
+      setShadeBias,
+      setRadiusPreset,
+      setPaper,
+      setLadderStrength,
+      enableCustomize,
+      apply,
+      reset,
+      copyCss,
+      downloadCss,
+      copyAiPrompt,
+      accentHue: draft.accentHue,
+      radiusPreset: draft.radiusPreset,
+    }),
+    [
+      draft,
+      saved,
+      isDirty,
+      contrastOk,
+      themeMode,
+      setLook,
+      setAccentHue,
+      setAccentShade,
+      setShadeBias,
+      setRadiusPreset,
+      setPaper,
+      setLadderStrength,
+      enableCustomize,
+      apply,
+      reset,
+      copyCss,
+      downloadCss,
+      copyAiPrompt,
+    ],
+  )
 
   return (
     <ThemeTokensContext.Provider value={value}>
       <div className="min-h-dvh">{children}</div>
     </ThemeTokensContext.Provider>
-  );
+  )
 }
 
 /** @deprecated Prefer ThemeTokensProvider — alias kept for main.tsx during rename. */
-export const PrimaryAccentProvider = ThemeTokensProvider;
+export const PrimaryAccentProvider = ThemeTokensProvider
 
 export function useThemeTokens() {
-  const ctx = useContext(ThemeTokensContext);
+  const ctx = useContext(ThemeTokensContext)
   if (!ctx) {
-    throw new Error("useThemeTokens must be used within ThemeTokensProvider");
+    throw new Error("useThemeTokens must be used within ThemeTokensProvider")
   }
-  return ctx;
+  return ctx
 }
 
 /** Alias for consumers that only need accent hue (e.g. pixel-globe-hero). */
 export function usePrimaryAccent() {
-  const { accentHue, setAccentHue } = useThemeTokens();
-  return { accentHue, setAccentHue };
+  const { accentHue, setAccentHue } = useThemeTokens()
+  return { accentHue, setAccentHue }
 }
+
+export type { LookId, PaperSeed }

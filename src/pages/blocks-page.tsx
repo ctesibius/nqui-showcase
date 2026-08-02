@@ -11,6 +11,7 @@ import {
   cn,
 } from "@nqlib/nqui";
 import { ShowcaseTopBar } from "../components/showcase-top-bar";
+import { LiquidGlassBar } from "../components/liquid-glass-bar";
 import {
   contrastSlidingTabsListClass,
   contrastSlidingTabsTriggerClass,
@@ -81,23 +82,25 @@ export function BlocksPage() {
             onValueChange={(v) => setLib(v as Lib | "all")}
             className="w-fit max-w-full"
           >
-            <TabsList
-              aria-label="Filter blocks by library"
-              className={contrastSlidingTabsListClass(
-                "max-w-full overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-              )}
-            >
-              {LIBS.map((l) => (
-                <TabsTrigger
-                  key={l.id}
-                  value={l.id}
-                  className={contrastSlidingTabsTriggerClass()}
-                >
-                  {l.label}
-                  <span className="ml-1.5 tabular-nums opacity-70">{libCount(l.id)}</span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <LiquidGlassBar shape="pill" className="max-w-full" contentClassName="p-0.5">
+              <TabsList
+                aria-label="Filter blocks by library"
+                className={contrastSlidingTabsListClass(
+                  "max-w-full overflow-x-auto border-transparent bg-transparent [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+                )}
+              >
+                {LIBS.map((l) => (
+                  <TabsTrigger
+                    key={l.id}
+                    value={l.id}
+                    className={contrastSlidingTabsTriggerClass()}
+                  >
+                    {l.label}
+                    <span className="ml-1.5 tabular-nums opacity-70">{libCount(l.id)}</span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </LiquidGlassBar>
           </Tabs>
         </div>
 
@@ -113,7 +116,7 @@ export function BlocksPage() {
                 key={b.id}
                 className={cn(
                   "blk-card",
-                  fullBleed && "blk-card--wide",
+                  (fullBleed || b.wide) && "blk-card--wide",
                   stage === "gantt" && "blk-card--gantt",
                   stage === "report" && "blk-card--report",
                   stage === "table" && "blk-card--table",

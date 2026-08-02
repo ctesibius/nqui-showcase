@@ -22,7 +22,8 @@
   min-height: 100dvh;
   background: var(--background);
   color: var(--foreground);
-  overflow-x: hidden;
+  /* clip (not hidden) — avoids a scrollport that kills position:sticky children */
+  overflow-x: clip;
 }
 
 .fl-grid {

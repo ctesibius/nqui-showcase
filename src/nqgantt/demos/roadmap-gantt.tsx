@@ -9,6 +9,7 @@ import { TASKS, setTaskValue, type Task } from "../../lib/mock/ops";
 import { groupTasksByStatus, intervalToRangeRaw, tasksToGanttRootData } from "./tasks-to-gantt";
 import type { GanttRootGroup } from "@nqlib/nqgantt/ui";
 import { GanttBarDebugProbe } from "./gantt-bar-debug-probe";
+import { useGanttPinScrollSignal } from "./use-gantt-pin-scroll-signal";
 
 export function RoadmapGantt({
   className,
@@ -60,6 +61,7 @@ export function RoadmapGantt({
   }, []);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  useGanttPinScrollSignal(containerRef);
 
   return (
     <div

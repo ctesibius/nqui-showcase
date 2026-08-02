@@ -61,7 +61,28 @@
       "@nqlib/nqgantt/engine": ["../nqgantt/packages/nqgantt/src/engine.ts"],
       "@nqlib/nqgantt/mock": ["../nqgantt/packages/nqgantt/src/mock.ts"],
       "@nqlib/nqgantt/item-gantt-adapter": ["../nqgantt/packages/nqgantt/src/item-gantt-adapter.ts"],
-      "@nqlib/nqgantt-engine": ["../nqgantt/packages/nqgantt-engine/src/index.ts"]
+      "@nqlib/nqgantt-engine": ["../nqgantt/packages/nqgantt-engine/src/index.ts"],
+      /*
+       * DEV-ONLY: type-resolve @nqlib/nqchart against sibling becocharts declarations
+       * so new funnel APIs (`connection="pipe"`) typecheck before the next npm publish.
+       * Runtime: `pnpm nqchart:build` + `USE_LOCAL_NQCHART=true` (vite → dist).
+       */
+      "@nqlib/nqchart": ["../becocharts/dist/types/lib/public.d.ts"],
+      "@nqlib/nqchart/funnel-chart": ["../becocharts/dist/types/registry/charts/funnel-chart.d.ts"],
+      "@nqlib/nqchart/bar-chart": ["../becocharts/dist/types/registry/charts/bar-chart.d.ts"],
+      "@nqlib/nqchart/area-chart": ["../becocharts/dist/types/registry/charts/area-chart.d.ts"],
+      "@nqlib/nqchart/line-chart": ["../becocharts/dist/types/registry/charts/line-chart.d.ts"],
+      "@nqlib/nqchart/composed-chart": ["../becocharts/dist/types/registry/charts/composed-chart.d.ts"],
+      "@nqlib/nqchart/pie-chart": ["../becocharts/dist/types/registry/charts/pie-chart.d.ts"],
+      "@nqlib/nqchart/radar-chart": ["../becocharts/dist/types/registry/charts/radar-chart.d.ts"],
+      "@nqlib/nqchart/radial-chart": ["../becocharts/dist/types/registry/charts/radial-chart.d.ts"],
+      "@nqlib/nqchart/scatter-chart": ["../becocharts/dist/types/registry/charts/scatter-chart.d.ts"],
+      "@nqlib/nqchart/sparkline-chart": ["../becocharts/dist/types/registry/charts/sparkline-chart.d.ts"],
+      "@nqlib/nqchart/treemap-chart": ["../becocharts/dist/types/registry/charts/treemap-chart.d.ts"],
+      "@nqlib/nqchart/waterfall-chart": ["../becocharts/dist/types/registry/charts/waterfall-chart.d.ts"],
+      "@nqlib/nqchart/heatmap-chart": ["../becocharts/dist/types/registry/charts/heatmap-chart.d.ts"],
+      "@nqlib/nqchart/calendar-chart": ["../becocharts/dist/types/registry/charts/calendar-chart.d.ts"],
+      "@nqlib/nqchart/recipes": ["../becocharts/dist/types/registry/lib/chart-recipes.d.ts"]
     },
 
     /* Linting */

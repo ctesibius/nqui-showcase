@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useReducedMotion } from "motion/react";
 import { Button, NquiLogo } from "@nqlib/nqui";
 import { ThemeControls } from "../components/showcase/theme-tokens/theme-token-sheet";
+import { LiquidGlassBar } from "../components/liquid-glass-bar";
 import { LiveWindow } from "../components/landing/live-window";
 import pkg from "../../package.json";
 import "../components/landing/landing.css";
@@ -80,8 +81,10 @@ export function LandingPage() {
       <div className="fl-grid" aria-hidden />
       <div className="fl-glow" aria-hidden />
 
-      <div className="absolute right-4 top-4 z-10" data-fl-reveal>
-        <ThemeControls />
+      <div className="fixed right-4 top-4 z-[var(--z-sticky-page,40)]" data-fl-reveal>
+        <LiquidGlassBar>
+          <ThemeControls embedded className="gap-0.5" />
+        </LiquidGlassBar>
       </div>
 
       <main className="fl-shell">

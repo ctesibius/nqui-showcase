@@ -12,6 +12,7 @@ import {
 } from "@nqlib/nqui";
 import type { BackgroundVariant } from "@nqlib/nqchart";
 import { ShowcaseTopBar } from "../components/showcase-top-bar";
+import { LiquidGlassBar } from "../components/liquid-glass-bar";
 import {
   CATALOG_COUNT,
   NQCHART_CATALOG,
@@ -213,7 +214,11 @@ export function ChartsPage() {
           </p>
         </div>
 
-        <div className="charts-toolbar sticky top-3 z-[var(--z-sticky-content)] mt-8 space-y-3 rounded-2xl border bg-background/80 p-3 backdrop-blur-md">
+        <LiquidGlassBar
+          shape="rounded"
+          className="charts-toolbar sticky top-3 z-[var(--z-sticky-content)] mt-8 w-full max-w-full"
+          contentClassName="w-full flex-col items-stretch gap-3 p-3"
+        >
           <div className="flex flex-wrap items-center gap-2">
             <Input
               value={query}
@@ -320,7 +325,7 @@ export function ChartsPage() {
               {filtered.length} match · page {safePage + 1}/{pageCount}
             </span>
           </div>
-        </div>
+        </LiquidGlassBar>
 
         <div className="blk-shelf mt-8">
           {pageItems.map((entry) => (
