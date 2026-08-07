@@ -10,7 +10,7 @@ import {
   TabsTrigger,
   cn,
 } from "@nqlib/nqui";
-import { ShowcaseTopBar } from "../components/showcase-top-bar";
+import { ShowcaseTopBar , devTopBarLinks } from "../components/showcase-top-bar";
 import { LiquidGlassBar } from "../components/liquid-glass-bar";
 import {
   contrastSlidingTabsListClass,
@@ -59,6 +59,7 @@ export function BlocksPage() {
             { to: "/catalog", label: "Catalog" },
             { to: "/charts", label: "Charts" },
             { to: "/docs", label: "Docs" },
+            ...devTopBarLinks,
           ]}
         />
 

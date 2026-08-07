@@ -11,7 +11,7 @@ import {
   cn,
 } from "@nqlib/nqui";
 import type { BackgroundVariant } from "@nqlib/nqchart";
-import { ShowcaseTopBar } from "../components/showcase-top-bar";
+import { ShowcaseTopBar , devTopBarLinks } from "../components/showcase-top-bar";
 import { LiquidGlassBar } from "../components/liquid-glass-bar";
 import {
   CATALOG_COUNT,
@@ -198,6 +198,7 @@ export function ChartsPage() {
             { to: "/blocks", label: "Blocks" },
             { to: "/catalog", label: "Catalog" },
             { to: "/docs/nqchart", label: "Docs" },
+            ...devTopBarLinks,
           ]}
         />
 

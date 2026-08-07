@@ -22,6 +22,16 @@ const ThemeStudio = lazy(() => import("./components/showcase/pages/theme-studio"
 const DesignSystemPage = lazy(() => import("./components/showcase/pages/design-system"));
 const CommandLab = lazy(() => import("./components/showcase/pages/command-lab"));
 
+/*
+ * Dev-only surfaces. `import.meta.env.DEV` is replaced with a literal at build
+ * time, so this whole branch — and the chunk it would import — is dropped from
+ * a production bundle. Keep the check statically analysable: hoisting it into
+ * a variable or a helper is enough to defeat the elimination.
+ */
+const GanttLabPage = import.meta.env.DEV
+  ? lazy(() => import("./pages/gantt-lab-page").then((m) => ({ default: m.GanttLabPage })))
+  : null;
+
 function DocsShell() {
   return (
     <div className="min-h-dvh bg-background">
@@ -80,6 +90,11 @@ function App() {
           <Route path="/readme/nqgrid" element={<Navigate to="/docs/nqgrid" replace />} />
           <Route path="/readme/nqgantt" element={<Navigate to="/docs/nqgantt" replace />} />
           <Route path="/readme/*" element={<Navigate to="/docs" replace />} />
+          {/* Dev only: absent from the deployed build, so `/gantt-lab` there
+              falls through to the catch-all below and lands on the landing. */}
+          {GanttLabPage ? (
+            <Route path="/gantt-lab" element={<GanttLabPage />} />
+          ) : null}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

@@ -25,7 +25,20 @@ import {
 export type ShowcaseTopBarLink = {
   to: string;
   label: string;
+  /** Small pill after the label — for surfaces that aren't part of the product. */
+  badge?: string;
 };
+
+/**
+ * Nav entries that only exist while `pnpm dev` is running.
+ *
+ * `import.meta.env.DEV` is a build-time literal, so in a production bundle this
+ * is `[]` and the routes it points at aren't registered either (see `App.tsx`).
+ * Spread it into any page's `links` — the tab appears locally and evaporates on
+ * deploy, so a dev surface can never leak into the shipped nav.
+ */
+export const devTopBarLinks: ReadonlyArray<ShowcaseTopBarLink> =
+  import.meta.env.DEV ? [{ to: "/gantt-lab", label: "Gantt lab", badge: "dev" }] : [];
 
 export type ShowcaseTopBarSegment = {
   value: string;
@@ -89,7 +102,14 @@ export function ShowcaseTopBar({
               "rounded-full px-3 text-foreground hover:bg-[color-mix(in_oklch,var(--accent)_70%,transparent)]",
           )}
         >
-          <Link to={link.to}>{link.label}</Link>
+          <Link to={link.to}>
+            {link.label}
+            {link.badge ? (
+              <span className="ml-1.5 rounded-full bg-foreground/10 px-1.5 py-px font-mono text-[9px] leading-[1.5] tracking-wide text-muted-foreground uppercase">
+                {link.badge}
+              </span>
+            ) : null}
+          </Link>
         </Button>
       ))}
       {trailing ?? (
