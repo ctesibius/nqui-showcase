@@ -27,8 +27,6 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@nqlib/nqui/command"
-import { DebugPanel } from "@nqlib/nqui/debug"
-import "@nqlib/nqui/debug.css"
 import {
   NQUI_HUB_PATH,
   showcaseCatalogSections,
@@ -302,7 +300,6 @@ export function AppLayout() {
     >
       <AppLayoutContent />
       <CommandPaletteContent />
-      <DebugPanel />
     </SidebarProvider>
   )
 }

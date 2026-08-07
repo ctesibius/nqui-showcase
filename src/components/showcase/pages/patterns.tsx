@@ -694,7 +694,6 @@ export default function Showcase2() {
                       <Button variant="outline" size="sm">
                         Share
                       </Button>
-                      <ButtonGroupSeparator />
                       <Button variant="outline" size="sm">
                         Publish
                       </Button>

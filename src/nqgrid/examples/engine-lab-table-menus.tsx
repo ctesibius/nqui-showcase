@@ -173,8 +173,8 @@ export function SpreadsheetColumnsMenu<TData>({
           <DropdownMenuCheckboxItem
             key={column.id}
             checked={column.getIsVisible()}
-            onCheckedChange={(value) => column.toggleVisibility(!!value)}
-            onSelect={(e) => e.preventDefault()}
+            onCheckedChange={(value: boolean) => column.toggleVisibility(value)}
+            onSelect={(e: Event) => e.preventDefault()}
           >
             {columnLabel(column)}
           </DropdownMenuCheckboxItem>

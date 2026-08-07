@@ -452,6 +452,41 @@ const CATALOG_PLANS = [
     title: "Education",
     description: "Verified schools get Pro features for classrooms and labs.",
   },
+  {
+    value: "hobby",
+    title: "Hobby",
+    description: "Personal use with soft limits and email support on business days.",
+  },
+  {
+    value: "pro-plus",
+    title: "Pro Plus",
+    description: "Pro plus advanced analytics, custom domains, and audit exports.",
+  },
+  {
+    value: "business",
+    title: "Business",
+    description: "Role-based access, SCIM provisioning, and 99.9% uptime SLA.",
+  },
+  {
+    value: "enterprise-plus",
+    title: "Enterprise Plus",
+    description: "Private cloud option, pen-test reports, and named support engineer.",
+  },
+  {
+    value: "nonprofit",
+    title: "Nonprofit",
+    description: "Discounted Team plan for registered 501(c)(3) organizations.",
+  },
+  {
+    value: "startup",
+    title: "Startup",
+    description: "Twelve months of Pro credits for seed-stage companies under 20 people.",
+  },
+  {
+    value: "agency",
+    title: "Agency",
+    description: "Client workspaces, white-label portals, and pooled seat billing.",
+  },
 ] as const
 
 const CATALOG_REGIONS = [
@@ -461,9 +496,29 @@ const CATALOG_REGIONS = [
     description: "Oregon · lowest latency for West Coast and Pacific users.",
   },
   {
+    value: "us-west-2",
+    title: "US West 2",
+    description: "California · alternate path when Oregon is congested.",
+  },
+  {
     value: "us-east",
     title: "US East",
     description: "Virginia · default for East Coast and Atlantic traffic.",
+  },
+  {
+    value: "us-east-2",
+    title: "US East 2",
+    description: "Ohio · failover region for East Coast workloads.",
+  },
+  {
+    value: "us-central",
+    title: "US Central",
+    description: "Iowa · balanced latency across the continental US.",
+  },
+  {
+    value: "ca-central",
+    title: "Canada Central",
+    description: "Montreal · data residency for Canadian customers.",
   },
   {
     value: "eu-central",
@@ -476,15 +531,83 @@ const CATALOG_REGIONS = [
     description: "Ireland · good fit for UK and Western Europe.",
   },
   {
+    value: "eu-north",
+    title: "EU North",
+    description: "Stockholm · low latency for Nordic traffic.",
+  },
+  {
+    value: "eu-south",
+    title: "EU South",
+    description: "Milan · coverage for Southern Europe and MENA edge.",
+  },
+  {
     value: "ap-southeast",
     title: "Asia Pacific",
     description: "Singapore · coverage for SEA and Australia-bound traffic.",
+  },
+  {
+    value: "ap-southeast-2",
+    title: "Asia Pacific 2",
+    description: "Sydney · Australian residency and Oceania routes.",
   },
   {
     value: "ap-northeast",
     title: "Asia Northeast",
     description: "Tokyo · optimized for Japan and Korea routes.",
   },
+  {
+    value: "ap-south",
+    title: "Asia South",
+    description: "Mumbai · primary region for India and nearby markets.",
+  },
+  {
+    value: "sa-east",
+    title: "South America East",
+    description: "São Paulo · primary region for LATAM traffic.",
+  },
+  {
+    value: "me-central",
+    title: "Middle East",
+    description: "UAE · regional residency for Gulf customers.",
+  },
+] as const
+
+/** Long menu rows for Dropdown / Context scroll QA. */
+const CATALOG_MENU_ACTIONS = [
+  "Cut",
+  "Copy",
+  "Paste",
+  "Paste and match style",
+  "Duplicate",
+  "Rename",
+  "Move to…",
+  "Add to favorites",
+  "Share link",
+  "Copy link",
+  "Open in new tab",
+  "Open in split view",
+  "Pin to sidebar",
+  "Unpin",
+  "Archive",
+  "Unarchive",
+  "Mark as read",
+  "Mark as unread",
+  "Mute notifications",
+  "Assign to me",
+  "Assign to…",
+  "Change status",
+  "Change priority",
+  "Add label",
+  "Remove label",
+  "Export as CSV",
+  "Export as PDF",
+  "Print",
+  "View history",
+  "View permissions",
+  "Lock",
+  "Unlock",
+  "Delete",
+  "Move to trash",
 ] as const
 
 /** Multi-line Command / CommandDialog catalog fixtures. */
@@ -528,6 +651,126 @@ const CATALOG_PALETTE_HITS = [
     description: "Jump to component docs, recipes, and migration notes.",
     shortcut: "⌘K",
     icon: FileIcon,
+  },
+  {
+    value: "new-file",
+    title: "New file",
+    meta: "File › Create",
+    description: "Create a blank document in the current workspace.",
+    shortcut: "⌘N",
+    icon: FileIcon,
+  },
+  {
+    value: "new-folder",
+    title: "New folder",
+    meta: "File › Create",
+    description: "Organize files into a new folder at the current path.",
+    shortcut: "⇧⌘N",
+    icon: FileIcon,
+  },
+  {
+    value: "upload",
+    title: "Upload files",
+    meta: "File › Import",
+    description: "Choose local files and attach them to this project.",
+    shortcut: null,
+    icon: MailIcon,
+  },
+  {
+    value: "share",
+    title: "Share workspace",
+    meta: "Collaborate › Invite",
+    description: "Invite teammates by email or copy a join link.",
+    shortcut: "⌘S",
+    icon: MailIcon,
+  },
+  {
+    value: "members",
+    title: "Manage members",
+    meta: "Collaborate › Access",
+    description: "Review roles, pending invites, and seat usage.",
+    shortcut: null,
+    icon: SettingsIcon,
+  },
+  {
+    value: "theme",
+    title: "Toggle theme",
+    meta: "App › Appearance",
+    description: "Switch between light, dark, and system appearance.",
+    shortcut: "⌘\\",
+    icon: SettingsIcon,
+  },
+  {
+    value: "density",
+    title: "Comfortable density",
+    meta: "App › Appearance",
+    description: "Widen row height for touch-friendly controls.",
+    shortcut: null,
+    icon: SettingsIcon,
+  },
+  {
+    value: "goto-inbox",
+    title: "Go to Inbox",
+    meta: "Navigate › Mail",
+    description: "Jump to unread messages and triage queues.",
+    shortcut: "G I",
+    icon: MailIcon,
+  },
+  {
+    value: "goto-projects",
+    title: "Go to Projects",
+    meta: "Navigate › Work",
+    description: "Open the projects board for the active team.",
+    shortcut: "G P",
+    icon: HomeIcon,
+  },
+  {
+    value: "goto-analytics",
+    title: "Go to Analytics",
+    meta: "Navigate › Insights",
+    description: "Charts and funnels for the last 30 days of usage.",
+    shortcut: "G A",
+    icon: HomeIcon,
+  },
+  {
+    value: "run-audit",
+    title: "Run accessibility audit",
+    meta: "Tools › QA",
+    description: "Scan the current page for contrast and focus issues.",
+    shortcut: null,
+    icon: FileIcon,
+  },
+  {
+    value: "copy-page-url",
+    title: "Copy page URL",
+    meta: "Share › Link",
+    description: "Copy a deep link to this view including filters.",
+    shortcut: "⌥⌘C",
+    icon: MailIcon,
+  },
+  {
+    value: "keyboard-cheatsheet",
+    title: "Keyboard cheatsheet",
+    meta: "Help › Shortcuts",
+    description: "Show every registered shortcut for this surface.",
+    shortcut: "?",
+    icon: FileIcon,
+  },
+  {
+    value: "sign-out",
+    title: "Sign out",
+    meta: "Account › Session",
+    description: "End the current session on this device.",
+    shortcut: null,
+    icon: SettingsIcon,
+  },
+  {
+    value: "feedback",
+    title: "Send feedback",
+    meta: "Help › Contact",
+    description: "Report a bug or request a feature with page context attached.",
+    shortcut: null,
+    icon: MailIcon,
   },
 ] as const
 
@@ -1013,9 +1256,7 @@ export default function ComponentShowcase() {
                 <div className="flex flex-wrap items-center gap-3">
                   <ButtonGroup>
                     <Button variant="outline">Left</Button>
-                    <ButtonGroupSeparator />
                     <Button variant="outline">Middle</Button>
-                    <ButtonGroupSeparator />
                     <Button variant="outline">Right</Button>
                   </ButtonGroup>
                 </div>
@@ -1034,7 +1275,6 @@ export default function ComponentShowcase() {
                   >
                     Left
                   </Button>
-                  <ButtonGroupSeparator />
                   <Button
                     type="button"
                     variant={buttonGroupAlign === "center" ? "secondary" : "outline"}
@@ -1043,7 +1283,6 @@ export default function ComponentShowcase() {
                   >
                     Center
                   </Button>
-                  <ButtonGroupSeparator />
                   <Button
                     type="button"
                     variant={buttonGroupAlign === "right" ? "secondary" : "outline"}
@@ -1285,7 +1524,7 @@ export default function ComponentShowcase() {
               </div>
               <div className="space-y-2">
                 <Label className="text-xs text-muted-foreground">
-                  Multi-line — title + description slots (trigger shows title only)
+                  Multi-line ({CATALOG_PLANS.length} plans) — title + description; should scroll
                 </Label>
                 <Select defaultValue="pro">
                   <SelectTrigger className="w-full max-w-sm">
@@ -2186,9 +2425,7 @@ export default function ComponentShowcase() {
                   Dropdown Menu—actions, settings, account menu
                 </p>
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline">Open Menu</Button>
-                  </DropdownMenuTrigger>
+                  <DropdownMenuTrigger>Open Menu</DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
@@ -2197,7 +2434,7 @@ export default function ComponentShowcase() {
                     <DropdownMenuSeparator />
                     <DropdownMenuCheckboxItem
                       checked={checkboxItems.item1}
-                      onCheckedChange={(checked) =>
+                      onCheckedChange={(checked: boolean) =>
                         setCheckboxItems({ ...checkboxItems, item1: checked })
                       }
                     >
@@ -2215,6 +2452,21 @@ export default function ComponentShowcase() {
                         <DropdownMenuItem>Sub Item 2</DropdownMenuItem>
                       </DropdownMenuSubContent>
                     </DropdownMenuSub>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Long list ({CATALOG_MENU_ACTIONS.length} actions) — open and scroll
+                </p>
+                <DropdownMenu>
+                  <DropdownMenuTrigger>Open long menu</DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {CATALOG_MENU_ACTIONS.map((action) => (
+                      <DropdownMenuItem key={action}>{action}</DropdownMenuItem>
+                    ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -2241,17 +2493,19 @@ export default function ComponentShowcase() {
           <Card>
             <CardHeader>
               <CardTitle>Context Menu</CardTitle>
-              <CardDescription>Right-click context menu</CardDescription>
+              <CardDescription>
+                Right-click context menu — long list ({CATALOG_MENU_ACTIONS.length}) for scroll QA
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <ContextMenu>
                 <ContextMenuTrigger className="flex h-[100px] w-full items-center justify-center rounded-md border border-dashed">
                   Right click here
                 </ContextMenuTrigger>
-                <ContextMenuContent>
-                  <ContextMenuItem>Back</ContextMenuItem>
-                  <ContextMenuItem>Forward</ContextMenuItem>
-                  <ContextMenuItem>Reload</ContextMenuItem>
+                <ContextMenuContent className="w-56">
+                  {CATALOG_MENU_ACTIONS.map((action) => (
+                    <ContextMenuItem key={action}>{action}</ContextMenuItem>
+                  ))}
                 </ContextMenuContent>
               </ContextMenu>
             </CardContent>
@@ -2297,33 +2551,40 @@ export default function ComponentShowcase() {
           <Card>
             <CardHeader>
               <CardTitle>Command</CardTitle>
-              <CardDescription>Single-line menu vs multi-line search hits</CardDescription>
+              <CardDescription>
+                Single-line and multi-line lists long enough to exercise ScrollArea
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground">Single-line</p>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Single-line ({COMBOBOX_SHORTCUTS.length} items) — ScrollArea list
+                </p>
                 <Command className="rounded-lg border">
                   <CommandInput placeholder="Type a command or search..." />
                   <CommandList>
                     <CommandEmpty>No results found.</CommandEmpty>
                     <CommandGroup heading="Suggestions">
-                      <CommandItem>Calendar</CommandItem>
-                      <CommandItem>Search Emoji</CommandItem>
-                      <CommandItem>Calculator</CommandItem>
+                      {COMBOBOX_SHORTCUTS.map((item) => (
+                        <CommandItem key={item.value} value={item.label}>
+                          <HugeiconsIcon icon={item.icon} strokeWidth={2} />
+                          {item.label}
+                        </CommandItem>
+                      ))}
                     </CommandGroup>
                   </CommandList>
                 </Command>
               </div>
               <div className="space-y-2">
                 <p className="text-xs font-medium text-muted-foreground">
-                  Multi-line — title, meta, description slots
+                  Multi-line ({CATALOG_PALETTE_HITS.length} hits) — title, meta, description
                 </p>
                 <Command className="rounded-lg border">
                   <CommandInput placeholder="Search help…" />
                   <CommandList>
                     <CommandEmpty>No results found.</CommandEmpty>
                     <CommandGroup heading="Results">
-                      {CATALOG_PALETTE_HITS.slice(0, 3).map((hit) => (
+                      {CATALOG_PALETTE_HITS.map((hit) => (
                         <CommandItem
                           key={hit.value}
                           value={`${hit.title} ${hit.meta} ${hit.description}`}
@@ -2350,13 +2611,13 @@ export default function ComponentShowcase() {
             <CardHeader>
               <CardTitle>Command Palette</CardTitle>
               <CardDescription>
-                Multi-line search hits in CommandDialog — title, meta, description
+                Multi-line search hits in CommandDialog ({CATALOG_PALETTE_HITS.length} rows) — ScrollArea
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-sm text-muted-foreground">
                 Site chrome uses <Kbd>⌘</Kbd>
-                <Kbd>K</Kbd>. Open this demo for the same shell with multi-line slots.
+                <Kbd>K</Kbd>. Open this demo for a long multi-line list that should scroll.
               </p>
               <Button
                 type="button"
@@ -2364,7 +2625,7 @@ export default function ComponentShowcase() {
                 size="sm"
                 onClick={() => setCommandPaletteDemoOpen(true)}
               >
-                Open multi-line palette
+                Open long multi-line palette
               </Button>
               <CommandDialog
                 open={commandPaletteDemoOpen}
@@ -2395,13 +2656,16 @@ export default function ComponentShowcase() {
                     </CommandGroup>
                     <CommandSeparator />
                     <CommandGroup heading="Single-line">
-                      <CommandItem onSelect={() => setCommandPaletteDemoOpen(false)}>
-                        Profile
-                        <CommandShortcut>⌘P</CommandShortcut>
-                      </CommandItem>
-                      <CommandItem onSelect={() => setCommandPaletteDemoOpen(false)}>
-                        Billing
-                      </CommandItem>
+                      {COMBOBOX_SHORTCUTS.slice(0, 12).map((item) => (
+                        <CommandItem
+                          key={item.value}
+                          value={item.label}
+                          onSelect={() => setCommandPaletteDemoOpen(false)}
+                        >
+                          <HugeiconsIcon icon={item.icon} strokeWidth={2} />
+                          {item.label}
+                        </CommandItem>
+                      ))}
                     </CommandGroup>
                   </CommandList>
                 </Command>
@@ -2750,7 +3014,7 @@ export default function ComponentShowcase() {
               </div>
               <div className="space-y-2">
                 <p className="text-xs font-medium text-muted-foreground">
-                  Multi-line — title + description (closed field shows title only)
+                  Multi-line ({CATALOG_REGIONS.length} regions) — title + description; should scroll
                 </p>
                 <Combobox items={CATALOG_REGIONS.map((r) => r.value)}>
                   <ComboboxInput placeholder="Search regions…" />
@@ -3140,10 +3404,10 @@ export default function ComponentShowcase() {
                       realistic reflection effect as content scrolls.
                     </p>
                   </div>
-                  <div className="space-y-2 p-4 rounded-lg bg-purple-500/20 border border-purple-500/30">
-                    <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-400">Section 4: Purple Section</h3>
+                  <div className="space-y-2 p-4 rounded-lg bg-amber-500/20 border border-amber-500/30">
+                    <h3 className="text-lg font-semibold text-amber-700 dark:text-amber-400">Section 4: Amber Section</h3>
                     <p className="text-muted-foreground">
-                      Purple creates a rich reflection. When content scrolls up toward the header, it first fades
+                      Amber creates a warm reflection. When content scrolls up toward the header, it first fades
                       (from the scroll mask), then gets blurred as it passes behind the frosted glass.
                     </p>
                   </div>
@@ -3154,18 +3418,18 @@ export default function ComponentShowcase() {
                       elements, while backdrop-filter: blur() creates the glass effect.
                     </p>
                   </div>
-                  <div className="space-y-2 p-4 rounded-lg bg-pink-500/20 border border-pink-500/30">
-                    <h3 className="text-lg font-semibold text-pink-700 dark:text-pink-400">Section 6: Pink Section</h3>
+                  <div className="space-y-2 p-4 rounded-lg bg-rose-500/20 border border-rose-500/30">
+                    <h3 className="text-lg font-semibold text-rose-700 dark:text-rose-400">Section 6: Rose Section</h3>
                     <p className="text-muted-foreground">
-                      Pink adds softness. Keep scrolling to see how different colors reflect through the glass header.
+                      Rose adds softness. Keep scrolling to see how different colors reflect through the glass header.
                       Each color creates a unique blur effect.
                     </p>
                   </div>
-                  <div className="space-y-2 p-4 rounded-lg bg-cyan-500/20 border border-cyan-500/30">
-                    <h3 className="text-lg font-semibold text-cyan-700 dark:text-cyan-400">Section 7: Cyan Section</h3>
+                  <div className="space-y-2 p-4 rounded-lg bg-lime-500/20 border border-lime-500/30">
+                    <h3 className="text-lg font-semibold text-lime-700 dark:text-lime-400">Section 7: Lime Section</h3>
                     <p className="text-muted-foreground">
-                      Cyan provides cool tones. The combination of fade mask and frosted glass provides excellent
-                      visual feedback with beautiful color reflections.
+                      Lime provides cool-bright tones. The combination of fade mask and frosted glass provides excellent
+                      visual feedback with colorful reflections.
                     </p>
                   </div>
                   <div className="space-y-2 p-4 rounded-lg bg-yellow-500/20 border border-yellow-500/30">
@@ -3175,10 +3439,10 @@ export default function ComponentShowcase() {
                       is used extensively in macOS and iOS interfaces.
                     </p>
                   </div>
-                  <div className="space-y-2 p-4 rounded-lg bg-indigo-500/20 border border-indigo-500/30">
-                    <h3 className="text-lg font-semibold text-indigo-700 dark:text-indigo-400">Section 9: Indigo Section</h3>
+                  <div className="space-y-2 p-4 rounded-lg bg-stone-500/20 border border-stone-500/30">
+                    <h3 className="text-lg font-semibold text-stone-700 dark:text-stone-300">Section 9: Stone Section</h3>
                     <p className="text-muted-foreground">
-                      Indigo creates depth. Backdrop-filter is hardware-accelerated and performs well in modern browsers.
+                      Stone creates depth. Backdrop-filter is hardware-accelerated and performs well in modern browsers.
                       The extended backdrop technique ensures nearby elements are properly blurred.
                     </p>
                   </div>

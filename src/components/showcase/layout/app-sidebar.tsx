@@ -39,7 +39,8 @@ const navIcons: Record<string, typeof HomeIcon> = {
 const showcaseUser = {
   name: "Nqui",
   email: "dev@nqui.local",
-  avatar: "/avatars/shadcn.jpg",
+  // No asset at /avatars/* — leave empty so NavUser renders flat initials (not a muted chip).
+  avatar: "",
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
