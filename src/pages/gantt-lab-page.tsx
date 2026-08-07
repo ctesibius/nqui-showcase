@@ -29,6 +29,7 @@ import { useGanttBarDesign } from "@/nqgantt/demos/use-gantt-bar-design"
 import { useGanttFocusWork } from "@/nqgantt/demos/use-gantt-focus-work"
 import { useGanttRowHover } from "@/nqgantt/demos/use-gantt-row-hover"
 import { useGanttSidebarResize } from "@/nqgantt/demos/use-gantt-sidebar-resize"
+import { useShowcaseGanttTheme } from "@/nqgantt/demos/use-showcase-gantt-theme"
 import {
   GANTT_BAR_DESIGN_DEFAULT,
   GANTT_BAR_STYLES,
@@ -94,6 +95,39 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   )
 }
 
+/**
+ * The package with nothing of ours on it — no design tokens, no row hover, no
+ * keyboard resize, no scroll-to-work. Paired with the theme layer switched off
+ * it answers the only question that matters after an upstream change: does
+ * `@nqlib/nqgantt` do this by itself?
+ */
+function BareGantt({ tasks, range, density, grouped, critical, className }: LabGanttProps) {
+  return (
+    <div className={cn("min-h-0 flex-1", className)}>
+      <RoadmapGantt
+        key={`bare:${range}:${density}:${grouped}:${critical}:${tasks.length}`}
+        className="h-full"
+        tasks={tasks}
+        grouped={grouped}
+        showCriticalPath={critical}
+        colorBy="status"
+        density={density}
+        defaultRange={range}
+      />
+    </div>
+  )
+}
+
+interface LabGanttProps {
+  tasks: Task[]
+  design: GanttBarDesign
+  range: Range
+  density: GanttDensity
+  grouped: boolean
+  critical: boolean
+  className?: string
+}
+
 /** One gantt under the current settings, with every showcase hook attached. */
 function LabGantt({
   tasks,
@@ -103,15 +137,7 @@ function LabGantt({
   grouped,
   critical,
   className,
-}: {
-  tasks: Task[]
-  design: GanttBarDesign
-  range: Range
-  density: GanttDensity
-  grouped: boolean
-  critical: boolean
-  className?: string
-}) {
+}: LabGanttProps) {
   const stageRef = useRef<HTMLDivElement>(null)
   useGanttBarDesign(stageRef, design)
   useGanttSidebarResize(stageRef)
@@ -144,9 +170,13 @@ export function GanttLabPage() {
   const [grouped, setGrouped] = useState(true)
   const [critical, setCritical] = useState(false)
   const [matrix, setMatrix] = useState(false)
+  const [bare, setBare] = useState(false)
   const tasks = useFixture(fixture)
   const benchEnabled = useGanttLabEnabled()
   const benchRef = useRef<HTMLDivElement>(null)
+
+  // Off = the package alone; on = the package under our override layer.
+  useShowcaseGanttTheme(!bare)
 
   const activeFixture = FIXTURES.find((f) => f.id === fixture)!
 
@@ -169,6 +199,14 @@ export function GanttLabPage() {
           </div>
           <p className="mt-1 text-[12px] text-muted-foreground">
             {activeFixture.hint}. Not in the deployed build — break whatever you like.
+            {bare ? (
+              <>
+                {" "}
+                <span className="text-foreground">
+                  Bare: showcase theme and hooks off — this is @nqlib/nqgantt alone.
+                </span>
+              </>
+            ) : null}
           </p>
         </div>
         <GanttDesignMenu design={design} onDesignChange={setDesign} />
@@ -235,6 +273,13 @@ export function GanttLabPage() {
             <Switch checked={matrix} onCheckedChange={setMatrix} />
             Style matrix
           </label>
+          <label
+            className="flex items-center gap-2 text-xs"
+            title="Drop the showcase theme + hooks and render @nqlib/nqgantt as it ships"
+          >
+            <Switch checked={bare} onCheckedChange={setBare} />
+            Bare package
+          </label>
         </div>
 
         <Button
@@ -267,29 +312,52 @@ export function GanttLabPage() {
                     {rows.label}
                   </span>
                 </div>
-                <LabGantt
-                  tasks={tasks}
-                  design={{ barStyle: style.id, groupRows: rows.id, tuning: design.tuning }}
-                  range={range}
-                  density={density}
-                  grouped={grouped}
-                  critical={critical}
-                />
+                {bare ? (
+                  <BareGantt
+                    tasks={tasks}
+                    design={design}
+                    range={range}
+                    density={density}
+                    grouped={grouped}
+                    critical={critical}
+                  />
+                ) : (
+                  <LabGantt
+                    tasks={tasks}
+                    design={{ barStyle: style.id, groupRows: rows.id, tuning: design.tuning }}
+                    range={range}
+                    density={density}
+                    grouped={grouped}
+                    critical={critical}
+                  />
+                )}
               </section>
             )),
           )}
         </div>
       ) : (
         <div ref={benchRef} className="flex min-h-0 flex-1 flex-col p-6">
-          <LabGantt
-            tasks={tasks}
-            design={design}
-            range={range}
-            density={density}
-            grouped={grouped}
-            critical={critical}
-            className="rounded-md border border-border"
-          />
+          {bare ? (
+            <BareGantt
+              tasks={tasks}
+              design={design}
+              range={range}
+              density={density}
+              grouped={grouped}
+              critical={critical}
+              className="rounded-md border border-border"
+            />
+          ) : (
+            <LabGantt
+              tasks={tasks}
+              design={design}
+              range={range}
+              density={density}
+              grouped={grouped}
+              critical={critical}
+              className="rounded-md border border-border"
+            />
+          )}
         </div>
       )}
 

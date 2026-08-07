@@ -6,7 +6,10 @@
 @custom-variant mid (&:where(.mid, .mid *));
 
 @import "@nqlib/nqui/styles";
-@import "./nqgantt/gantt-theme.css";
+/* nqgantt overrides are imported from main.tsx, not here: as its own module
+   Vite serves them as a separate dev stylesheet, which /gantt-lab's "Bare
+   package" toggle switches off to judge the package unstyled. Load order is
+   unchanged — main.tsx imports it immediately after this file. */
 
 /* Primary brand: monochrome. Near-black primary in light, near-white in dark —
  * semantic accents (badges) and the chart palette carry all the color. */
