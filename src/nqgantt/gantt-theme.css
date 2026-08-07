@@ -976,27 +976,54 @@
 .gantt [data-gantt-resize-delta] {
   position: absolute;
   inset-block: 25%;
-  z-index: var(--z-content);
+  /* Must clear the bar, not tie with it. After a grow the settled bar already
+     covers this span, and React re-renders the row on commit — so an equal
+     z-index leaves paint order to wherever React happens to put its children,
+     and the mark intermittently disappears under the bar. */
+  z-index: calc(var(--z-content, 10) + 1);
   pointer-events: none;
   border-radius: 2px;
+  /* Near-solid, because it is read *against the bar it overlays*, not against
+     the timeline. At 30% over a pale bar this was an ~8% luminance shift — a
+     smudge rather than a statement. It fades to reveal the settled bar. */
   background-color: color-mix(
     in oklch,
-    var(--gantt-bar-accent, var(--primary)) 30%,
+    var(--gantt-bar-accent, var(--primary)) 78%,
     transparent
   );
   animation: gantt-delta-grew 260ms var(--ease-out) both;
 }
 
+/* Reclaimed time goes neutral — it no longer belongs to the task. This one is
+   read against bare timeline, so it needs less weight than the grow. */
 .gantt [data-gantt-resize-delta="shrank"] {
   animation-name: gantt-delta-shrank;
   background-color: color-mix(
     in oklch,
-    var(--muted-foreground) 26%,
+    var(--muted-foreground) 42%,
     transparent
   );
 }
 
-/* Wipe in from the old edge, hold, then let go. */
+/*
+ * Both beats pivot on the *old* edge — growing wipes away from it, shrinking
+ * retreats onto it — so each needs a left- and a right-anchored form. The
+ * unsuffixed pair is anchored left; `-rtl` mirrors it.
+ *
+ * `data-gantt-delta-anchor` is resolved in JS from edge *and* direction, never
+ * from which handle was grabbed: those agree in three of the four cases and
+ * disagree on a start-edge shrink, which anchoring off the handle sent
+ * retreating along with the drag instead of against it.
+ */
+.gantt [data-gantt-resize-delta="grew"][data-gantt-delta-anchor="right"] {
+  animation-name: gantt-delta-grew-rtl;
+}
+
+.gantt [data-gantt-resize-delta="shrank"][data-gantt-delta-anchor="right"] {
+  animation-name: gantt-delta-shrank-rtl;
+}
+
+/* Wipe out from the old edge, hold, then let go. */
 @keyframes gantt-delta-grew {
   0% {
     clip-path: inset(0 100% 0 0);
@@ -1012,23 +1039,6 @@
   }
 }
 
-/* Retreat toward the old edge — the reverse gesture, not a reverse fade. */
-@keyframes gantt-delta-shrank {
-  0% {
-    clip-path: inset(0);
-    opacity: 1;
-  }
-  100% {
-    clip-path: inset(0 0 0 100%);
-    opacity: 0;
-  }
-}
-
-/* A start-edge resize mirrors the wipe: there, "outward" is leftward. */
-.gantt [data-gantt-resize-delta="grew"][data-gantt-delta-from="right"] {
-  animation-name: gantt-delta-grew-rtl;
-}
-
 @keyframes gantt-delta-grew-rtl {
   0% {
     clip-path: inset(0 0 0 100%);
@@ -1040,6 +1050,29 @@
   }
   100% {
     clip-path: inset(0);
+    opacity: 0;
+  }
+}
+
+/* Retreat onto the old edge — the reverse gesture, not a reverse fade. */
+@keyframes gantt-delta-shrank {
+  0% {
+    clip-path: inset(0);
+    opacity: 1;
+  }
+  100% {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0;
+  }
+}
+
+@keyframes gantt-delta-shrank-rtl {
+  0% {
+    clip-path: inset(0);
+    opacity: 1;
+  }
+  100% {
+    clip-path: inset(0 0 0 100%);
     opacity: 0;
   }
 }
