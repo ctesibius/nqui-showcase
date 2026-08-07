@@ -1,12 +1,32 @@
-/* Weekend hatch + critical-path motion — copied from @nqlib/nqgantt gantt-theme.css */
+/*
+ * Weekend hatch + critical-path motion — showcase override of the package's
+ * `gantt-theme.css`.
+ *
+ * At week and month range a "weekend" is a whole column, so the package's
+ * 5px-pitch 14% hatch tiles across a third of the canvas and competes with the
+ * bars for attention. Non-working time is background information: it only has
+ * to be noticed when you look for it. Halve the wash, thin the stripe, and
+ * open the pitch until the texture reads as paper rather than pattern.
+ */
+.gantt {
+  --gantt-weekend-wash: color-mix(in srgb, var(--muted) 30%, transparent);
+  --gantt-weekend-hatch: color-mix(in srgb, var(--muted-foreground) 6%, transparent);
+  --gantt-weekend-hatch-pitch: 9px;
+}
+
+.dark .gantt {
+  --gantt-weekend-wash: color-mix(in srgb, var(--muted) 26%, transparent);
+  --gantt-weekend-hatch: color-mix(in srgb, var(--muted-foreground) 8%, transparent);
+}
+
 .gantt-weekend-cell {
-  background-color: color-mix(in srgb, var(--muted) 60%, transparent);
+  background-color: var(--gantt-weekend-wash);
   background-image: repeating-linear-gradient(
     135deg,
     transparent 0,
-    transparent 5px,
-    color-mix(in srgb, var(--muted-foreground) 14%, transparent) 5px,
-    color-mix(in srgb, var(--muted-foreground) 14%, transparent) 6px
+    transparent var(--gantt-weekend-hatch-pitch),
+    var(--gantt-weekend-hatch) var(--gantt-weekend-hatch-pitch),
+    var(--gantt-weekend-hatch) calc(var(--gantt-weekend-hatch-pitch) + 1px)
   );
 }
 
@@ -14,53 +34,234 @@
   --gantt-critical-color: oklch(0.58 0.28 27);
   --gantt-critical-tint: color-mix(in srgb, var(--gantt-critical-color) 24%, transparent);
 
-  /*
-   * Bar progress two-tone system (slide-deck friendly)
-   * ─────────────────────────────────────────────────
-   * track-tint  — accent weight for open / unfilled work (0–100)
-   * done-tint   — accent weight for completed work (0–100)
-   * progress-gap — done − track; keep ≥ 50 for readable split
-   *
-   * Light: 30% track on background → 84% done  (gap 54)
-   * Dark:  38% track on muted      → 88% done on card (gap 50)
-   */
-  --gantt-bar-track-tint: 30;
-  --gantt-bar-done-tint: 84;
-  --gantt-bar-hover-tint: 36;
-  --gantt-bar-progress-gap: calc(var(--gantt-bar-done-tint) - var(--gantt-bar-track-tint));
-  --gantt-bar-track-base: var(--background);
-  --gantt-bar-done-base: var(--background);
-  --gantt-bar-feather-px: 6;
-
-  /* nqui Button chrome — radius + ring + inset highlight (no decorative glow) */
-  /* Track the nqui radius ladder (package default) so the appearance
-     configurator reaches gantt bars — a literal here shadows it. */
-  --gantt-bar-radius: var(--radius-md);
-  --gantt-bar-ring-mix: 38%;
-  --gantt-bar-lift-y: 1px;
-  --gantt-bar-lift-alpha: 0.1;
-  --gantt-bar-inset-highlight: rgb(255 255 255 / 0.28);
-
   /* Inline bar label legibility over tinted fills — tight shadow, no bloom */
   --gantt-bar-inline-label-shadow: 0 1px 1px rgb(255 255 255 / 0.9);
+
+  /* Rail share of the summary bracket viewBox — the package's own 0.6 default.
+     Pill and rail group rows scale by its inverse to fill the row with it. */
+  --gantt-group-rail-ratio: 0.6;
+
+  /*
+   * Leading-edge seam — off by default; styles that want it set both.
+   * `seam-mix` is how much white to fold into the accent, NOT a finished
+   * colour: `--gantt-bar-accent` is set inline on each bar, so a colour built
+   * from it up here computes to invalid and takes its whole declaration down.
+   */
+  --gantt-bar-seam-mix: 0%;
+  --gantt-bar-seam-width: 0px;
+
+  /*
+   * How much of the row band to give back above and below the bar, so the two
+   * columns share a rhythm rather than just a pitch: a label sets roughly 45%
+   * ink into its row, and a bar filling the band turns the timeline into a
+   * stack of slabs with hairline gaps.
+   *
+   * Stated in whole pixels, not a percentage, and applied as a margin rather
+   * than a centring translate. A share of a 22px band lands on a fraction, the
+   * bar straddles a device pixel, and the 1px ring and 2px seam smear — the
+   * bar goes soft exactly where it should be sharpest. Integers in, crisp
+   * edges out, at any density.
+   */
+  --gantt-bar-inset-y: 3px;
 }
 
 .dark .gantt {
   --gantt-critical-color: oklch(0.78 0.28 25);
   --gantt-critical-tint: color-mix(in srgb, var(--gantt-critical-color) 34%, transparent);
 
+  --gantt-bar-inline-label-shadow: 0 1px 2px rgb(0 0 0 / 0.75);
+}
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════
+ * Bar styles — the picker's payload
+ * ═══════════════════════════════════════════════════════════════════════
+ *
+ * Two-tone progress system:
+ *   track-tint  — accent weight on open / unfilled work (0–100)
+ *   done-tint   — accent weight on completed work (0–100)
+ *   done-alpha  — how solid the completed slice paints; below ~85% the glass
+ *                 rim and top sheen still read across the filled half
+ *
+ * `data-gantt-bar-style` lands on the live `.gantt` element (see
+ * `use-gantt-bar-design.ts`) and on the menu's swatches, so both read one
+ * source. Each style declares the full light set; the `.dark` block that
+ * follows it states only the deltas. Styles are peers — a gantt with no
+ * attribute at all falls back to Studio below.
+ */
+
+/* ── Studio — the shipped look: soft two-tone under a glass rim ───────── */
+.gantt:not([data-gantt-bar-style]),
+[data-gantt-bar-style="studio"] {
+  --gantt-bar-track-tint: 30;
+  --gantt-bar-done-tint: 58;
+  --gantt-bar-hover-tint: 36;
+  --gantt-bar-track-base: var(--background);
+  --gantt-bar-done-base: var(--background);
+  --gantt-bar-done-alpha: 82%;
+  --gantt-bar-feather-px: 8;
+  /* Track the nqui radius ladder so the appearance configurator reaches
+     gantt bars — a literal here would shadow it. */
+  --gantt-bar-radius: var(--radius-md);
+  --gantt-bar-ring-mix: 38%;
+  --gantt-bar-lift-y: 1px;
+  --gantt-bar-lift-alpha: 0.1;
+  --gantt-bar-inset-highlight: rgb(255 255 255 / 0.36);
+  --gantt-bar-sheen: rgb(255 255 255 / 0.22);
+  --gantt-bar-sheen-stop: 58%;
+}
+
+.dark .gantt:not([data-gantt-bar-style]),
+.dark [data-gantt-bar-style="studio"] {
   --gantt-bar-track-tint: 38;
-  --gantt-bar-done-tint: 88;
+  --gantt-bar-done-tint: 62;
   --gantt-bar-hover-tint: 44;
   --gantt-bar-track-base: var(--muted);
   --gantt-bar-done-base: var(--card);
-
+  --gantt-bar-done-alpha: 78%;
   --gantt-bar-ring-mix: 36%;
-  --gantt-bar-lift-y: 1px;
   --gantt-bar-lift-alpha: 0.2;
-  --gantt-bar-inset-highlight: rgb(255 255 255 / 0.12);
+  --gantt-bar-inset-highlight: rgb(255 255 255 / 0.2);
+  --gantt-bar-sheen: rgb(255 255 255 / 0.14);
+  --gantt-bar-sheen-stop: 62%;
+}
 
-  --gantt-bar-inline-label-shadow: 0 1px 2px rgb(0 0 0 / 0.75);
+/* ── Solid — vivid completed slice, crisp seam. Reads across a room. ──── */
+[data-gantt-bar-style="solid"] {
+  --gantt-bar-track-tint: 26;
+  --gantt-bar-done-tint: 88;
+  --gantt-bar-hover-tint: 32;
+  --gantt-bar-track-base: var(--background);
+  --gantt-bar-done-base: var(--background);
+  --gantt-bar-done-alpha: 100%;
+  --gantt-bar-feather-px: 2;
+  --gantt-bar-radius: var(--radius-md);
+  --gantt-bar-ring-mix: 42%;
+  --gantt-bar-lift-y: 1px;
+  --gantt-bar-lift-alpha: 0.12;
+  --gantt-bar-inset-highlight: rgb(255 255 255 / 0.3);
+  --gantt-bar-sheen: rgb(255 255 255 / 0.18);
+  --gantt-bar-sheen-stop: 52%;
+}
+
+.dark [data-gantt-bar-style="solid"] {
+  --gantt-bar-track-tint: 34;
+  --gantt-bar-done-tint: 92;
+  --gantt-bar-hover-tint: 40;
+  --gantt-bar-track-base: var(--muted);
+  --gantt-bar-done-base: var(--card);
+  --gantt-bar-ring-mix: 38%;
+  --gantt-bar-lift-alpha: 0.24;
+  --gantt-bar-inset-highlight: rgb(255 255 255 / 0.16);
+  --gantt-bar-sheen: rgb(255 255 255 / 0.1);
+}
+
+/*
+ * ── Flat — two translucent tints of one hue, hard seam, no chrome ─────
+ * Both halves are washes of the accent rather than solids: open work sits
+ * barely above the grid, done work carries weight without going opaque, and
+ * the only hard edge in the bar is where one becomes the other. No rim, no
+ * lift, no sheen, no feather — the seam does all the work.
+ */
+[data-gantt-bar-style="flat"] {
+  --gantt-bar-track-tint: 16;
+  --gantt-bar-done-tint: 62;
+  --gantt-bar-hover-tint: 24;
+  --gantt-bar-track-base: var(--background);
+  --gantt-bar-done-base: var(--background);
+  --gantt-bar-done-alpha: 90%;
+  --gantt-bar-feather-px: 0;
+  --gantt-bar-radius: 6px;
+  /*
+   * A hairline of the bar's own hue. Translucent fills bleed into whatever is
+   * behind them — grid lines, the weekend wash — and the silhouette goes soft
+   * exactly where the bar is palest. The ring costs one pixel and gives every
+   * bar a definite edge without reintroducing chrome.
+   */
+  --gantt-bar-ring-mix: 38%;
+  --gantt-bar-lift-y: 0px;
+  --gantt-bar-lift-alpha: 0;
+  --gantt-bar-inset-highlight: transparent;
+  --gantt-bar-sheen: transparent;
+  --gantt-bar-sheen-stop: 50%;
+  /*
+   * The seam runs at full accent strength — the one opaque thing in the bar.
+   * On light ground that reads darker than the 62% fill, which is what makes
+   * the edge crisp; lightening it here would sink it into the pale track.
+   */
+  --gantt-bar-seam-mix: 0%;
+  --gantt-bar-seam-width: 2px;
+}
+
+.dark [data-gantt-bar-style="flat"] {
+  --gantt-bar-track-tint: 22;
+  --gantt-bar-done-tint: 66;
+  --gantt-bar-hover-tint: 30;
+  --gantt-bar-track-base: var(--card);
+  --gantt-bar-done-base: var(--card);
+  --gantt-bar-done-alpha: 88%;
+  --gantt-bar-ring-mix: 46%;
+  /* On dark ground the edge has to go the other way to separate. */
+  --gantt-bar-seam-mix: 40%;
+}
+
+/* ── Outline — hollow track, hairline edge. Only finished work has weight. */
+[data-gantt-bar-style="outline"] {
+  --gantt-bar-track-tint: 8;
+  --gantt-bar-done-tint: 64;
+  --gantt-bar-hover-tint: 18;
+  --gantt-bar-track-base: transparent;
+  --gantt-bar-done-base: var(--background);
+  --gantt-bar-done-alpha: 92%;
+  --gantt-bar-feather-px: 10;
+  --gantt-bar-radius: var(--radius-md);
+  --gantt-bar-ring-mix: 55%;
+  --gantt-bar-lift-y: 0px;
+  --gantt-bar-lift-alpha: 0;
+  --gantt-bar-inset-highlight: transparent;
+  --gantt-bar-sheen: transparent;
+  --gantt-bar-sheen-stop: 50%;
+}
+
+.dark [data-gantt-bar-style="outline"] {
+  --gantt-bar-track-tint: 12;
+  --gantt-bar-done-tint: 68;
+  --gantt-bar-hover-tint: 22;
+  --gantt-bar-done-base: var(--card);
+  --gantt-bar-ring-mix: 50%;
+}
+
+/* ── Capsule — full pill radius, long feather. Roadmaps over schedules. ── */
+[data-gantt-bar-style="capsule"] {
+  --gantt-bar-track-tint: 28;
+  --gantt-bar-done-tint: 62;
+  --gantt-bar-hover-tint: 34;
+  --gantt-bar-track-base: var(--background);
+  --gantt-bar-done-base: var(--background);
+  --gantt-bar-done-alpha: 85%;
+  --gantt-bar-feather-px: 12;
+  --gantt-bar-radius: 9999px;
+  --gantt-bar-ring-mix: 34%;
+  --gantt-bar-lift-y: 1px;
+  --gantt-bar-lift-alpha: 0.1;
+  --gantt-bar-inset-highlight: rgb(255 255 255 / 0.4);
+  --gantt-bar-sheen: rgb(255 255 255 / 0.26);
+  --gantt-bar-sheen-stop: 64%;
+}
+
+.dark [data-gantt-bar-style="capsule"] {
+  --gantt-bar-track-tint: 36;
+  --gantt-bar-done-tint: 66;
+  --gantt-bar-hover-tint: 42;
+  --gantt-bar-track-base: var(--muted);
+  --gantt-bar-done-base: var(--card);
+  --gantt-bar-ring-mix: 32%;
+  --gantt-bar-inset-highlight: rgb(255 255 255 / 0.22);
+  --gantt-bar-sheen: rgb(255 255 255 / 0.16);
+}
+
+.gantt {
+  --gantt-bar-progress-gap: calc(var(--gantt-bar-done-tint) - var(--gantt-bar-track-tint));
 }
 
 .gantt-critical-bar {
@@ -94,6 +295,12 @@
      `min(var(--gantt-bar-radius), w/2, h/2)` so short bars stay pill-capped
      instead of over-rounding. This stands as the fallback. */
   border-radius: var(--gantt-bar-radius);
+  /* Sit the bar on the row's rhythm without ever leaving the pixel grid. */
+  height: calc(100% - var(--gantt-bar-inset-y) * 2);
+  margin-block: var(--gantt-bar-inset-y);
+  padding-block: 0;
+  display: flex;
+  align-items: center;
   background-color: color-mix(
     in srgb,
     var(--gantt-bar-accent) calc(var(--gantt-bar-track-tint) * 1%),
@@ -129,11 +336,11 @@
   z-index: 1;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(to bottom, rgb(255 255 255 / 0.22), transparent 58%);
-}
-
-.dark .gantt [data-gantt-feature-bar]:not([data-gantt-summary="true"])::after {
-  background: linear-gradient(to bottom, rgb(255 255 255 / 0.08), transparent 62%);
+  background: linear-gradient(
+    to bottom,
+    var(--gantt-bar-sheen),
+    transparent var(--gantt-bar-sheen-stop)
+  );
 }
 
 .dark .gantt .group\/bar:hover [data-gantt-feature-bar]:not([data-gantt-summary="true"]) {
@@ -142,6 +349,22 @@
       rgb(0 0 0 / var(--gantt-bar-lift-alpha)),
     0 0 0 1px color-mix(in srgb, var(--gantt-bar-accent) calc(var(--gantt-bar-ring-mix) + 4%), transparent),
     inset 0 1px 0 var(--gantt-bar-inset-highlight) !important;
+}
+
+/*
+ * Flat's ring goes inside the box. Everywhere else the ring is a non-inset
+ * shadow — a 1px halo hugging the silhouette, which suits a bar that also has
+ * a lift and a sheen to sit inside. Flat has neither, so that halo is the only
+ * edge it owns, and a halo against a fractional bar width reads as softness
+ * rather than an edge. Inset, it is clipped by the radius and becomes an
+ * actual border.
+ */
+.gantt[data-gantt-bar-style="flat"] [data-gantt-feature-bar]:not([data-gantt-summary="true"]),
+.gantt[data-gantt-bar-style="flat"]
+  .group\/bar:hover
+  [data-gantt-feature-bar]:not([data-gantt-summary="true"]) {
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--gantt-bar-accent) var(--gantt-bar-ring-mix), transparent) !important;
 }
 
 /* Clip progress fill to bar silhouette */
@@ -154,20 +377,48 @@
   border-radius: inherit;
 }
 
-/* Completed slice — vivid accent mix (done-tint) */
+/* Completed slice — soft accent wash (reads under glass rim + top sheen) */
 .gantt
   [data-gantt-feature-bar]:not([data-gantt-summary="true"])
   [role="progressbar"]
   > div[aria-hidden="true"] {
-  background: linear-gradient(
-    to right,
-    color-mix(
-      in srgb,
-      var(--gantt-bar-accent) calc(var(--gantt-bar-done-tint) * 1%),
-      var(--gantt-bar-done-base)
-    ) calc(100% - var(--gantt-bar-feather-px) * 1px),
-    transparent
-  ) !important;
+  background:
+    /*
+     * Leading-edge seam, pinned to the right of the filled slice. It rides in
+     * the fill's own background stack rather than on a pseudo-element: the
+     * package positions this node absolutely, and any `position` override here
+     * collapses it to nothing.
+     */
+    linear-gradient(
+        color-mix(in srgb, white var(--gantt-bar-seam-mix, 0%), var(--gantt-bar-accent)),
+        color-mix(in srgb, white var(--gantt-bar-seam-mix, 0%), var(--gantt-bar-accent))
+      )
+      right center / var(--gantt-bar-seam-width, 0px) 100% no-repeat,
+    linear-gradient(
+      to right,
+      color-mix(
+        in srgb,
+        color-mix(
+          in srgb,
+          var(--gantt-bar-accent) calc(var(--gantt-bar-done-tint) * 1%),
+          var(--gantt-bar-done-base)
+        ) var(--gantt-bar-done-alpha),
+        transparent
+      ) calc(100% - var(--gantt-bar-feather-px) * 1px),
+      transparent
+    ) !important;
+}
+
+/*
+ * At 100% there is no seam to draw — the "edge between done and open" has no
+ * open side left, and a bright rule sitting on the bar's own right edge just
+ * doubles the ring. (ReUI reaches the same conclusion with `data-full:border-e-0`.)
+ */
+.gantt
+  [data-gantt-feature-bar]:not([data-gantt-summary="true"])
+  [role="progressbar"][aria-valuenow="100"]
+  > div[aria-hidden="true"] {
+  --gantt-bar-seam-width: 0px;
 }
 
 /* Library sheen layer — theme uses ::after instead */
@@ -188,9 +439,310 @@
   opacity: 1 !important;
 }
 
+/*
+ * ── Group rows as a rail ───────────────────────────────────────────────
+ *
+ * The plainest rollup there is: a hairline span with a stop at each end — an
+ * I laid on its side. It still has to answer "how far along is this group?",
+ * so it is not redrawn: the package's bracket is scaled until its top rail
+ * fills the row, then clipped to a thin band through the middle. What
+ * survives the clip is a slice of the real bracket — accent, rolled-up
+ * progress veil and all — and the end stops are drawn over it in CSS.
+ */
+.gantt[data-gantt-group-rows="rail"] [data-gantt-summary="true"] > div:first-of-type {
+  --gantt-group-rail-ink: color-mix(in oklch, var(--muted-foreground) 62%, transparent);
+  --gantt-group-rail-thickness: 4px;
+  --gantt-group-rail-stop-height: 12px;
+  /* The package fades the bracket by progress; a rail reads as geometry. */
+  opacity: 1 !important;
+  clip-path: inset(
+    calc(50% - var(--gantt-group-rail-thickness) / 2) 0 round 9999px
+  );
+}
+
+.gantt[data-gantt-group-rows="rail"] [data-gantt-summary="true"] svg[aria-hidden="true"] {
+  transform: scaleY(calc(1 / var(--gantt-group-rail-ratio)));
+  transform-origin: top center;
+}
+
+/* End stops — drawn outside the clip so they keep their full height. */
+.gantt[data-gantt-group-rows="rail"] [data-gantt-summary="true"]::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: min(12px, 100%);
+  translate: 0 -50%;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--gantt-group-rail-stop), var(--gantt-group-rail-stop)),
+    linear-gradient(var(--gantt-group-rail-stop), var(--gantt-group-rail-stop));
+  background-size: 3px 100%;
+  background-position: left center, right center;
+  background-repeat: no-repeat;
+  border-radius: 1px;
+}
+
+.gantt[data-gantt-group-rows="rail"] [data-gantt-summary="true"] {
+  --gantt-group-rail-stop: color-mix(in oklch, var(--muted-foreground) 70%, transparent);
+}
+
+.dark .gantt[data-gantt-group-rows="rail"] [data-gantt-summary="true"] {
+  --gantt-group-rail-stop: color-mix(in oklch, var(--muted-foreground) 85%, transparent);
+}
+
+/*
+ * ── Group rows as pills ────────────────────────────────────────────────
+ *
+ * The package paints a rollup as one SVG: a rounded top rail over two feet,
+ * all clipped from full-bar rects, so the accent, the progress veil and the
+ * sheen are already in there. Pill mode keeps every one of those layers and
+ * only changes the silhouette — scale the rail band up to fill the row, then
+ * clip the feet away and round the result to the task-bar radius. Nothing is
+ * repainted, so a group row stays the same material as its children, one step
+ * heavier by the ring and the shadow below.
+ */
+.gantt[data-gantt-group-rows="pill"] [data-gantt-summary="true"] > div:first-of-type {
+  overflow: hidden;
+  border-radius: var(--gantt-bar-radius);
+  box-shadow:
+    0 var(--gantt-bar-lift-y) calc(var(--gantt-bar-lift-y) * 2 + 1px)
+      rgb(0 0 0 / calc(var(--gantt-bar-lift-alpha) + 0.06)),
+    inset 0 0 0 1px rgb(0 0 0 / 0.1),
+    inset 0 1px 0 var(--gantt-bar-inset-highlight);
+}
+
+.dark .gantt[data-gantt-group-rows="pill"] [data-gantt-summary="true"] > div:first-of-type {
+  box-shadow:
+    0 var(--gantt-bar-lift-y) calc(var(--gantt-bar-lift-y) * 2 + 1px)
+      rgb(0 0 0 / calc(var(--gantt-bar-lift-alpha) + 0.1)),
+    inset 0 0 0 1px rgb(255 255 255 / 0.14),
+    inset 0 1px 0 var(--gantt-bar-inset-highlight);
+}
+
+.gantt[data-gantt-group-rows="pill"] [data-gantt-summary="true"] svg[aria-hidden="true"] {
+  transform: scaleY(calc(1 / var(--gantt-group-rail-ratio)));
+  transform-origin: top center;
+}
+
+/*
+ * ── Bar drag grips ─────────────────────────────────────────────────────
+ *
+ * Mirror nqui hit-area: center a larger zone on the bar edge, fill it with
+ * the 1st child, keep the thumb visual-only.
+ *
+ * Published @nqlib/nqgantt: listeners on the 1st child → make outer inert so
+ * col-resize chrome never eats the grab.
+ * Local sibling (USE_LOCAL_NQGANTT): listeners on outer + 1st child has
+ * pointer-events-none → leave outer active.
+ */
+.gantt .group\/resize {
+  width: 2.25rem; /* ~36px — hit-area boundary around the thumb */
+  cursor: col-resize;
+}
+
+/*
+ * Published only (1st child still receives hits): inert outer so col-resize
+ * chrome never eats the grab. Local sibling marks the spacer
+ * `.pointer-events-none` — these rules intentionally do not match then.
+ */
+.gantt .group\/resize:has(> div:first-child:not(.pointer-events-none)) {
+  pointer-events: none;
+}
+
+.gantt .group\/resize:has(> div:first-child:not(.pointer-events-none)) > div:first-child {
+  pointer-events: auto;
+}
+
+/* Center the hit zone on the bar edge (package -left/-right-2.5 assumed 24px) */
+.gantt .group\/resize[class*="-left-2.5"] {
+  left: 0 !important;
+  right: auto !important;
+  transform: none !important; /* drop Tailwind -translate-y-1/2 */
+  translate: -50% -50%;
+}
+
+.gantt .group\/resize[class*="-right-2.5"] {
+  right: 0 !important;
+  left: auto !important;
+  transform: none !important;
+  translate: 50% -50%;
+}
+
+.gantt .group\/resize > div:first-child {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  transform: none !important;
+  cursor: col-resize;
+}
+
+/* Visual thumb only — never intercept the strip underneath */
+.gantt .group\/resize > div:nth-child(2) {
+  pointer-events: none;
+  left: 50% !important;
+  right: auto !important;
+  translate: -50% -50%;
+  height: 70%;
+  width: 4px;
+  background-color: color-mix(in oklch, var(--foreground) 55%, transparent);
+}
+
+.gantt .group\/resize:hover > div:nth-child(2) {
+  background-color: color-mix(in oklch, var(--foreground) 78%, transparent);
+}
+
 /* Task name + meta inside bar pills — tight contrast, no bloom */
 .gantt .gantt-bar-inline-text {
   text-shadow: var(--gantt-bar-inline-label-shadow);
+}
+
+/*
+ * ── Picker swatch ──────────────────────────────────────────────────────
+ *
+ * A 56×12 specimen built from the same declarations as a real bar, so the menu
+ * can't drift from the timeline: change a style block above and every swatch
+ * moves with it. The accent is fixed (chart series 1) so the five looks are
+ * compared on chrome, not hue.
+ */
+.gantt-bar-swatch {
+  --gantt-bar-accent: var(--chart-1);
+  position: relative;
+  display: block;
+  flex: none;
+  width: 3.5rem;
+  height: 0.75rem;
+  margin-top: 0.125rem;
+  overflow: hidden;
+  border-radius: min(var(--gantt-bar-radius), 0.375rem);
+  background-color: color-mix(
+    in srgb,
+    var(--gantt-bar-accent) calc(var(--gantt-bar-track-tint) * 1%),
+    var(--gantt-bar-track-base)
+  );
+  box-shadow:
+    0 var(--gantt-bar-lift-y) calc(var(--gantt-bar-lift-y) * 2)
+      rgb(0 0 0 / var(--gantt-bar-lift-alpha)),
+    0 0 0 1px color-mix(in srgb, var(--gantt-bar-accent) var(--gantt-bar-ring-mix), transparent),
+    inset 0 1px 0 var(--gantt-bar-inset-highlight);
+}
+
+.gantt-bar-swatch::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    to bottom,
+    var(--gantt-bar-sheen),
+    transparent var(--gantt-bar-sheen-stop)
+  );
+}
+
+.gantt-bar-swatch__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 62%;
+  border-radius: inherit;
+  background: linear-gradient(
+    to right,
+    color-mix(
+      in srgb,
+      color-mix(
+        in srgb,
+        var(--gantt-bar-accent) calc(var(--gantt-bar-done-tint) * 1%),
+        var(--gantt-bar-done-base)
+      ) var(--gantt-bar-done-alpha),
+      transparent
+    ) calc(100% - var(--gantt-bar-feather-px) * 1px),
+    transparent
+  );
+}
+
+/*
+ * ── Row hover ──────────────────────────────────────────────────────────
+ *
+ * One band across both halves of the split, driven by
+ * `use-gantt-row-hover.ts`. The sidebar half could be pure CSS (the package
+ * already ships `hover:bg-muted/40` there) but it is restated here so both
+ * sides light at the same weight from either direction — a highlight that
+ * stops at the divider is worse than none, because it tells you the two
+ * columns are separate things.
+ *
+ * The timeline half is a `::before` rather than a background: those body rows
+ * are zero-width anchors for absolutely positioned bars, so there is no box to
+ * paint. It carries no z-index, which puts it under the bars (they sit at
+ * `--z-content`) and over the grid.
+ */
+.gantt {
+  --gantt-row-hover: color-mix(in oklch, var(--muted) 45%, transparent);
+}
+
+.dark .gantt {
+  --gantt-row-hover: color-mix(in oklch, var(--muted) 55%, transparent);
+}
+
+.gantt [data-gantt-sidebar-row][data-gantt-row-hover] {
+  background-color: var(--gantt-row-hover);
+}
+
+.gantt [data-focus-id][data-gantt-row-hover]::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: var(--gantt-timeline-width, 100%);
+  background-color: var(--gantt-row-hover);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .gantt [data-gantt-sidebar-row],
+  .gantt [data-focus-id]::before {
+    transition: background-color 100ms var(--ease-out);
+  }
+}
+
+/*
+ * ── Scrollbars ─────────────────────────────────────────────────────────
+ *
+ * The gantt canvas scrolls natively: `.gantt` is both the scrollport *and*
+ * the grid that hosts the `position: sticky` header, corner and sidebar, and
+ * every scroll consumer (pin signal, scroll-to-today, virtualisation) reads
+ * `scrollLeft` straight off it. Radix's ScrollArea moves scrolling into an
+ * inner viewport — which is why this skins the native bars to nqui's
+ * ScrollBar instead of wrapping them: same 6px rounded `border/80` thumb,
+ * same hover, no sticky to lose.
+ */
+.gantt {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--border) 80%, transparent) transparent;
+}
+
+.gantt::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.gantt::-webkit-scrollbar-track,
+.gantt::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+.gantt::-webkit-scrollbar-thumb {
+  /* 2px transparent inset clipped to the padding box = a 6px thumb in a
+     10px lane, matching ScrollBar's `p-px` inside `w-2`. */
+  background-color: color-mix(in oklch, var(--border) 80%, transparent);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  border-radius: 9999px;
+  min-height: 2rem;
+  min-width: 2rem;
+}
+
+.gantt::-webkit-scrollbar-thumb:hover {
+  background-color: var(--border);
 }
 
 /*
@@ -214,7 +766,7 @@
   position: absolute;
   inset-block: 0;
   right: 0;
-  width: 1px;
+  width: 2px;
   background-color: color-mix(in oklch, var(--border) 55%, transparent);
   pointer-events: none;
   /* Above group bands / header cells inside the panel; below modal chrome */
@@ -232,49 +784,96 @@
   transition: box-shadow 150ms ease-out;
 }
 
+/*
+ * Resize handle — package mounts it only on the sidebar BODY cell
+ * (`data-roadmap-ui="gantt-sidebar"`), not the sticky header corner. Header
+ * sits at `--z-floating` + `isolate`, so this handle can never paint through
+ * the header; it starts at the body top (just under the header row). Pin the
+ * grip near that top edge so it isn’t lost at 50% of a tall task list.
+ */
 .gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"] {
-  width: 1px;
-  background-color: transparent;
-  /* Above the hairline so the grip/hit target stays usable */
-  z-index: calc(var(--z-floating) + 1);
-  transition: background-color 150ms ease-out, width 150ms ease-out;
+  width: 2px;
+  background-color: color-mix(in oklch, var(--border) 35%, transparent);
+  /* Above sidebar rows / group bands; still under the header stacking context */
+  z-index: calc(var(--z-floating) + 5);
+  transition: background-color 150ms ease-out, box-shadow 150ms ease-out;
 }
 
+/*
+ * Hit target — wider grab lane centred on the hairline.
+ */
+.gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]::before {
+  left: -14px;
+  width: 30px;
+}
+
+/* Grip — thicker thumb, parked just under the sticky header */
 .gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]::after {
   content: "";
   position: absolute;
-  top: 50%;
+  top: 1.25rem;
   left: 50%;
-  translate: -50% -50%;
-  width: 3px;
-  height: 24px;
+  width: 5px;
+  height: 40px;
   border-radius: 9999px;
-  background-color: color-mix(in oklch, var(--foreground) 40%, transparent);
-  opacity: 0;
+  background-color: color-mix(in oklch, var(--foreground) 45%, transparent);
+  opacity: 0.45;
+  transform: translateX(-50%) scale(0.92);
   transition:
-    opacity 150ms ease-out,
-    height 150ms ease-out,
-    background-color 150ms ease-out;
+    opacity 150ms var(--ease-out),
+    background-color 150ms var(--ease-out),
+    transform 150ms var(--ease-out);
 }
 
 .gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]:hover,
 .gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]:focus-visible {
-  background-color: color-mix(in oklch, var(--foreground) 22%, transparent);
+  background-color: color-mix(in oklch, var(--foreground) 28%, transparent);
 }
 
 .gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]:hover::after,
 .gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]:focus-visible::after {
   opacity: 1;
+  transform: translateX(-50%) scale(1);
 }
 
-.gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]:active {
-  width: 2px;
-  background-color: color-mix(in oklch, var(--primary) 80%, transparent);
-  box-shadow: 0 0 6px color-mix(in oklch, var(--primary) 40%, transparent);
+/*
+ * Keyboard focus is a held state, not a passing one — the thumb reads as
+ * "armed" (primary) so it's obvious the arrow keys now go here. The
+ * package gives the handle `tabIndex=0`; `use-gantt-sidebar-resize.ts` gives
+ * it the keys.
+ */
+.gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]:focus-visible {
+  outline: none;
+  background-color: color-mix(in oklch, var(--primary) 55%, transparent);
 }
 
-.gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]:active::after {
-  opacity: 1;
-  height: 32px;
+.gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]:focus-visible::after {
+  width: 6px;
+  height: 44px;
   background-color: var(--primary);
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+.gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]:active,
+.gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"][data-gantt-resizing] {
+  background-color: color-mix(in oklch, var(--primary) 80%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--primary) 80%, transparent),
+    0 0 8px color-mix(in oklch, var(--primary) 40%, transparent);
+}
+
+.gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]:active::after,
+.gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"][data-gantt-resizing]::after {
+  opacity: 1;
+  width: 6px;
+  height: 48px;
+  background-color: var(--primary);
+  transform: translateX(-50%) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]::after {
+    transition: opacity 150ms var(--ease-out);
+  }
 }
