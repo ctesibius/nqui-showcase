@@ -661,6 +661,86 @@
 }
 
 /*
+ * ── Resize gesture ─────────────────────────────────────────────────────
+ *
+ * A resize is not a size change, it is a commitment change: "this now ends two
+ * days later." The gesture currently says nothing about that. It doesn't say
+ * which end is pinned while you pull, and the moment you let go the thing you
+ * just did stops existing — there is only the result.
+ *
+ * Three beats, smallest first:
+ *
+ *   GRAB    the seized port takes the accent and stops hiding; the OPPOSITE
+ *           edge marks itself as the anchor. You are told what is moving and
+ *           what is not, which is information the UI otherwise withholds.
+ *   DRAG    the package's own dashed preview carries this beat. Nothing added
+ *           — a second moving thing during a drag is noise.
+ *   DROP    see `--gantt-delta-*` below. The focal moment.
+ *
+ * Under `prefers-reduced-motion` the anchor still appears (it is information,
+ * not decoration) and simply doesn't fade in.
+ */
+.gantt [data-gantt-bar-hit]:has(.group\/resize[aria-pressed="true"]) {
+  --gantt-anchor: color-mix(in oklch, var(--gantt-bar-accent, var(--primary)) 85%, transparent);
+}
+
+/* The port you grabbed: full accent, held open, slightly taller. */
+.gantt .group\/resize[aria-pressed="true"] > div:nth-child(2) {
+  opacity: 1;
+  height: 86%;
+  width: 4px;
+  background-color: var(--gantt-anchor, var(--primary));
+}
+
+/*
+ * The anchor: a hairline down the edge that ISN'T moving. Drawn on the idle
+ * port rather than the bar so it sits exactly on the pivot, and inset-block-0
+ * so it reads as a pin through the row, not a second grip.
+ */
+.gantt
+  [data-gantt-bar-hit]:has(.group\/resize[aria-pressed="true"])
+  .group\/resize:not([aria-pressed="true"])::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  width: 2px;
+  border-radius: 9999px;
+  background-color: var(--gantt-anchor);
+  animation: gantt-anchor-in 140ms var(--ease-out) both;
+}
+
+.gantt
+  [data-gantt-bar-hit]:has(.group\/resize[class*="-left-2.5"][aria-pressed="true"])
+  .group\/resize[class*="-right-2.5"]::after {
+  right: 10px;
+}
+
+.gantt
+  [data-gantt-bar-hit]:has(.group\/resize[class*="-right-2.5"][aria-pressed="true"])
+  .group\/resize[class*="-left-2.5"]::after {
+  left: 10px;
+}
+
+@keyframes gantt-anchor-in {
+  from {
+    opacity: 0;
+    scale: 1 0.4;
+  }
+  to {
+    opacity: 1;
+    scale: 1 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gantt
+    [data-gantt-bar-hit]:has(.group\/resize[aria-pressed="true"])
+    .group\/resize:not([aria-pressed="true"])::after {
+    animation: none;
+  }
+}
+
+/*
  * ── Row hover ──────────────────────────────────────────────────────────
  *
  * One band across both halves of the split, driven by
@@ -875,5 +955,98 @@
 @media (prefers-reduced-motion: reduce) {
   .gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]::after {
     transition: opacity 150ms var(--ease-out);
+  }
+}
+
+/*
+ * Resize delta — the drop beat (see ../../../nqgantt/packages/nqgantt/src/components/pm/gantt/gantt-resize-delta.ts).
+ * Mirrored from the package theme, which this showcase does not import —
+ * `src/index.css` only @sources the package JS for Tailwind, so package CSS
+ * additions are invisible here until copied across (pnpm nqgantt:sync-lib).
+ *
+ * The span of time a resize just added or gave back, drawn for a beat and then
+ * erased. It is the content of the edit: without it a commit leaves only a bar
+ * that is a different width now, and the user infers what changed.
+ *
+ * Growing wipes outward from the old edge; shrinking retreats toward it, so the
+ * motion runs against the drag and the two outcomes never read alike. Painted
+ * in the bar's own accent at low alpha — this is the same task, not a new
+ * object. clip-path + opacity only: no layout, and nothing touches the bar.
+ */
+.gantt [data-gantt-resize-delta] {
+  position: absolute;
+  inset-block: 25%;
+  z-index: var(--z-content);
+  pointer-events: none;
+  border-radius: 2px;
+  background-color: color-mix(
+    in oklch,
+    var(--gantt-bar-accent, var(--primary)) 30%,
+    transparent
+  );
+  animation: gantt-delta-grew 260ms var(--ease-out) both;
+}
+
+.gantt [data-gantt-resize-delta="shrank"] {
+  animation-name: gantt-delta-shrank;
+  background-color: color-mix(
+    in oklch,
+    var(--muted-foreground) 26%,
+    transparent
+  );
+}
+
+/* Wipe in from the old edge, hold, then let go. */
+@keyframes gantt-delta-grew {
+  0% {
+    clip-path: inset(0 100% 0 0);
+    opacity: 1;
+  }
+  35% {
+    clip-path: inset(0);
+    opacity: 1;
+  }
+  100% {
+    clip-path: inset(0);
+    opacity: 0;
+  }
+}
+
+/* Retreat toward the old edge — the reverse gesture, not a reverse fade. */
+@keyframes gantt-delta-shrank {
+  0% {
+    clip-path: inset(0);
+    opacity: 1;
+  }
+  100% {
+    clip-path: inset(0 0 0 100%);
+    opacity: 0;
+  }
+}
+
+/* A start-edge resize mirrors the wipe: there, "outward" is leftward. */
+.gantt [data-gantt-resize-delta="grew"][data-gantt-delta-from="right"] {
+  animation-name: gantt-delta-grew-rtl;
+}
+
+@keyframes gantt-delta-grew-rtl {
+  0% {
+    clip-path: inset(0 0 0 100%);
+    opacity: 1;
+  }
+  35% {
+    clip-path: inset(0);
+    opacity: 1;
+  }
+  100% {
+    clip-path: inset(0);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gantt [data-gantt-resize-delta] {
+    animation: none;
+    display: none;
   }
 }

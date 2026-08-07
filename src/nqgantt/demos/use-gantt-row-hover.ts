@@ -62,13 +62,28 @@ export function useGanttRowHover(rootRef: RefObject<HTMLElement | null>) {
         )
       }
 
-      // The twin on the far side of the split: the row whose band contains
-      // this one's centre line.
+      // Prefer the id: nqgantt puts the same `data-focus-id` on both halves of
+      // a row, so the twin is a lookup rather than a search.
+      const id = row.getAttribute("data-focus-id")
+      if (id) {
+        for (const twin of gantt.querySelectorAll(`[data-focus-id="${CSS.escape(id)}"]`)) {
+          if (twin !== row) mark(twin)
+        }
+        return
+      }
+
+      // Group bands carry no focus id, so they still pair geometrically: the
+      // row on the far side whose band contains this one's centre line. Note
+      // the `:not([data-gantt-sidebar-row])` — sidebar rows now carry a focus
+      // id too, and without it a sidebar row matches its own twin selector and
+      // the timeline half is never reached.
       const inSidebar = row.hasAttribute("data-gantt-sidebar-row")
       const box = row.getBoundingClientRect()
       const centre = box.top + box.height / 2
       const others = gantt.querySelectorAll(
-        inSidebar ? "[data-focus-id]" : "[data-gantt-sidebar-row]",
+        inSidebar
+          ? "[data-focus-id]:not([data-gantt-sidebar-row])"
+          : "[data-gantt-sidebar-row]",
       )
       for (const other of others) {
         const r = other.getBoundingClientRect()
