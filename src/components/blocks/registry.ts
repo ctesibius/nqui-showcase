@@ -65,6 +65,9 @@ const report = (name: keyof typeof import("./blocks-report")) =>
 const grid = (name: keyof typeof import("./blocks-grid")) =>
   lazy(() => import("./blocks-grid").then((m) => ({ default: m[name] as ComponentType })));
 
+const timeline = (name: keyof typeof import("./blocks-timeline")) =>
+  lazy(() => import("./blocks-timeline").then((m) => ({ default: m[name] as ComponentType })));
+
 export const BLOCKS: Block[] = [
   {
     id: "sales-ledger",
@@ -72,16 +75,26 @@ export const BLOCKS: Block[] = [
     blurb: "Full-bleed ink report — pivot, trend, and a real campaign timeline.",
     lib: "report",
     libs: ["report", "nqgrid", "nqchart", "nqgantt"],
-    bom: ["computePivot", "NQAreaChart", "NQBarChart", "NQSparklineChart", "GanttRoot"],
+    bom: ["computePivot", "NQAreaChart", "NQBarChart", "NQSparklineChart", "GanttRoot", "DropdownMenu", "Button"],
     stage: "report",
     Render: report("SalesLedgerBlock"),
+  },
+  {
+    id: "timeline-lab",
+    name: "Timeline lab",
+    blurb:
+      "A grouped plan you can re-skin live — five bar looks, bracket, rail or pill rollups, and a divider that answers the arrow keys.",
+    lib: "nqgantt",
+    bom: ["GanttRoot", "DropdownMenu", "Button", "Slider", "--gantt-bar-* tokens"],
+    stage: "gantt",
+    Render: timeline("TimelineLabBlock"),
   },
   {
     id: "initiatives",
     name: "Initiatives tree",
     blurb: "Hierarchical rollup — health, project counts, and expandable rows.",
     lib: "nqgrid",
-    bom: ["useReactTable", "getExpandedRowModel", "getSubRows", "ToggleGroup"],
+    bom: ["ScrollArea", "useReactTable", "getExpandedRowModel", "getSubRows", "ToggleGroup"],
     stage: "table",
     wide: true,
     Render: grid("InitiativesBlock"),
@@ -91,7 +104,7 @@ export const BLOCKS: Block[] = [
     name: "Work breakdown",
     blurb: "Drag rows across phases (WBS renumbers) or reorder columns — pinned + resizable headers, shift-click ranges, inline status/priority/date edits.",
     lib: "nqgrid",
-    bom: ["Sortable", "useSortableTableDropIndicators", "sortableDropTargetProps", "Calendar", "AvatarStack"],
+    bom: ["ScrollArea", "DropdownMenu", "Button", "Sortable", "useSortableTableDropIndicators", "sortableDropTargetProps", "Calendar", "AvatarStack"],
     stage: "table",
     wide: true,
     Render: grid("WorkBreakdownBlock"),

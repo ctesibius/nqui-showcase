@@ -1,7 +1,7 @@
 /**
  * Timeline view — GanttRoot over the shared work-management task set.
  */
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GanttRoot } from "@nqlib/nqgantt/ui";
 import type { GanttDependency, GanttFeature } from "@nqlib/nqgantt";
 import { cn } from "@nqlib/nqui";
@@ -13,12 +13,14 @@ import { useGanttPinScrollSignal } from "./use-gantt-pin-scroll-signal";
 
 export function RoadmapGantt({
   className,
-  tasks = TASKS,
+  tasks: tasksProp,
   onTasksChange,
   grouped = true,
   groupsOverride,
   showCriticalPath = false,
   colorBy = "status",
+  density = "compact",
+  defaultRange = "weekly",
   debugProbe = false,
 }: {
   className?: string;
@@ -30,8 +32,26 @@ export function RoadmapGantt({
   groupsOverride?: GanttRootGroup[];
   showCriticalPath?: boolean;
   colorBy?: "status" | "assignee" | "phase" | "health";
+  /**
+   * Row height ladder. Both this and `defaultRange` are read once by the
+   * package when the provider mounts, so a caller changing them at runtime
+   * must remount (see the gantt lab's `key`).
+   */
+  density?: "compact" | "default" | "comfortable";
+  defaultRange?: "daily" | "weekly" | "monthly" | "quarterly";
   debugProbe?: boolean;
 }) {
+  // Controlled only when the parent owns both value + setter. Passing `tasks`
+  // alone (gantt lab fixtures) seeds writable internal state — otherwise
+  // drag/resize commits are dropped and edges snap back on release.
+  const controlled = tasksProp !== undefined && onTasksChange !== undefined;
+  const [internalTasks, setInternalTasks] = useState(() => tasksProp ?? TASKS);
+  useEffect(() => {
+    if (!controlled && tasksProp !== undefined) setInternalTasks(tasksProp);
+  }, [controlled, tasksProp]);
+  const tasks = controlled ? tasksProp : internalTasks;
+  const commitTasks = controlled ? onTasksChange : setInternalTasks;
+
   const ganttData = useMemo(() => tasksToGanttRootData(tasks), [tasks]);
   const groups = useMemo(
     () =>
@@ -42,14 +62,14 @@ export function RoadmapGantt({
 
   const onFeatureMove = useCallback(
     (id: string, startAt: Date, endAt: Date | null) => {
-      if (!endAt || !onTasksChange) return;
+      if (!endAt || !commitTasks) return;
       // Atomic write to the timeline column (the SSOT) — same seam the grid reads.
       const raw = intervalToRangeRaw(startAt, endAt);
-      onTasksChange(
+      commitTasks(
         tasks.map((t) => (t.id === id ? setTaskValue(t, "timeline", raw) : t)),
       );
     },
-    [tasks, onTasksChange],
+    [tasks, commitTasks],
   );
 
   const onDependenciesChange = useCallback((deps: GanttDependency[]) => {
@@ -76,8 +96,8 @@ export function RoadmapGantt({
         className="min-h-0 flex-1"
         data={ganttData}
         groups={groups}
-        density="compact"
-        defaultRange="weekly"
+        density={density}
+        defaultRange={defaultRange}
         defaultZoom={100}
         colorBy={colorBy}
         showAssignees
