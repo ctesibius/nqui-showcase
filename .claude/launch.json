@@ -16,6 +16,13 @@
       "autoPort": true
     },
     {
+      "name": "showcase-local-charts",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev:local:charts"],
+      "port": 5174,
+      "autoPort": true
+    },
+    {
       "name": "showcase-preview-dist",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["preview"],

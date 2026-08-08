@@ -8,7 +8,7 @@ import {
 import { pageTitle, pagesInSameLibrary } from "@/lib/docs-nav";
 
 /**
- * Phone/tablet docs page strip — replaces the left tree below `xl`.
+ * Phone/tablet docs page strip — replaces the left tree below the `sidebar` breakpoint (940px).
  * Horizontal swipe / scroll through pages in the active library.
  */
 export function DocsMobileNav({ pageUrl }: { pageUrl: string }) {
@@ -26,7 +26,7 @@ export function DocsMobileNav({ pageUrl }: { pageUrl: string }) {
   if (pages.length <= 1) return null;
 
   return (
-    <div className="mb-6 xl:hidden">
+    <div className="mb-6 sidebar:hidden">
       <p className="mb-2 font-mono text-[0.625rem] font-medium uppercase tracking-[0.16em] text-muted-foreground">
         In this library
       </p>

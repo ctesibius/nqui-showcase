@@ -5,6 +5,11 @@
 @custom-variant dark (&:is(.dark *));
 @custom-variant mid (&:where(.mid, .mid *));
 
+/* Docs left nav — match nqchart/becocharts (~940px), earlier than default `xl`. */
+@theme {
+  --breakpoint-sidebar: 940px;
+}
+
 @import "@nqlib/nqui/styles";
 /* nqgantt overrides are imported from main.tsx, not here: as its own module
    Vite serves them as a separate dev stylesheet, which /gantt-lab's "Bare

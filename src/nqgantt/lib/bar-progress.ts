@@ -15,7 +15,7 @@ export function getSummaryBracketOpacity(progress: number | null): number {
 
 // Fallbacks when `.gantt` theme tokens are absent (unit tests, Storybook).
 const FALLBACK_TRACK_TINT = 30
-const FALLBACK_DONE_TINT = 84
+const FALLBACK_DONE_TINT = 58
 const FALLBACK_HOVER_TINT = 36
 
 const PILL_RING_TINT = 60

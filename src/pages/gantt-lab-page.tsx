@@ -101,15 +101,24 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
  * it answers the only question that matters after an upstream change: does
  * `@nqlib/nqgantt` do this by itself?
  */
-function BareGantt({ tasks, range, density, grouped, critical, className }: LabGanttProps) {
+function BareGantt({
+  tasks,
+  range,
+  density,
+  grouped,
+  critical,
+  autoSchedule,
+  className,
+}: LabGanttProps) {
   return (
     <div className={cn("min-h-0 flex-1", className)}>
       <RoadmapGantt
-        key={`bare:${range}:${density}:${grouped}:${critical}:${tasks.length}`}
+        key={`bare:${range}:${density}:${grouped}:${critical}:${autoSchedule}:${tasks.length}`}
         className="h-full"
         tasks={tasks}
         grouped={grouped}
         showCriticalPath={critical}
+        autoSchedule={autoSchedule}
         colorBy="status"
         density={density}
         defaultRange={range}
@@ -125,6 +134,7 @@ interface LabGanttProps {
   density: GanttDensity
   grouped: boolean
   critical: boolean
+  autoSchedule: boolean
   className?: string
 }
 
@@ -136,6 +146,7 @@ function LabGantt({
   density,
   grouped,
   critical,
+  autoSchedule,
   className,
 }: LabGanttProps) {
   const stageRef = useRef<HTMLDivElement>(null)
@@ -149,11 +160,12 @@ function LabGantt({
       <RoadmapGantt
         // Range and density are constructor-time defaults in the package, so
         // the key forces a fresh instance rather than a stale toolbar.
-        key={`${range}:${density}:${grouped}:${critical}:${tasks.length}`}
+        key={`${range}:${density}:${grouped}:${critical}:${autoSchedule}:${tasks.length}`}
         className="h-full"
         tasks={tasks}
         grouped={grouped}
         showCriticalPath={critical}
+        autoSchedule={autoSchedule}
         colorBy="status"
         density={density}
         defaultRange={range}
@@ -169,6 +181,7 @@ export function GanttLabPage() {
   const [density, setDensity] = useState<GanttDensity>("compact")
   const [grouped, setGrouped] = useState(true)
   const [critical, setCritical] = useState(false)
+  const [autoSchedule, setAutoSchedule] = useState(true)
   const [matrix, setMatrix] = useState(false)
   const [bare, setBare] = useState(false)
   const tasks = useFixture(fixture)
@@ -269,6 +282,13 @@ export function GanttLabPage() {
             <Switch checked={critical} onCheckedChange={setCritical} />
             Critical path
           </label>
+          <label
+            className="flex items-center gap-2 text-xs"
+            title="Moving a bar shifts successors using each edge’s FS/SS/FF/SF + lag"
+          >
+            <Switch checked={autoSchedule} onCheckedChange={setAutoSchedule} />
+            Auto-schedule
+          </label>
           <label className="flex items-center gap-2 text-xs">
             <Switch checked={matrix} onCheckedChange={setMatrix} />
             Style matrix
@@ -320,6 +340,7 @@ export function GanttLabPage() {
                     density={density}
                     grouped={grouped}
                     critical={critical}
+                    autoSchedule={autoSchedule}
                   />
                 ) : (
                   <LabGantt
@@ -329,6 +350,7 @@ export function GanttLabPage() {
                     density={density}
                     grouped={grouped}
                     critical={critical}
+                    autoSchedule={autoSchedule}
                   />
                 )}
               </section>
@@ -345,6 +367,7 @@ export function GanttLabPage() {
               density={density}
               grouped={grouped}
               critical={critical}
+              autoSchedule={autoSchedule}
               className="rounded-md border border-border"
             />
           ) : (
@@ -355,6 +378,7 @@ export function GanttLabPage() {
               density={density}
               grouped={grouped}
               critical={critical}
+              autoSchedule={autoSchedule}
               className="rounded-md border border-border"
             />
           )}

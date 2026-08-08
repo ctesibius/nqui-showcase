@@ -6,7 +6,20 @@ import { NQSparklineChart, Fill, Sparkline, Tooltip as SparkTooltip } from "@nql
 import { computePivot, type PivotConfig } from "@nqlib/nqgrid";
 import { GanttRoot } from "@nqlib/nqgantt/ui";
 import { getDefaultColumnDefs, toGanttData, type PMDataInput } from "@nqlib/nqgantt";
-import { cn, ScrollArea } from "@nqlib/nqui";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  cn,
+  ScrollArea,
+} from "@nqlib/nqui";
 import { useGanttPinScrollSignal } from "@/nqgantt/demos/use-gantt-pin-scroll-signal";
 
 /*
@@ -405,223 +418,172 @@ function TopItems() {
   );
 }
 
+const CAMPAIGN_LANES = ["Merchandising", "Media & Creative", "Ops & Logistics"] as const;
+type CampaignLane = (typeof CAMPAIGN_LANES)[number];
+type CampaignStatus = "done" | "in_progress" | "review" | "blocked" | "todo";
+
+type CampaignRow = {
+  id: string;
+  name: string;
+  startAt: string;
+  endAt: string;
+  status: CampaignStatus;
+  progress: number;
+  lane: CampaignLane;
+  isMilestone?: boolean;
+};
+
+const CAMPAIGN_STATUSES: { id: CampaignStatus; name: string; color: string }[] = [
+  { id: "done", name: "Done", color: "oklch(0.52 0.12 155)" },
+  { id: "in_progress", name: "Active", color: "oklch(0.52 0.12 250)" },
+  { id: "review", name: "In review", color: "oklch(0.55 0.14 300)" },
+  { id: "blocked", name: "Blocked", color: "oklch(0.55 0.12 45)" },
+  { id: "todo", name: "Planned", color: "oklch(0.62 0.03 250)" },
+];
+
+const CAMPAIGN_ROWS: CampaignRow[] = [
+  { id: "m1", name: "Assortment freeze", startAt: "2026-02-02", endAt: "2026-02-20", status: "done", progress: 100, lane: "Merchandising" },
+  { id: "m2", name: "Spring catalog drop", startAt: "2026-02-16", endAt: "2026-03-15", status: "done", progress: 100, lane: "Merchandising" },
+  { id: "m3", name: "Electronics promo window", startAt: "2026-03-01", endAt: "2026-04-18", status: "done", progress: 100, lane: "Merchandising" },
+  { id: "m4", name: "Back-to-school buy", startAt: "2026-06-08", endAt: "2026-07-30", status: "in_progress", progress: 58, lane: "Merchandising" },
+  { id: "m5", name: "Holiday SKU lock", startAt: "2026-08-10", endAt: "2026-08-10", status: "todo", progress: 0, lane: "Merchandising", isMilestone: true },
+  { id: "m6", name: "Year-end clearance set", startAt: "2026-10-20", endAt: "2026-12-22", status: "todo", progress: 0, lane: "Merchandising" },
+  { id: "c1", name: "Brand film shoot", startAt: "2026-02-10", endAt: "2026-03-05", status: "done", progress: 100, lane: "Media & Creative" },
+  { id: "c2", name: "Paid social flight A", startAt: "2026-03-10", endAt: "2026-04-25", status: "done", progress: 100, lane: "Media & Creative" },
+  { id: "c3", name: "Catalog page proofs", startAt: "2026-06-01", endAt: "2026-07-12", status: "review", progress: 82, lane: "Media & Creative" },
+  { id: "c4", name: "Holiday creative package", startAt: "2026-08-18", endAt: "2026-10-02", status: "todo", progress: 8, lane: "Media & Creative" },
+  { id: "c5", name: "Black Friday go-live", startAt: "2026-11-27", endAt: "2026-11-27", status: "todo", progress: 0, lane: "Media & Creative", isMilestone: true },
+  { id: "o1", name: "DC capacity plan", startAt: "2026-02-01", endAt: "2026-02-28", status: "done", progress: 100, lane: "Ops & Logistics" },
+  { id: "o2", name: "Inbound ocean booking", startAt: "2026-04-06", endAt: "2026-06-12", status: "in_progress", progress: 64, lane: "Ops & Logistics" },
+  { id: "o3", name: "Carrier rate renegotiation", startAt: "2026-05-18", endAt: "2026-07-03", status: "blocked", progress: 35, lane: "Ops & Logistics" },
+  { id: "o4", name: "Peak staffing roster", startAt: "2026-08-24", endAt: "2026-10-15", status: "todo", progress: 5, lane: "Ops & Logistics" },
+  { id: "o5", name: "Last inbound cut-off", startAt: "2026-10-08", endAt: "2026-10-08", status: "todo", progress: 0, lane: "Ops & Logistics", isMilestone: true },
+  { id: "o6", name: "Returns surge window", startAt: "2026-12-01", endAt: "2026-12-28", status: "todo", progress: 0, lane: "Ops & Logistics" },
+];
+
+const CAMPAIGN_DEPS = [
+  { fromId: "m1", toId: "m2", type: "FS" as const },
+  { fromId: "m2", toId: "m3", type: "FS" as const },
+  { fromId: "m4", toId: "m5", type: "FS" as const },
+  { fromId: "m5", toId: "m6", type: "FS" as const },
+  { fromId: "c1", toId: "c2", type: "FS" as const },
+  { fromId: "c3", toId: "c4", type: "FS" as const },
+  { fromId: "c4", toId: "c5", type: "FS" as const },
+  { fromId: "o1", toId: "o2", type: "FS" as const },
+  { fromId: "o2", toId: "o3", type: "SS" as const, lag: 14 },
+  { fromId: "o4", toId: "o5", type: "FS" as const },
+];
+
+type CampaignFilters = {
+  statuses: Set<CampaignStatus>;
+  lanes: Set<CampaignLane>;
+  milestonesOnly: boolean;
+  incompleteOnly: boolean;
+};
+
+type CampaignPreset = "all" | "active" | "blocked" | "planned" | "done" | "milestones" | "custom";
+
+function campaignFreshFilters(patch: Partial<CampaignFilters> = {}): CampaignFilters {
+  return {
+    statuses: new Set(patch.statuses ?? []),
+    lanes: new Set(patch.lanes ?? []),
+    milestonesOnly: patch.milestonesOnly ?? false,
+    incompleteOnly: patch.incompleteOnly ?? false,
+  };
+}
+
+function campaignFiltersActive(f: CampaignFilters): boolean {
+  return f.statuses.size > 0 || f.lanes.size > 0 || f.milestonesOnly || f.incompleteOnly;
+}
+
+function campaignFilterCount(f: CampaignFilters): number {
+  return f.statuses.size + f.lanes.size + (f.milestonesOnly ? 1 : 0) + (f.incompleteOnly ? 1 : 0);
+}
+
+function campaignPresetFrom(f: CampaignFilters): CampaignPreset {
+  if (!campaignFiltersActive(f)) return "all";
+  if (f.milestonesOnly && !f.incompleteOnly && f.statuses.size === 0 && f.lanes.size === 0) {
+    return "milestones";
+  }
+  if (!f.milestonesOnly && !f.incompleteOnly && f.lanes.size === 0 && f.statuses.size === 1) {
+    if (f.statuses.has("blocked")) return "blocked";
+    if (f.statuses.has("todo")) return "planned";
+    if (f.statuses.has("done")) return "done";
+  }
+  if (
+    !f.milestonesOnly &&
+    !f.incompleteOnly &&
+    f.lanes.size === 0 &&
+    f.statuses.size === 3 &&
+    f.statuses.has("in_progress") &&
+    f.statuses.has("review") &&
+    f.statuses.has("blocked")
+  ) {
+    return "active";
+  }
+  return "custom";
+}
+
+function campaignFiltersFromPreset(preset: CampaignPreset): CampaignFilters {
+  switch (preset) {
+    case "active":
+      return campaignFreshFilters({ statuses: new Set(["in_progress", "review", "blocked"]) });
+    case "blocked":
+      return campaignFreshFilters({ statuses: new Set(["blocked"]) });
+    case "planned":
+      return campaignFreshFilters({ statuses: new Set(["todo"]) });
+    case "done":
+      return campaignFreshFilters({ statuses: new Set(["done"]) });
+    case "milestones":
+      return campaignFreshFilters({ milestonesOnly: true });
+    default:
+      return campaignFreshFilters();
+  }
+}
+
+function toggleCampaignSet<T>(set: Set<T>, value: T, on: boolean): Set<T> {
+  const next = new Set(set);
+  if (on) next.add(value);
+  else next.delete(value);
+  return next;
+}
+
+function FilterGlyph() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+      <path d="M2.5 3.5h11L9.5 8.5v3.5L6.5 13.5V8.5L2.5 3.5Z" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function CampaignGantt() {
   const ganttPinRef = useRef<HTMLDivElement>(null);
   useGanttPinScrollSignal(ganttPinRef);
+  const [filters, setFilters] = useState<CampaignFilters>(() => campaignFreshFilters());
+
+  const filteredRows = useMemo(() => {
+    if (!campaignFiltersActive(filters)) return CAMPAIGN_ROWS;
+    return CAMPAIGN_ROWS.filter((r) => {
+      if (filters.statuses.size > 0 && !filters.statuses.has(r.status)) return false;
+      if (filters.lanes.size > 0 && !filters.lanes.has(r.lane)) return false;
+      if (filters.milestonesOnly && !r.isMilestone) return false;
+      if (filters.incompleteOnly && r.progress >= 100) return false;
+      return true;
+    });
+  }, [filters]);
 
   const { data, groups } = useMemo(() => {
-    // Retail campaign plan — three workstreams, mixed statuses, milestones.
-    // Groups are lanes (not status), so the sidebar reads like a real program board.
-    const LANES = ["Merchandising", "Media & Creative", "Ops & Logistics"] as const;
-    type Lane = (typeof LANES)[number];
-
-    // Status ink: green done, blue active, purple review, warm blocked, slate planned.
-    const statuses = [
-      { id: "done", name: "Done", color: "oklch(0.52 0.12 155)" },
-      { id: "in_progress", name: "Active", color: "oklch(0.52 0.12 250)" },
-      { id: "review", name: "In review", color: "oklch(0.55 0.14 300)" },
-      { id: "blocked", name: "Blocked", color: "oklch(0.55 0.12 45)" },
-      { id: "todo", name: "Planned", color: "oklch(0.62 0.03 250)" },
-    ];
-
-    type Row = {
-      id: string;
-      name: string;
-      startAt: string;
-      endAt: string;
-      status: string;
-      progress: number;
-      lane: Lane;
-      isMilestone?: boolean;
-    };
-
-    const rows: Row[] = [
-      // ── Merchandising ──────────────────────────────────────────────
-      {
-        id: "m1",
-        name: "Assortment freeze",
-        startAt: "2026-02-02",
-        endAt: "2026-02-20",
-        status: "done",
-        progress: 100,
-        lane: "Merchandising",
-      },
-      {
-        id: "m2",
-        name: "Spring catalog drop",
-        startAt: "2026-02-16",
-        endAt: "2026-03-15",
-        status: "done",
-        progress: 100,
-        lane: "Merchandising",
-      },
-      {
-        id: "m3",
-        name: "Electronics promo window",
-        startAt: "2026-03-01",
-        endAt: "2026-04-18",
-        status: "done",
-        progress: 100,
-        lane: "Merchandising",
-      },
-      {
-        id: "m4",
-        name: "Back-to-school buy",
-        startAt: "2026-06-08",
-        endAt: "2026-07-30",
-        status: "in_progress",
-        progress: 58,
-        lane: "Merchandising",
-      },
-      {
-        id: "m5",
-        name: "Holiday SKU lock",
-        startAt: "2026-08-10",
-        endAt: "2026-08-10",
-        status: "todo",
-        progress: 0,
-        lane: "Merchandising",
-        isMilestone: true,
-      },
-      {
-        id: "m6",
-        name: "Year-end clearance set",
-        startAt: "2026-10-20",
-        endAt: "2026-12-22",
-        status: "todo",
-        progress: 0,
-        lane: "Merchandising",
-      },
-
-      // ── Media & Creative ───────────────────────────────────────────
-      {
-        id: "c1",
-        name: "Brand film shoot",
-        startAt: "2026-02-10",
-        endAt: "2026-03-05",
-        status: "done",
-        progress: 100,
-        lane: "Media & Creative",
-      },
-      {
-        id: "c2",
-        name: "Paid social flight A",
-        startAt: "2026-03-10",
-        endAt: "2026-04-25",
-        status: "done",
-        progress: 100,
-        lane: "Media & Creative",
-      },
-      {
-        id: "c3",
-        name: "Catalog page proofs",
-        startAt: "2026-06-01",
-        endAt: "2026-07-12",
-        status: "review",
-        progress: 82,
-        lane: "Media & Creative",
-      },
-      {
-        id: "c4",
-        name: "Holiday creative package",
-        startAt: "2026-08-18",
-        endAt: "2026-10-02",
-        status: "todo",
-        progress: 8,
-        lane: "Media & Creative",
-      },
-      {
-        id: "c5",
-        name: "Black Friday go-live",
-        startAt: "2026-11-27",
-        endAt: "2026-11-27",
-        status: "todo",
-        progress: 0,
-        lane: "Media & Creative",
-        isMilestone: true,
-      },
-
-      // ── Ops & Logistics ────────────────────────────────────────────
-      {
-        id: "o1",
-        name: "DC capacity plan",
-        startAt: "2026-02-01",
-        endAt: "2026-02-28",
-        status: "done",
-        progress: 100,
-        lane: "Ops & Logistics",
-      },
-      {
-        id: "o2",
-        name: "Inbound ocean booking",
-        startAt: "2026-04-06",
-        endAt: "2026-06-12",
-        status: "in_progress",
-        progress: 64,
-        lane: "Ops & Logistics",
-      },
-      {
-        id: "o3",
-        name: "Carrier rate renegotiation",
-        startAt: "2026-05-18",
-        endAt: "2026-07-03",
-        status: "blocked",
-        progress: 35,
-        lane: "Ops & Logistics",
-      },
-      {
-        id: "o4",
-        name: "Peak staffing roster",
-        startAt: "2026-08-24",
-        endAt: "2026-10-15",
-        status: "todo",
-        progress: 5,
-        lane: "Ops & Logistics",
-      },
-      {
-        id: "o5",
-        name: "Last inbound cut-off",
-        startAt: "2026-10-08",
-        endAt: "2026-10-08",
-        status: "todo",
-        progress: 0,
-        lane: "Ops & Logistics",
-        isMilestone: true,
-      },
-      {
-        id: "o6",
-        name: "Returns surge window",
-        startAt: "2026-12-01",
-        endAt: "2026-12-28",
-        status: "todo",
-        progress: 0,
-        lane: "Ops & Logistics",
-      },
-    ];
-
-    const laneById = new Map(rows.map((r) => [r.id, r.lane]));
-    // Lane stripes: blue / purple / green — readable without rainbow charts.
-    const laneColor: Record<Lane, string> = {
+    const laneById = new Map(filteredRows.map((r) => [r.id, r.lane]));
+    const laneColor: Record<CampaignLane, string> = {
       Merchandising: "oklch(0.48 0.11 250)",
       "Media & Creative": "oklch(0.52 0.13 300)",
       "Ops & Logistics": "oklch(0.50 0.11 155)",
     };
-
+    const visible = new Set(filteredRows.map((r) => r.id));
     const input: PMDataInput = {
-      items: rows.map(({ lane, ...item }) => ({ ...item, lane })),
-      dependencies: [
-        { fromId: "m1", toId: "m2", type: "FS" },
-        { fromId: "m2", toId: "m3", type: "FS" },
-        { fromId: "m4", toId: "m5", type: "FS" },
-        { fromId: "m5", toId: "m6", type: "FS" },
-        { fromId: "c1", toId: "c2", type: "FS" },
-        { fromId: "c3", toId: "c4", type: "FS" },
-        { fromId: "c4", toId: "c5", type: "FS" },
-        { fromId: "o1", toId: "o2", type: "FS" },
-        { fromId: "o2", toId: "o3", type: "SS", lag: 14 },
-        { fromId: "o4", toId: "o5", type: "FS" },
-      ],
-      statuses,
+      items: filteredRows.map(({ lane, ...item }) => ({ ...item, lane })),
+      dependencies: CAMPAIGN_DEPS.filter((d) => visible.has(d.fromId) && visible.has(d.toId)),
+      statuses: CAMPAIGN_STATUSES,
       markers: [
         { id: "q2", date: "2026-04-01", label: "Q2 open" },
         { id: "bts", date: "2026-08-10", label: "BTS lock" },
@@ -632,7 +594,7 @@ function CampaignGantt() {
     const { data: gantt } = toGanttData(input);
     const data = {
       features: gantt.features,
-      statuses,
+      statuses: CAMPAIGN_STATUSES,
       dependencies: gantt.dependencies,
       columnDefs: getDefaultColumnDefs(),
       markers: [
@@ -647,37 +609,183 @@ function CampaignGantt() {
       ],
     };
 
-    const buckets = new Map<Lane, typeof gantt.features>();
-    for (const lane of LANES) buckets.set(lane, []);
+    const buckets = new Map<CampaignLane, typeof gantt.features>();
+    for (const lane of CAMPAIGN_LANES) buckets.set(lane, []);
     for (const feature of gantt.features) {
       const lane = laneById.get(feature.id) ?? "Merchandising";
       buckets.get(lane)!.push(feature);
     }
-    const groups = LANES.map((name) => ({
+    const groups = CAMPAIGN_LANES.filter((name) => (buckets.get(name)?.length ?? 0) > 0).map((name) => ({
       name,
       features: buckets.get(name)!,
       color: laneColor[name],
     }));
 
     return { data, groups };
-  }, []);
+  }, [filteredRows]);
+
+  const filterOn = campaignFiltersActive(filters);
+  const activeFilterCount = campaignFilterCount(filters);
+  const filterPreset = campaignPresetFrom(filters);
 
   return (
-    <div
-      ref={ganttPinRef}
-      className="ledger-gantt ledger-gantt--embed overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--ledger-rule)] bg-[color:var(--ledger-paper)]"
-    >
-      <GanttRoot
-        className="min-h-0 h-full"
-        data={data}
-        groups={groups}
-        density="compact"
-        defaultRange="monthly"
-        defaultZoom={90}
-        colorBy="status"
-        showAssignees={false}
-        visibleColumnIds={["tasks"]}
-      />
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[var(--radius-md)] border border-[color:var(--ledger-rule)] bg-[color:var(--ledger-paper)]">
+      <div className="flex items-center gap-3 border-b border-[color:var(--ledger-rule)] px-3 py-2">
+        <p className="text-sm font-medium text-[color:var(--ledger-ink)]">FY26 campaign</p>
+        <p className="text-xs text-[color:var(--ledger-muted)]">Workstreams</p>
+        <div className="ml-auto flex h-6 items-center gap-2 text-xs text-[color:var(--ledger-muted)]">
+          <span className="tabular-nums">
+            {filterOn ? `${filteredRows.length} of ${CAMPAIGN_ROWS.length}` : CAMPAIGN_ROWS.length}{" "}
+            items
+          </span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className={cn(
+                  "h-6 gap-1.5 border-[color:var(--ledger-rule)] px-2 text-xs text-[color:var(--ledger-ink)]",
+                  filterOn && "border-primary/40 text-primary",
+                )}
+                aria-label="Filter campaign items"
+              >
+                <FilterGlyph />
+                Filter
+                {activeFilterCount > 0 ? (
+                  <span className="rounded-full bg-primary/15 px-1.5 py-px text-[10px] font-medium tabular-nums">
+                    {activeFilterCount}
+                  </span>
+                ) : null}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Quick views</DropdownMenuLabel>
+              <DropdownMenuRadioGroup
+                value={filterPreset}
+                onValueChange={(v) => {
+                  if (
+                    v === "all" ||
+                    v === "active" ||
+                    v === "blocked" ||
+                    v === "planned" ||
+                    v === "done" ||
+                    v === "milestones"
+                  ) {
+                    setFilters(campaignFiltersFromPreset(v));
+                  }
+                }}
+              >
+                <DropdownMenuRadioItem value="all" className="text-xs">
+                  All items
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="active" className="text-xs">
+                  In flight
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="blocked" className="text-xs">
+                  Blocked
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="planned" className="text-xs">
+                  Planned
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="done" className="text-xs">
+                  Complete
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="milestones" className="text-xs">
+                  Milestones only
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Status</DropdownMenuLabel>
+              {CAMPAIGN_STATUSES.map((s) => (
+                <DropdownMenuCheckboxItem
+                  key={s.id}
+                  className="text-xs"
+                  checked={filters.statuses.has(s.id)}
+                  onCheckedChange={(on) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      milestonesOnly: false,
+                      incompleteOnly: false,
+                      statuses: toggleCampaignSet(prev.statuses, s.id, on),
+                    }))
+                  }
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  {s.name}
+                </DropdownMenuCheckboxItem>
+              ))}
+
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Workstream</DropdownMenuLabel>
+              {CAMPAIGN_LANES.map((lane) => (
+                <DropdownMenuCheckboxItem
+                  key={lane}
+                  className="text-xs"
+                  checked={filters.lanes.has(lane)}
+                  onCheckedChange={(on) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      milestonesOnly: false,
+                      incompleteOnly: false,
+                      lanes: toggleCampaignSet(prev.lanes, lane, on),
+                    }))
+                  }
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  {lane}
+                </DropdownMenuCheckboxItem>
+              ))}
+
+              <DropdownMenuSeparator />
+              <DropdownMenuCheckboxItem
+                className="text-xs"
+                checked={filters.incompleteOnly}
+                onCheckedChange={(on) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    milestonesOnly: false,
+                    incompleteOnly: on,
+                  }))
+                }
+                onSelect={(e) => e.preventDefault()}
+              >
+                Incomplete only
+              </DropdownMenuCheckboxItem>
+
+              {filterOn ? (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-xs"
+                    onSelect={() => setFilters(campaignFiltersFromPreset("all"))}
+                  >
+                    Clear filters
+                  </DropdownMenuItem>
+                </>
+              ) : null}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      <div
+        ref={ganttPinRef}
+        className="ledger-gantt ledger-gantt--embed min-h-0 flex-1 overflow-hidden"
+      >
+        <GanttRoot
+          className="min-h-0 h-full"
+          data={data}
+          groups={groups}
+          density="compact"
+          defaultRange="monthly"
+          defaultZoom={90}
+          colorBy="status"
+          showAssignees={false}
+          visibleColumnIds={["tasks"]}
+        />
+      </div>
     </div>
   );
 }
@@ -760,8 +868,7 @@ export function SalesLedgerBlock() {
         </section>
       </div>
 
-      <section className="min-w-0 space-y-3">
-        <SectionLabel>FY26 Campaign Calendar</SectionLabel>
+      <section className="min-w-0">
         <CampaignGantt />
       </section>
     </div>

@@ -4,6 +4,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GanttRoot } from "@nqlib/nqgantt/ui";
 import type { GanttDependency, GanttFeature } from "@nqlib/nqgantt";
+import {
+  applyAutoSchedule,
+  syncInboundDependencyLags,
+} from "@nqlib/nqgantt-engine";
 import { cn } from "@nqlib/nqui";
 import { TASKS, setTaskValue, type Task } from "../../lib/mock/ops";
 import { groupTasksByStatus, intervalToRangeRaw, tasksToGanttRootData } from "./tasks-to-gantt";
@@ -21,6 +25,8 @@ export function RoadmapGantt({
   colorBy = "status",
   density = "compact",
   defaultRange = "weekly",
+  /** When true, moving a bar shifts successors via FS/SS/FF/SF + lag. */
+  autoSchedule = false,
   debugProbe = false,
 }: {
   className?: string;
@@ -39,6 +45,7 @@ export function RoadmapGantt({
    */
   density?: "compact" | "default" | "comfortable";
   defaultRange?: "daily" | "weekly" | "monthly" | "quarterly";
+  autoSchedule?: boolean;
   debugProbe?: boolean;
 }) {
   // Controlled only when the parent owns both value + setter. Passing `tasks`
@@ -52,7 +59,21 @@ export function RoadmapGantt({
   const tasks = controlled ? tasksProp : internalTasks;
   const commitTasks = controlled ? onTasksChange : setInternalTasks;
 
-  const ganttData = useMemo(() => tasksToGanttRootData(tasks), [tasks]);
+  // Dependencies are not on Task[] — keep a writable list or port→port creates
+  // call onDependenciesChange and then vanish on the next render.
+  const [dependencies, setDependencies] = useState<GanttDependency[]>(
+    () => tasksToGanttRootData(tasksProp ?? TASKS).dependencies,
+  );
+  useEffect(() => {
+    if (!controlled && tasksProp !== undefined) {
+      setDependencies(tasksToGanttRootData(tasksProp).dependencies);
+    }
+  }, [controlled, tasksProp]);
+
+  const ganttData = useMemo(() => {
+    const data = tasksToGanttRootData(tasks);
+    return { ...data, dependencies };
+  }, [tasks, dependencies]);
   const groups = useMemo(
     () =>
       groupsOverride ??
@@ -63,18 +84,74 @@ export function RoadmapGantt({
   const onFeatureMove = useCallback(
     (id: string, startAt: Date, endAt: Date | null) => {
       if (!endAt || !commitTasks) return;
-      // Atomic write to the timeline column (the SSOT) — same seam the grid reads.
-      const raw = intervalToRangeRaw(startAt, endAt);
+      // Propagate through dependency types + lag (engine), then write Task.timeline.
+      const nextFeatures = autoSchedule
+        ? applyAutoSchedule(
+            id,
+            startAt,
+            endAt,
+            ganttData.features,
+            dependencies,
+          )
+        : ganttData.features.map((f) =>
+            f.id === id ? { ...f, startAt, endAt } : f,
+          );
+      // Successor drag changes the visible gap — keep stored lag truthful.
+      // Predecessor drag under auto-schedule leaves outbound lag fixed.
+      const nextDeps = syncInboundDependencyLags(
+        id,
+        nextFeatures,
+        dependencies,
+      );
+      if (nextDeps !== dependencies) setDependencies(nextDeps);
+      const byId = new Map(nextFeatures.map((f) => [f.id, f]));
       commitTasks(
-        tasks.map((t) => (t.id === id ? setTaskValue(t, "timeline", raw) : t)),
+        tasks.map((t) => {
+          const f = byId.get(t.id);
+          if (!f) return t;
+          const raw = intervalToRangeRaw(f.startAt, f.endAt);
+          if (t.timeline.start === raw.start && t.timeline.end === raw.end) {
+            return t;
+          }
+          return setTaskValue(t, "timeline", raw);
+        }),
       );
     },
-    [tasks, commitTasks],
+    [tasks, commitTasks, autoSchedule, ganttData.features, dependencies],
   );
 
-  const onDependenciesChange = useCallback((deps: GanttDependency[]) => {
-    void deps;
-  }, []);
+  const onDependenciesChange = useCallback(
+    (deps: GanttDependency[]) => {
+      setDependencies(deps);
+      // Lag/type only change the link until we re-solve — with auto-schedule,
+      // push successors from each predecessor using the new constraints.
+      if (!autoSchedule || !commitTasks) return;
+      let nextFeatures = ganttData.features;
+      const predIds = [...new Set(deps.map((d) => d.fromId))];
+      for (const predId of predIds) {
+        const pred = nextFeatures.find((f) => f.id === predId);
+        if (!pred) continue;
+        nextFeatures = applyAutoSchedule(
+          predId,
+          pred.startAt,
+          pred.endAt,
+          nextFeatures,
+          deps,
+        );
+      }
+      const byId = new Map(nextFeatures.map((f) => [f.id, f]));
+      commitTasks(
+        tasks.map((t) => {
+          const f = byId.get(t.id);
+          if (!f) return t;
+          const raw = intervalToRangeRaw(f.startAt, f.endAt);
+          if (t.timeline.start === raw.start && t.timeline.end === raw.end) return t;
+          return setTaskValue(t, "timeline", raw);
+        }),
+      );
+    },
+    [autoSchedule, commitTasks, ganttData.features, tasks],
+  );
 
   const onFeatureClick = useCallback((feature: GanttFeature) => {
     void feature;

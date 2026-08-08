@@ -1,4 +1,21 @@
 {
   "title": "nqgantt",
-  "pages": ["index", "installation", "changelog", "concepts"]
+  "pages": [
+    "index",
+    "installation",
+    "changelog",
+    "concepts",
+    "getting-started",
+    "philosophy",
+    "bars-and-timeline",
+    "dependencies",
+    "dependency-types",
+    "auto-schedule",
+    "monday-com-mapping",
+    "critical-path",
+    "practice-in-gantt-lab",
+    "pmo-playbook",
+    "glossary",
+    "cheatsheet"
+  ]
 }

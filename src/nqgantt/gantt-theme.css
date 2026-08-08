@@ -172,11 +172,11 @@
    * only softens. Pushing alpha much below this starts letting the grid and the
    * weekend wash through the fill, which is the bleed the ring exists to stop.
    */
-  --gantt-bar-done-tint: 52;
+  --gantt-bar-done-tint: 48;
   --gantt-bar-hover-tint: 24;
   --gantt-bar-track-base: var(--background);
   --gantt-bar-done-base: var(--background);
-  --gantt-bar-done-alpha: 84%;
+  --gantt-bar-done-alpha: 76%;
   --gantt-bar-feather-px: 0;
   --gantt-bar-radius: 6px;
   /*
@@ -204,11 +204,11 @@
   --gantt-bar-track-tint: 22;
   /* Kept a touch stronger than light: on dark ground the fill mixes toward
      --card, so the same tint loses more separation from the track. */
-  --gantt-bar-done-tint: 56;
+  --gantt-bar-done-tint: 52;
   --gantt-bar-hover-tint: 30;
   --gantt-bar-track-base: var(--card);
   --gantt-bar-done-base: var(--card);
-  --gantt-bar-done-alpha: 82%;
+  --gantt-bar-done-alpha: 74%;
   --gantt-bar-ring-mix: 46%;
   /* On dark ground the edge has to go the other way to separate. */
   --gantt-bar-seam-mix: 40%;

@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { ScrollArea, cn } from "@nqlib/nqui";
 import type * as PageTree from "fumadocs-core/page-tree";
-import { source } from "@/lib/docs-source";
+import { docsSidebarScope } from "@/lib/docs-nav";
 
 function isSeparator(node: PageTree.Node): node is PageTree.Separator {
   return node.type === "separator";
@@ -101,14 +101,14 @@ const DOCS_STICKY_TOP = "top-12";
 const DOCS_STICKY_HEIGHT = "h-[calc(100dvh-3rem)]";
 
 export function DocsSidebar({ className }: { className?: string }) {
-  const tree = source.getPageTree();
-  const title = typeof tree.name === "string" ? tree.name : "nqlib Docs";
+  const { pathname } = useLocation();
+  const { title, nodes } = docsSidebarScope(pathname);
 
   return (
     <nav
       aria-label="Docs"
       className={cn(
-        // Keep `flex` in the caller too (`hidden xl:flex`) — `xl:block` drops flex via tw-merge.
+        // Keep `flex` in the caller too (`hidden sidebar:flex`) — `sidebar:block` drops flex via tw-merge.
         "sticky z-[var(--z-sticky-content)] flex w-56 shrink-0 flex-col self-start overflow-hidden",
         DOCS_STICKY_TOP,
         DOCS_STICKY_HEIGHT,
@@ -124,7 +124,7 @@ export function DocsSidebar({ className }: { className?: string }) {
         viewportStyle={{ position: "absolute", inset: 0, minHeight: 0 }}
       >
         <div className="pb-6 pr-2">
-          <DocsTreeNodes nodes={tree.children} />
+          <DocsTreeNodes nodes={nodes} />
         </div>
       </ScrollArea>
     </nav>

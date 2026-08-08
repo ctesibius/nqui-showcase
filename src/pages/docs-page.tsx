@@ -49,9 +49,15 @@ function DocsPageInner({ slugs }: { slugs: string[] }) {
   useEffect(() => {
     setReady(false);
     let cancelled = false;
-    void clientLoader.preload(page.path).then(() => {
-      if (!cancelled) setReady(true);
-    });
+    void clientLoader
+      .preload(page.path)
+      .then(() => {
+        if (!cancelled) setReady(true);
+      })
+      .catch((err) => {
+        console.error("[docs] failed to preload", page.path, err);
+        if (!cancelled) setReady(true);
+      });
     return () => {
       cancelled = true;
     };
@@ -118,7 +124,7 @@ export function DocsPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl gap-8 px-4 pt-8 pb-12 sm:px-6">
-      <DocsSidebar className="hidden xl:flex" />
+      <DocsSidebar className="hidden sidebar:flex" />
       <div className="min-w-0 flex-1">
         <DocsPageInner slugs={slugs} />
       </div>

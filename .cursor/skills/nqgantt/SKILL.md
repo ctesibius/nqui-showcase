@@ -3,13 +3,15 @@ name: nqgantt
 description: >-
   Integrates @nqlib/nqgantt in external apps using an engine-first blueprint
   workflow, then UI choice (library imports vs custom). Use for schedules,
-  critical path, EVM, workload, portfolio rollups, constraints, baselines, or
-  Gantt UI. Run `nqgantt skill install` to set up in any compatible IDE.
+  critical path, EVM, workload, portfolio rollups, constraints, baselines,
+  agile sprints/velocity, lean tools (A3/5-Why/Fishbone/VSM), outcome &
+  impact tracking, activity logs, status workflows, change control, or Gantt
+  UI. Run `nqgantt skill install` to set up in any compatible IDE.
 license: MIT
 compatibility: Requires Node 20+, a React app, and @nqlib/nqgantt npm packages.
 metadata:
   author: nqlib
-  version: "0.2.0"
+  version: "0.3.0"
   package: "@nqlib/nqgantt"
 ---
 
@@ -74,7 +76,10 @@ Clarify feature → Draft blueprint → STOP for acceptance
 
 ### Step 1 — Map the request
 
-Match the user request to one or more engine capabilities. See [references/engine-blueprints.md](references/engine-blueprints.md).
+Match the user request to one or more engine capabilities:
+
+- Core scheduling / PMBOK (CP, EVM, WBS, calendar, constraints, baseline, workload, portfolio, governance, export, undo) → [references/engine-blueprints.md](references/engine-blueprints.md)
+- Agile / lean / outcomes / activity / status workflow / mirror / change control / capacity contour → [references/pm-extensions.md](references/pm-extensions.md)
 
 If the request spans multiple capabilities, list them in the blueprint and ask whether to ship together or in phases.
 
@@ -120,7 +125,7 @@ Import paths:
 
 | Package | When |
 |---------|------|
-| `@nqlib/nqgantt/engine` | Headless only — Node, workers, API routes |
+| `@nqlib/nqgantt-engine` | Headless only — Node, workers, API routes |
 | `@nqlib/nqgantt` | React app + re-exported engine helpers |
 | `@nqlib/nqgantt/item-gantt-adapter` | Persisted `Item[]` → schedule features |
 | `@nqlib/nqgantt/ui` | Default bars, sidebar, toolbar, modals, `GanttDemo` / `GanttRoot` |
@@ -134,7 +139,7 @@ Default question pattern:
 
 > Blueprint accepted. For UI I suggest **[recommended path]** because **[reason]**. Alternatives: **[B]** (tradeoff), **[C]** (tradeoff). Which do you want?
 
-Library UI = import from `@nqlib/nqgantt/ui` (or `/engine` for headless). Do not vendor Gantt source into the consumer repo unless path E/C requires custom components.
+Library UI = import from `@nqlib/nqgantt/ui` (or `@nqlib/nqgantt-engine` for headless). Do not vendor Gantt source into the consumer repo unless path E/C requires custom components.
 
 After the user picks a path, run `scripts/install-deps.sh` with matching flags if npm peers are not yet installed.
 
@@ -176,12 +181,17 @@ Always include a **recommended default** and **one-line tradeoff** per option.
 - Inventing parallel types (`Task`, `Activity`) when `GanttFeature` / `PMItem` exist
 - Calling `computeCriticalPath` / `applyAutoSchedule` inline every render without memoization
 - Assuming the library persists data — **the consumer owns storage**
+- Wiring a **controlled** feature list (`data` / `features` from props) **without** an
+  `onFeatureMove` (or equivalent) that updates that list — drag/resize looks live, then
+  the bar and dependency edges **snap back** when the gesture ends (preview is ephemeral)
+- Passing seed props without a commit path and expecting the library to keep edits
 - Hand-copying SKILL.md instead of `nqgantt skill install`
 
 ## Reference files
 
 - [references/nqui-showcase.md](references/nqui-showcase.md) — **this repo** (Path B embed, CSS chrome, deploy rules)
 
-- [references/engine-blueprints.md](references/engine-blueprints.md) — per-feature inputs, engine calls, outputs
+- [references/engine-blueprints.md](references/engine-blueprints.md) — core scheduling/PMBOK: per-feature inputs, engine calls, outputs
+- [references/pm-extensions.md](references/pm-extensions.md) — agile, lean, outcomes, activity, status workflow, mirror, change control, capacity contour
 - [references/ui-options.md](references/ui-options.md) — UI paths and import patterns
 - [scripts/install-deps.sh](scripts/install-deps.sh) — optional npm peer install by profile

@@ -1,15 +1,70 @@
 ---
-title: nqgantt
-description: Schedule engine and Gantt UI — @nqlib/nqgantt for roadmaps and timelines.
+title: "nqgantt"
+description: "Schedule engine, Gantt UI, and PM / PMO guide for @nqlib/nqgantt."
 ---
 
-`@nqlib/nqgantt` powers roadmap and timeline demos in this showcase.
+Plain-language guide for **project managers**, **PMO leads**, and **inexperienced PMs** learning how `@nqlib/nqgantt` thinks about schedules, bars, and dependencies.
 
-| Next | |
-|------|--|
-| [Installation](/docs/nqgantt/installation) | Install and sync notes |
-| [Changelog](/docs/nqgantt/changelog) | What’s shipping |
-| [Concepts](/docs/nqgantt/concepts) | Bars, sync, and live demos |
-| Live | Roadmap gantt demos under `src/nqgantt/demos/` |
+Published on the showcase at **`/docs/nqgantt`**. This folder (`docs/nqgantt/`) stays the Markdown + `[[wikilinks]]` source; sync with `pnpm docs:sync:nqgantt`. Engineers still use sibling package docs under `../nqgantt/docs/` for engine internals.
 
-Related: [nqgrid](/docs/nqgrid) for boards, [nqui](/docs/nqui) for chrome.
+## Who this is for
+
+| Reader | Start here |
+|--------|------------|
+| New to Gantt / scheduling | [Getting started](/docs/nqgantt/getting-started) → [Practice in Gantt lab](/docs/nqgantt/practice-in-gantt-lab) |
+| Coming from Monday.com | [Monday.com mapping](/docs/nqgantt/monday-com-mapping) → [Auto-schedule](/docs/nqgantt/auto-schedule) |
+| PMP / PMO rolling this out | [Design philosophy](/docs/nqgantt/philosophy) → [PMO playbook](/docs/nqgantt/pmo-playbook) |
+| Need a term | [Glossary](/docs/nqgantt/glossary) |
+| Need a one-pager | [Cheatsheet](/docs/nqgantt/cheatsheet) |
+
+## How to read
+
+1. **Intention** — what the product is trying to do.
+2. **How** — what you click / drag in the UI.
+3. **When not to** — anti-patterns and flex vs strict choices.
+
+Prefer concrete scenarios over abstract graphs. Practice in **`/gantt-lab`** (dev) or the **`/blocks`** timeline — those are safe places to break things.
+
+## All pages
+
+| Page | What it covers |
+|------|----------------|
+| [Design philosophy](/docs/nqgantt/philosophy) | Design intentions: kernel vs UI, persistence, edges as constraints |
+| [Getting started](/docs/nqgantt/getting-started) | First session path for inexperienced PMs |
+| [Bars and timeline](/docs/nqgantt/bars-and-timeline) | Bars, ranges, progress, groups, what drag means |
+| [Dependencies](/docs/nqgantt/dependencies) | Create / select / edit / delete links |
+| [Dependency types](/docs/nqgantt/dependency-types) | FS, SS, FF, SF + lag/lead |
+| [Auto-schedule](/docs/nqgantt/auto-schedule) | Strict (on) vs flexible (off); push and pull |
+| [Monday.com mapping](/docs/nqgantt/monday-com-mapping) | Monday flexible/strict → nqgantt |
+| [Critical path](/docs/nqgantt/critical-path) | What “critical” means here |
+| [Practice in Gantt lab](/docs/nqgantt/practice-in-gantt-lab) | Lab controls and drills |
+| [PMO playbook](/docs/nqgantt/pmo-playbook) | Adoption, defaults, training, anti-patterns |
+| [Glossary](/docs/nqgantt/glossary) | PMP ↔ product terms |
+| [Cheatsheet](/docs/nqgantt/cheatsheet) | One-page reference |
+
+## Live surfaces in this showcase
+
+| Surface | Route / path |
+|---------|----------------|
+| Gantt lab (dev) | `/gantt-lab` |
+| Blocks timeline | `/blocks` (Timeline lab) |
+| Demo wiring | `src/nqgantt/demos/roadmap-gantt.tsx` |
+| Theme / bar looks | `src/nqgantt/gantt-theme.css`, `src/nqgantt/bar-design.ts` |
+
+## Developer pages (same sidebar)
+
+| Page | Route |
+|------|--------|
+| Installation | `/docs/nqgantt/installation` |
+| Changelog | `/docs/nqgantt/changelog` |
+| Concepts | `/docs/nqgantt/concepts` |
+
+## Related (outside this guide)
+
+- Engine / architecture (engineers): sibling `../nqgantt/docs/`
+
+## Related
+
+- [Design philosophy](/docs/nqgantt/philosophy)
+- [Getting started](/docs/nqgantt/getting-started)
+- [Cheatsheet](/docs/nqgantt/cheatsheet)

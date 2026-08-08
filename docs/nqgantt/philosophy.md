@@ -1,0 +1,52 @@
+# Design philosophy
+
+**Intention:** nqgantt is a **schedule kernel with a Gantt view**, not a drawing tool that happens to look like a timeline. Dates and links are real constraints; the UI paints them honestly.
+
+## What we optimize for
+
+1. **True schedule math** — Finish-to-start / start-to-start / etc., lag/lead, critical path, and auto-schedule are engine behavior, not decoration.
+2. **Honest edges** — A dependency line means a stored link (`from` → `to`, type, lag). If you cannot persist it, the line must not pretend to stick.
+3. **Consumer owns data** — The library proposes moves and link changes; the host app saves `tasks` / `dependencies` (or rejects them). Reload must restore what the host stored.
+4. **Progressive power** — Inexperienced PMs can draw FS links and drag bars; PMO can turn on auto-schedule and critical path when the plan is ready to be strict.
+
+## Kernel vs UI
+
+| Layer | Owns | Does not own |
+|-------|------|----------------|
+| **Engine** (`@nqlib/nqgantt-engine`) | Constraint math, CPM, auto-schedule ASAP snap | Pixels, themes, menus |
+| **Gantt UI** (`@nqlib/nqgantt`) | Bars, ports, edge routing, selection chrome | Your database |
+| **Host app** (this showcase, your product) | Task list, dependency list, save/load, product defaults | Reinventing FS/SS math |
+
+## Bars show plan; edges show constraints
+
+- **Bars** — When work is planned (start/end), progress, grouping.
+- **Edges** — How work is *allowed* to relate. Moving a bar under **auto-schedule on** re-solves successors; under **off**, only that bar moves (flexible / visual link).
+
+See [[auto-schedule]] and [[dependencies]].
+
+## Strict vs flexible (product intention)
+
+| Mode | Product name today | Behavior |
+|------|--------------------|----------|
+| Strict | Auto-schedule **on** | Successors snap ASAP to the link (push later *and* pull earlier) |
+| Flexible | Auto-schedule **off** | Links still draw and store type/lag; dates do not cascade |
+
+Monday.com users: see [[monday-com-mapping]]. Per-edge flex/strict is an intended direction; today the showcase lab uses a **chart-level** toggle.
+
+## What we refuse
+
+- Fake critical path (highlight without a real network).
+- Chart-wide “everything is FS” instead of **per-link** type.
+- Silent snap-back: live drag that reverts because the host never committed `onFeatureMove` / `onDependenciesChange`.
+- Treating dependency lines as pure illustration with no data model.
+
+## Under the hood (one line)
+
+Scheduling and ASAP propagation live in the engine (`applyAutoSchedule`, CPM); the Gantt view routes SVG edges and calls host callbacks.
+
+## Related
+
+- [[pmo-playbook]]
+- [[auto-schedule]]
+- [[dependencies]]
+- [[index]]

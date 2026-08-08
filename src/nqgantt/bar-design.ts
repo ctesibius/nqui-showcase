@@ -206,8 +206,8 @@ export interface GanttBarDesign {
 }
 
 export const GANTT_BAR_DESIGN_DEFAULT: GanttBarDesign = {
-  barStyle: "studio",
-  groupRows: "bracket",
+  barStyle: "flat",
+  groupRows: "rail",
   tuning: {},
 }
 

@@ -15,10 +15,21 @@ import {
 } from "@tanstack/react-table";
 import { format } from "date-fns";
 import {
+  Button,
   Checkbox,
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
   Popover,
   PopoverContent,
   PopoverTrigger,
+  ScrollArea,
   Select,
   SelectContent,
   SelectItem,
@@ -27,6 +38,15 @@ import {
   ToggleGroupItem,
   cn,
 } from "@nqlib/nqui";
+
+/** Absolute viewport — same slot pattern as playground table shells. */
+const TABLE_SCROLL_VIEWPORT = {
+  position: "absolute",
+  inset: 0,
+  minHeight: 0,
+  minWidth: 0,
+  overscrollBehavior: "contain",
+} as const;
 import { Calendar } from "@nqlib/nqui/calendar";
 import {
   Sortable,
@@ -294,14 +314,24 @@ const GUIDE_PATHS: Record<Exclude<GuideSeg, "none">, string> = {
   elbow: `M8 0 V${ROW_H / 2 - 4} Q8 ${ROW_H / 2} 12 ${ROW_H / 2} H${GUIDE_W}`,
 };
 
-function TreeGuides({ segs }: { segs: GuideSeg[] }) {
+function guidePathsFor(rowH: number): Record<Exclude<GuideSeg, "none">, string> {
+  const mid = rowH / 2;
+  return {
+    line: `M8 0 V${rowH}`,
+    tee: `M8 0 V${rowH} M8 ${mid - 4} Q8 ${mid} 12 ${mid} H${GUIDE_W}`,
+    elbow: `M8 0 V${mid - 4} Q8 ${mid} 12 ${mid} H${GUIDE_W}`,
+  };
+}
+
+function TreeGuides({ segs, rowH = ROW_H }: { segs: GuideSeg[]; rowH?: number }) {
   if (segs.length === 0) return null;
+  const paths = rowH === ROW_H ? GUIDE_PATHS : guidePathsFor(rowH);
   return (
     <span className="flex shrink-0 self-stretch text-muted-foreground/40" aria-hidden>
       {segs.map((seg, i) => (
-        <svg key={i} width={GUIDE_W} height={ROW_H} viewBox={`0 0 ${GUIDE_W} ${ROW_H}`} fill="none">
+        <svg key={i} width={GUIDE_W} height={rowH} viewBox={`0 0 ${GUIDE_W} ${rowH}`} fill="none">
           {seg === "none" ? null : (
-            <path d={GUIDE_PATHS[seg]} stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+            <path d={paths[seg]} stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
           )}
         </svg>
       ))}
@@ -413,7 +443,12 @@ export function InitiativesBlock() {
           <ToggleGroupItem value="all" className="text-xs">All initiatives</ToggleGroupItem>
         </ToggleGroup>
       </div>
-      <div className="min-h-0 flex-1 overflow-auto">
+      <ScrollArea
+        orientation="both"
+        fadeMask={false}
+        className="min-h-0 w-full flex-1"
+        viewportStyle={TABLE_SCROLL_VIEWPORT}
+      >
         <table className="w-full min-w-[720px] border-collapse text-xs">
           <thead>
             <tr className="border-b text-left text-[11px] font-normal text-muted-foreground">
@@ -479,7 +514,7 @@ export function InitiativesBlock() {
             })}
           </tbody>
         </table>
-      </div>
+      </ScrollArea>
     </div>
   );
 }
@@ -566,6 +601,156 @@ const DEFAULT_COLUMN_ORDER: DataColId[] = [
   "status", "assignees", "priority", "est", "start", "due", "progress", "note",
 ];
 
+/** Faceted filters for the work-breakdown toolbar — empty sets mean “any”. */
+type WorkFilters = {
+  statuses: Set<TaskStatus>;
+  priorities: Set<0 | 1 | 2>;
+  assignees: Set<string>;
+  /** Incomplete work past due (demo “today” = 2026-08-06). */
+  overdueOnly: boolean;
+  unassignedOnly: boolean;
+};
+
+type FilterPreset = "all" | "open" | "blocked" | "overdue" | "unassigned" | "custom";
+
+const FILTER_TODAY = "2026-08-06";
+
+function filtersActive(f: WorkFilters): boolean {
+  return (
+    f.statuses.size > 0 ||
+    f.priorities.size > 0 ||
+    f.assignees.size > 0 ||
+    f.overdueOnly ||
+    f.unassignedOnly
+  );
+}
+
+function filterChipCount(f: WorkFilters): number {
+  return (
+    f.statuses.size +
+    f.priorities.size +
+    f.assignees.size +
+    (f.overdueOnly ? 1 : 0) +
+    (f.unassignedOnly ? 1 : 0)
+  );
+}
+
+function presetFromFilters(f: WorkFilters): FilterPreset {
+  if (!filtersActive(f)) return "all";
+  if (
+    f.overdueOnly &&
+    !f.unassignedOnly &&
+    f.statuses.size === 0 &&
+    f.priorities.size === 0 &&
+    f.assignees.size === 0
+  ) {
+    return "overdue";
+  }
+  if (
+    f.unassignedOnly &&
+    !f.overdueOnly &&
+    f.statuses.size === 0 &&
+    f.priorities.size === 0 &&
+    f.assignees.size === 0
+  ) {
+    return "unassigned";
+  }
+  if (
+    !f.overdueOnly &&
+    !f.unassignedOnly &&
+    f.priorities.size === 0 &&
+    f.assignees.size === 0 &&
+    f.statuses.size === 1 &&
+    f.statuses.has("blocked")
+  ) {
+    return "blocked";
+  }
+  if (
+    !f.overdueOnly &&
+    !f.unassignedOnly &&
+    f.priorities.size === 0 &&
+    f.assignees.size === 0 &&
+    f.statuses.size === 3 &&
+    f.statuses.has("active") &&
+    f.statuses.has("todo") &&
+    f.statuses.has("blocked")
+  ) {
+    return "open";
+  }
+  return "custom";
+}
+
+function freshFilters(patch: Partial<WorkFilters> = {}): WorkFilters {
+  return {
+    statuses: new Set(patch.statuses ?? []),
+    priorities: new Set(patch.priorities ?? []),
+    assignees: new Set(patch.assignees ?? []),
+    overdueOnly: patch.overdueOnly ?? false,
+    unassignedOnly: patch.unassignedOnly ?? false,
+  };
+}
+
+function filtersFromPreset(preset: FilterPreset): WorkFilters {
+  switch (preset) {
+    case "open":
+      return freshFilters({ statuses: new Set(["active", "todo", "blocked"]) });
+    case "blocked":
+      return freshFilters({ statuses: new Set(["blocked"]) });
+    case "overdue":
+      return freshFilters({ overdueOnly: true });
+    case "unassigned":
+      return freshFilters({ unassignedOnly: true });
+    default:
+      return freshFilters();
+  }
+}
+
+function toggleInSet<T>(set: Set<T>, value: T, on: boolean): Set<T> {
+  const next = new Set(set);
+  if (on) next.add(value);
+  else next.delete(value);
+  return next;
+}
+
+function itemMatchesFilters(
+  item: { status: TaskStatus; assignees: string[]; due: string },
+  priority: 0 | 1 | 2 | undefined,
+  f: WorkFilters,
+): boolean {
+  if (f.statuses.size > 0 && !f.statuses.has(item.status)) return false;
+  if (f.priorities.size > 0 && (priority === undefined || !f.priorities.has(priority))) return false;
+  if (f.assignees.size > 0 && !item.assignees.some((a) => f.assignees.has(a))) return false;
+  if (f.unassignedOnly && item.assignees.length > 0) return false;
+  if (f.overdueOnly) {
+    if (item.status === "done") return false;
+    if (item.due >= FILTER_TODAY) return false;
+  }
+  return true;
+}
+
+/** Ids of tasks/subs that pass the facets (phases inferred at render time). */
+function matchingWorkIds(rows: WorkRow[], f: WorkFilters): Set<string> | null {
+  if (!filtersActive(f)) return null;
+  const ids = new Set<string>();
+  for (const r of rows) {
+    if (r.kind !== "task") continue;
+    const self = itemMatchesFilters(r, r.priority, f);
+    if (self) ids.add(r.id);
+    for (const s of r.subs ?? []) {
+      if (itemMatchesFilters(s, r.priority, f)) ids.add(s.id);
+    }
+  }
+  return ids;
+}
+
+function FilterIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+      <path d="M2.5 3.5h11L9.5 8.5v3.5L6.5 13.5V8.5L2.5 3.5Z" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 /** One flattened display row with its computed WBS number. */
 type WbsRow =
   | { kind: "phase"; wbs: string; row: Extract<WorkRow, { kind: "phase" }> }
@@ -592,6 +777,130 @@ function computeWbs(rows: WorkRow[]): WbsRow[] {
     }
   }
   return out;
+}
+
+const WBS_ROW_PX = 36;
+const WBS_GUIDE_W = 12;
+
+function wbsDepth(v: WbsRow): number {
+  return v.kind === "phase" ? 0 : v.kind === "task" ? 1 : 2;
+}
+
+/** True when another visible row at the same depth follows before we step out. */
+function wbsBranchContinues(
+  rows: WbsRow[],
+  index: number,
+  isVisible: (v: WbsRow) => boolean,
+): boolean {
+  const depth = wbsDepth(rows[index]);
+  for (let j = index + 1; j < rows.length; j++) {
+    if (!isVisible(rows[j])) continue;
+    const dj = wbsDepth(rows[j]);
+    if (dj < depth) return false;
+    if (dj === depth) return true;
+  }
+  return false;
+}
+
+function WbsNodeSlot({
+  name,
+  expandable,
+  expanded,
+  onToggle,
+  leaf,
+  through,
+}: {
+  name: string;
+  expandable?: boolean;
+  expanded?: boolean;
+  onToggle?: () => void;
+  leaf?: boolean;
+  /** More siblings at this depth — keep the vertical running through the elbow. */
+  through?: boolean;
+}) {
+  const uid = useId().replace(/:/g, "");
+  const cy = WBS_ROW_PX / 2;
+  const railX = 6;
+
+  if (expandable && onToggle) {
+    return (
+      <span
+        className="relative flex h-full shrink-0 items-center justify-center text-muted-foreground/40"
+        style={{ width: WBS_GUIDE_W }}
+      >
+        {expanded ? (
+          <svg
+            className="absolute inset-0"
+            width={WBS_GUIDE_W}
+            height={WBS_ROW_PX}
+            viewBox={`0 0 ${WBS_GUIDE_W} ${WBS_ROW_PX}`}
+            fill="none"
+            aria-hidden
+          >
+            <defs>
+              <linearGradient
+                id={`wbs-node-drop-${uid}`}
+                x1="0"
+                y1={cy + 5}
+                x2="0"
+                y2={WBS_ROW_PX}
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop offset="0" stopColor="currentColor" stopOpacity="0" />
+                <stop offset="0.45" stopColor="currentColor" stopOpacity="1" />
+              </linearGradient>
+            </defs>
+            <path
+              d={`M${railX} ${cy + 5} V${WBS_ROW_PX}`}
+              stroke={`url(#wbs-node-drop-${uid})`}
+              strokeWidth="1"
+            />
+          </svg>
+        ) : null}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle();
+          }}
+          aria-label={expanded ? `Collapse ${name}` : `Expand ${name}`}
+          className="relative z-[1] flex size-3.5 items-center justify-center rounded-full border bg-background text-muted-foreground/80 transition-colors hover:border-foreground/30 hover:text-foreground"
+        >
+          <svg
+            viewBox="0 0 12 12"
+            width="8"
+            height="8"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            className={cn("transition-transform", expanded && "rotate-90")}
+          >
+            <path d="m4.5 2.5 3.5 3.5-3.5 3.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      </span>
+    );
+  }
+
+  if (leaf) {
+    const stem = through
+      ? `M${railX} 0 V${WBS_ROW_PX} M${railX} ${cy - 3} Q${railX} ${cy} 9 ${cy} H${WBS_GUIDE_W}`
+      : `M${railX} 0 V${cy - 3} Q${railX} ${cy} 9 ${cy} H${WBS_GUIDE_W}`;
+    return (
+      <span
+        className="flex h-full shrink-0 items-center text-muted-foreground/40"
+        style={{ width: WBS_GUIDE_W }}
+        aria-hidden
+      >
+        <svg width={WBS_GUIDE_W} height={WBS_ROW_PX} viewBox={`0 0 ${WBS_GUIDE_W} ${WBS_ROW_PX}`} fill="none">
+          <path d={stem} stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+          <circle cx="9" cy={cy} r="1.5" fill="currentColor" />
+        </svg>
+      </span>
+    );
+  }
+
+  return <span className="shrink-0" style={{ width: WBS_GUIDE_W }} />;
 }
 
 /** Phases cannot be dragged; tasks dropped above the first phase clamp into it. */
@@ -741,9 +1050,11 @@ export function WorkBreakdownBlock() {
   const [rows, setRows] = useState<WorkRow[]>(WORK_ROWS);
   const [columnOrder, setColumnOrder] = useState<DataColId[]>(DEFAULT_COLUMN_ORDER);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [filters, setFilters] = useState<WorkFilters>(() => freshFilters());
+  const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
   const anchorRef = useRef<string | null>(null);
   const [widths, setWidths] = useState<Record<string, number>>(() => ({
-    name: 300,
+    name: 340,
     ...Object.fromEntries(Object.entries(DATA_COLS).map(([id, c]) => [id, c.defaultW])),
   }));
   /**
@@ -768,6 +1079,40 @@ export function WorkBreakdownBlock() {
     () => view.filter((v) => v.kind !== "phase").map((v) => v.row.id),
     [view],
   );
+  const matchedIds = useMemo(() => matchingWorkIds(rows, filters), [rows, filters]);
+  const filterOn = matchedIds != null;
+  const visibleTaskCount = filterOn
+    ? selectableIds.filter((id) => matchedIds.has(id)).length
+    : selectableIds.length;
+  const activeFilterCount = filterChipCount(filters);
+  const filterPreset = presetFromFilters(filters);
+
+  const rowVisible = (v: WbsRow): boolean => {
+    if (v.kind === "task" && collapsed.has(v.phaseId)) return false;
+    if (v.kind === "sub" && (collapsed.has(v.phaseId) || collapsed.has(v.parentId))) return false;
+    if (!matchedIds) return true;
+    if (v.kind === "phase") {
+      return view.some(
+        (x) => x.kind !== "phase" && x.phaseId === v.row.id && matchedIds.has(x.row.id),
+      );
+    }
+    if (v.kind === "task") {
+      return (
+        matchedIds.has(v.row.id) ||
+        (v.row.subs?.some((s) => matchedIds.has(s.id)) ?? false)
+      );
+    }
+    return matchedIds.has(v.row.id);
+  };
+
+  const toggleCollapsed = (id: string) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const patchItem = (id: string, patch: Partial<SubTask> & { priority?: 0 | 1 | 2 }) => {
     setRows((prev) =>
@@ -1009,13 +1354,156 @@ export function WorkBreakdownBlock() {
               </button>
             </>
           ) : (
-            <span className="text-muted-foreground tabular-nums">{selectableIds.length} tasks</span>
+            <span className="text-muted-foreground tabular-nums">
+              {filterOn ? `${visibleTaskCount} of ${selectableIds.length}` : selectableIds.length}{" "}
+              tasks
+            </span>
           )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className={cn(
+                  "h-6 gap-1.5 px-2 text-xs",
+                  filterOn && "border-primary/40 text-primary",
+                )}
+                aria-label="Filter tasks"
+              >
+                <FilterIcon />
+                Filter
+                {activeFilterCount > 0 ? (
+                  <span className="rounded-full bg-primary/15 px-1.5 py-px text-[10px] font-medium tabular-nums">
+                    {activeFilterCount}
+                  </span>
+                ) : null}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Quick views</DropdownMenuLabel>
+              <DropdownMenuRadioGroup
+                value={filterPreset}
+                onValueChange={(v) => {
+                  if (
+                    v === "all" ||
+                    v === "open" ||
+                    v === "blocked" ||
+                    v === "overdue" ||
+                    v === "unassigned"
+                  ) {
+                    setFilters(filtersFromPreset(v));
+                  }
+                }}
+              >
+                <DropdownMenuRadioItem value="all" className="text-xs">
+                  All tasks
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="open" className="text-xs">
+                  Open work
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="blocked" className="text-xs">
+                  Blocked only
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="overdue" className="text-xs">
+                  Overdue
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="unassigned" className="text-xs">
+                  Unassigned
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Status</DropdownMenuLabel>
+              {STATUSES.map((s) => (
+                <DropdownMenuCheckboxItem
+                  key={s.id}
+                  className="text-xs"
+                  checked={filters.statuses.has(s.id)}
+                  onCheckedChange={(on) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      overdueOnly: false,
+                      unassignedOnly: false,
+                      statuses: toggleInSet(prev.statuses, s.id, on),
+                    }))
+                  }
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  <span className="flex items-center gap-1.5">
+                    <span className={cn("size-1.5 rounded-full", STATUS_STYLE[s.id].dot)} aria-hidden />
+                    {s.label}
+                  </span>
+                </DropdownMenuCheckboxItem>
+              ))}
+
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Priority</DropdownMenuLabel>
+              {PRIORITIES.map((p) => (
+                <DropdownMenuCheckboxItem
+                  key={p.id}
+                  className="text-xs"
+                  checked={filters.priorities.has(p.id)}
+                  onCheckedChange={(on) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      overdueOnly: false,
+                      unassignedOnly: false,
+                      priorities: toggleInSet(prev.priorities, p.id, on),
+                    }))
+                  }
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  <span className={cn("font-mono text-[10px] font-medium", PRIORITY_STYLE[p.id])}>
+                    {p.label}
+                  </span>
+                </DropdownMenuCheckboxItem>
+              ))}
+
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Assignee</DropdownMenuLabel>
+              {DATA.people.map((p) => (
+                <DropdownMenuCheckboxItem
+                  key={p.id}
+                  className="text-xs"
+                  checked={filters.assignees.has(p.id)}
+                  onCheckedChange={(on) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      overdueOnly: false,
+                      unassignedOnly: false,
+                      assignees: toggleInSet(prev.assignees, p.id, on),
+                    }))
+                  }
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  {p.name}
+                </DropdownMenuCheckboxItem>
+              ))}
+
+              {filterOn ? (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-xs"
+                    onSelect={() => setFilters(filtersFromPreset("all"))}
+                  >
+                    Clear filters
+                  </DropdownMenuItem>
+                </>
+              ) : null}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
-      <div ref={dropContainerRef} className={dropContainerClassName}>
-        <div className="max-h-[440px] overflow-auto">
+      <div ref={dropContainerRef} className={cn(dropContainerClassName, "max-h-[440px]")}>
+        <ScrollArea
+          orientation="both"
+          fadeMask={false}
+          className="h-full min-h-0 w-full"
+          viewportStyle={TABLE_SCROLL_VIEWPORT}
+        >
           <table
             className="border-collapse text-xs"
             style={{ width: totalW, minWidth: "100%", tableLayout: "fixed" }}
@@ -1092,11 +1580,15 @@ export function WorkBreakdownBlock() {
             >
               <SortableContent withoutSlot>
                 <tbody>
-                  {view.map((v) => {
+                  {view.map((v, index) => {
+                    const visible = rowVisible(v);
+                    const depth = wbsDepth(v);
+                    const branchThrough = wbsBranchContinues(view, index, rowVisible);
                     if (v.kind === "phase") {
                       const ids = phaseDescendants(v.row.id);
                       const allPhase = ids.length > 0 && ids.every((id) => selected.has(id));
                       const somePhase = !allPhase && ids.some((id) => selected.has(id));
+                      const phaseExpanded = !collapsed.has(v.row.id);
                       return (
                         <SortableItem
                           key={v.row.id}
@@ -1104,7 +1596,7 @@ export function WorkBreakdownBlock() {
                           asChild
                           {...sortableDropTargetProps(v.row.id)}
                         >
-                          <tr className={cn("group/row bg-muted/30", WBS_ROW_H)}>
+                          <tr className={cn("group/row bg-muted/30", WBS_ROW_H, !visible && "hidden")}>
                             <td
                               className={cn(stickyCellCls, "left-0 z-[2] cursor-pointer p-0")}
                               onClick={() => togglePhase(v.row.id)}
@@ -1124,12 +1616,23 @@ export function WorkBreakdownBlock() {
                             </td>
                             <td className={cn(stickyCellCls, "z-[2] border-r px-2")} style={{ left: SELECT_W }}>
                               <span aria-hidden className="pointer-events-none absolute inset-0 bg-muted/30" />
-                              <span className="relative flex items-center gap-2">
-                                <span className="w-4 shrink-0" />
+                              <span className="relative flex h-full items-center gap-2">
+                                <span className="w-4 shrink-0" aria-hidden />
                                 <span className="w-12 shrink-0 font-mono text-[10px] text-muted-foreground tabular-nums">
                                   {v.wbs}
                                 </span>
-                                <span className="truncate font-medium">{v.row.name}</span>
+                                <WbsNodeSlot
+                                  name={v.row.name}
+                                  expandable={ids.length > 0}
+                                  expanded={phaseExpanded}
+                                  onToggle={() => toggleCollapsed(v.row.id)}
+                                />
+                                <span
+                                  className="min-w-0 truncate font-medium"
+                                  style={depth ? { paddingLeft: depth * 8 } : undefined}
+                                >
+                                  {v.row.name}
+                                </span>
                               </span>
                             </td>
                             {columnOrder.map((id) => renderPhaseCell(id, v.row.id, ids.length))}
@@ -1141,9 +1644,16 @@ export function WorkBreakdownBlock() {
                     const isSub = v.kind === "sub";
                     const t = v.row;
                     const isSelected = selected.has(t.id);
+                    const hasSubs = v.kind === "task" && (v.row.subs?.length ?? 0) > 0;
+                    const taskExpanded = v.kind === "task" && !collapsed.has(t.id);
                     const rowInner = (
                       <tr
-                        className={cn("group/row", WBS_ROW_H, "data-dragging:opacity-30")}
+                        className={cn(
+                          "group/row",
+                          WBS_ROW_H,
+                          "data-dragging:opacity-30",
+                          !visible && "hidden",
+                        )}
                         aria-selected={isSelected}
                       >
                         <td
@@ -1165,9 +1675,9 @@ export function WorkBreakdownBlock() {
                         </td>
                         <td className={cn(stickyCellCls, "z-[2] border-r px-2")} style={{ left: SELECT_W }}>
                           {pinnedTint(isSelected)}
-                          <span className="relative flex items-center gap-2">
+                          <span className="relative flex h-full items-center gap-2">
                             {isSub ? (
-                              <span className="w-4 shrink-0" />
+                              <span className="w-4 shrink-0" aria-hidden />
                             ) : (
                               <SortableItemHandle asChild>
                                 <button
@@ -1182,7 +1692,20 @@ export function WorkBreakdownBlock() {
                             <span className="w-12 shrink-0 font-mono text-[10px] text-muted-foreground tabular-nums">
                               {v.wbs}
                             </span>
-                            <span className={cn("truncate", isSub && "text-muted-foreground")}>{t.name}</span>
+                            <WbsNodeSlot
+                              name={t.name}
+                              expandable={hasSubs}
+                              expanded={taskExpanded}
+                              onToggle={hasSubs ? () => toggleCollapsed(t.id) : undefined}
+                              leaf={isSub || (!hasSubs && depth > 0)}
+                              through={branchThrough}
+                            />
+                            <span
+                              className={cn("min-w-0 truncate", isSub && "text-muted-foreground")}
+                              style={depth ? { paddingLeft: depth * 8 } : undefined}
+                            >
+                              {t.name}
+                            </span>
                           </span>
                         </td>
                         {columnOrder.map((id) => renderDataCell(id, v))}
@@ -1214,7 +1737,7 @@ export function WorkBreakdownBlock() {
               </SortableOverlay>
             </Sortable>
           </table>
-        </div>
+        </ScrollArea>
 
         {dropChrome}
         {/* Zero-width rail pinned to the column boundary. The line and the grip

@@ -63,7 +63,7 @@ import {
   computeScheduleAnalysis,
   computeScheduleDates,
   nearCriticalTaskIds,
-} from "@nqlib/nqgantt/engine"
+} from "@nqlib/nqgantt-engine"
 ```
 
 | Function | Use when |
@@ -111,7 +111,7 @@ import {
   groupByPhaseWithWBS,
   computeFeatureSetRollup,
   createGroupRollupFeature,
-} from "@nqlib/nqgantt/engine"
+} from "@nqlib/nqgantt-engine"
 ```
 
 **Outputs**
@@ -146,7 +146,7 @@ import {
   addWorkingDays,
   normalizeCalendar,
   DEFAULT_WORKING_CALENDAR,
-} from "@nqlib/nqgantt/engine"
+} from "@nqlib/nqgantt-engine"
 ```
 
 Pass calendar into `computeCriticalPath` and `applyAutoSchedule` when durations must respect working days.
@@ -173,7 +173,7 @@ Pass calendar into `computeCriticalPath` and `applyAutoSchedule` when durations 
 **Engine calls**
 
 ```ts
-import { applyTaskConstraint, applyConstraints } from "@nqlib/nqgantt/engine"
+import { applyTaskConstraint, applyConstraints } from "@nqlib/nqgantt-engine"
 ```
 
 Run after drag edits or before `applyAutoSchedule` depending on agreed authority (ask user: constraints vs deps win).
@@ -204,7 +204,7 @@ import {
   computeEVMSCurve,
   computeEVMTrend,
   computeEVMRollup,
-} from "@nqlib/nqgantt/engine"
+} from "@nqlib/nqgantt-engine"
 ```
 
 **Outputs**
@@ -238,7 +238,7 @@ import {
   computeAssigneeWorkloads,
   computeResourceHistogram,
   levelResources,
-} from "@nqlib/nqgantt/engine"
+} from "@nqlib/nqgantt-engine"
 ```
 
 **Outputs**
@@ -274,7 +274,7 @@ import {
   generateVPDigest,
   syncWorkstreamFromCatalog,
   syncWorkstreamsFromCatalog,
-} from "@nqlib/nqgantt/engine"
+} from "@nqlib/nqgantt-engine"
 ```
 
 **Verify**
@@ -302,7 +302,7 @@ import {
 import {
   buildRiskHeatmap,
   generateStatusReportMarkdown,
-} from "@nqlib/nqgantt/engine"
+} from "@nqlib/nqgantt-engine"
 ```
 
 **Verify**
@@ -330,7 +330,7 @@ import {
 import {
   setBaselineFromSchedule,
   computeBaselineVariance,
-} from "@nqlib/nqgantt/engine"
+} from "@nqlib/nqgantt-engine"
 ```
 
 **Outputs**
@@ -359,7 +359,7 @@ import {
 **Engine calls**
 
 ```ts
-import { pertEstimate, pertProjectFinish } from "@nqlib/nqgantt/engine"
+import { pertEstimate, pertProjectFinish } from "@nqlib/nqgantt-engine"
 ```
 
 **Verify**
@@ -378,7 +378,7 @@ import { pertEstimate, pertProjectFinish } from "@nqlib/nqgantt/engine"
 import {
   exportFeaturesToCSV,
   importFeaturesFromCSV,
-} from "@nqlib/nqgantt/engine"
+} from "@nqlib/nqgantt-engine"
 import { downloadTextFile } from "@nqlib/nqgantt" // browser download helper
 ```
 
@@ -402,7 +402,7 @@ import {
   undoHistory,
   redoHistory,
   createSnapshot,
-} from "@nqlib/nqgantt/engine"
+} from "@nqlib/nqgantt-engine"
 ```
 
 **Verify**
@@ -429,7 +429,7 @@ import {
   computeDependencyNeighborhood,
   getDependencyLabels,
   mapExtremitiesToType,
-} from "@nqlib/nqgantt/engine"
+} from "@nqlib/nqgantt-engine"
 ```
 
 Use when building custom dependency editors or tooltips — not needed for default Gantt lines.

@@ -1,0 +1,37 @@
+---
+title: "Glossary"
+description: "nqgantt — Glossary"
+---
+
+PMP / common PM language ↔ what nqgantt and this showcase call it.
+
+| Term (PM / PMP) | In this product |
+|-----------------|-----------------|
+| Activity / task | Feature / bar / task row |
+| Predecessor | Dependency **from** task |
+| Successor | Dependency **to** task |
+| Finish-to-Start (FS) | Link type **FS** |
+| Start-to-Start (SS) | Link type **SS** |
+| Finish-to-Finish (FF) | Link type **FF** |
+| Start-to-Finish (SF) | Link type **SF** |
+| Lag | Edge **lag** (`+Nd`) |
+| Lead | Negative lag |
+| Network diagram (logic) | Dependency graph (edges on the Gantt) |
+| Critical path | [Critical path](/docs/nqgantt/critical-path) highlight from CPM |
+| Total float / slack | Not a first-class lab toggle yet; implied when flexible or when successor sits after the ASAP date |
+| Baseline | Engine supports baselines; not covered in this PM guide v1 |
+| Auto-schedule / “drive schedule” | [Auto-schedule](/docs/nqgantt/auto-schedule) **on** (strict ASAP) |
+| Soft / visual link | [Auto-schedule](/docs/nqgantt/auto-schedule) **off** (flexible) |
+| Monday flexible | Auto-schedule off — [Monday.com mapping](/docs/nqgantt/monday-com-mapping) |
+| Monday strict | Auto-schedule on — [Monday.com mapping](/docs/nqgantt/monday-com-mapping) |
+| Working calendar | Engine calendar; not detailed in this guide |
+| WBS summary | Group / rollup rows in the Gantt |
+| Port / connector | Drag handle on bar start/end to create links |
+| Host / consumer | App that owns tasks + deps and callbacks |
+
+## Related
+
+- [Dependency types](/docs/nqgantt/dependency-types)
+- [Auto-schedule](/docs/nqgantt/auto-schedule)
+- [Cheatsheet](/docs/nqgantt/cheatsheet)
+- [nqgantt](/docs/nqgantt)
