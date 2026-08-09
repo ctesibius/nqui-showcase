@@ -49,10 +49,12 @@ const TABLE_SCROLL_VIEWPORT = {
 } as const;
 import { Calendar } from "@nqlib/nqui/calendar";
 import {
-  SortableList,
-  SortableListItem,
-  SortableListItemHandle,
-} from "@nqlib/nqui/dnd";
+  Sortable,
+  SortableContent,
+  SortableItem,
+  SortableItemHandle,
+  SortableOverlay,
+} from "@nqlib/nqui/sortable";
 import { getDragHandleAria } from "@nqlib/nqgrid";
 import { AvatarStack } from "../story/avatar-stack";
 import { useWorkBreakdownDropChrome } from "./blocks-grid-drop-chrome";
@@ -518,8 +520,8 @@ export function InitiativesBlock() {
 }
 
 /*
- * Work breakdown — a project detail sheet on Pragmatic `./dnd` SortableList
- * (`layout="table"`). Row reorder (WBS renumbers from structure every render)
+ * Work breakdown — a project detail sheet on `@nqlib/nqui/sortable` (published
+ * API; table `asChild`). Row reorder (WBS renumbers from structure every render)
  * and column reorder share one table; Select + Name stay pinned; data headers
  * resize. Status/priority edit inline through nqui Select, dates through
  * Popover + Calendar. Native HTML5 drag has no KeyboardSensor — pair with
@@ -1069,7 +1071,6 @@ export function WorkBreakdownBlock() {
   const dropContainerRef = useRef<HTMLDivElement>(null);
 
   const view = useMemo(() => computeWbs(rows), [rows]);
-  const tableColCount = 2 + columnOrder.length;
   // Selection operates on tasks + subtasks; phases toggle their subtree.
   const selectableIds = useMemo(
     () => view.filter((v) => v.kind !== "phase").map((v) => v.row.id),
@@ -1512,14 +1513,13 @@ export function WorkBreakdownBlock() {
               ))}
             </colgroup>
             <thead>
-              <SortableList
-                layout="table"
-                asChild
+              <Sortable
                 value={columnOrder}
                 onValueChange={(next) => setColumnOrder(next as DataColId[])}
                 orientation="horizontal"
                 flatCursor
               >
+                <SortableContent asChild>
                 <tr className="text-left text-[11px] text-muted-foreground">
                   <th className={cn(stickyCellCls, "sticky top-0 left-0 z-[4] h-8 border-b font-normal")}>
                     <span className="flex items-center justify-center">
@@ -1542,14 +1542,11 @@ export function WorkBreakdownBlock() {
                     {resizeHandle("name")}
                   </th>
                   {columnOrder.map((id) => (
-                    <SortableListItem
+                    <SortableItem
                       key={id}
                       value={id}
                       asChild
                       asHandle
-                      preview={
-                        <span className="font-medium">{DATA_COLS[id].label}</span>
-                      }
                     >
                       <th
                         className={cn(
@@ -1561,21 +1558,20 @@ export function WorkBreakdownBlock() {
                         {DATA_COLS[id].label}
                         {resizeHandle(id)}
                       </th>
-                    </SortableListItem>
+                    </SortableItem>
                   ))}
                 </tr>
-              </SortableList>
+                </SortableContent>
+              </Sortable>
             </thead>
-            <SortableList
-              layout="table"
-              asChild
+            <Sortable
               value={rows}
               onValueChange={(next) => setRows(normalizeWorkOrder(next))}
               getItemValue={(r: WorkRow) => r.id}
               orientation="vertical"
               flatCursor
-              ghostColSpan={tableColCount}
             >
+              <SortableContent asChild>
               <tbody>
                   {view.map((v, index) => {
                     const visible = rowVisible(v);
@@ -1587,16 +1583,10 @@ export function WorkBreakdownBlock() {
                       const somePhase = !allPhase && ids.some((id) => selected.has(id));
                       const phaseExpanded = !collapsed.has(v.row.id);
                       return (
-                        <SortableListItem
+                        <SortableItem
                           key={v.row.id}
                           value={v.row.id}
                           asChild
-                          preview={
-                            <span className="flex items-center gap-2">
-                              <span className="font-mono text-[10px] text-muted-foreground">{v.wbs}</span>
-                              <span className="font-medium">{v.row.name}</span>
-                            </span>
-                          }
                         >
                           <tr className={cn("group/row bg-muted/30", WBS_ROW_H, !visible && "hidden")}>
                             <td
@@ -1639,7 +1629,7 @@ export function WorkBreakdownBlock() {
                             </td>
                             {columnOrder.map((id) => renderPhaseCell(id, v.row.id, ids.length))}
                           </tr>
-                        </SortableListItem>
+                        </SortableItem>
                       );
                     }
 
@@ -1681,7 +1671,7 @@ export function WorkBreakdownBlock() {
                             {isSub ? (
                               <span className="w-4 shrink-0" aria-hidden />
                             ) : (
-                              <SortableListItemHandle asChild>
+                              <SortableItemHandle asChild>
                                 <button
                                   type="button"
                                   {...getDragHandleAria({ label: `Reorder ${t.name}` })}
@@ -1689,7 +1679,7 @@ export function WorkBreakdownBlock() {
                                 >
                                   <GripIcon />
                                 </button>
-                              </SortableListItemHandle>
+                              </SortableItemHandle>
                             )}
                             <span className="w-12 shrink-0 font-mono text-[10px] text-muted-foreground tabular-nums">
                               {v.wbs}
@@ -1716,23 +1706,29 @@ export function WorkBreakdownBlock() {
 
                     if (isSub) return <Fragment key={t.id}>{rowInner}</Fragment>;
                     return (
-                      <SortableListItem
+                      <SortableItem
                         key={t.id}
                         value={t.id}
                         asChild
-                        preview={
-                          <span className="flex items-center gap-2">
-                            <span className="font-mono text-[10px] text-muted-foreground">{v.wbs}</span>
-                            <span className="font-medium">{t.name}</span>
-                          </span>
-                        }
                       >
                         {rowInner}
-                      </SortableListItem>
+                      </SortableItem>
                     );
                   })}
               </tbody>
-            </SortableList>
+              </SortableContent>
+              <SortableOverlay>
+                {({ value }) => {
+                  const row = rows.find((r) => r.id === value);
+                  if (!row) return null;
+                  return (
+                    <div className="flex items-center gap-2 rounded-md border bg-background px-3 py-2 shadow-lg">
+                      <span className="font-medium">{row.name}</span>
+                    </div>
+                  );
+                }}
+              </SortableOverlay>
+            </Sortable>
           </table>
         </ScrollArea>
 
