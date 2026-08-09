@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { Skeleton, cn } from "@nqlib/nqui";
 import { resolveDocsCatalogEntry, loadCatalogComponent, type CatalogEntry } from "@/nqchart/catalog";
 import { LazyMount } from "@/components/blocks/lazy-mount";
+import { Tray } from "@/components/showcase/tray";
+import "@/components/blocks/blocks.css";
 
 const componentCache = new Map<string, Promise<ComponentType>>();
 
@@ -68,8 +70,8 @@ export function ComponentPreview({
 
   return (
     <div className={cn("group relative my-4 mb-10", className)}>
-      <div className="flex flex-col rounded-lg bg-muted p-1">
-        <div className="flex items-center justify-between gap-2 px-2 py-1">
+      <Tray as="div">
+        <Tray.Caption className="items-center">
           <span className="line-clamp-1 font-mono text-xs text-muted-foreground">
             {title ?? entry.name}
           </span>
@@ -101,35 +103,29 @@ export function ComponentPreview({
               </button>
             </div>
           ) : null}
-        </div>
+        </Tray.Caption>
 
-        <div className="overflow-hidden rounded-md border border-border bg-background">
+        <Tray.Stage
+          variant="flush"
+          className={cn(
+            tallPreview ? "h-[22rem] sm:h-[28rem]" : "h-64 sm:h-[22.5rem]",
+            containerClassName,
+          )}
+          data-align={align}
+        >
           {tab === "preview" ? (
-            <div
-              className={cn(
-                "flex w-full justify-center",
-                tallPreview ? "h-[22rem] sm:h-[28rem]" : "h-64 sm:h-[22.5rem]",
-                containerClassName,
-              )}
-              data-align={align}
-              style={{
-                alignItems:
-                  align === "start" ? "flex-start" : align === "end" ? "flex-end" : "center",
-              }}
+            <LazyMount
+              className="size-full min-h-0"
+              fallback={<Skeleton className="size-full rounded-md" />}
             >
-              <LazyMount
-                className="size-full min-h-0"
-                fallback={<Skeleton className="size-full rounded-md" />}
-              >
-                <Suspense fallback={<Skeleton className="size-full rounded-md" />}>
-                  <div className="size-full min-h-0 [&_[data-slot=chart]]:size-full">
-                    <LiveChart entry={entry} />
-                  </div>
-                </Suspense>
-              </LazyMount>
-            </div>
+              <Suspense fallback={<Skeleton className="size-full rounded-md" />}>
+                <div className="size-full min-h-0 [&_[data-slot=chart]]:size-full">
+                  <LiveChart entry={entry} />
+                </div>
+              </Suspense>
+            </LazyMount>
           ) : (
-            <div className="space-y-2 p-4 text-sm text-muted-foreground">
+            <div className="space-y-2 overflow-auto p-4 text-sm text-muted-foreground">
               <p>
                 Registry id{" "}
                 <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
@@ -148,8 +144,8 @@ export function ComponentPreview({
               </p>
             </div>
           )}
-        </div>
-      </div>
+        </Tray.Stage>
+      </Tray>
     </div>
   );
 }

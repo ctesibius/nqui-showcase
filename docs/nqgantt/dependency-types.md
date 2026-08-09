@@ -2,6 +2,8 @@
 
 **Intention:** Type answers *which ends* of the two bars are tied. It is a property of the **link**, not of a bar and not of the whole chart.
 
+<GanttExample name="dependencies" />
+
 ## The four types
 
 | Code | Name | Plain meaning | Typical use |

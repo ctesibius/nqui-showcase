@@ -53,5 +53,5 @@ In this showcase, [[practice-in-gantt-lab]] / `RoadmapGantt` keeps an internal d
 
 - [[dependency-types]]
 - [[auto-schedule]]
-- [[monday-com-mapping]]
+- [[auto-schedule]]
 - [[cheatsheet]]

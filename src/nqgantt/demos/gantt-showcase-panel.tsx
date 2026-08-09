@@ -22,6 +22,7 @@ type GanttShowcaseTabId =
   | "gantt-root"
   | "critical-path"
   | "flat"
+  | "editable-sidebar"
   | "gantt-demo";
 
 type GanttShowcaseTab = {
@@ -70,6 +71,15 @@ const TABS: GanttShowcaseTab[] = [
     title: "Ungrouped timeline",
     description: "Single swimlane — no phase brackets, useful when grouping lives in your app shell.",
     importHint: "<GanttRoot data={…} />  // omit groups prop",
+  },
+  {
+    id: "editable-sidebar",
+    label: "Editable sidebar",
+    path: "0.4.0",
+    title: "Sidebar as an editable grid",
+    description:
+      "Host-defined columns with inline editing, sort, filter, resize and reorder. Dates typed in the sidebar go through onFeatureMove — the same handler bar drags use — so auto-scheduling applies either way.",
+    importHint: "<GanttRoot onCellCommit onFeatureMove onSortChange … />",
   },
   {
     id: "gantt-demo",
@@ -163,6 +173,16 @@ export function GanttShowcasePanel({ className }: { className?: string }) {
             tasks={tasks}
             onTasksChange={setTasks}
             grouped={false}
+          />
+        );
+      case "editable-sidebar":
+        return (
+          <RoadmapGantt
+            className="min-h-0 flex-1 border-0"
+            tasks={tasks}
+            onTasksChange={setTasks}
+            grouped={false}
+            visibleColumnIds={["tasks", "status", "timeline", "duration", "priority", "progress"]}
           />
         );
       case "gantt-demo":

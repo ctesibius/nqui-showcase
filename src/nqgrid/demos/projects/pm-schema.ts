@@ -2,10 +2,7 @@
  * ONE schema + ONE row set, fed to table / list / board — the proof that the
  * ColumnType contract makes them render modes of one engine, not three engines.
  *
- * Everything here is data. The engine never learns what "status" or "person" is:
- * `select` is a core plugin; `person` is registered locally below to show the
- * registry extends with zero engine edits (SKILL.md: "new types are registry
- * entries, never edits to engine core").
+ * Row SSOT: `@/lib/pm` (Q3_TASKS / TEAM). Schema + person column stay local.
  */
 import {
   createDefaultRegistry,
@@ -13,21 +10,11 @@ import {
   type ColumnType,
   type SelectOption,
 } from "@nqlib/nqgrid/engine";
+import { Q3_TASKS } from "@/lib/pm/fixtures/q3-tasks";
+import { TEAM, TEAM_BY_ID } from "@/lib/pm/team";
+import type { PmIssue as Task, PmPerson as Person } from "@/lib/pm/types";
 
-export interface Person {
-  readonly id: string;
-  readonly name: string;
-  readonly color: string;
-}
-
-export const TEAM: readonly Person[] = [
-  { id: "ava", name: "Ava Chen", color: "#6366f1" },
-  { id: "ben", name: "Ben Ortiz", color: "#0ea5e9" },
-  { id: "cleo", name: "Cleo Park", color: "#14b8a6" },
-  { id: "dane", name: "Dane Reyes", color: "#f59e0b" },
-];
-
-const TEAM_BY_ID = new Map(TEAM.map((p) => [p.id, p]));
+export { TEAM, TEAM_BY_ID, Q3_TASKS as TASKS, type Task, type Person };
 
 /** A locally-registered `person` type. Stores an id, renders the name, chips by color. */
 const personType: ColumnType<unknown, Person> = {
@@ -119,130 +106,6 @@ export function statusSchemaFrom(
     }
   );
 }
-
-export type Task = {
-  id: string;
-  title: string;
-  status: string;
-  priority: string;
-  assignee: string;
-  effort: number;
-  progress: number;
-  budget: number;
-  due: string;
-  timeline: { start: string; end: string };
-};
-
-export const TASKS: Task[] = [
-  {
-    id: "t1",
-    title: "Finalize checkout wireframes",
-    status: "done",
-    priority: "high",
-    assignee: "ava",
-    effort: 5,
-    progress: 100,
-    budget: 12000,
-    due: "2026-06-03",
-    timeline: { start: "2026-05-28", end: "2026-06-03" },
-  },
-  {
-    id: "t2",
-    title: "Payment provider security review",
-    status: "done",
-    priority: "high",
-    assignee: "ben",
-    effort: 8,
-    progress: 100,
-    budget: 18000,
-    due: "2026-06-08",
-    timeline: { start: "2026-06-01", end: "2026-06-08" },
-  },
-  {
-    id: "t3",
-    title: "Apple Pay integration",
-    status: "in_progress",
-    priority: "high",
-    assignee: "ava",
-    effort: 13,
-    progress: 62,
-    budget: 24000,
-    due: "2026-06-18",
-    timeline: { start: "2026-06-05", end: "2026-06-18" },
-  },
-  {
-    id: "t4",
-    title: "Cart abandonment recovery",
-    status: "in_progress",
-    priority: "med",
-    assignee: "cleo",
-    effort: 8,
-    progress: 45,
-    budget: 16000,
-    due: "2026-06-20",
-    timeline: { start: "2026-06-10", end: "2026-06-20" },
-  },
-  {
-    id: "t5",
-    title: "Mobile performance audit",
-    status: "review",
-    priority: "med",
-    assignee: "dane",
-    effort: 5,
-    progress: 88,
-    budget: 9000,
-    due: "2026-06-17",
-    timeline: { start: "2026-06-12", end: "2026-06-17" },
-  },
-  {
-    id: "t6",
-    title: "EU market localization",
-    status: "review",
-    priority: "low",
-    assignee: "ben",
-    effort: 3,
-    progress: 70,
-    budget: 6000,
-    due: "2026-06-19",
-    timeline: { start: "2026-06-15", end: "2026-06-19" },
-  },
-  {
-    id: "t7",
-    title: "Analytics event schema",
-    status: "backlog",
-    priority: "med",
-    assignee: "cleo",
-    effort: 5,
-    progress: 0,
-    budget: 11000,
-    due: "2026-06-24",
-    timeline: { start: "2026-06-20", end: "2026-06-24" },
-  },
-  {
-    id: "t8",
-    title: "Checkout A/B test setup",
-    status: "backlog",
-    priority: "low",
-    assignee: "dane",
-    effort: 8,
-    progress: 0,
-    budget: 14000,
-    due: "2026-06-28",
-    timeline: { start: "2026-06-22", end: "2026-06-28" },
-  },
-  {
-    id: "t9",
-    title: "Launch runbook and rollback plan",
-    status: "backlog",
-    priority: "high",
-    assignee: "ava",
-    effort: 13,
-    progress: 12,
-    budget: 22000,
-    due: "2026-07-04",
-    timeline: { start: "2026-06-24", end: "2026-07-04" },
-  },
-];
 
 /** Accessor: read a task field by schema column id (raw value, the SSOT scalar). */
 export function taskValue(task: Task, columnId: string): unknown {

@@ -48,6 +48,122 @@ export default function DesignSystem() {
       {/* Color */}
       <section id="color" className="space-y-4">
         <h2 className="text-2xl font-semibold">Color</h2>
+
+        {/*
+          Hybrid = max 2 surfaces (tray + stage). Card is the product float,
+          not a gallery A/B pair. Side-by-side recipes — same stub in each.
+        */}
+        <div className="space-y-3">
+          <div>
+            <h3 className="text-lg font-semibold">Tray · stage · card</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Hybrid chrome uses two tones only.{" "}
+              <code className="text-xs text-foreground">bg-card</code> is the
+              product float surface — not the third gallery layer. Catalog and{" "}
+              <code className="text-xs text-foreground">/blocks</code> use recipe
+              1.
+            </p>
+          </div>
+
+          {/* Token roles (reference strip) */}
+          <div className="rounded-lg bg-muted p-1">
+            <div className="grid grid-cols-1 gap-1 sm:grid-cols-3">
+              {[
+                {
+                  role: "Tray",
+                  token: "bg-muted",
+                  note: "Typical rim (Surface B)",
+                  className: "bg-muted",
+                },
+                {
+                  role: "Stage",
+                  token: "bg-background",
+                  note: "Inner stage (Surface A)",
+                  className: "bg-background",
+                },
+                {
+                  role: "Card",
+                  token: "bg-card",
+                  note: "Product float — not A/B",
+                  className: "bg-card",
+                },
+              ].map(({ role, token, note, className }) => (
+                <div
+                  key={token}
+                  className={`flex min-h-28 flex-col justify-between rounded-md border border-border p-3 ${className}`}
+                >
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{role}</p>
+                    <p className="mt-0.5 font-mono text-xs text-muted-foreground">
+                      {token}
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{note}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Recipe comparison — identical stub content in each nest */}
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-foreground">
+              Elevation recipes
+            </h4>
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+              {(
+                [
+                  {
+                    id: "hybrid",
+                    label: "1 · Hybrid (canonical)",
+                    tray: "bg-muted",
+                    stage: "bg-background",
+                    note: "Philosophy match — muted tray, background stage. Shared Tray in catalog / blocks / charts / docs.",
+                  },
+                  {
+                    id: "broke",
+                    label: "2 · Broke it",
+                    tray: "bg-muted",
+                    stage: "bg-card",
+                    note: "Muted tray + card stage. Card is the product float — wrong role as gallery stage.",
+                  },
+                  {
+                    id: "alt",
+                    label: "3 · Alt proposal",
+                    tray: "bg-card",
+                    stage: "bg-background",
+                    note: "Card tray, background stage. Stage matches page chrome; tray is a lighter rim (inverted recess).",
+                  },
+                ] as const
+              ).map(({ id, label, tray, stage, note }) => (
+                <figure key={id} className="min-w-0 space-y-1.5">
+                  <figcaption className="space-y-0.5">
+                    <p className="text-sm font-medium text-foreground">{label}</p>
+                    <p className="font-mono text-[0.625rem] text-muted-foreground">
+                      {tray} → {stage}
+                    </p>
+                  </figcaption>
+                  <div className={`rounded-lg p-1 ${tray}`}>
+                    <div
+                      className={`rounded-md border border-border p-3 ${stage}`}
+                    >
+                      <p className="text-sm font-medium text-foreground">
+                        Specimen stub
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Same content in every recipe — compare surfaces only.
+                      </p>
+                      <div className="mt-3 h-8 rounded-sm border border-dashed border-border/80" />
+                    </div>
+                  </div>
+                  <p className="text-xs leading-snug text-muted-foreground">
+                    {note}
+                  </p>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </div>
+
         <Card>
           <CardHeader>
             <CardTitle>System Colors</CardTitle>
@@ -100,7 +216,7 @@ export default function DesignSystem() {
         <Card>
           <CardHeader>
             <CardTitle>Type Scale</CardTitle>
-            <CardDescription>Font: Inter Variable (--font-sans). sm: text-xs, default: text-sm, base: text-base</CardDescription>
+            <CardDescription>Font: Satoshi (--font-sans). sm: text-xs, default: text-sm, base: text-base</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">

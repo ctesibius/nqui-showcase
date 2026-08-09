@@ -29,7 +29,7 @@
 
 1. Auto-schedule **on**; move predecessor left and right; note successor.
 2. Auto-schedule **off**; repeat; successor stays.
-3. Read [[monday-com-mapping]].
+3. Read [[auto-schedule]].
 
 ### Drill C — Types
 

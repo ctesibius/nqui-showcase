@@ -18,20 +18,29 @@ import {
 } from "../components/contrast-sliding-segment";
 import { BLOCKS, LIBS, blockMatchesLib, isFullBleed, libCount, resolveStage, type Lib } from "../components/blocks/registry";
 import { LazyMount } from "../components/blocks/lazy-mount";
+import {
+  Tray,
+  trayMeta,
+  trayTags,
+  type TrayStageVariant,
+} from "../components/showcase/tray";
 import "../components/landing/landing.css";
 import "../components/blocks/blocks.css";
 
 /*
  * The blocks gallery — the tour. Same room as the landing (grid wallpaper, one
- * bloom, calm engineered chrome), but where the landing shows one window, this
- * shows the whole shelf: every block is a real, interactive pattern built only
- * from nqlib components. Filter by library; each card names its bill of
- * materials so you can read a block and know what to import.
+ * bloom), but the shelf uses shared Tray (muted rim → background stage).
+ * Every block is live nqlib.
  *
- * Card size follows the component's job (`stage`): charts stay 4:3 tiles,
+ * Tray size follows the component's job (`stage`): charts stay 4:3 tiles,
  * tables get vertical room, gantt/report claim the full shelf — never cram a
  * timeline into minmax(310px).
  */
+
+function stageVariant(stage: ReturnType<typeof resolveStage>): TrayStageVariant {
+  if (stage === "compact") return "default";
+  return stage;
+}
 
 export function BlocksPage() {
   const [lib, setLib] = useState<Lib | "all">("all");
@@ -113,49 +122,42 @@ export function BlocksPage() {
             const heavy =
               b.lib === "nqchart" || b.lib === "report" || b.lib === "nqgrid" || b.lib === "nqgantt";
             return (
-              <figure
+              <Tray
                 key={b.id}
+                interactive
                 className={cn(
-                  "blk-card",
-                  (fullBleed || b.wide) && "blk-card--wide",
-                  stage === "gantt" && "blk-card--gantt",
-                  stage === "report" && "blk-card--report",
-                  stage === "table" && "blk-card--table",
-                  (b.tall || stage === "compact") &&                   b.tall && "blk-card--tall",
+                  (fullBleed || b.wide) && "col-span-full",
+                  stage === "gantt" && "min-h-[28rem]",
+                  stage === "report" && "min-h-[48rem]",
+                  stage === "table" && "min-h-[22rem]",
+                  b.tall && "min-h-[28rem]",
                 )}
               >
-                <figcaption className="flex items-baseline justify-between gap-3">
-                  <span className="text-sm font-medium">{b.name}</span>
+                <Tray.Caption>
+                  <span className="truncate text-sm font-medium">{b.name}</span>
                   <Badge variant="outline" className="shrink-0 font-mono text-[10px] font-normal">
                     {b.lib}
                   </Badge>
-                </figcaption>
+                </Tray.Caption>
 
-                {/* Live surface. Stage CSS is intentional: size follows the job. */}
-                <div
-                  className={cn(
-                    "blk-stage",
-                    stage === "chart" && "blk-stage--chart",
-                    stage === "table" && "blk-stage--table",
-                    stage === "gantt" && "blk-stage--gantt",
-                    stage === "report" && "blk-stage--report",
-                  )}
-                >
+                <Tray.Stage variant={stageVariant(stage)}>
                   {heavy ? (
-                    <LazyMount fallback={<Skeleton className="size-full rounded-lg" />}>
+                    <LazyMount fallback={<Skeleton className="size-full rounded-md" />}>
                       <div className="size-full min-h-0">
                         <b.Render />
                       </div>
                     </LazyMount>
                   ) : (
-                    <Suspense fallback={<Skeleton className="size-full rounded-lg" />}>
+                    <Suspense fallback={<Skeleton className="size-full rounded-md" />}>
                       <b.Render />
                     </Suspense>
                   )}
-                </div>
+                </Tray.Stage>
 
-                <p className="text-xs leading-relaxed text-muted-foreground">{b.blurb}</p>
-                <ul className="flex flex-wrap gap-1">
+                <p className={cn(trayMeta, "text-xs leading-relaxed text-muted-foreground")}>
+                  {b.blurb}
+                </p>
+                <ul className={trayTags}>
                   {b.bom.map((p) => (
                     <li
                       key={p}
@@ -165,7 +167,7 @@ export function BlocksPage() {
                     </li>
                   ))}
                 </ul>
-              </figure>
+              </Tray>
             );
           })}
         </div>

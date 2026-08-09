@@ -65,6 +65,9 @@ const report = (name: keyof typeof import("./blocks-report")) =>
 const grid = (name: keyof typeof import("./blocks-grid")) =>
   lazy(() => import("./blocks-grid").then((m) => ({ default: m[name] as ComponentType })));
 
+const issues = (name: keyof typeof import("./blocks-issues")) =>
+  lazy(() => import("./blocks-issues").then((m) => ({ default: m[name] as ComponentType })));
+
 const timeline = (name: keyof typeof import("./blocks-timeline")) =>
   lazy(() => import("./blocks-timeline").then((m) => ({ default: m[name] as ComponentType })));
 
@@ -72,20 +75,31 @@ export const BLOCKS: Block[] = [
   {
     id: "sales-ledger",
     name: "Sales ledger",
-    blurb: "Full-bleed ink report — pivot, trend, and a real campaign timeline.",
+    blurb: "Full-bleed ink report — pivot, trend, and category bars.",
     lib: "report",
-    libs: ["report", "nqgrid", "nqchart", "nqgantt"],
-    bom: ["computePivot", "NQAreaChart", "NQBarChart", "NQSparklineChart", "GanttRoot", "DropdownMenu", "Button"],
+    libs: ["report", "nqgrid", "nqchart"],
+    bom: ["computePivot", "NQAreaChart", "NQBarChart", "NQSparklineChart"],
     stage: "report",
     Render: report("SalesLedgerBlock"),
+  },
+  {
+    id: "issues-lab",
+    name: "Issues lab",
+    blurb:
+      "FY26 campaign as board and list — one PmIssue feed shared with Timeline lab.",
+    lib: "report",
+    libs: ["report", "nqui", "nqchart"],
+    bom: ["KanbanBoard", "SortableList", "ToggleGroup", "Badge", "Avatar", "NQBarChart", "@/lib/pm"],
+    stage: "report",
+    Render: issues("IssuesLabBlock"),
   },
   {
     id: "timeline-lab",
     name: "Timeline lab",
     blurb:
-      "A grouped plan you can re-skin live — five bar looks, bracket, rail or pill rollups, and a divider that answers the arrow keys.",
+      "FY26 campaign by lane — drag to reschedule, live bar skins, milestones and dependencies.",
     lib: "nqgantt",
-    bom: ["GanttRoot", "DropdownMenu", "Button", "Slider", "--gantt-bar-* tokens"],
+    bom: ["GanttRoot", "DropdownMenu", "Button", "Slider", "--gantt-bar-* tokens", "@/lib/pm"],
     stage: "gantt",
     Render: timeline("TimelineLabBlock"),
   },
@@ -104,7 +118,7 @@ export const BLOCKS: Block[] = [
     name: "Work breakdown",
     blurb: "Drag rows across phases (WBS renumbers) or reorder columns — pinned + resizable headers, shift-click ranges, inline status/priority/date edits.",
     lib: "nqgrid",
-    bom: ["ScrollArea", "DropdownMenu", "Button", "Sortable", "useSortableTableDropIndicators", "sortableDropTargetProps", "Calendar", "AvatarStack"],
+    bom: ["ScrollArea", "DropdownMenu", "Button", "SortableList", "SortableListItem", "Calendar", "AvatarStack"],
     stage: "table",
     wide: true,
     Render: grid("WorkBreakdownBlock"),

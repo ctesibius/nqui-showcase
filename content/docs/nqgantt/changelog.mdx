@@ -7,6 +7,30 @@ Track published versions on npm: [`@nqlib/nqgantt`](https://www.npmjs.com/packag
 
 Bar chrome in this showcase may lag or lead the package — see `pnpm nqgantt:sync-lib` and `NQGANTT-WORKSPACE.md`.
 
+## 0.4.0
+
+The first release since 0.3.1, and a large one. Two things changed shape.
+
+**The left sidebar became a working grid.** Every visible cell edits in place, columns can be
+added, sorted, filtered, resized and reordered, and columns your organisation defined render as
+richly as the built-in ones. Typing a date goes through the same path as dragging a bar, so
+scheduling rules apply either way. See [Editable columns](/docs/nqgantt/editable-columns).
+
+**The engine gained the cost and resource machinery for reporting**, not just drawing:
+
+| | |
+|---|---|
+| [Baselines and earned value](/docs/nqgantt/baselines-and-earned-value) | Freeze an approved plan — dates *and* budget — and measure PV / EV / CPI / SPI against it |
+| [Actuals and the worklog](/docs/nqgantt/actuals-and-worklog) | Actual cost derived from logged hours rather than typed in |
+| [Resource availability](/docs/nqgantt/resource-availability) | Part-time patterns and leave, honoured by levelling and capacity |
+| [MS Project interop](/docs/nqgantt/ms-project-interop) | Import and export plans as XML |
+
+**One behaviour change on upgrade:** durations are now **inclusive**. A task running Monday to
+Friday reads as 5 days, not 4 — which is what a planner means by "a week of work". Displayed
+durations shift by one; scheduling itself is unchanged.
+
+Everything else is opt-in.
+
 | Next | |
 |------|--|
 | [Concepts](/docs/nqgantt/concepts) | Demo map |

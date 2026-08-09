@@ -23,6 +23,7 @@
     "nqgantt:sync-lib": "node scripts/sync-nqgantt-lib.mjs",
     "nqgantt:sync-skill": "node scripts/sync-nqgantt-skill.mjs",
     "build": "fumadocs-mdx && tsc -b && vite build",
+    "build:local": "USE_LOCAL_NQGRID=true USE_LOCAL_NQGANTT=true USE_LOCAL_NQCHART=true fumadocs-mdx && tsc -b && USE_LOCAL_NQGRID=true USE_LOCAL_NQGANTT=true USE_LOCAL_NQCHART=true vite build",
     "lint": "eslint .",
     "generate-favicon": "node scripts/generate-favicon.mjs",
     "preview": "vite preview"

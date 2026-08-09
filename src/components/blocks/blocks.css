@@ -1,7 +1,8 @@
 /*
- * Blocks gallery chrome. Same rule as the landing: the shelf is furniture, the
- * blocks inside are real nqui components. Every value here is a raw nqui token
- * (--radius-*, --border, --card, --duration-*, --ease-out, --shadow-elevated).
+ * Blocks / charts gallery — shelf grid + ledger/chart embed helpers.
+ *
+ * Specimen chrome (muted tray → background stage) lives in
+ * `src/components/showcase/tray.tsx` — do not reintroduce .blk-card / .blk-stage.
  */
 
 .blk-shelf {
@@ -16,103 +17,9 @@
   gap: 1rem;
 }
 
-.blk-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  min-width: 0;
-  padding: 1.1rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  background: color-mix(in oklch, var(--card) 82%, transparent);
-  /* Shadow/border only — a CSS transform here desyncs ECharts hit-testing. */
-  transition:
-    border-color var(--duration-standard) var(--ease-out),
-    box-shadow var(--duration-standard) var(--ease-out);
-}
-
-.blk-card:hover {
-  border-color: color-mix(in oklch, var(--foreground) 18%, transparent);
-  box-shadow: var(--shadow-elevated);
-}
-
-/* Dense forms need a taller card; chart cards stay content-sized (4:3 stage). */
-.blk-card--tall {
-  min-height: 28rem;
-}
-
-/* Dense tables: one shelf column is fine; give the body real vertical room. */
-.blk-card--table {
-  min-height: 22rem;
-}
-
 /*
- * Full-bleed surfaces — gantt + multi-panel reports.
- * A timeline needs horizontal runway for bars and labels; never squeeze into
- * minmax(310px).
- */
-.blk-card--wide {
-  grid-column: 1 / -1;
-}
-
-.blk-card--wide.blk-card--gantt {
-  min-height: 28rem;
-}
-
-.blk-card--wide.blk-card--report {
-  min-height: 48rem;
-}
-
-/* Default stage: grow to fill leftover card height (nqui blocks). */
-.blk-stage {
-  position: relative;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-/*
- * Chart stage — 4:3 — a touch taller than aspect-video so pie labels fit in narrow cards.
- * Cards are ~310px wide; a fixed rem height forced ~1:1 canvases that
- * stretched the plot and broke ECharts hit-testing (stuck hover, pie glitter).
- */
-.blk-stage--chart {
-  flex: none;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  height: auto;
-  overflow: hidden;
-}
-
-/* Pivot / grid specimen — room for header + rows without clipping. */
-.blk-stage--table {
-  flex: 1;
-  min-height: 16rem;
-  overflow: auto;
-}
-
-/*
- * Gantt stage — sidebar labels + month scale + 5 bars need real height.
- * Width comes from .blk-card--wide (full shelf).
- */
-.blk-stage--gantt {
-  flex: none;
-  height: 30rem;
-  min-height: 30rem;
-  overflow: hidden;
-}
-
-/* Multi-surface report: one scrollport (not the chart islands inside). */
-.blk-stage--report {
-  flex: 1;
-  min-height: 40rem;
-  overflow: auto;
-  /* Stable gutter — scrollbar appearing on hover must not resize ECharts. */
-  scrollbar-gutter: stable;
-}
-
-/*
- * Chart island inside a scrolling report — same contract as .blk-stage--chart.
+ * Chart island inside a scrolling report — same contract as Tray.Stage chart,
+ * but borderless: the outer report stage already owns the frame.
  * overflow:hidden + contain keeps ECharts hit-testing off the scrollport;
  * without this, axisPointer freezes on first hover (charts page is fine).
  */
@@ -123,6 +30,18 @@
   height: auto;
   overflow: hidden;
   contain: layout paint;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+}
+
+/* Chart hosts flush in the ledger — no nested card chrome. */
+.blk-ledger [data-slot="chart"] {
+  border: none;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
 }
 
 /* Timeless ledger ink — dark mode flips to paper-on-slate. */
@@ -168,13 +87,6 @@
 /* Shared with /charts — HTML tooltips must never steal hits (flicker / stuck axis line). */
 .nq-echarts-tooltip {
   pointer-events: none !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .blk-card,
-  .blk-card:hover {
-    transition: none;
-  }
 }
 
 @media (max-width: 560px) {

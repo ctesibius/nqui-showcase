@@ -11,7 +11,7 @@
 | Critical path display | Off in workshops | On for status / slip reviews |
 | Bar look | Flat + rail (showcase default) | Team preference; keep readable contrast |
 
-Train the **difference** between link geometry ([[dependency-types]]) and enforcement ([[auto-schedule]]) early—Monday migrants will look for “flexible/strict” first ([[monday-com-mapping]]).
+Train the **difference** between link geometry ([[dependency-types]]) and enforcement ([[auto-schedule]]) early. Most people arrive looking for a single “flexible vs strict” switch and need to learn that the link type and whether it is enforced are two separate decisions.
 
 ## Training path (suggested)
 
@@ -42,6 +42,6 @@ Train the **difference** between link geometry ([[dependency-types]]) and enforc
 
 - [[philosophy]]
 - [[auto-schedule]]
-- [[monday-com-mapping]]
+- [[baselines-and-earned-value]]
 - [[glossary]]
 - [[index]]

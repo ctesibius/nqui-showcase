@@ -18,6 +18,7 @@ import {
   ShowcaseGrid,
   SkillsBlock,
 } from "./nqchart-blocks";
+import { GanttExample } from "./gantt-example";
 
 /**
  * MDX component map for showcase docs (nqui + synced nqchart pages).
@@ -111,6 +112,7 @@ export const mdxComponents: MDXComponents = {
   SkillsBlock,
   ComponentPreview,
   ComponentSource,
+  GanttExample,
   ComponentProps,
   Alert,
   AlertContent,

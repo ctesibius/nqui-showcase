@@ -9,7 +9,7 @@ Published on the showcase at **`/docs/nqgantt`**. This folder (`docs/nqgantt/`) 
 | Reader | Start here |
 |--------|------------|
 | New to Gantt / scheduling | [[getting-started]] → [[practice-in-gantt-lab]] |
-| Coming from Monday.com | [[monday-com-mapping]] → [[auto-schedule]] |
+| Reporting on cost or schedule performance | [[baselines-and-earned-value]] → [[actuals-and-worklog]] |
 | PMP / PMO rolling this out | [[philosophy]] → [[pmo-playbook]] |
 | Need a term | [[glossary]] |
 | Need a one-pager | [[cheatsheet]] |
@@ -32,8 +32,12 @@ Prefer concrete scenarios over abstract graphs. Practice in **`/gantt-lab`** (de
 | [[dependencies]] | Create / select / edit / delete links |
 | [[dependency-types]] | FS, SS, FF, SF + lag/lead |
 | [[auto-schedule]] | Strict (on) vs flexible (off); push and pull |
-| [[monday-com-mapping]] | Monday flexible/strict → nqgantt |
 | [[critical-path]] | What “critical” means here |
+| [[editable-columns]] | The sidebar as a working grid; your own columns |
+| [[baselines-and-earned-value]] | Freezing an approved plan; PV / EV / CPI / SPI |
+| [[actuals-and-worklog]] | Giving actual cost a source you can defend |
+| [[resource-availability]] | Part-time patterns, leave, levelling that holds up |
+| [[ms-project-interop]] | Moving a plan in and out as XML |
 | [[practice-in-gantt-lab]] | Lab controls and drills |
 | [[pmo-playbook]] | Adoption, defaults, training, anti-patterns |
 | [[glossary]] | PMP ↔ product terms |

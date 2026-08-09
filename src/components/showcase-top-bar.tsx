@@ -38,7 +38,12 @@ export type ShowcaseTopBarLink = {
  * deploy, so a dev surface can never leak into the shipped nav.
  */
 export const devTopBarLinks: ReadonlyArray<ShowcaseTopBarLink> =
-  import.meta.env.DEV ? [{ to: "/gantt-lab", label: "Gantt lab", badge: "dev" }] : [];
+  import.meta.env.DEV
+    ? [
+        { to: "/gantt-lab", label: "Gantt lab", badge: "dev" },
+        { to: "/grid-lab", label: "Grid lab", badge: "dev" },
+      ]
+    : [];
 
 export type ShowcaseTopBarSegment = {
   value: string;
@@ -105,7 +110,7 @@ export function ShowcaseTopBar({
           <Link to={link.to}>
             {link.label}
             {link.badge ? (
-              <span className="ml-1.5 rounded-full bg-foreground/10 px-1.5 py-px font-mono text-[9px] leading-[1.5] tracking-wide text-muted-foreground uppercase">
+              <span className="ml-1.5 rounded-full bg-foreground/10 px-1.5 py-px font-mono text-xs leading-[1.5] tracking-wide text-muted-foreground uppercase">
                 {link.badge}
               </span>
             ) : null}

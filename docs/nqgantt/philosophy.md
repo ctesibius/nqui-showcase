@@ -31,7 +31,7 @@ See [[auto-schedule]] and [[dependencies]].
 | Strict | Auto-schedule **on** | Successors snap ASAP to the link (push later *and* pull earlier) |
 | Flexible | Auto-schedule **off** | Links still draw and store type/lag; dates do not cascade |
 
-Monday.com users: see [[monday-com-mapping]]. Per-edge flex/strict is an intended direction; today the showcase lab uses a **chart-level** toggle.
+Per-edge flexible/strict is an intended direction; today the showcase lab uses a **chart-level** toggle.
 
 ## What we refuse
 

@@ -125,6 +125,9 @@ export default defineConfig(async ({ mode }) => ({
       ...localNqgridAliases(),
       ...localNqganttAliases(),
       ...localNqchartAliases(),
+      // Force one nqui graph. Local nqgantt otherwise resolves its nested
+      // @nqlib/nqui@0.6.x and ships a second Radix Tooltip context.
+      { find: /^@nqlib\/nqui$/, replacement: path.resolve(__dirname, "node_modules/@nqlib/nqui/dist/nqui.es.js") },
       { find: "@", replacement: path.resolve(__dirname, "./src") },
       { find: "collections", replacement: path.resolve(__dirname, "./.source") },
     ],
@@ -132,6 +135,9 @@ export default defineConfig(async ({ mode }) => ({
     // `@nqlib/nqchart` too — duplicate copies break Grid reference equality in
     // apply-preview-controls (pattern XOR Grid strip).
     // fumadocs packages must stay deduped / noExternal to avoid duplicate React context.
+    // `@nqlib/nqui` must win over nested copies (e.g. nqgantt's @nqlib/nqui@0.6.x)
+    // — two TooltipProvider contexts crash Rating/star editors as
+    // "`Tooltip` must be used within `TooltipProvider`".
     dedupe: [
       "recharts",
       "echarts",
@@ -141,6 +147,8 @@ export default defineConfig(async ({ mode }) => ({
       "@tanstack/react-table",
       "@tanstack/react-virtual",
       "@nqlib/nqchart",
+      "@nqlib/nqui",
+      "@radix-ui/react-tooltip",
       "fumadocs-core",
       "fumadocs-mdx",
     ],

@@ -353,7 +353,7 @@ export function StageFlowBlock() {
   const top = PIPELINE[0].value;
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border bg-card">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-background">
       <div className="border-b px-4 py-2.5">
         <p className="text-sm font-medium">Job progression</p>
         <p className="text-xs text-muted-foreground">
@@ -398,7 +398,7 @@ export function StageFlowBlock() {
         })}
       </div>
 
-      <div className="h-[180px] shrink-0 px-1 pb-2">
+      <div className="h-[180px] shrink-0 px-4 pb-2">
         <FunnelC.NQFunnelChart
           data={PIPELINE_DATA}
           config={PIPELINE_CFG}

@@ -19,8 +19,8 @@ PMP / common PM language ↔ what nqgantt and this showcase call it.
 | Baseline | Engine supports baselines; not covered in this PM guide v1 |
 | Auto-schedule / “drive schedule” | [[auto-schedule]] **on** (strict ASAP) |
 | Soft / visual link | [[auto-schedule]] **off** (flexible) |
-| Monday flexible | Auto-schedule off — [[monday-com-mapping]] |
-| Monday strict | Auto-schedule on — [[monday-com-mapping]] |
+| Flexible dependency | Auto-schedule off — the link is recorded, dates do not cascade ([[auto-schedule]]) |
+| Strict dependency | Auto-schedule on — successors move with the predecessor ([[auto-schedule]]) |
 | Working calendar | Engine calendar; not detailed in this guide |
 | WBS summary | Group / rollup rows in the Gantt |
 | Port / connector | Drag handle on bar start/end to create links |

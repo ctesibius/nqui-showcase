@@ -20,6 +20,7 @@ Load **1–3 files** per task. Do not bulk-read skill folders or sibling engine 
 | **Component gallery / site chrome** | nqui `READ_BUDGET.md` | one `components/nqui-<name>.md` | all component docs |
 | **Spreadsheet / formula bar / pivot** | `NQGRID-WORKSPACE.md` | `src/nqgrid/demos/spreadsheet/spreadsheet-page.tsx` | all of `../nqgrid/src/` |
 | **Projects / PM board / columns** | `src/nqgrid/demos/projects/projects-page.tsx` | `pm-column-model.ts`, `pm-schema.ts` | nqgrid engine internals |
+| **Grid lab (dev only)** | `src/pages/grid-lab-page.tsx` (`/grid-lab`) | WBS + projects + spreadsheet benches | inventing a second catalog |
 | **Grid styling / rich cells** | `src/nqgrid/lib/nqgrid-styling/` (one file) | `NQGRID-WORKSPACE.md` | full playground mirror |
 | **Gantt / timeline embed** | `src/nqgantt/demos/roadmap-gantt.tsx` | `tasks-to-gantt.ts` | `../nqgantt` tree |
 | **Analytics / chart gallery** | `src/components/analytics/analytics-dashboard.tsx` | one file in `src/registry/charts/` | all 12 chart files |

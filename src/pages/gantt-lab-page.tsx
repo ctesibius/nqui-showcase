@@ -135,6 +135,8 @@ interface LabGanttProps {
   grouped: boolean
   critical: boolean
   autoSchedule: boolean
+  /** PMP side panel — baseline / worklog / availability / MSPDI. */
+  pmp?: boolean
   className?: string
 }
 
@@ -147,6 +149,7 @@ function LabGantt({
   grouped,
   critical,
   autoSchedule,
+  pmp,
   className,
 }: LabGanttProps) {
   const stageRef = useRef<HTMLDivElement>(null)
@@ -166,6 +169,7 @@ function LabGantt({
         grouped={grouped}
         showCriticalPath={critical}
         autoSchedule={autoSchedule}
+        showPmpPanel={pmp}
         colorBy="status"
         density={density}
         defaultRange={range}
@@ -182,6 +186,7 @@ export function GanttLabPage() {
   const [grouped, setGrouped] = useState(true)
   const [critical, setCritical] = useState(false)
   const [autoSchedule, setAutoSchedule] = useState(true)
+  const [pmp, setPmp] = useState(false)
   const [matrix, setMatrix] = useState(false)
   const [bare, setBare] = useState(false)
   const tasks = useFixture(fixture)
@@ -289,6 +294,13 @@ export function GanttLabPage() {
             <Switch checked={autoSchedule} onCheckedChange={setAutoSchedule} />
             Auto-schedule
           </label>
+          <label
+            className="flex items-center gap-2 text-xs"
+            title="Baseline capture, worklog, availability and MS Project import/export"
+          >
+            <Switch checked={pmp} onCheckedChange={setPmp} />
+            PMP panel
+          </label>
           <label className="flex items-center gap-2 text-xs">
             <Switch checked={matrix} onCheckedChange={setMatrix} />
             Style matrix
@@ -379,6 +391,7 @@ export function GanttLabPage() {
               grouped={grouped}
               critical={critical}
               autoSchedule={autoSchedule}
+              pmp={pmp}
               className="rounded-md border border-border"
             />
           )}

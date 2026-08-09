@@ -1,0 +1,65 @@
+# Actuals and the worklog
+
+**Intention:** Make "actual cost" something you measured rather than something somebody typed, so cost performance is a real ratio instead of one estimate divided by another.
+
+<GanttExample name="worklog" />
+
+## Why it matters
+
+Cost performance is earned value divided by actual cost. If actual cost is a number a PM enters at the end of the month from memory, then both halves of that ratio are guesses and the result measures nothing.
+
+Worse, it is a guess that flatters. People round down what they spent and round up what they finished, so the index drifts optimistic in exactly the situation where you needed a warning.
+
+## What a worklog entry is
+
+One block of work: who did how many hours, on which task, on which day. Day precision — this is a timesheet, not a stopwatch.
+
+Everything else is a sum over that list. Actual hours per task, actual cost per task, cost by person, cost as of a reporting date.
+
+## Where cost comes from
+
+For each entry, in order:
+
+1. An **explicit cost** on the entry, if there is one.
+2. Otherwise **hours × the person's rate**.
+3. Otherwise nothing.
+
+Explicit wins because real invoices carry overtime multipliers, fixed fees and agency uplifts that no hourly rate reproduces. Let people record what was actually charged.
+
+## Reporting as of a date
+
+Always roll actuals up **as of** the reporting date, not as of today.
+
+Without that, a timesheet submitted late retroactively changes a period you already closed and reported. The March CPI you presented in April quietly becomes a different number in May. Cutting off at the period end keeps a closed period closed.
+
+## Partial adoption is fine
+
+Not every team will keep timesheets, and the model does not force it.
+
+- Tasks **with** entries get their actual cost and hours from those entries.
+- Tasks **without** keep whatever was entered by hand.
+- The resource chart uses logged hours where they exist, and falls back to estimating from progress % where they don't.
+
+So a team can start logging on one workstream without the rest of the board going blank.
+
+## The estimate you are replacing
+
+Without a worklog, the "actual" line on a resource chart is *inferred*: it assumes effort was spent evenly across the task and exactly in proportion to reported completion.
+
+That is a reasonable guess and it is precisely the assumption a timesheet exists to test. When the two disagree, the disagreement is the finding — usually that a task reported 80 % complete has consumed 130 % of its planned hours.
+
+## See it for yourself
+
+In the Gantt lab's **PMP panel**, log a few hours against a task. Watch **AC** move from 0 to hours × rate, and watch **CPI** change with it. Nothing was typed into a cost field.
+
+## When not to
+
+- **Do not demand timesheets to get a Gantt chart.** Scheduling works fine without them. Introduce logging where cost accuracy actually matters — usually billable or capitalised work.
+- **Do not log against summary rows.** Log against the leaf tasks; the rollup is derived.
+- **Do not backfill a quarter from memory.** An invented log is worse than an honest manual number, because it looks like evidence.
+
+## Related
+
+- [[baselines-and-earned-value]] — what actual cost is measured against
+- [[resource-availability]] — planned versus actual load
+- [[pmo-playbook]]

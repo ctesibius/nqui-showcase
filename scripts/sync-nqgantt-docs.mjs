@@ -13,6 +13,7 @@ import {
   mkdirSync,
   readFileSync,
   readdirSync,
+  rmSync,
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
@@ -30,12 +31,19 @@ const PRESERVE = new Set(["installation.mdx", "changelog.mdx", "concepts.mdx"]);
 const PM_PAGES = [
   "getting-started",
   "philosophy",
+  // Working the plan
   "bars-and-timeline",
+  "editable-columns",
   "dependencies",
   "dependency-types",
   "auto-schedule",
-  "monday-com-mapping",
   "critical-path",
+  // Controlling the plan
+  "baselines-and-earned-value",
+  "actuals-and-worklog",
+  "resource-availability",
+  "ms-project-interop",
+  // Practice + reference
   "practice-in-gantt-lab",
   "pmo-playbook",
   "glossary",
@@ -50,7 +58,11 @@ const TITLE_BY_SLUG = {
   dependencies: "Dependencies",
   "dependency-types": "Dependency types",
   "auto-schedule": "Auto-schedule",
-  "monday-com-mapping": "Monday.com mapping",
+  "editable-columns": "Editable columns",
+  "baselines-and-earned-value": "Baselines and earned value",
+  "actuals-and-worklog": "Actuals and the worklog",
+  "resource-availability": "Resource availability",
+  "ms-project-interop": "MS Project interop",
   "critical-path": "Critical path",
   "practice-in-gantt-lab": "Practice in Gantt lab",
   "pmo-playbook": "PMO playbook",
@@ -143,6 +155,22 @@ const meta = {
   ],
 };
 writeFileSync(path.join(destRoot, "meta.json"), `${JSON.stringify(meta, null, 2)}\n`, "utf8");
+
+// Prune generated pages whose source is gone. Without this, deleting a page from
+// docs/nqgantt/ leaves its .mdx behind forever — out of the sidebar, since
+// meta.json no longer lists it, but still resolving as a live route serving
+// stale content that nobody is maintaining.
+const expected = new Set([
+  ...PM_PAGES.map(slug => `${slug}.mdx`),
+  "index.mdx",
+  ...PRESERVE,
+  "meta.json",
+]);
+for (const file of readdirSync(destRoot)) {
+  if (expected.has(file)) continue;
+  rmSync(path.join(destRoot, file));
+  console.info(`[docs:sync:nqgantt] Pruned stale page ${file}`);
+}
 
 console.info(
   `[docs:sync:nqgantt] Wrote ${count} pages + meta.json → ${path.relative(root, destRoot)}`,

@@ -8,6 +8,19 @@ styling layer for it. Two real product surfaces are built on it:
 | `/app/sheets`   | Spreadsheet | Sheets-style workbook (menu bar, formula bar, frozen panes, pivot, 2k rows) |
 | `/app/projects` | Projects/PM | Table · List · Board, status/assignee chips, progress, timeline `toInterval` |
 | `/dashboard`    | Pipeline    | the existing opportunities CRM                   |
+| `/grid-lab`     | **Dev only** | WBS (Pragmatic DnD) · Projects · Spreadsheet — dropped from production builds |
+
+## Dev lab
+
+```bash
+pnpm dev:local          # local engine
+open /grid-lab          # WBS / Projects / Spreadsheet benches (DEV nav badge)
+```
+
+Do **not** migrate nqgrid’s dnd-kit drop-indicator hooks until Grid lab proves
+the Pragmatic table path on spreadsheet + projects (virtualized rows). The WBS
+block is the reference consumer of `@nqlib/nqui/dnd` `layout="table"`.
+
 
 All three live behind one app shell (`src/layouts/app-shell.tsx`) with the icon
 rail (`appNav` in `src/config/site-nav.ts`).

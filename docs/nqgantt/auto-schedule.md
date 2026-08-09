@@ -2,6 +2,8 @@
 
 **Intention:** Auto-schedule decides whether moving one task **re-dates its successors** according to dependency type and lag. Links always exist; enforcement is optional.
 
+<GanttExample name="auto-schedule" />
+
 ## Modes
 
 | Mode | Lab control | Behavior |
@@ -9,7 +11,7 @@
 | **Strict** | Auto-schedule **on** | Successors **snap ASAP** to the constraint: push when A moves later, **pull** when A moves earlier |
 | **Flexible** | Auto-schedule **off** | Only the dragged task’s dates change; edges still draw and store type/lag |
 
-This matches the familiar Monday.com idea of **strict** vs **flexible** dependencies—see [[monday-com-mapping]]. Today the lab uses a **chart-level** toggle (not yet per-edge).
+This is the familiar **strict** vs **flexible** distinction: a strict link enforces the dates, a flexible one records the relationship and leaves the dates alone. Today the lab uses a **chart-level** toggle (not yet per-edge).
 
 ## What happens when it is on
 
@@ -46,7 +48,7 @@ If B depends on A *and* C, B follows the **latest** required date. Moving A left
 
 ## Related
 
-- [[monday-com-mapping]]
+- [[critical-path]]
 - [[dependencies]]
 - [[dependency-types]]
 - [[philosophy]]

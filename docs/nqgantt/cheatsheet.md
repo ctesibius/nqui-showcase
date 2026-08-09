@@ -21,7 +21,7 @@ One page. Details live in the linked notes.
 | **On** (strict) | Move A → B follows (push and pull ASAP) |
 | **Off** (flexible) | Move A → B stays; link still stored |
 
-→ [[auto-schedule]] · [[monday-com-mapping]]
+→ [[auto-schedule]] · [[critical-path]]
 
 ## Types (pick per link)
 

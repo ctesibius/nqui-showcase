@@ -1,0 +1,66 @@
+# Resource availability
+
+**Intention:** Make the plan account for who is actually available — part-time patterns and leave included — so levelling produces a schedule people can work rather than one that merely looks resolved.
+
+<GanttExample name="resource-availability" />
+
+## The optimistic-plan problem
+
+A project calendar says *the company* works Monday to Friday. It cannot say that Ada works Monday, Wednesday and Friday, or that Alan is on parental leave for a fortnight.
+
+Without that, two things go wrong quietly:
+
+- **Capacity overstates the team.** A week where half the team is away still reads as a full week of availability.
+- **Levelling produces nonsense.** Asked to resolve an over-allocation, it happily moves the task into somebody's leave, reports the conflict resolved, and is wrong.
+
+The second one is the dangerous one, because it looks like an answer.
+
+## Two things you can describe
+
+**A weekly pattern.** Which days a person works and how many hours on each. A four-hours-a-day, three-days-a-week contractor is half a person for capacity and cost, and the plan should say so.
+
+**Dated absences.** Leave, training, secondment. A start and end date with a label.
+
+A pattern can never grant a day the project itself doesn't work — a contractor available on Saturdays still cannot book against a closed site.
+
+## What changes once you supply them
+
+- **Load lands only on days the person actually works.** A task spanning someone's leave no longer charges them for it.
+- **Allocation is measured against their own capacity.** Eight hours is 100 % of a full-timer and 200 % of a half-timer. This is usually the number that surprises people.
+- **Levelling steps to the owner's next working day**, not simply the next calendar day — so a pushed task lands somewhere they can actually start.
+- **Capacity drops to zero on absence days**, which makes a week of leave read as over-allocation rather than as a suspiciously quiet week.
+
+## See it for yourself
+
+In the Gantt lab's **PMP panel**: give someone leave, then press **Level**. The task steps *over* the absence. Untick the leave and level again — it lands inside it.
+
+The same demo on the library's own docs page shows the peak-allocation badge going from 200 % to resolved.
+
+## Reading the load chart
+
+Three lines matter:
+
+| Line | Means |
+|------|-------|
+| **Planned** | What the schedule says this person should be doing |
+| **Actual** | What they recorded (or, without a worklog, an estimate from progress) |
+| **Capacity** | What they are actually available for |
+
+Planned above capacity is over-allocation. Actual above planned is an estimate that was too optimistic. Actual well below planned on a task reporting high progress usually means the progress number is wishful.
+
+## When not to
+
+- **Do not model every half-day.** Availability data has to be maintained by somebody. Model the patterns that persist — part-time contracts, long leave — and let short absences wash out.
+- **Do not level a plan you have not networked.** Levelling moves tasks without regard to logic you never entered. Get [[dependencies]] in first.
+- **Do not treat levelling output as a decision.** It is a proposal. It will push work later; whether that is acceptable is a conversation, not a computation.
+
+## When not to bother at all
+
+If everyone is full-time and nobody is away in the horizon you are planning, the project calendar is enough. Adding per-person data you don't need is maintenance for no signal.
+
+## Related
+
+- [[actuals-and-worklog]] — where the actual line comes from
+- [[auto-schedule]] — the other thing that moves tasks for you
+- [[critical-path]]
+- [[pmo-playbook]]

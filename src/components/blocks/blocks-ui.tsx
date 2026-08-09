@@ -103,7 +103,7 @@ export function SignInBlock() {
 export function DeployBlock() {
   const [auto, setAuto] = useState(true);
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex h-full flex-col gap-4">
       <div className="flex items-start justify-between gap-3">
         <div className="leading-tight">
           <p className="text-sm font-medium">Meridian Web</p>
@@ -161,10 +161,10 @@ export function KpiBlock() {
     { label: "Win rate", value: "34%", delta: "+2.4%" },
   ];
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex h-full flex-col gap-3">
       <div className="grid grid-cols-2 gap-3">
         {kpis.map((k) => (
-          <div key={k.label} className="rounded-xl border bg-muted/40 p-3">
+          <div key={k.label} className="rounded-lg bg-muted/40 p-3">
             <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{k.label}</p>
             <div className="mt-1 flex items-baseline gap-2">
               <span className="text-xl font-semibold tabular-nums">{k.value}</span>
@@ -173,7 +173,7 @@ export function KpiBlock() {
           </div>
         ))}
       </div>
-      <div className="flex flex-col gap-1.5">
+      <div className="mt-auto flex flex-col gap-1.5">
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>Quota attainment</span><span className="tabular-nums">78%</span>
         </div>
@@ -219,7 +219,7 @@ export function TableBlock() {
       return s;
     });
   return (
-    <div className="overflow-hidden rounded-lg border">
+    <div className="overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">

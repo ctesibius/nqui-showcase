@@ -1,142 +1,13 @@
 /**
- * Q3 Delivery Program — single source of truth for the ops command center.
+ * Q3 Delivery Program — ops command center data.
+ * Work items (TEAM / TASKS / Task) live in `@/lib/pm`; this module keeps program chrome.
  */
-export interface Person {
-  readonly id: string;
-  readonly name: string;
-  readonly color: string;
-}
+export { TEAM, TEAM_BY_ID } from "@/lib/pm/team";
+export type { PmPerson as Person, PmIssue as Task } from "@/lib/pm/types";
+export { Q3_TASKS as TASKS } from "@/lib/pm/fixtures/q3-tasks";
 
-export const TEAM: readonly Person[] = [
-  { id: "ava", name: "Ava Chen", color: "#6366f1" },
-  { id: "ben", name: "Ben Ortiz", color: "#0ea5e9" },
-  { id: "cleo", name: "Cleo Park", color: "#14b8a6" },
-  { id: "dane", name: "Dane Reyes", color: "#f59e0b" },
-];
-
-export type Task = {
-  id: string;
-  title: string;
-  status: string;
-  priority: string;
-  assignee: string;
-  effort: number;
-  progress: number;
-  budget: number;
-  due: string;
-  timeline: { start: string; end: string };
-};
-
-export const TASKS: Task[] = [
-  {
-    id: "t1",
-    title: "Finalize checkout wireframes",
-    status: "done",
-    priority: "high",
-    assignee: "ava",
-    effort: 5,
-    progress: 100,
-    budget: 12000,
-    due: "2026-06-03",
-    timeline: { start: "2026-05-28", end: "2026-06-03" },
-  },
-  {
-    id: "t2",
-    title: "Payment provider security review",
-    status: "done",
-    priority: "high",
-    assignee: "ben",
-    effort: 8,
-    progress: 100,
-    budget: 18000,
-    due: "2026-06-08",
-    timeline: { start: "2026-06-01", end: "2026-06-08" },
-  },
-  {
-    id: "t3",
-    title: "Apple Pay integration",
-    status: "in_progress",
-    priority: "high",
-    assignee: "ava",
-    effort: 13,
-    progress: 62,
-    budget: 24000,
-    due: "2026-06-18",
-    timeline: { start: "2026-06-05", end: "2026-06-18" },
-  },
-  {
-    id: "t4",
-    title: "Cart abandonment recovery",
-    status: "in_progress",
-    priority: "med",
-    assignee: "cleo",
-    effort: 8,
-    progress: 45,
-    budget: 16000,
-    due: "2026-06-20",
-    timeline: { start: "2026-06-10", end: "2026-06-20" },
-  },
-  {
-    id: "t5",
-    title: "Mobile performance audit",
-    status: "review",
-    priority: "med",
-    assignee: "dane",
-    effort: 5,
-    progress: 88,
-    budget: 9000,
-    due: "2026-06-17",
-    timeline: { start: "2026-06-12", end: "2026-06-17" },
-  },
-  {
-    id: "t6",
-    title: "EU market localization",
-    status: "review",
-    priority: "low",
-    assignee: "ben",
-    effort: 3,
-    progress: 70,
-    budget: 6000,
-    due: "2026-06-19",
-    timeline: { start: "2026-06-15", end: "2026-06-19" },
-  },
-  {
-    id: "t7",
-    title: "Analytics event schema",
-    status: "backlog",
-    priority: "med",
-    assignee: "cleo",
-    effort: 5,
-    progress: 0,
-    budget: 11000,
-    due: "2026-06-24",
-    timeline: { start: "2026-06-20", end: "2026-06-24" },
-  },
-  {
-    id: "t8",
-    title: "Checkout A/B test setup",
-    status: "backlog",
-    priority: "low",
-    assignee: "dane",
-    effort: 8,
-    progress: 0,
-    budget: 14000,
-    due: "2026-06-28",
-    timeline: { start: "2026-06-22", end: "2026-06-28" },
-  },
-  {
-    id: "t9",
-    title: "Launch runbook and rollback plan",
-    status: "backlog",
-    priority: "high",
-    assignee: "ava",
-    effort: 13,
-    progress: 12,
-    budget: 22000,
-    due: "2026-07-04",
-    timeline: { start: "2026-06-24", end: "2026-07-04" },
-  },
-];
+import { Q3_TASKS } from "@/lib/pm/fixtures/q3-tasks";
+import type { PmIssue as Task } from "@/lib/pm/types";
 
 export function setTaskValue(task: Task, columnId: string, raw: unknown): Task {
   return { ...(task as unknown as Record<string, unknown>), [columnId]: raw } as Task;
@@ -201,7 +72,6 @@ export type OpsTeamLoad = {
   available: number;
 };
 
-/** Task → project mapping for Q3 initiatives */
 const TASK_PROJECT: Record<string, string> = {
   t1: "p-checkout",
   t2: "p-checkout",
@@ -257,7 +127,7 @@ export function taskProjectId(taskId: string): string {
   return TASK_PROJECT[taskId] ?? "p-checkout";
 }
 
-export function tasksForProject(projectId: string, tasks: Task[] = TASKS): Task[] {
+export function tasksForProject(projectId: string, tasks: Task[] = Q3_TASKS): Task[] {
   return tasks.filter((t) => taskProjectId(t.id) === projectId);
 }
 

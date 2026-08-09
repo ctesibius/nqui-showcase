@@ -1,10 +1,8 @@
 /**
  * Timeline lab — the nqgantt block on /blocks.
  *
- * A real grouped timeline plus the one control that matters here: a picker that
- * re-skins every bar live. Bar chrome is pure token work (`src/nqgantt/bar-design.ts`),
- * so the same menu that showcases the look is also how we test one.
- *
+ * FY26 campaign mock (lanes, milestones, deps) + live bar re-skin controls
+ * + feature toggles for every GanttRoot/host switch users can exercise.
  * Add `?ganttlab` to the URL for the token bench.
  */
 import { useCallback, useEffect, useRef, useState } from "react"
@@ -16,6 +14,18 @@ import { useGanttBarDesign } from "@/nqgantt/demos/use-gantt-bar-design"
 import { useGanttFocusWork } from "@/nqgantt/demos/use-gantt-focus-work"
 import { useGanttRowHover } from "@/nqgantt/demos/use-gantt-row-hover"
 import { useGanttSidebarResize } from "@/nqgantt/demos/use-gantt-sidebar-resize"
+import {
+  GANTT_FEATURE_TOGGLE_DEFAULTS,
+  GANTT_LAB_COLUMN_IDS,
+  GanttFeatureToggles,
+  type GanttFeatureToggleState,
+} from "@/nqgantt/demos/gantt-feature-toggles"
+import {
+  CAMPAIGN_ISSUES,
+  CAMPAIGN_SCHEDULE,
+  groupCampaignByLane,
+  toGanttOptions,
+} from "@/lib/pm"
 import {
   GANTT_BAR_DESIGN_DEFAULT,
   isGanttBarStyleId,
@@ -51,6 +61,9 @@ function readStoredDesign(): GanttBarDesign {
 export function TimelineLabBlock({ className }: { className?: string }) {
   const stageRef = useRef<HTMLDivElement>(null)
   const [design, setDesign] = useState<GanttBarDesign>(readStoredDesign)
+  const [features, setFeatures] = useState<GanttFeatureToggleState>(
+    GANTT_FEATURE_TOGGLE_DEFAULTS,
+  )
   const labEnabled = useGanttLabEnabled()
 
   useGanttBarDesign(stageRef, design)
@@ -70,20 +83,61 @@ export function TimelineLabBlock({ className }: { className?: string }) {
 
   return (
     <div className={cn("flex h-full min-h-0 flex-col gap-2", className)}>
-      <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1">
-        <p className="text-[11px] text-muted-foreground">
-          Drag a bar to reschedule. Drag the sidebar divider to resize it — or focus it and
-          use <Kbd>←</Kbd> <Kbd>→</Kbd>.
-        </p>
-        <GanttDesignMenu
-          className="ml-auto"
-          design={design}
-          onDesignChange={onDesignChange}
+      {/* Stage is padding:0 for full-bleed bars — inset chrome so tray edges breathe. */}
+      <div className="flex shrink-0 flex-col gap-2 px-3 pt-3">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <p className="text-[11px] text-muted-foreground">
+            FY26 campaign — 12-bar critical spine (same-day FS), float side tasks, Ava peak-load,
+            slipped baselines. Critical is on by default; drag or use <Kbd>←</Kbd> <Kbd>→</Kbd>.
+          </p>
+          <GanttDesignMenu
+            className="ml-auto"
+            design={design}
+            onDesignChange={onDesignChange}
+          />
+        </div>
+
+        <GanttFeatureToggles
+          className="shrink-0"
+          value={features}
+          onChange={setFeatures}
         />
       </div>
 
-      <div ref={stageRef} className="min-h-0 flex-1">
-        <RoadmapGantt className="h-full" grouped colorBy="status" />
+      <div
+        ref={stageRef}
+        className="min-h-0 flex-1"
+        data-card-progress={features.card.showProgress ? "on" : "off"}
+        data-card-milestone={features.card.showMilestone ? "on" : "off"}
+      >
+        <RoadmapGantt
+          // Range + density are mount-time defaults in the package.
+          key={`${features.range}:${features.density}`}
+          className="h-full border-0 bg-transparent"
+          tasks={CAMPAIGN_ISSUES}
+          scheduleOptions={toGanttOptions(CAMPAIGN_ISSUES, CAMPAIGN_SCHEDULE)}
+          groupByFeatures={groupCampaignByLane}
+          grouped={features.grouped}
+          colorBy={features.colorBy}
+          density={features.density}
+          defaultRange={features.range}
+          autoSchedule={features.autoSchedule}
+          showCriticalPath={features.showCriticalPath}
+          criticalPathStyle={features.criticalPathStyle}
+          showAssignees={features.showAssignees}
+          showMarkers={features.showMarkers}
+          showDependencies={features.showDependencies}
+          showBaselines={features.showBaselines}
+          defaultCardDisplay={features.card}
+          visibleColumnIds={
+            features.showColumns ? GANTT_LAB_COLUMN_IDS : ["tasks"]
+          }
+          loading={features.loading}
+          showInsights={features.showInsights}
+          showLegend={features.showLegend}
+          enableSelection={features.enableSelection}
+          enableHistory={features.enableHistory}
+        />
       </div>
 
       {labEnabled ? (

@@ -40,12 +40,6 @@ export const referenceEntries: ShowcaseRoute[] = [
     description: "All variants and states — use when you need props, not layout advice.",
   },
   {
-    title: "Theme Studio",
-    path: "/studio",
-    description:
-      "Floating token designer — open on any page, export colors.css or an AI prompt.",
-  },
-  {
     title: "Appearance",
     path: "/settings/appearance",
     description: "Look, accent, corners — SaaS preferences specimen.",

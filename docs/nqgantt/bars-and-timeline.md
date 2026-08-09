@@ -2,6 +2,8 @@
 
 **Intention:** A bar is a task’s **planned window** on a calendar axis. Dragging it changes dates (and may cascade if auto-schedule is on).
 
+<GanttExample name="bars-basics" />
+
 ## What you see
 
 | Element | Meaning |

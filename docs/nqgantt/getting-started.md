@@ -37,7 +37,7 @@ Details: [[dependencies]], [[dependency-types]].
 1. With **Auto-schedule on**, drag predecessor **A** later — successor **B** should push; drag A earlier — B should pull (ASAP / strict).
 2. Turn **Auto-schedule off**, move A again — B stays put; the edge still draws.
 
-See [[auto-schedule]] and [[monday-com-mapping]].
+See [[auto-schedule]] and [[dependency-types]].
 
 ### 5. Optional: critical path
 

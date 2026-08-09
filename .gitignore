@@ -24,3 +24,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local design-tooling state — regenerated, not source
+.impeccable/

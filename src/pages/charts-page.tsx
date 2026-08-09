@@ -25,6 +25,7 @@ import {
   type TooltipPreviewMode,
 } from "../nqchart/catalog/apply-preview-controls";
 import { LazyMount } from "../components/blocks/lazy-mount";
+import { Tray, trayMeta, trayTags } from "../components/showcase/tray";
 import "../components/landing/landing.css";
 import "../components/blocks/blocks.css";
 import "./charts-page.css";
@@ -111,30 +112,30 @@ function ChartCard({
   tooltip: TooltipPreviewMode;
 }) {
   return (
-    <figure className="blk-card">
-      <figcaption className="flex items-baseline justify-between gap-3">
+    <Tray interactive>
+      <Tray.Caption>
         <span className="truncate text-sm font-medium">{entry.name}</span>
         <Badge variant="outline" className="shrink-0 font-mono text-[10px] font-normal">
           {entry.family}
         </Badge>
-      </figcaption>
-      <div
+      </Tray.Caption>
+      <Tray.Stage
+        variant="chart"
         className={cn(
-          "blk-stage blk-stage--chart",
           entry.category === "block" && "charts-stage--tall",
           entry.id.includes("workload-dashboard") && "charts-stage--dashboard",
         )}
       >
-        <LazyMount fallback={<Skeleton className="size-full rounded-lg" />}>
-          <Suspense fallback={<Skeleton className="size-full rounded-lg" />}>
+        <LazyMount fallback={<Skeleton className="size-full rounded-md" />}>
+          <Suspense fallback={<Skeleton className="size-full rounded-md" />}>
             <div className="size-full min-h-0">
               <ChartPreview entry={entry} background={background} tooltip={tooltip} />
             </div>
           </Suspense>
         </LazyMount>
-      </div>
-      <p className="font-mono text-[10px] text-muted-foreground">{entry.id}</p>
-      <ul className="flex flex-wrap gap-1">
+      </Tray.Stage>
+      <p className={cn(trayMeta, "font-mono text-[10px] text-muted-foreground")}>{entry.id}</p>
+      <ul className={trayTags}>
         <li className="rounded-full bg-foreground/5 px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
           {entry.category}
         </li>
@@ -142,7 +143,7 @@ function ChartCard({
           {entry.component}
         </li>
       </ul>
-    </figure>
+    </Tray>
   );
 }
 

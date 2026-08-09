@@ -31,6 +31,9 @@ const CommandLab = lazy(() => import("./components/showcase/pages/command-lab"))
 const GanttLabPage = import.meta.env.DEV
   ? lazy(() => import("./pages/gantt-lab-page").then((m) => ({ default: m.GanttLabPage })))
   : null;
+const GridLabPage = import.meta.env.DEV
+  ? lazy(() => import("./pages/grid-lab-page").then((m) => ({ default: m.GridLabPage })))
+  : null;
 
 function DocsShell() {
   return (
@@ -90,10 +93,13 @@ function App() {
           <Route path="/readme/nqgrid" element={<Navigate to="/docs/nqgrid" replace />} />
           <Route path="/readme/nqgantt" element={<Navigate to="/docs/nqgantt" replace />} />
           <Route path="/readme/*" element={<Navigate to="/docs" replace />} />
-          {/* Dev only: absent from the deployed build, so `/gantt-lab` there
-              falls through to the catch-all below and lands on the landing. */}
+          {/* Dev only: absent from the deployed build, so lab paths there
+              fall through to the catch-all below and land on the landing. */}
           {GanttLabPage ? (
             <Route path="/gantt-lab" element={<GanttLabPage />} />
+          ) : null}
+          {GridLabPage ? (
+            <Route path="/grid-lab" element={<GridLabPage />} />
           ) : null}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

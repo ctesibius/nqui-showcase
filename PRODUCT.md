@@ -48,5 +48,12 @@ Card size follows the **job of the surface**, not the package name:
 
 Rule of thumb: if the component needs to show a time axis or many columns at once, it claims the full shelf (`isFullBleed`).
 
+### Shared PM feed (2026-08-08)
+One contract in `src/lib/pm` (`PmIssue` + `PmSchedule` + adapters) powers:
+- **Issues lab** (`report`) — Board | List + status-mix chart (nqui DnD + nqchart); table density stays on Work breakdown
+- **Timeline lab** (`gantt`) — same FY26 campaign rows via `toGanttOptions`
+
+Q3 checkout tasks are a second fixture (`Q3_TASKS`) for projects/ops — same `PmIssue` type, not a divergent `Task`.
+
 ### Timeless report block (2026-07-15)
-The **Sales ledger** (`/blocks` → report) is the multi-package composition: ink-blue monochrome charts + hairline pivot, with the campaign gantt as the sole timeline surface (no duplicate gantt card). Gantt status/lane colors use restrained green / blue / purple for readability. Companion: Category pivot (`table`).
+The **Sales ledger** (`/blocks` → report) is the multi-package composition: ink-blue monochrome charts + hairline pivot, Companion: Category pivot (`table`). FY26 campaign gantt lives in Timeline lab (Issues lab shares that feed).

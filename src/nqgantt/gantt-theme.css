@@ -31,8 +31,14 @@
 }
 
 .gantt {
-  --gantt-critical-color: oklch(0.58 0.28 27);
-  --gantt-critical-tint: color-mix(in srgb, var(--gantt-critical-color) 24%, transparent);
+  /* Schedule-critical — calm coral, not neon alarm. */
+  --gantt-critical-color: oklch(0.52 0.165 28);
+  --gantt-critical-glow-soft: color-mix(in srgb, var(--gantt-critical-color) 36%, transparent);
+  --gantt-critical-glow-strong: color-mix(in srgb, var(--gantt-critical-color) 58%, transparent);
+  --gantt-critical-tint: color-mix(in srgb, var(--gantt-critical-color) 22%, transparent);
+  --gantt-critical-float-opacity: 0.42;
+  --gantt-critical-float-dep-opacity: 0.2;
+  --gantt-critical-ring: 1.5px;
 
   /* Inline bar label legibility over tinted fills — tight shadow, no bloom */
   --gantt-bar-inline-label-shadow: 0 1px 1px rgb(255 255 255 / 0.9);
@@ -66,8 +72,11 @@
 }
 
 .dark .gantt {
-  --gantt-critical-color: oklch(0.78 0.28 25);
-  --gantt-critical-tint: color-mix(in srgb, var(--gantt-critical-color) 34%, transparent);
+  --gantt-critical-color: oklch(0.72 0.14 28);
+  --gantt-critical-glow-soft: color-mix(in srgb, var(--gantt-critical-color) 42%, transparent);
+  --gantt-critical-glow-strong: color-mix(in srgb, var(--gantt-critical-color) 64%, transparent);
+  --gantt-critical-tint: color-mix(in srgb, var(--gantt-critical-color) 28%, transparent);
+  --gantt-critical-float-opacity: 0.38;
 
   --gantt-bar-inline-label-shadow: 0 1px 2px rgb(0 0 0 / 0.75);
 }
@@ -273,8 +282,227 @@
   --gantt-bar-progress-gap: calc(var(--gantt-bar-done-tint) - var(--gantt-bar-track-tint));
 }
 
-.gantt-critical-bar {
-  position: relative;
+/*
+ * Critical path — five distinct marks on the real bar (status/lane fill kept).
+ *
+ *   ring   — hard outline only
+ *   glow   — soft shape halo (drop-shadow) + hairline
+ *   tint   — coral wash in the fill, no outline
+ *   stripe — leading inset rail (not a card side-tab)
+ *   beacon — wash + thick outline + deepest float dim
+ *
+ * Mark: `[data-gantt-critical="true"]` on the feature bar itself.
+ */
+.gantt[data-critical-path-style]
+  [data-gantt-feature-bar]:not([data-gantt-summary="true"]):not([data-gantt-critical="true"]) {
+  opacity: var(--gantt-critical-float-opacity) !important;
+}
+
+.gantt[data-critical-path-style]
+  .group\/bar:hover
+  [data-gantt-feature-bar]:not([data-gantt-summary="true"]):not([data-gantt-critical="true"]) {
+  opacity: calc(var(--gantt-critical-float-opacity) + 0.2) !important;
+}
+
+.gantt[data-critical-path-style]
+  [data-gantt-feature-bar][data-gantt-critical="true"]:not([data-gantt-summary="true"]) {
+  opacity: 1 !important;
+}
+
+/* Shared chrome pieces referenced by each style */
+.gantt[data-critical-path-style]
+  [data-gantt-feature-bar][data-gantt-critical="true"]:not([data-gantt-summary="true"]) {
+  --gantt-cp-lift:
+    0 var(--gantt-bar-lift-y) calc(var(--gantt-bar-lift-y) * 2)
+    rgb(0 0 0 / var(--gantt-bar-lift-alpha));
+  --gantt-cp-accent-ring:
+    0 0 0 1px color-mix(in srgb, var(--gantt-bar-accent) var(--gantt-bar-ring-mix), transparent);
+  --gantt-cp-sheen: inset 0 1px 0 var(--gantt-bar-inset-highlight);
+}
+
+/* ── ring: crisp schedule outline ───────────────────────────────────── */
+.gantt[data-critical-path-style="ring"]
+  [data-gantt-feature-bar][data-gantt-critical="true"]:not([data-gantt-summary="true"]) {
+  box-shadow:
+    0 0 0 2px var(--gantt-critical-color),
+    var(--gantt-cp-lift),
+    var(--gantt-cp-accent-ring),
+    var(--gantt-cp-sheen) !important;
+}
+
+.gantt[data-critical-path-style="ring"]
+  .group\/bar:hover
+  [data-gantt-feature-bar][data-gantt-critical="true"]:not([data-gantt-summary="true"]) {
+  box-shadow:
+    0 0 0 2.5px var(--gantt-critical-color),
+    0 calc(var(--gantt-bar-lift-y) + 1px) calc(var(--gantt-bar-lift-y) * 3)
+      rgb(0 0 0 / var(--gantt-bar-lift-alpha)),
+    0 0 0 1px color-mix(in srgb, var(--gantt-bar-accent) calc(var(--gantt-bar-ring-mix) + 8%), transparent),
+    var(--gantt-cp-sheen) !important;
+}
+
+/* ── glow: soft halo that follows the bar silhouette ────────────────── */
+.gantt[data-critical-path-style="glow"]
+  [data-gantt-feature-bar][data-gantt-critical="true"]:not([data-gantt-summary="true"]) {
+  filter:
+    drop-shadow(0 0 2px var(--gantt-critical-glow-strong))
+    drop-shadow(0 0 6px var(--gantt-critical-glow-soft));
+  box-shadow:
+    0 0 0 1px var(--gantt-critical-color),
+    var(--gantt-cp-lift),
+    var(--gantt-cp-accent-ring),
+    var(--gantt-cp-sheen) !important;
+}
+
+.gantt[data-critical-path-style="glow"]
+  .group\/bar:hover
+  [data-gantt-feature-bar][data-gantt-critical="true"]:not([data-gantt-summary="true"]) {
+  filter:
+    drop-shadow(0 0 3px var(--gantt-critical-glow-strong))
+    drop-shadow(0 0 8px var(--gantt-critical-glow-soft));
+}
+
+/* ── tint: coral wash through the fill, no outline ──────────────────── */
+.gantt[data-critical-path-style="tint"]
+  [data-gantt-feature-bar][data-gantt-critical="true"]:not([data-gantt-summary="true"]) {
+  background-color: color-mix(
+    in srgb,
+    var(--gantt-critical-color) 28%,
+    color-mix(
+      in srgb,
+      var(--gantt-bar-accent) calc(var(--gantt-bar-track-tint) * 1%),
+      var(--gantt-bar-track-base)
+    )
+  ) !important;
+  box-shadow:
+    var(--gantt-cp-lift),
+    var(--gantt-cp-accent-ring),
+    var(--gantt-cp-sheen) !important;
+}
+
+.gantt[data-critical-path-style="tint"]
+  .group\/bar:hover
+  [data-gantt-feature-bar][data-gantt-critical="true"]:not([data-gantt-summary="true"]) {
+  background-color: color-mix(
+    in srgb,
+    var(--gantt-critical-color) 34%,
+    color-mix(
+      in srgb,
+      var(--gantt-bar-accent) calc(var(--gantt-bar-hover-tint) * 1%),
+      var(--gantt-bar-track-base)
+    )
+  ) !important;
+}
+
+/* ── stripe: leading inset rail on the bar (schedule mark, not a card) ─ */
+.gantt[data-critical-path-style="stripe"]
+  [data-gantt-feature-bar][data-gantt-critical="true"]:not([data-gantt-summary="true"]) {
+  box-shadow:
+    inset 3px 0 0 0 var(--gantt-critical-color),
+    var(--gantt-cp-lift),
+    var(--gantt-cp-accent-ring),
+    var(--gantt-cp-sheen) !important;
+}
+
+.gantt[data-critical-path-style="stripe"]
+  .group\/bar:hover
+  [data-gantt-feature-bar][data-gantt-critical="true"]:not([data-gantt-summary="true"]) {
+  box-shadow:
+    inset 3.5px 0 0 0 var(--gantt-critical-color),
+    0 calc(var(--gantt-bar-lift-y) + 1px) calc(var(--gantt-bar-lift-y) * 3)
+      rgb(0 0 0 / var(--gantt-bar-lift-alpha)),
+    0 0 0 1px color-mix(in srgb, var(--gantt-bar-accent) calc(var(--gantt-bar-ring-mix) + 8%), transparent),
+    var(--gantt-cp-sheen) !important;
+}
+
+/* ── beacon: wash + thick outline + deepest recession of float work ─── */
+.gantt[data-critical-path-style="beacon"] {
+  --gantt-critical-float-opacity: 0.26;
+  --gantt-critical-float-dep-opacity: 0.1;
+}
+
+.gantt[data-critical-path-style="beacon"]
+  [data-gantt-feature-bar][data-gantt-critical="true"]:not([data-gantt-summary="true"]) {
+  background-color: color-mix(
+    in srgb,
+    var(--gantt-critical-color) 22%,
+    color-mix(
+      in srgb,
+      var(--gantt-bar-accent) calc(var(--gantt-bar-track-tint) * 1%),
+      var(--gantt-bar-track-base)
+    )
+  ) !important;
+  box-shadow:
+    0 0 0 2.5px var(--gantt-critical-color),
+    0 0 0 4px var(--gantt-critical-glow-soft),
+    var(--gantt-cp-lift),
+    var(--gantt-cp-accent-ring),
+    var(--gantt-cp-sheen) !important;
+}
+
+.gantt[data-critical-path-style="beacon"]
+  .group\/bar:hover
+  [data-gantt-feature-bar][data-gantt-critical="true"]:not([data-gantt-summary="true"]) {
+  box-shadow:
+    0 0 0 3px var(--gantt-critical-color),
+    0 0 0 5px var(--gantt-critical-glow-soft),
+    0 calc(var(--gantt-bar-lift-y) + 1px) calc(var(--gantt-bar-lift-y) * 3)
+      rgb(0 0 0 / var(--gantt-bar-lift-alpha)),
+    0 0 0 1px color-mix(in srgb, var(--gantt-bar-accent) calc(var(--gantt-bar-ring-mix) + 8%), transparent),
+    var(--gantt-cp-sheen) !important;
+}
+
+/*
+ * Links — float edges fade; spine weight follows style.
+ * Local nqgantt: [data-gantt-critical-dep]; published: .gantt-critical-edge-glow.
+ */
+.gantt[data-critical-path-style]
+  [data-gantt-dep-layer]
+  > g:not([data-gantt-critical-dep]):not(:has(.gantt-critical-edge-glow))
+  > path:not([data-gantt-dep-hit]) {
+  stroke-opacity: var(--gantt-critical-float-dep-opacity) !important;
+}
+
+.gantt[data-critical-path-style] path.gantt-critical-edge-glow {
+  stroke: var(--gantt-critical-color);
+  stroke-width: 1.5px;
+  stroke-opacity: 0.18;
+}
+
+.gantt[data-critical-path-style] path.gantt-critical-edge-glow + path,
+.gantt[data-critical-path-style] [data-gantt-critical-dep] > path:not([data-gantt-dep-hit]) {
+  stroke: var(--gantt-critical-color) !important;
+  stroke-opacity: 0.88 !important;
+  stroke-width: 1.75px !important;
+}
+
+.gantt[data-critical-path-style="tint"]
+  [data-gantt-critical-dep]
+  > path:not([data-gantt-dep-hit]),
+.gantt[data-critical-path-style="tint"] path.gantt-critical-edge-glow + path {
+  stroke-width: 1.25px !important;
+  stroke-opacity: 0.7 !important;
+}
+
+.gantt[data-critical-path-style="beacon"]
+  [data-gantt-critical-dep]
+  > path:not([data-gantt-dep-hit]),
+.gantt[data-critical-path-style="beacon"] path.gantt-critical-edge-glow + path {
+  stroke-width: 2.25px !important;
+  stroke-opacity: 0.95 !important;
+}
+
+.gantt[data-critical-path-style="glow"]
+  [data-gantt-critical-dep]
+  > path:not([data-gantt-dep-hit]),
+.gantt[data-critical-path-style="glow"] path.gantt-critical-edge-glow + path {
+  stroke-width: 2px !important;
+  stroke-opacity: 0.9 !important;
+}
+
+/* Deps toggle hides link SVG only — keep dependency data for CPM. */
+[data-gantt-hide-deps] [data-gantt-dep-layer] {
+  display: none !important;
 }
 
 .gantt-cursor-reveal {
@@ -896,11 +1124,18 @@
   width: 30px;
 }
 
-/* Grip — thicker thumb, parked just under the sticky header */
+/*
+ * Grip — thicker thumb, parked just under the sticky header.
+ *
+ * The handle now spans the header row as well (it is owned by the canvas
+ * layout, not the sidebar body, so the divider is continuous from the top of
+ * the header to the bottom of the list). Offset the thumb past the header band
+ * so it still reads as a grip on the list rather than a mark in the header.
+ */
 .gantt div[data-roadmap-ui="gantt-sidebar-resize-handle"]::after {
   content: "";
   position: absolute;
-  top: 1.25rem;
+  top: calc(var(--gantt-header-height, 3.5rem) + 1.25rem);
   left: 50%;
   width: 5px;
   height: 40px;
@@ -1091,4 +1326,13 @@
     animation: none;
     display: none;
   }
+}
+
+/*
+ * Timeline lab BAR CARD toggles — published @nqlib/nqgantt paints progress
+ * fills without consulting card settings. RoadmapGantt also strips `progress`
+ * when off; this CSS is a belt-and-suspenders hide for leftover veils.
+ */
+[data-card-progress="off"] .gantt [data-gantt-feature-bar] [role="progressbar"] > div[aria-hidden] {
+  opacity: 0;
 }

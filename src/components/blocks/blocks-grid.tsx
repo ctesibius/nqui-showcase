@@ -49,13 +49,11 @@ const TABLE_SCROLL_VIEWPORT = {
 } as const;
 import { Calendar } from "@nqlib/nqui/calendar";
 import {
-  Sortable,
-  SortableContent,
-  SortableItem,
-  SortableItemHandle,
-  SortableOverlay,
-} from "@nqlib/nqui/sortable";
-import { getDragHandleAria, sortableDropTargetProps } from "@nqlib/nqgrid";
+  SortableList,
+  SortableListItem,
+  SortableListItemHandle,
+} from "@nqlib/nqui/dnd";
+import { getDragHandleAria } from "@nqlib/nqgrid";
 import { AvatarStack } from "../story/avatar-stack";
 import { useWorkBreakdownDropChrome } from "./blocks-grid-drop-chrome";
 import portfolio from "./blocks-portfolio-data.json";
@@ -429,7 +427,7 @@ export function InitiativesBlock() {
   });
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-lg border">
+    <div className="flex h-full flex-col overflow-hidden">
       <div className="flex items-center gap-3 border-b px-3 py-2">
         <p className="text-sm font-medium">Initiatives</p>
         <ToggleGroup
@@ -520,11 +518,12 @@ export function InitiativesBlock() {
 }
 
 /*
- * Work breakdown — a project detail sheet on the nqgrid drag engine.
- * `useSortableTableDropIndicators` runs BOTH axes: row reorder (WBS renumbers
- * from structure every render) and column reorder for the data columns. The
- * Select + Name columns are pinned; every data header resizes. Status and
- * priority edit inline through nqui Select, dates through Popover + Calendar.
+ * Work breakdown — a project detail sheet on Pragmatic `./dnd` SortableList
+ * (`layout="table"`). Row reorder (WBS renumbers from structure every render)
+ * and column reorder share one table; Select + Name stay pinned; data headers
+ * resize. Status/priority edit inline through nqui Select, dates through
+ * Popover + Calendar. Native HTML5 drag has no KeyboardSensor — pair with
+ * nqgrid `moveRowUp`/`moveRowDown` if keyboard parity is required.
  */
 
 type TaskStatus = "done" | "active" | "todo" | "blocked";
@@ -1065,15 +1064,12 @@ export function WorkBreakdownBlock() {
     { x: number; active: boolean; col: string } | null
   >(null);
 
-  const {
-    containerRef: dropContainerRef,
-    containerClassName: dropContainerClassName,
-    chrome: dropChrome,
-    columnSortableProps,
-    rowSortableProps,
-  } = useWorkBreakdownDropChrome();
+  const { containerClassName: dropContainerClassName } =
+    useWorkBreakdownDropChrome();
+  const dropContainerRef = useRef<HTMLDivElement>(null);
 
   const view = useMemo(() => computeWbs(rows), [rows]);
+  const tableColCount = 2 + columnOrder.length;
   // Selection operates on tasks + subtasks; phases toggle their subtree.
   const selectableIds = useMemo(
     () => view.filter((v) => v.kind !== "phase").map((v) => v.row.id),
@@ -1337,7 +1333,7 @@ export function WorkBreakdownBlock() {
   };
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-lg border">
+    <div className="flex h-full flex-col overflow-hidden">
       <div className="flex items-center gap-3 border-b px-3 py-2">
         <p className="text-sm font-medium">{DATA.project.name}</p>
         <p className="text-xs text-muted-foreground">Work breakdown</p>
@@ -1515,71 +1511,72 @@ export function WorkBreakdownBlock() {
                 <col key={id} style={{ width: widths[id] }} />
               ))}
             </colgroup>
-            <Sortable
-              value={columnOrder}
-              onValueChange={(next) => setColumnOrder(next as DataColId[])}
-              orientation="horizontal"
-              flatCursor
-              {...columnSortableProps}
-            >
-              <SortableContent withoutSlot>
-                <thead>
-                  <tr className="text-left text-[11px] text-muted-foreground">
-                    <th className={cn(stickyCellCls, "sticky top-0 left-0 z-[4] h-8 border-b font-normal")}>
-                      <span className="flex items-center justify-center">
-                        <Checkbox
-                          checked={someSelected ? "indeterminate" : allSelected}
-                          onCheckedChange={toggleAll}
-                          aria-label="Select all tasks"
-                        />
-                      </span>
-                    </th>
-                    <th
-                      className={cn(stickyCellCls, "sticky top-0 z-[4] h-8 border-r border-b px-2 font-normal")}
-                      style={{ left: SELECT_W }}
+            <thead>
+              <SortableList
+                layout="table"
+                asChild
+                value={columnOrder}
+                onValueChange={(next) => setColumnOrder(next as DataColId[])}
+                orientation="horizontal"
+                flatCursor
+              >
+                <tr className="text-left text-[11px] text-muted-foreground">
+                  <th className={cn(stickyCellCls, "sticky top-0 left-0 z-[4] h-8 border-b font-normal")}>
+                    <span className="flex items-center justify-center">
+                      <Checkbox
+                        checked={someSelected ? "indeterminate" : allSelected}
+                        onCheckedChange={toggleAll}
+                        aria-label="Select all tasks"
+                      />
+                    </span>
+                  </th>
+                  <th
+                    className={cn(stickyCellCls, "sticky top-0 z-[4] h-8 border-r border-b px-2 font-normal")}
+                    style={{ left: SELECT_W }}
+                  >
+                    <span className="relative flex items-center gap-2">
+                      <span className="w-4 shrink-0" />
+                      <span className="w-12 shrink-0 font-mono text-[10px]">WBS</span>
+                      <span>Name</span>
+                    </span>
+                    {resizeHandle("name")}
+                  </th>
+                  {columnOrder.map((id) => (
+                    <SortableListItem
+                      key={id}
+                      value={id}
+                      asChild
+                      asHandle
+                      preview={
+                        <span className="font-medium">{DATA_COLS[id].label}</span>
+                      }
                     >
-                      <span className="relative flex items-center gap-2">
-                        <span className="w-4 shrink-0" />
-                        <span className="w-12 shrink-0 font-mono text-[10px]">WBS</span>
-                        <span>Name</span>
-                      </span>
-                      {resizeHandle("name")}
-                    </th>
-                    {columnOrder.map((id) => (
-                      <SortableItem key={id} value={id} asChild asHandle {...sortableDropTargetProps(id)}>
-                        <th
-                          className={cn(
-                            "sticky top-0 z-[3] h-8 border-b bg-card px-2 font-normal",
-                            DATA_COLS[id].align === "right" && "text-right",
-                            "data-dragging:opacity-30",
-                          )}
-                        >
-                          {DATA_COLS[id].label}
-                          {resizeHandle(id)}
-                        </th>
-                      </SortableItem>
-                    ))}
-                  </tr>
-                </thead>
-              </SortableContent>
-              <SortableOverlay>
-                {({ value }) => (
-                  <div className="rounded-md border bg-card/55 px-2.5 py-1.5 text-xs font-medium shadow-lg backdrop-blur-md backdrop-saturate-150">
-                    {DATA_COLS[value as DataColId]?.label ?? String(value)}
-                  </div>
-                )}
-              </SortableOverlay>
-            </Sortable>
-            <Sortable
+                      <th
+                        className={cn(
+                          "sticky top-0 z-[3] h-8 border-b bg-card px-2 font-normal",
+                          DATA_COLS[id].align === "right" && "text-right",
+                          "data-dragging:opacity-30",
+                        )}
+                      >
+                        {DATA_COLS[id].label}
+                        {resizeHandle(id)}
+                      </th>
+                    </SortableListItem>
+                  ))}
+                </tr>
+              </SortableList>
+            </thead>
+            <SortableList
+              layout="table"
+              asChild
               value={rows}
               onValueChange={(next) => setRows(normalizeWorkOrder(next))}
               getItemValue={(r: WorkRow) => r.id}
               orientation="vertical"
               flatCursor
-              {...rowSortableProps}
+              ghostColSpan={tableColCount}
             >
-              <SortableContent withoutSlot>
-                <tbody>
+              <tbody>
                   {view.map((v, index) => {
                     const visible = rowVisible(v);
                     const depth = wbsDepth(v);
@@ -1590,11 +1587,16 @@ export function WorkBreakdownBlock() {
                       const somePhase = !allPhase && ids.some((id) => selected.has(id));
                       const phaseExpanded = !collapsed.has(v.row.id);
                       return (
-                        <SortableItem
+                        <SortableListItem
                           key={v.row.id}
                           value={v.row.id}
                           asChild
-                          {...sortableDropTargetProps(v.row.id)}
+                          preview={
+                            <span className="flex items-center gap-2">
+                              <span className="font-mono text-[10px] text-muted-foreground">{v.wbs}</span>
+                              <span className="font-medium">{v.row.name}</span>
+                            </span>
+                          }
                         >
                           <tr className={cn("group/row bg-muted/30", WBS_ROW_H, !visible && "hidden")}>
                             <td
@@ -1637,7 +1639,7 @@ export function WorkBreakdownBlock() {
                             </td>
                             {columnOrder.map((id) => renderPhaseCell(id, v.row.id, ids.length))}
                           </tr>
-                        </SortableItem>
+                        </SortableListItem>
                       );
                     }
 
@@ -1679,7 +1681,7 @@ export function WorkBreakdownBlock() {
                             {isSub ? (
                               <span className="w-4 shrink-0" aria-hidden />
                             ) : (
-                              <SortableItemHandle asChild>
+                              <SortableListItemHandle asChild>
                                 <button
                                   type="button"
                                   {...getDragHandleAria({ label: `Reorder ${t.name}` })}
@@ -1687,7 +1689,7 @@ export function WorkBreakdownBlock() {
                                 >
                                   <GripIcon />
                                 </button>
-                              </SortableItemHandle>
+                              </SortableListItemHandle>
                             )}
                             <span className="w-12 shrink-0 font-mono text-[10px] text-muted-foreground tabular-nums">
                               {v.wbs}
@@ -1714,32 +1716,26 @@ export function WorkBreakdownBlock() {
 
                     if (isSub) return <Fragment key={t.id}>{rowInner}</Fragment>;
                     return (
-                      <SortableItem key={t.id} value={t.id} asChild {...sortableDropTargetProps(t.id)}>
+                      <SortableListItem
+                        key={t.id}
+                        value={t.id}
+                        asChild
+                        preview={
+                          <span className="flex items-center gap-2">
+                            <span className="font-mono text-[10px] text-muted-foreground">{v.wbs}</span>
+                            <span className="font-medium">{t.name}</span>
+                          </span>
+                        }
+                      >
                         {rowInner}
-                      </SortableItem>
+                      </SortableListItem>
                     );
                   })}
-                </tbody>
-              </SortableContent>
-              <SortableOverlay>
-                {({ value }) => {
-                  const r = rows.find((x) => x.id === value);
-                  const wbs = view.find((x) => x.kind !== "phase" && x.row.id === value)?.wbs;
-                  return (
-                    <div className="flex items-center gap-2 rounded-md border bg-card/55 px-2.5 py-1.5 text-xs font-medium shadow-lg backdrop-blur-md backdrop-saturate-150">
-                      {wbs ? (
-                        <span className="font-mono text-[10px] text-muted-foreground">{wbs}</span>
-                      ) : null}
-                      {r?.name ?? String(value)}
-                    </div>
-                  );
-                }}
-              </SortableOverlay>
-            </Sortable>
+              </tbody>
+            </SortableList>
           </table>
         </ScrollArea>
 
-        {dropChrome}
         {/* Zero-width rail pinned to the column boundary. The line and the grip
             are both centred on it with -translate-x-1/2, so the line bisects
             the grip exactly; the grip sits at 50% of the table view's height. */}
