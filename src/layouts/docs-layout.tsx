@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@nqlib/nqui";
 import { ShowcaseTopBar } from "../components/showcase-top-bar";
@@ -24,8 +25,26 @@ export function DocsLayout() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
+  // Keep the layout from shifting when the vertical scrollbar appears/disappears,
+  // and lock horizontal rubber-band swing on hard trackpad scrolls.
+  // Do NOT set overflow-x on html/layout — that breaks position:sticky for the top bar.
+  useEffect(() => {
+    const root = document.documentElement;
+    const prevGutter = root.style.scrollbarGutter;
+    const prevOverscrollX = root.style.overscrollBehaviorX;
+    const prevOverscroll = root.style.overscrollBehavior;
+    root.style.scrollbarGutter = "stable";
+    root.style.overscrollBehaviorX = "none";
+    root.style.overscrollBehavior = "none";
+    return () => {
+      root.style.scrollbarGutter = prevGutter;
+      root.style.overscrollBehaviorX = prevOverscrollX;
+      root.style.overscrollBehavior = prevOverscroll;
+    };
+  }, []);
+
   return (
-    <div className="min-h-dvh bg-background text-foreground">
+    <div className="min-h-dvh overscroll-x-none bg-background text-foreground">
       <ShowcaseTopBar
         bordered
         sticky

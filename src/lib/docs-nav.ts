@@ -1,25 +1,10 @@
 import type * as PageTree from "fumadocs-core/page-tree";
-import { source } from "@/lib/docs-source";
+import { source, type DocsPage } from "@/lib/docs-source";
 
 /** `/docs/nqui/...` → `nqui`; hub `/docs` → null */
 export function docsLibraryKey(url: string): string | null {
   const match = url.match(/^\/docs\/([^/]+)/);
   return match?.[1] ?? null;
-}
-
-export function pagesInSameLibrary(pageUrl: string) {
-  const lib = docsLibraryKey(pageUrl);
-  const all = source.getPages();
-  if (!lib) {
-    return all.filter((p) => p.url === "/docs");
-  }
-  const prefix = `/docs/${lib}`;
-  return all.filter((p) => p.url === prefix || p.url.startsWith(`${prefix}/`));
-}
-
-export function pageTitle(page: NonNullable<ReturnType<typeof source.getPage>>): string {
-  const data = page.data as { title?: string };
-  return typeof data.title === "string" ? data.title : "Page";
 }
 
 function nodeName(node: PageTree.Node): string {
@@ -32,6 +17,53 @@ function isFolder(node: PageTree.Node): node is PageTree.Folder {
 
 function isPage(node: PageTree.Node): node is PageTree.Item {
   return node.type === "page";
+}
+
+/** Depth-first page URLs in the same order as the sidebar tree (meta.json). */
+function flattenPageUrls(nodes: PageTree.Node[]): string[] {
+  const urls: string[] = [];
+  const seen = new Set<string>();
+
+  const visit = (list: PageTree.Node[]) => {
+    for (const node of list) {
+      if (isPage(node)) {
+        if (seen.has(node.url)) continue;
+        seen.add(node.url);
+        urls.push(node.url);
+        continue;
+      }
+      if (isFolder(node)) {
+        if (node.index && !seen.has(node.index.url)) {
+          seen.add(node.index.url);
+          urls.push(node.index.url);
+        }
+        visit(node.children);
+      }
+    }
+  };
+
+  visit(nodes);
+  return urls;
+}
+
+/**
+ * Library pages in sidebar / meta.json order (not filesystem / getPages order).
+ * Used for prev/next and the mobile page strip.
+ */
+export function pagesInSameLibrary(pageUrl: string): DocsPage[] {
+  const { nodes } = docsSidebarScope(pageUrl);
+  const byUrl = new Map(source.getPages().map((page) => [page.url, page]));
+  const ordered: DocsPage[] = [];
+  for (const url of flattenPageUrls(nodes)) {
+    const page = byUrl.get(url);
+    if (page) ordered.push(page);
+  }
+  return ordered;
+}
+
+export function pageTitle(page: DocsPage): string {
+  const data = page.data as { title?: string };
+  return typeof data.title === "string" ? data.title : "Page";
 }
 
 /**

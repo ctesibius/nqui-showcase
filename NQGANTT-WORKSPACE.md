@@ -2,34 +2,15 @@
 
 Consumer app pattern: **published `@nqlib/nqgantt` UI + engine**, showcase-owned **demos + CSS**.
 
-## ⚠️ Deploy blocked until nqgantt 0.4.0 is published
+## Current pin
 
-This app pins `@nqlib/nqgantt` and `@nqlib/nqgantt-engine` at **`^0.3.1`**, but the gantt
-demos and the `/docs/nqgantt` guide now use the 0.4.0 surface (baselines, earned value,
-worklog, resource calendars, MS Project import/export). `pnpm build` therefore fails with
-~21 `MISSING_EXPORT` errors — the symbols exist in the sibling source but not in the
-published tarball.
-
-The pin is deliberately **not** bumped ahead of the release: pointing it at a version that
-is not on npm would break `pnpm install` for everyone, including people not touching gantt.
-
-Meanwhile, verify the bundle against the local libraries:
+`@nqlib/nqgantt` / `@nqlib/nqgantt-engine` at **`^0.4.0`** (baselines, earned value,
+worklog, resource calendars, MS Project import/export). Deploy uses published npm:
 
 ```bash
-make build-local     # production build, local siblings — this passes today
-make local           # dev server, local siblings
+pnpm build           # published path
+make build-local     # optional: production build against local siblings
 ```
-
-Once nqgantt 0.4.0 is on npm (`cd ../nqgantt && make publish`, needs an OTP):
-
-```bash
-# in this repo
-pnpm up @nqlib/nqgantt@^0.4.0 @nqlib/nqgantt-engine@^0.4.0
-pnpm install
-pnpm build           # published path — should now pass
-```
-
-Git tag `v0.4.0` in the sibling repo marks the commit this app expects.
 
 ## Agent skill (read first)
 

@@ -36,9 +36,7 @@
       /*
        * DEV-ONLY: type-resolve @nqlib/nqgrid against the sibling ../nqgrid/src so
        * the editor/typecheck match the engine API that `pnpm dev:local` runs with.
-       * The published @nqlib/nqgrid@0.1.0 is STALE and lacks this API. Before the
-       * showcase can build/deploy against the published package, publish a current
-       * nqgrid and REMOVE these eight mappings (see NQGRID-WORKSPACE.md).
+       * Runtime still uses published @nqlib/nqgrid@^0.2.0 unless USE_LOCAL_NQGRID.
        */
       "@nqlib/nqgrid": ["../nqgrid/src/index.ts"],
       "@nqlib/nqgrid/engine": ["../nqgrid/src/engine/index.ts"],

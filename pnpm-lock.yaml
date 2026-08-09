@@ -42,14 +42,14 @@ importers:
         specifier: ^1.1.6
         version: 1.1.6(react@19.2.4)
       '@nqlib/nqchart':
-        specifier: ^0.2.1
-        version: 0.2.1(@nqlib/nqui@nqui)(echarts@5.6.0)(motion@12.40.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: ^0.2.2
+        version: 0.2.2(@nqlib/nqui@nqui)(echarts@5.6.0)(motion@12.40.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@nqlib/nqgantt':
-        specifier: ^0.3.1
-        version: 0.3.1(@dnd-kit/core@6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@dnd-kit/modifiers@9.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4))(@hugeicons/core-free-icons@4.1.3)(@hugeicons/react@1.1.6(react@19.2.4))(@nqlib/nqui@nqui)(@uidotdev/usehooks@2.4.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(date-fns@4.1.0)(jotai@2.20.1(@babel/core@7.29.0)(@babel/template@7.28.6)(@types/react@19.2.14)(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: ^0.4.0
+        version: 0.4.0(@dnd-kit/core@6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@dnd-kit/modifiers@9.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4))(@hugeicons/core-free-icons@4.1.3)(@hugeicons/react@1.1.6(react@19.2.4))(@nqlib/nqui@nqui)(@uidotdev/usehooks@2.4.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(date-fns@4.1.0)(jotai@2.20.1(@babel/core@7.29.0)(@babel/template@7.28.6)(@types/react@19.2.14)(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@nqlib/nqgantt-engine':
-        specifier: ^0.3.1
-        version: 0.3.1(date-fns@4.1.0)
+        specifier: ^0.4.0
+        version: 0.4.0(date-fns@4.1.0)
       '@nqlib/nqgrid':
         specifier: ^0.2.0
         version: 0.2.0(@tanstack/react-table@8.21.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@tanstack/react-virtual@3.14.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -767,8 +767,8 @@ packages:
       '@emnapi/core': ^1.7.1
       '@emnapi/runtime': ^1.7.1
 
-  '@nqlib/nqchart@0.2.1':
-    resolution: {integrity: sha512-nqeQlQ3K7zuI8KM6KJWZV1wXbja7FecuyFlGtU4tefSnul4HHD7/4nmc1/Os3IL1oo4FuewKIqZUGC5oqw1oEg==}
+  '@nqlib/nqchart@0.2.2':
+    resolution: {integrity: sha512-NtUvAyGo255weNMb5wsHlleQWiqW/Y2IIo9Y3rCEpQxdIKMAGcfDiAthxcTlJNqcd/UzwYU4n2xssoV/leqKYw==}
     peerDependencies:
       '@nqlib/nqui': ^0.7.0
       echarts: ^5.6.0
@@ -779,13 +779,13 @@ packages:
       '@nqlib/nqui':
         optional: true
 
-  '@nqlib/nqgantt-engine@0.3.1':
-    resolution: {integrity: sha512-QPFOZvoWKKOBCi42OJX2O/wZcmq/hEXsrXwW6eVtNaaKgnZiPeqxn6eQj8RUnlu54rctiWMRezj8aY+IrHQu6w==}
+  '@nqlib/nqgantt-engine@0.4.0':
+    resolution: {integrity: sha512-RbXbRti7RozD8o1butpcTOEynEOoRMrsPpi3R39JpbcGW45MRpot0ze5iXPR9e/XjPvj2trCSpBAfLXSwFq0yw==}
     peerDependencies:
       date-fns: ^4.1.0
 
-  '@nqlib/nqgantt@0.3.1':
-    resolution: {integrity: sha512-/ihhUFo6wLOyI2AmOjPLboYJ1KPTCdtDlS6Kv5Rhpyu8OZVZT7bPbmCQ1VoGpSvFQBAXdUmMp/DYKFY1ET5klA==}
+  '@nqlib/nqgantt@0.4.0':
+    resolution: {integrity: sha512-TZkNG4ErbhqEJv/l4SB2dEvL9NFAR+Nph3FcDExzyUsaP7euGZyqMaews4+0kMWLXTJyVvwZvDzdYHIyVD4iJw==}
     hasBin: true
     peerDependencies:
       '@dnd-kit/core': ^6.3.1
@@ -3911,7 +3911,7 @@ snapshots:
       '@tybys/wasm-util': 0.10.1
     optional: true
 
-  '@nqlib/nqchart@0.2.1(@nqlib/nqui@nqui)(echarts@5.6.0)(motion@12.40.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+  '@nqlib/nqchart@0.2.2(@nqlib/nqui@nqui)(echarts@5.6.0)(motion@12.40.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       echarts: 5.6.0
       motion: 12.40.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -3920,17 +3920,17 @@ snapshots:
     optionalDependencies:
       '@nqlib/nqui': link:../nqui
 
-  '@nqlib/nqgantt-engine@0.3.1(date-fns@4.1.0)':
+  '@nqlib/nqgantt-engine@0.4.0(date-fns@4.1.0)':
     dependencies:
       date-fns: 4.1.0
 
-  '@nqlib/nqgantt@0.3.1(@dnd-kit/core@6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@dnd-kit/modifiers@9.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4))(@hugeicons/core-free-icons@4.1.3)(@hugeicons/react@1.1.6(react@19.2.4))(@nqlib/nqui@nqui)(@uidotdev/usehooks@2.4.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(date-fns@4.1.0)(jotai@2.20.1(@babel/core@7.29.0)(@babel/template@7.28.6)(@types/react@19.2.14)(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+  '@nqlib/nqgantt@0.4.0(@dnd-kit/core@6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@dnd-kit/modifiers@9.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4))(@hugeicons/core-free-icons@4.1.3)(@hugeicons/react@1.1.6(react@19.2.4))(@nqlib/nqui@nqui)(@uidotdev/usehooks@2.4.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(date-fns@4.1.0)(jotai@2.20.1(@babel/core@7.29.0)(@babel/template@7.28.6)(@types/react@19.2.14)(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@dnd-kit/core': 6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@dnd-kit/modifiers': 9.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
       '@hugeicons/core-free-icons': 4.1.3
       '@hugeicons/react': 1.1.6(react@19.2.4)
-      '@nqlib/nqgantt-engine': 0.3.1(date-fns@4.1.0)
+      '@nqlib/nqgantt-engine': 0.4.0(date-fns@4.1.0)
       '@nqlib/nqui': link:../nqui
       '@uidotdev/usehooks': 2.4.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       date-fns: 4.1.0

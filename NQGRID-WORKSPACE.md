@@ -48,18 +48,11 @@ The toggle is a pure vite alias driven by `USE_LOCAL_NQGRID` (see
 `vite.config.ts`); no install/link churn. Point at a different checkout with
 `NQGRID_DIR=/path/to/nqgrid`.
 
-## ⚠️ Before deploying the showcase
+## Deploy note
 
-The published `@nqlib/nqgrid@0.1.0` is **stale** — it predates the engine API
-these surfaces use (`renderCell`, `ColumnSchema`, `SelectOption`,
-`createDefaultRegistry`, …). So `pnpm build` / a clean deploy will fail today.
-To deploy each app independently:
+Pinned at **`@nqlib/nqgrid@^0.2.0`** (published). `pnpm build` / deploy use that
+tarball unless `USE_LOCAL_NQGRID=true`.
 
-1. **Publish a current nqgrid** (in `../nqgrid`: `pnpm build` → bump → publish),
-   then bump `@nqlib/nqgrid` here to that version.
-2. **Remove the eight dev-only `@nqlib/nqgrid*` paths** in `tsconfig.app.json`
-   (they reference the sibling `../nqgrid/src`, which does not exist in the
-   showcase repo on its own / in CI).
-
-After that, `pnpm dev` and `pnpm build` run fully against the published engine,
-and the showcase deploys with no dependency on a checked-out nqgrid.
+`tsconfig.app.json` still has **dev-only** `@nqlib/nqgrid*` path aliases to
+`../nqgrid/src` for local typechecking when the sibling is checked out. Vite
+runtime resolution follows the env toggle, not those paths.

@@ -1,10 +1,10 @@
 import { Suspense, useEffect, useState, type ComponentType } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
-import { Spinner } from "@nqlib/nqui";
+import { Spinner, cn } from "@nqlib/nqui";
 import browserCollections from "collections/browser";
 import { DocsArticle } from "@/components/docs/docs-article";
 import { DocsMobileNav } from "@/components/docs/docs-mobile-nav";
-import { DocsSidebar } from "@/components/docs/docs-sidebar";
+import { DocsSidebar, useDocsSidebarCollapsed } from "@/components/docs/docs-sidebar";
 import { mdxComponents } from "@/components/docs/mdx";
 import { pageTitle, pagesInSameLibrary } from "@/lib/docs-nav";
 import { source } from "@/lib/docs-source";
@@ -39,7 +39,7 @@ function DocsMdxBody({ path }: { path: string }) {
   return clientLoader.useContent(path);
 }
 
-function DocsPageInner({ slugs }: { slugs: string[] }) {
+function DocsPageInner({ slugs, wide }: { slugs: string[]; wide: boolean }) {
   const page = source.getPage(slugs);
   if (!page) {
     return <Navigate to="/docs" replace />;
@@ -85,7 +85,7 @@ function DocsPageInner({ slugs }: { slugs: string[] }) {
   const next = neighbors >= 0 && neighbors < pages.length - 1 ? pages[neighbors + 1] : undefined;
 
   return (
-    <DocsArticle>
+    <DocsArticle wide={wide}>
       <DocsMobileNav pageUrl={page.url} />
       <Suspense
         fallback={
@@ -121,12 +121,23 @@ export function DocsPage() {
   const params = useParams();
   const splat = params["*"] ?? "";
   const slugs = splat.split("/").filter((s) => s.length > 0);
+  const [sidebarCollapsed, setSidebarCollapsed] = useDocsSidebarCollapsed();
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl gap-8 px-4 pt-8 pb-12 sm:px-6">
-      <DocsSidebar className="hidden sidebar:flex" />
+    <div
+      className={cn(
+        // No shared pt — padding is on the article so fixed/pinned chrome does not travel.
+        "mx-auto flex w-full min-w-0 items-start gap-8 px-4 pb-12 sm:px-6",
+        sidebarCollapsed ? "max-w-[96rem]" : "max-w-6xl",
+      )}
+    >
+      <DocsSidebar
+        className="hidden sidebar:block"
+        collapsed={sidebarCollapsed}
+        onCollapsedChange={setSidebarCollapsed}
+      />
       <div className="min-w-0 flex-1">
-        <DocsPageInner slugs={slugs} />
+        <DocsPageInner slugs={slugs} wide={sidebarCollapsed} />
       </div>
     </div>
   );
