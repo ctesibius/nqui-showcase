@@ -117,8 +117,19 @@ export default defineConfig(async ({ mode }) => ({
   // dev-links the sibling repo — the dep optimizer mangles a symlinked
   // package's named exports (e.g. InlineTabsList disappears), so keep this
   // exclude to serve its ESM dist unbundled whenever local mode is active.
+  // PdD's honey-pot imports CJS-only `bind-event-listener` / `raf-schd` with
+  // named ESM imports. Under pnpm those stay nested; if Vite serves them raw,
+  // the browser throws "does not provide an export named 'bind'" and the
+  // LazyMount DnD/gantt block crashes the /blocks tree.
   optimizeDeps: {
     exclude: ["@nqlib/nqui"],
+    include: [
+      "bind-event-listener",
+      "raf-schd",
+      "@atlaskit/pragmatic-drag-and-drop",
+      "@atlaskit/pragmatic-drag-and-drop > bind-event-listener",
+      "@atlaskit/pragmatic-drag-and-drop > raf-schd",
+    ],
   },
   resolve: {
     alias: [

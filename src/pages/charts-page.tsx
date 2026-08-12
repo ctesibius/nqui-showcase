@@ -26,6 +26,7 @@ import {
 } from "../nqchart/catalog/apply-preview-controls";
 import { LazyMount } from "../components/blocks/lazy-mount";
 import { Tray, trayMeta, trayTags } from "../components/showcase/tray";
+import { isNew } from "../nqchart/lab/whats-new";
 import "../components/landing/landing.css";
 import "../components/blocks/blocks.css";
 import "./charts-page.css";
@@ -115,9 +116,14 @@ function ChartCard({
     <Tray interactive>
       <Tray.Caption>
         <span className="truncate text-sm font-medium">{entry.name}</span>
-        <Badge variant="outline" className="shrink-0 font-mono text-[10px] font-normal">
-          {entry.family}
-        </Badge>
+        <span className="flex shrink-0 items-center gap-1.5">
+          {isNew(entry.id) ? (
+            <Badge className="font-mono text-xs font-normal">New</Badge>
+          ) : null}
+          <Badge variant="outline" className="font-mono text-xs font-normal">
+            {entry.family}
+          </Badge>
+        </span>
       </Tray.Caption>
       <Tray.Stage
         variant="chart"
@@ -134,12 +140,12 @@ function ChartCard({
           </Suspense>
         </LazyMount>
       </Tray.Stage>
-      <p className={cn(trayMeta, "font-mono text-[10px] text-muted-foreground")}>{entry.id}</p>
+      <p className={cn(trayMeta, "font-mono text-xs text-muted-foreground")}>{entry.id}</p>
       <ul className={trayTags}>
-        <li className="rounded-full bg-foreground/5 px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
+        <li className="rounded-full bg-foreground/5 px-2 py-0.5 font-mono text-xs text-muted-foreground">
           {entry.category}
         </li>
-        <li className="rounded-full bg-foreground/5 px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
+        <li className="rounded-full bg-foreground/5 px-2 py-0.5 font-mono text-xs text-muted-foreground">
           {entry.component}
         </li>
       </ul>
@@ -196,6 +202,7 @@ export function ChartsPage() {
             </Link>
           }
           links={[
+            { to: "/charts/lab", label: "Lab" },
             { to: "/blocks", label: "Blocks" },
             { to: "/catalog", label: "Catalog" },
             { to: "/docs/nqchart", label: "Docs" },
@@ -207,7 +214,7 @@ export function ChartsPage() {
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground/80">
             {CATALOG_COUNT} examples · synced from the nqchart registry
           </p>
-          <h1 className="mt-3 text-[clamp(1.9rem,3.6vw,2.55rem)] font-semibold leading-[1.07] tracking-[-0.028em]">
+          <h1 className="mt-3 text-4xl font-semibold leading-[1.07] tracking-[-0.028em] md:text-5xl">
             Every NQChart, live.
           </h1>
           <p className="mt-4 leading-relaxed text-muted-foreground">
@@ -250,11 +257,11 @@ export function ChartsPage() {
                  shell between them, so a hover fill stops short of its neighbour and
                  reads as a sliver. Use the `spacing` prop if separation is ever wanted. */
             >
-              <ToggleGroupItem value="all" className="h-7 rounded-full px-2.5 text-[11px]">
+              <ToggleGroupItem value="all" className="h-7 rounded-full px-2.5 text-xs">
                 All families
               </ToggleGroupItem>
               {NQCHART_FAMILIES.map((f) => (
-                <ToggleGroupItem key={f} value={f} className="h-7 rounded-full px-2.5 text-[11px]">
+                <ToggleGroupItem key={f} value={f} className="h-7 rounded-full px-2.5 text-xs">
                   {f}
                 </ToggleGroupItem>
               ))}
@@ -262,7 +269,7 @@ export function ChartsPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+            <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
               Category
             </span>
             <ToggleGroup
@@ -285,7 +292,7 @@ export function ChartsPage() {
                  reads as a sliver. Use the `spacing` prop if separation is ever wanted. */
             >
               {CATEGORIES.map((c) => (
-                <ToggleGroupItem key={c.id} value={c.id} className="h-7 rounded-full px-2.5 text-[11px]">
+                <ToggleGroupItem key={c.id} value={c.id} className="h-7 rounded-full px-2.5 text-xs">
                   {c.label}
                 </ToggleGroupItem>
               ))}
@@ -293,10 +300,10 @@ export function ChartsPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <label className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+            <label className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
               Background
               <select
-                className="h-7 rounded-full border bg-background px-2 text-[11px] normal-case tracking-normal text-foreground"
+                className="h-7 rounded-full border bg-background px-2 text-xs normal-case tracking-normal text-foreground"
                 value={background}
                 onChange={(e) => setBackground(e.target.value as BackgroundVariant | "none")}
               >
@@ -308,7 +315,7 @@ export function ChartsPage() {
               </select>
             </label>
 
-            <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+            <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
               Tooltip
             </span>
             <ToggleGroup
@@ -317,13 +324,13 @@ export function ChartsPage() {
               onValueChange={(v) => v && setTooltip(v as TooltipPreviewMode)}
             >
               {TIP_OPTIONS.map((t) => (
-                <ToggleGroupItem key={t.id} value={t.id} className="h-7 rounded-full px-2.5 text-[11px]">
+                <ToggleGroupItem key={t.id} value={t.id} className="h-7 rounded-full px-2.5 text-xs">
                   {t.label}
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
 
-            <span className="ml-auto font-mono text-[11px] tabular-nums text-muted-foreground">
+            <span className="ml-auto font-mono text-xs tabular-nums text-muted-foreground">
               {filtered.length} match · page {safePage + 1}/{pageCount}
             </span>
           </div>
@@ -366,7 +373,7 @@ export function ChartsPage() {
         )}
 
         <footer className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t pt-6">
-          <p className="font-mono text-[0.72rem] tracking-[0.04em] text-muted-foreground/70">
+          <p className="font-mono text-xs tracking-[0.04em] text-muted-foreground/70">
             synced via <code>pnpm nqchart:sync</code> · {PAGE_SIZE} charts mounted per page
           </p>
           <Button size="sm" variant="outline" className="rounded-full" asChild>

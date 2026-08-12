@@ -8,6 +8,9 @@ import { AppLayout } from "./components/showcase/layout/app-layout";
 // stays a featherweight first paint.
 const BlocksPage = lazy(() => import("./pages/blocks-page").then((m) => ({ default: m.BlocksPage })));
 const ChartsPage = lazy(() => import("./pages/charts-page").then((m) => ({ default: m.ChartsPage })));
+const ChartsLabPage = lazy(() =>
+  import("./pages/charts-lab-page").then((m) => ({ default: m.ChartsLabPage })),
+);
 const DocsLayout = lazy(() => import("./layouts/docs-layout").then((m) => ({ default: m.DocsLayout })));
 const DocsPage = lazy(() => import("./pages/docs-page").then((m) => ({ default: m.DocsPage })));
 
@@ -61,6 +64,8 @@ function App() {
           <Route path="/blocks" element={<BlocksPage />} />
           {/* Full NQChart registry catalog with global preview controls. */}
           <Route path="/charts" element={<ChartsPage />} />
+          {/* BI feature lab — release acceptance beside the gallery. */}
+          <Route path="/charts/lab" element={<ChartsLabPage />} />
           {/* The scroll-story was replaced by the blocks gallery. */}
           <Route path="/story" element={<Navigate to="/blocks" replace />} />
           {/* The live console was retired — send its old paths home. */}

@@ -76,7 +76,7 @@ export function BlocksPage() {
           <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground/80">
             {BLOCKS.length} patterns · copy the idea, keep the pieces
           </p>
-          <h1 className="mt-3 text-[clamp(1.9rem,3.6vw,2.55rem)] font-semibold leading-[1.07] tracking-[-0.028em]">
+          <h1 className="mt-3 text-4xl font-semibold leading-[1.07] tracking-[-0.028em] md:text-5xl">
             Blocks, not screenshots.
           </h1>
           <p className="mt-4 leading-relaxed text-muted-foreground">
@@ -135,7 +135,7 @@ export function BlocksPage() {
               >
                 <Tray.Caption>
                   <span className="truncate text-sm font-medium">{b.name}</span>
-                  <Badge variant="outline" className="shrink-0 font-mono text-[10px] font-normal">
+                  <Badge variant="outline" className="shrink-0 font-mono text-xs font-normal">
                     {b.lib}
                   </Badge>
                 </Tray.Caption>
@@ -161,7 +161,7 @@ export function BlocksPage() {
                   {b.bom.map((p) => (
                     <li
                       key={p}
-                      className="rounded-full bg-foreground/5 px-2 py-0.5 font-mono text-[10px] text-muted-foreground"
+                      className="rounded-full bg-foreground/5 px-2 py-0.5 font-mono text-xs text-muted-foreground"
                     >
                       {p}
                     </li>
@@ -173,7 +173,7 @@ export function BlocksPage() {
         </div>
 
         <footer className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t pt-6">
-          <p className="font-mono text-[0.72rem] tracking-[0.04em] text-muted-foreground/70">
+          <p className="font-mono text-xs tracking-[0.04em] text-muted-foreground/70">
             nqlib · this page is built with its own packages
           </p>
           <Button size="sm" variant="outline" className="rounded-full" asChild>

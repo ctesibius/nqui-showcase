@@ -29,7 +29,8 @@
   aspect-ratio: 4 / 3;
   height: auto;
   overflow: hidden;
-  contain: layout paint;
+  /* layout only — paint discards canvas backing stores while scrolling */
+  contain: layout;
   border: none;
   outline: none;
   box-shadow: none;
