@@ -2,7 +2,7 @@
 
 **Intention:** The 0.3.0 BI surface is a small set of props. Click, isolate, brush, keyboard, export — then stop. The host owns what those events mean.
 
-Practice every case on **`/charts/lab`**.
+Practice every case on the live [**/charts/lab**](/charts/lab).
 
 ## Mark click — `onMarkClick`
 

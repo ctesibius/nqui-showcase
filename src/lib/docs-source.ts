@@ -109,3 +109,18 @@ export const source = loader({
 });
 
 export type DocsPage = NonNullable<ReturnType<typeof source.getPage>>;
+
+/**
+ * Chart families are folders with `static.mdx` and no index (becocharts layout).
+ * `/docs/nqchart/area-chart` must resolve to that page, not 404 → `/docs`.
+ */
+export function resolveDocsPage(slugs: string[]): DocsPage | undefined {
+  const exact = source.getPage(slugs);
+  if (exact) return exact;
+  return source.getPage([...slugs, "static"]);
+}
+
+/** Drop the implementation `…/static` slug from consumer-facing URLs. */
+export function prettyDocsUrl(url: string): string {
+  return url.replace(/\/static$/, "");
+}

@@ -2,7 +2,7 @@
 
 Short guide for **dashboard engineers** wiring `@nqlib/nqchart` as a renderer: compose a primitive, listen for mark events, leave filter state in the host.
 
-Published at **`/docs/nqchart`**. This folder (`docs/nqchart/`) is the Markdown + `[[wikilinks]]` source for the hub pages; sync with `pnpm docs:sync:nqchart` (copies the becocharts API reference, then overlays these guides). Primitive pages (bar, funnel, recipes, …) still come from the package MDX.
+Install with `pnpm add @nqlib/nqchart echarts motion`. Primitive API pages (bar, funnel, recipes, …) live under [Components](/docs/nqchart/components).
 
 ## Who this is for
 
@@ -20,7 +20,7 @@ Published at **`/docs/nqchart`**. This folder (`docs/nqchart/`) is the Markdown 
 2. **How** — the prop or child you actually write.
 3. **When not to** — escape hatches and anti-patterns.
 
-Practice on **`/charts/lab`** (dev). The gallery at **`/charts`** only proves drawing.
+Practice on the live [**/charts/lab**](/charts/lab). The gallery at [**/charts**](/charts) only proves drawing.
 
 ## All guide pages
 
@@ -31,7 +31,7 @@ Practice on **`/charts/lab`** (dev). The gallery at **`/charts`** only proves dr
 | [[interaction]] | `onMarkClick`, legend, brush, keyboard, `chartRef.toDataURL` |
 | [[cheatsheet]] | Imports, config keys, BI props |
 
-## Live surfaces in this showcase
+## Live demos
 
 | Surface | Route |
 |---------|-------|

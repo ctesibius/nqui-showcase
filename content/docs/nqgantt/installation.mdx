@@ -4,23 +4,23 @@ description: Add @nqlib/nqgantt to a React app.
 ---
 
 ```bash
-pnpm add @nqlib/nqgantt
+pnpm add @nqlib/nqgantt @nqlib/nqgantt-engine
 ```
 
-### Local iteration in this showcase
+Peer React 18 or 19. Import the UI from `@nqlib/nqgantt/ui` and types/helpers from `@nqlib/nqgantt`:
 
-```bash
-pnpm nqgantt:status
-pnpm nqgantt:sync-lib   # refresh bar UI reference copies
-pnpm dev:local          # USE_LOCAL_NQGANTT when iterating on engine
+```ts
+import { GanttRoot } from "@nqlib/nqgantt/ui";
+import type { GanttFeature, GanttDependency } from "@nqlib/nqgantt";
 ```
 
-See `NQGANTT-WORKSPACE.md` for bar UI sync and release notes.
+Track versions on npm: [`@nqlib/nqgantt`](https://www.npmjs.com/package/@nqlib/nqgantt).
 
 ## What’s next
 
 | Next | |
 |------|--|
-| [Concepts](/docs/nqgantt/concepts) | How demos and `src/nqgantt/lib/` relate |
+| [Getting started](/docs/nqgantt/getting-started) | First session: links, lag, auto-schedule |
+| [Concepts](/docs/nqgantt/concepts) | Engine vs Gantt UI |
 | [Changelog](/docs/nqgantt/changelog) | Version notes |
 | Related | [nqgrid install](/docs/nqgrid/installation) · [nqui install](/docs/nqui/installation) |

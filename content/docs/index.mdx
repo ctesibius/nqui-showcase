@@ -1,23 +1,17 @@
 ---
 title: nqlib Docs
-description: Install guides and API docs for nqui, nqchart, nqgrid, and nqgantt — alongside the live showcase.
+description: Install guides and API docs for nqui, nqchart, nqgrid, and nqgantt.
 ---
 
-Documentation for the nqlib workspace libraries. **Showcase** surfaces let you try components live; **docs** cover install and composition.
+Install the published packages from npm, then compose them in your app. Live demos on this site are optional — they show the same APIs you import.
 
 ## Libraries
 
-| Library | Docs | Live |
-|---------|------|------|
-| **nqui** | [Install & skills](/docs/nqui) | [/catalog](/catalog) · [/nqui](/nqui) |
-| **nqchart** | [Charts docs](/docs/nqchart) | [/charts](/charts) · [/charts/lab](/charts/lab) · [/blocks](/blocks) |
-| **nqgrid** | [Grid docs](/docs/nqgrid) | Spreadsheet / projects demos in this app |
-| **nqgantt** | [Gantt docs](/docs/nqgantt) | Roadmap gantt demos in this app |
-
-## How this hub works
-
-- Content lives under `content/docs/` as MDX (Fumadocs collections).
-- NQChart API pages copy from sibling becocharts; hub guides overlay from `docs/nqchart/` via `pnpm docs:sync:nqchart`.
-- Old `/readme` URLs redirect here (`/readme` → `/docs/nqui`, `/readme/nqchart` → `/docs/nqchart`).
+| Library | Install | Docs | Live |
+|---------|---------|------|------|
+| **nqui** | `pnpm add @nqlib/nqui` | [Component guide](/docs/nqui) | [/catalog](/catalog) · [/nqui](/nqui) |
+| **nqchart** | `pnpm add @nqlib/nqchart echarts motion` | [Charts docs](/docs/nqchart) | [/charts](/charts) · [/charts/lab](/charts/lab) |
+| **nqgrid** | `pnpm add @nqlib/nqgrid` | [Grid docs](/docs/nqgrid) | Spreadsheet / projects demos |
+| **nqgantt** | `pnpm add @nqlib/nqgantt @nqlib/nqgantt-engine` | [Gantt docs](/docs/nqgantt) | [/blocks](/blocks) timeline |
 
 Pick a library from the top bar or sidebar to get started.

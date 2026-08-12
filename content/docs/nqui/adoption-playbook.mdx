@@ -1,0 +1,72 @@
+---
+title: "Adoption playbook"
+description: "How a team adopts `@nqlib/nqui` without inventing a parallel component set or fighting tokens."
+---
+
+**Intention:** How a team adopts `@nqlib/nqui` without inventing a parallel component set or fighting tokens.
+
+## Recommended defaults
+
+| Setting | Early app | Steady product |
+|---------|-----------|----------------|
+| Install | Core `@nqlib/nqui` only | Add peers when a feature needs them |
+| Agent skills | Optional | `init-skills` for shared AI / Cursor rules |
+| Inline selection | Always `ToggleGroup` | Same — train it early |
+| Forms | `Field` / `FieldGroup` from day one | Same |
+| Theme | System `ThemeProvider` | Brand tokens on semantic variables |
+| Catalog | Bookmark [/catalog](/catalog) | Recipes as the composition reference |
+
+Train the **difference** between toolbar selection ([Actions and selection](/docs/nqui/actions-and-selection)) and form selection early. Most people arrive looking for one “radio-looking” control and need both.
+
+## Training path (suggested)
+
+1. [Getting started](/docs/nqui/getting-started) + Drill A in [Practice in catalog](/docs/nqui/practice-in-catalog)
+2. [Actions and selection](/docs/nqui/actions-and-selection) + Drill B (ToggleGroup vs RadioGroup)
+3. [Forms and fields](/docs/nqui/forms-and-fields) + [Overlays](/docs/nqui/overlays)
+4. [Theming and tokens](/docs/nqui/theming-and-tokens) + [Feedback and states](/docs/nqui/feedback-and-states)
+5. [Cheatsheet](/docs/nqui/cheatsheet) on every engineer’s desk (or wiki home)
+
+## Anti-patterns
+
+| Anti-pattern | Why it hurts | Do instead |
+|--------------|--------------|------------|
+| Parallel “app Button” | Drift, a11y gaps, double maintenance | Import `@nqlib/nqui` Button |
+| Radio in toolbars | Wrong density / semantics | `ToggleGroup` |
+| Cards for every region | Noise; fights deference | Spacing + type; Card only for real units |
+| Hex colors in product UI | Breaks dark mode / brand swaps | Semantic tokens + variants |
+| Dialog for long forms | Cramped; hard to scan | Sheet or route |
+| Skipping empty/loading | Placeholder leak in prod | `Empty` / `Skeleton` |
+| No CSS `@source` for nqui | “Unstyled” components | [CSS](/docs/nqui/css) scan paths |
+| Second catalog in npm package | Boundary violation | Live catalog lives on this site |
+
+## Governance tips
+
+- Decide whether **optional peers** are installed repo-wide or per-app.
+- Prefer promoting a repeated escape hatch into a typed pattern / recipe over forking components.
+- Before ship, run the checklist on [Cheatsheet](/docs/nqui/cheatsheet) (or the App Builder Checklist in the design guide).
+
+## Starter prompt (AI / agents)
+
+```text
+Build this app screen using @nqlib/nqui.
+
+Follow /docs/nqui. Prefer catalog + recipes over inventing markup.
+Use semantic tokens, nqui variants, Field/FieldGroup for forms,
+ToggleGroup for inline selection, Hugeicons for icons, accessible titles.
+
+Screen goal:
+[describe]
+
+Primary user actions:
+[list]
+
+States to include:
+[empty, loading, error, success, disabled, selected]
+```
+
+## Related
+
+- [Design philosophy](/docs/nqui/philosophy)
+- [Practice in catalog](/docs/nqui/practice-in-catalog)
+- [Glossary](/docs/nqui/glossary)
+- [nqui](/docs/nqui)

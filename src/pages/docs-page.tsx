@@ -7,7 +7,7 @@ import { DocsMobileNav } from "@/components/docs/docs-mobile-nav";
 import { DocsSidebar, useDocsSidebarCollapsed } from "@/components/docs/docs-sidebar";
 import { mdxComponents } from "@/components/docs/mdx";
 import { pageTitle, pagesInSameLibrary } from "@/lib/docs-nav";
-import { source } from "@/lib/docs-source";
+import { prettyDocsUrl, resolveDocsPage } from "@/lib/docs-source";
 
 type DocModule = {
   default: ComponentType<{ components?: typeof mdxComponents }>;
@@ -40,9 +40,10 @@ function DocsMdxBody({ path }: { path: string }) {
 }
 
 function DocsPageInner({ slugs, wide }: { slugs: string[]; wide: boolean }) {
-  const page = source.getPage(slugs);
+  const page = resolveDocsPage(slugs);
   if (!page) {
-    return <Navigate to="/docs" replace />;
+    const libraryHub = slugs[0] ? `/docs/${slugs[0]}` : "/docs";
+    return <Navigate to={resolveDocsPage(slugs.slice(0, 1)) ? libraryHub : "/docs"} replace />;
   }
 
   const [ready, setReady] = useState(false);
@@ -98,14 +99,14 @@ function DocsPageInner({ slugs, wide }: { slugs: string[]; wide: boolean }) {
       </Suspense>
       <nav className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-8">
         {prev ? (
-          <Link to={prev.url} className="text-sm text-muted-foreground hover:text-foreground">
+          <Link to={prettyDocsUrl(prev.url)} className="text-sm text-muted-foreground hover:text-foreground">
             ← {pageTitle(prev)}
           </Link>
         ) : (
           <span />
         )}
         {next ? (
-          <Link to={next.url} className="text-sm text-muted-foreground hover:text-foreground">
+          <Link to={prettyDocsUrl(next.url)} className="text-sm text-muted-foreground hover:text-foreground">
             {pageTitle(next)} →
           </Link>
         ) : null}

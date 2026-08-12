@@ -1,5 +1,5 @@
 import type * as PageTree from "fumadocs-core/page-tree";
-import { source, type DocsPage } from "@/lib/docs-source";
+import { prettyDocsUrl, source, type DocsPage } from "@/lib/docs-source";
 
 /** `/docs/nqui/...` → `nqui`; hub `/docs` → null */
 export function docsLibraryKey(url: string): string | null {
@@ -17,6 +17,41 @@ function isFolder(node: PageTree.Node): node is PageTree.Folder {
 
 function isPage(node: PageTree.Node): node is PageTree.Item {
   return node.type === "page";
+}
+
+/** `/docs/nqchart/area-chart` matches the underlying `…/static` page. */
+export function docsUrlMatches(pathname: string, url: string): boolean {
+  const a = prettyDocsUrl(pathname);
+  const b = prettyDocsUrl(url);
+  return a === b || pathname === url;
+}
+
+function promoteStaticIndex(folder: PageTree.Folder): PageTree.Folder {
+  const children = folder.children.map((child) =>
+    isFolder(child) ? promoteStaticIndex(child) : child,
+  );
+  if (folder.index) return { ...folder, children };
+
+  const staticChild = children.find((c) => isPage(c) && c.url.endsWith("/static"));
+  if (!staticChild || !isPage(staticChild)) return { ...folder, children };
+
+  return {
+    ...folder,
+    index: { ...staticChild, url: prettyDocsUrl(staticChild.url) },
+    children: children.filter((c) => !(isPage(c) && c.url === staticChild.url)),
+  };
+}
+
+/** Folder whose only page was `static.mdx` → a single sidebar link. */
+function flattenIndexOnlyFolders(nodes: PageTree.Node[]): PageTree.Node[] {
+  return nodes.map((node) => {
+    if (!isFolder(node)) return node;
+    const children = flattenIndexOnlyFolders(node.children);
+    if (node.index && children.length === 0) {
+      return { ...node.index, name: nodeName(node) || node.index.name };
+    }
+    return { ...node, children };
+  });
 }
 
 /** Depth-first page URLs in the same order as the sidebar tree (meta.json). */
@@ -52,7 +87,12 @@ function flattenPageUrls(nodes: PageTree.Node[]): string[] {
  */
 export function pagesInSameLibrary(pageUrl: string): DocsPage[] {
   const { nodes } = docsSidebarScope(pageUrl);
-  const byUrl = new Map(source.getPages().map((page) => [page.url, page]));
+  const byUrl = new Map<string, DocsPage>();
+  for (const page of source.getPages()) {
+    byUrl.set(page.url, page);
+    const pretty = prettyDocsUrl(page.url);
+    if (pretty !== page.url && !byUrl.has(pretty)) byUrl.set(pretty, page);
+  }
   const ordered: DocsPage[] = [];
   for (const url of flattenPageUrls(nodes)) {
     const page = byUrl.get(url);
@@ -103,13 +143,16 @@ export function docsSidebarScope(pathname: string): {
   );
 
   if (folder && isFolder(folder)) {
+    const scoped = promoteStaticIndex(folder);
     const nodes: PageTree.Node[] = [];
-    if (folder.index) nodes.push(folder.index);
+    if (scoped.index) nodes.push(scoped.index);
     nodes.push(
-      ...folder.children.filter((c) => !(isPage(c) && folder.index && c.url === folder.index.url)),
+      ...flattenIndexOnlyFolders(
+        scoped.children.filter((c) => !(isPage(c) && scoped.index && c.url === scoped.index.url)),
+      ),
     );
     return {
-      title: nodeName(folder) || lib,
+      title: nodeName(scoped) || lib,
       nodes,
     };
   }

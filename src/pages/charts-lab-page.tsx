@@ -202,10 +202,7 @@ export function ChartsLabPage() {
         </div>
 
         <p className="mt-16 max-w-[70ch] font-mono text-xs leading-relaxed text-muted-foreground">
-          Structural checks need the ECharts handle, which landed with{" "}
-          <code className="text-foreground">chartRef</code> in {CURRENT_RELEASE} — run{" "}
-          <code className="text-foreground">pnpm dev:local:charts</code> or they all read
-          pending. Charts mount as you scroll to them; append{" "}
+          Charts mount as you scroll to them. Append{" "}
           <code className="text-foreground">?eager=1</code> to mount all{" "}
           {LAB_CASES.length} at once, and{" "}
           <code className="text-foreground">?only={LAB_GROUPS[0]}</code> to work through a

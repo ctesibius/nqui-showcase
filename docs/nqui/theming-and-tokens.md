@@ -1,0 +1,63 @@
+# Theming and tokens
+
+**Intention:** Product UI speaks in semantic tokens and component `variant` / `size` — so light/dark and brand swaps stay one CSS variable layer away.
+
+<NquiExample name="theming-tokens" />
+
+Open full variants: [Buttons & Actions](/catalog#buttons-actions) · [Design system](/design-system)
+
+## How
+
+### Prefer variants
+
+```tsx
+<Button variant="outline">Cancel</Button>
+<Badge variant="secondary">Active</Badge>
+```
+
+### Prefer semantic colors
+
+```tsx
+<div className="bg-background text-foreground">
+  <p className="text-muted-foreground">Secondary copy</p>
+</div>
+```
+
+Common tokens: `bg-background`, `text-foreground`, `text-muted-foreground`, `bg-primary`, `text-primary-foreground`, `border-input`, `text-destructive`, `bg-accent`, `bg-muted`.
+
+### className budget
+
+Use `className` mostly for **layout**, constraints, and positioning:
+
+```tsx
+<Card className="mx-auto max-w-md">…</Card>
+```
+
+Avoid raw palette colors and manual `dark:` overrides when tokens already flip with theme.
+
+### Theme wiring
+
+Host apps typically wrap with `ThemeProvider` (`next-themes`, `attribute="class"`) — see [Imports](/docs/nqui/imports). Token values live in `@nqlib/nqui/styles` and your CSS entry ([CSS](/docs/nqui/css)).
+
+### Conditional classes
+
+```tsx
+import { cn } from "@/lib/utils"; // or your app util
+
+<div className={cn("flex items-center gap-2", isActive && "bg-accent")}>
+  Content
+</div>
+```
+
+## When not to
+
+- Hex or Tailwind palette colors for brand chrome when a semantic token exists.
+- Fighting dark mode with per-component `dark:` instead of fixing the token.
+- Decorative glow / multi-shadow polish on flat surfaces ([[philosophy]]).
+
+## Related
+
+- [[icons-and-styling]]
+- [[layout-and-surfaces]]
+- [[philosophy]]
+- [[index]]

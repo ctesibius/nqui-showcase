@@ -42,7 +42,7 @@ So: the number is not decoration. Editing it pushes the schedule; widening the g
 
 The chart calls `onDependenciesChange` with the full dependency list. The host must keep that list in state (or a store). If the host ignores the callback, new links vanish on the next render—same class of bug as bar snap-back without `onFeatureMove`.
 
-In this showcase, [[practice-in-gantt-lab]] / `RoadmapGantt` keeps an internal dependency list for demos.
+Live demos keep an internal dependency list so you can practice; your app must persist that list itself.
 
 ## When not to
 

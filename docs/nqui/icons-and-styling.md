@@ -1,0 +1,68 @@
+# Icons and styling
+
+**Intention:** Icons are Hugeicons at product size; components own icon sizing. Styling stays on variants first, layout classes second.
+
+Open related catalog: [Buttons & Actions](/catalog#buttons-actions) · [Navigation & Menus](/catalog#navigation-menus)
+
+## How
+
+### Hugeicons
+
+```tsx
+import { SearchIcon, SettingsIcon, ArrowRightIcon } from "@hugeicons/react";
+```
+
+In buttons, mark placement with `data-icon`:
+
+```tsx
+<Button>
+  <SearchIcon data-icon="inline-start" />
+  Search
+</Button>
+
+<Button>
+  Continue
+  <ArrowRightIcon data-icon="inline-end" />
+</Button>
+```
+
+Icon-only:
+
+```tsx
+<Button size="icon" aria-label="Open settings">
+  <SettingsIcon />
+</Button>
+```
+
+Do **not** add manual icon size classes inside nqui components — they size icons for you.
+
+Product UI icons are typically 16–20px. Larger only when the icon *is* the content (empty states).
+
+### Composition nesting
+
+Put items inside their group parents:
+
+- `SelectItem` → `SelectGroup`
+- `DropdownMenuItem` → `DropdownMenuGroup`
+- `CommandItem` → `CommandGroup`
+- `TabsTrigger` → `TabsList`
+
+### Accessibility
+
+- Label every form control (`FieldLabel` or `sr-only`).
+- `aria-label` / `aria-labelledby` for icon-only and unlabeled groups.
+- Keep native keyboard behavior — prefer nqui controls over clickable `div`s.
+- Do not remove focus rings unless you replace them with an equally visible treatment.
+
+## When not to
+
+- Mixing another icon set into the same toolbar without a reason.
+- Hand-sizing icons with `w-4 h-4` inside `Button` / `InputGroupAddon`.
+- Using `font-bold` on labels and metadata — reserve weight for the content the user came to read.
+
+## Related
+
+- [[actions-and-selection]]
+- [[theming-and-tokens]]
+- [[cheatsheet]]
+- [[index]]

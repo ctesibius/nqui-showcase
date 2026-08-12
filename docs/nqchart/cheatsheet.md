@@ -16,7 +16,7 @@ import type { ChartConfig, NQMarkEvent, ChartHandle } from "@nqlib/nqchart";
 import { binForHistogram, prepareParetoData } from "@nqlib/nqchart/recipes";
 ```
 
-Until npm **0.3.0** is published: `pnpm dev:local:charts`.
+Current line: **0.3.0**.
 
 ## Config keys = series ids
 
@@ -54,7 +54,7 @@ const config = {
 
 ## Practice
 
-`/charts/lab` → [[getting-started]] · gallery `/charts` · embeds `/blocks`
+Live: [**/charts/lab**](/charts/lab) · gallery [**/charts**](/charts) · embeds [**/blocks**](/blocks) · [[getting-started]]
 
 ## Related
 

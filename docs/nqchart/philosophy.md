@@ -2,7 +2,7 @@
 
 **Intention:** NQChart is a **compound renderer** for BI dashboards. It draws and reports; the host owns filters, drills, and persistence.
 
-Distilled from the package philosophy. Full text lives in sibling `../becocharts/docs/product/philosophy.md`.
+Distilled from the package philosophy.
 
 ## What we optimize for
 

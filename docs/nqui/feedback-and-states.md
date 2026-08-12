@@ -1,0 +1,44 @@
+# Feedback and states
+
+**Intention:** Every real screen has empty, loading, error, and success paths — design them with nqui primitives instead of leftover lorem or a lone spinner.
+
+<NquiExample name="feedback-states" />
+
+Open full variants: [Display Components](/catalog#display-components)
+
+## How
+
+| State | Control | Notes |
+|-------|---------|-------|
+| Empty | `Empty` | Quiet: small icon, one sentence, one action |
+| Loading | `Skeleton` | Match the **shape** of content you replace |
+| Inline callout | `Alert` | Inform / warn without blocking |
+| Status chip | `Badge` | Prefer variants over custom spans |
+| Dividers | `Separator` | Not raw `hr` or border-only divs |
+| Toast | `Toaster` from `@nqlib/nqui/sonner` | Ephemeral success / failure |
+| Blocking confirm | `AlertDialog` | Destructive — see [[overlays]] |
+
+### Avatar
+
+Always include `AvatarFallback` when using `Avatar`.
+
+### Checklist before ship
+
+- Empty state written (not blank white).
+- Loading matches layout (Skeleton), not only a centered spinner.
+- Error path has copy + recovery action.
+- Success is toast **or** inline confirmation — not both shouting.
+- Disabled / selected states use component APIs (`disabled`, `data-invalid`, Toggle pressed).
+
+## When not to
+
+- Marketing illustrations for every empty state — keep product empty states quiet.
+- Generic spinner that steals focus when a Skeleton row would preserve layout.
+- Custom colored `span` for status when `Badge` exists.
+
+## Related
+
+- [[forms-and-fields]]
+- [[overlays]]
+- [[practice-in-catalog]]
+- [[index]]

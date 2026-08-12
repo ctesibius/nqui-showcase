@@ -1,6 +1,6 @@
 # Glossary
 
-PMP / common PM language ↔ what nqgantt and this showcase call it.
+PMP / common PM language ↔ what `@nqlib/nqgantt` calls it.
 
 | Term (PM / PMP) | In this product |
 |-----------------|-----------------|

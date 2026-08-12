@@ -15,7 +15,7 @@
 |-------|------|----------------|
 | **Engine** (`@nqlib/nqgantt-engine`) | Constraint math, CPM, auto-schedule ASAP snap | Pixels, themes, menus |
 | **Gantt UI** (`@nqlib/nqgantt`) | Bars, ports, edge routing, selection chrome | Your database |
-| **Host app** (this showcase, your product) | Task list, dependency list, save/load, product defaults | Reinventing FS/SS math |
+| **Host app** (your product) | Task list, dependency list, save/load, product defaults | Reinventing FS/SS math |
 
 ## Bars show plan; edges show constraints
 
@@ -31,7 +31,7 @@ See [[auto-schedule]] and [[dependencies]].
 | Strict | Auto-schedule **on** | Successors snap ASAP to the link (push later *and* pull earlier) |
 | Flexible | Auto-schedule **off** | Links still draw and store type/lag; dates do not cascade |
 
-Per-edge flexible/strict is an intended direction; today the showcase lab uses a **chart-level** toggle.
+Per-edge flexible/strict is an intended direction; today the published UI uses a **chart-level** toggle.
 
 ## What we refuse
 

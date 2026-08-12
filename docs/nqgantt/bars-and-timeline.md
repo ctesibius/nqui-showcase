@@ -14,7 +14,7 @@
 | **Range** | Day / week / month / quarter column scale |
 | **Density** | Row height (compact / default / comfortable) |
 
-Showcase defaults for look: **flat** bars + **rail** group treatment (`src/nqgantt/bar-design.ts`). Theme tokens live in `src/nqgantt/gantt-theme.css`.
+Default look in the live demos: **flat** bars + **rail** group treatment. Theme via CSS custom properties on the Gantt root.
 
 ## What dragging does
 
@@ -33,7 +33,6 @@ Grouped views show section headers (e.g. In Progress). Group treatments (bracket
 ## When not to
 
 - Do not treat bar color alone as “blocked” or “critical” — use [[critical-path]] and status fields for meaning.
-- Do not expect unpublished engine fixes without local nqgantt (`make local`).
 
 ## Related
 

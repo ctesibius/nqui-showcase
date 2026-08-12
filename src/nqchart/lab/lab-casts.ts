@@ -1,7 +1,6 @@
 /**
- * Lab-only casts. Chart roots are imported as namespaces so a missing 0.3.0
- * export (published npm lag) renders a "requires local nqchart" plate instead
- * of crashing the page. Types for the BI surface come from `@nqlib/nqchart`.
+ * Lab-only casts. Chart roots are imported as namespaces; types for the BI
+ * surface come from `@nqlib/nqchart`.
  */
 
 import type { ComponentType, ReactNode, Ref } from "react";
@@ -63,11 +62,3 @@ export type LabChartPartProps = {
 
 export const asRoot = (c: unknown) => c as ComponentType<LabChartRootProps>;
 export const asPart = (c: unknown) => c as ComponentType<LabChartPartProps>;
-
-export function optionalPart(
-  ns: Record<string, unknown>,
-  name: string,
-): ComponentType<LabChartPartProps> | null {
-  const c = ns[name];
-  return typeof c === "function" ? (c as ComponentType<LabChartPartProps>) : null;
-}

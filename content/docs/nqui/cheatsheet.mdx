@@ -1,0 +1,65 @@
+---
+title: "Cheatsheet"
+description: "nqui — Cheatsheet"
+---
+
+One page. Details live in the linked notes.
+
+## Install
+
+```bash
+pnpm add @nqlib/nqui
+pnpm dlx @nqlib/nqui install-peers   # optional
+pnpm dlx @nqlib/nqui init-css
+```
+
+CSS: `@import "@nqlib/nqui/styles";` → [CSS](/docs/nqui/css) · shell → [Imports](/docs/nqui/imports)
+
+## Pick a control
+
+| Job | Use |
+|-----|-----|
+| Action | `Button` / `ButtonGroup` |
+| Inline on/off | `Toggle` |
+| Inline modes | `ToggleGroup` |
+| Form choice | `RadioGroup` / `Select` / `Combobox` |
+| Settings bool | `Switch` |
+| Form bool | `Checkbox` |
+
+→ [Actions and selection](/docs/nqui/actions-and-selection)
+
+## Forms
+
+`FieldGroup` → `Field` → `FieldLabel` + control + `FieldDescription`  
+Addons → `InputGroup` · invalid → `data-invalid` + `aria-invalid`  
+→ [Forms and fields](/docs/nqui/forms-and-fields)
+
+## Overlays
+
+Dialog (task) · AlertDialog (destructive) · Sheet (side) · Drawer (mobile) · Popover / Tooltip  
+Titles required · z-index via `--z-*`  
+→ [Overlays](/docs/nqui/overlays)
+
+## Tokens
+
+Variants + semantic colors first · `className` for layout · no hex sprawl  
+→ [Theming and tokens](/docs/nqui/theming-and-tokens) · [Icons and styling](/docs/nqui/icons-and-styling)
+
+## States
+
+Empty · Skeleton · Alert · Badge · Separator · Sonner toaster  
+→ [Feedback and states](/docs/nqui/feedback-and-states)
+
+## Practice
+
+Drills → [Practice in catalog](/docs/nqui/practice-in-catalog) · first session → [Getting started](/docs/nqui/getting-started)  
+Live: [/catalog](/catalog) · [Buttons](/catalog#buttons-actions) · [Forms](/catalog#form-components) · [/nqui](/nqui)
+
+## Team
+
+Defaults and anti-patterns → [Adoption playbook](/docs/nqui/adoption-playbook) · why → [Design philosophy](/docs/nqui/philosophy)
+
+## Related
+
+- [nqui](/docs/nqui)
+- [Glossary](/docs/nqui/glossary)

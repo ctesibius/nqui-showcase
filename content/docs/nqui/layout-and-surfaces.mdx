@@ -1,0 +1,70 @@
+---
+title: "Layout and surfaces"
+description: "Structure screens with spacing, type, and a few real surfaces — not a Card around every region."
+---
+
+**Intention:** Structure screens with spacing, type, and a few real surfaces — not a Card around every region.
+
+<NquiExample name="layout-surfaces" />
+
+Open full variants: [Layout Components](/catalog#layout-components) · [Display Components](/catalog#display-components)
+
+## How
+
+### Card composition
+
+Use the full card parts when the surface is a real unit of content:
+
+```tsx
+<Card>
+  <CardHeader>
+    <CardTitle>Team Members</CardTitle>
+    <CardDescription>Manage members and invitations.</CardDescription>
+  </CardHeader>
+  <CardContent>{/* content */}</CardContent>
+  <CardFooter>
+    <Button>Invite member</Button>
+  </CardFooter>
+</Card>
+```
+
+For quiet chrome (filters, chart controls), a bordered muted panel is enough:
+
+```tsx
+<div className="rounded-lg border bg-muted/30 p-3">
+  {/* controls */}
+</div>
+```
+
+### Shared scale
+
+| Role | Guidance |
+|------|----------|
+| Control heights | `sm` / default / `lg` — keep a row consistent |
+| Page / app bar | `h-12` + `px-4` + `gap-2` or `gap-4` |
+| Gaps | `gap-*`, not `space-x-*` / `space-y-*` |
+| Equal boxes | `size-*` instead of matching `w-*` + `h-*` |
+| Flex children with text | `min-w-0` + `truncate` / `line-clamp` / scroll |
+
+### Scroll and density
+
+- Bound long content: truncate, clamp, wrap, or controlled scroll.
+- Dense tables / command lists / side panels: scroll **inside** the panel, not the whole page.
+- Cap surfaces: chrome + primary + optional secondary. Nesting Cards usually means you need spacing, not another box.
+
+### Responsive
+
+Design from a **container**, not only full viewport. Toolbar rows: `flex flex-wrap items-center gap-*`. Settings / dashboards: `grid`. Wide panels on mobile → [Sheet or Drawer](/docs/nqui/overlays).
+
+## When not to
+
+- Do not wrap every section in `Card` “for structure.”
+- Do not nest Card inside Card.
+- Do not let long emails / URLs / filenames break out of the panel.
+
+## Related
+
+- [Overlays](/docs/nqui/overlays)
+- [Theming and tokens](/docs/nqui/theming-and-tokens)
+- [Design philosophy](/docs/nqui/philosophy)
+- [nqui](/docs/nqui)

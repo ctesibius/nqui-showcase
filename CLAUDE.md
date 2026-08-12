@@ -26,7 +26,8 @@ Load **1–3 files** per task via **`.cursor/READ_BUDGET.md`**:
 | Charts / analytics dashboard | `src/components/analytics/analytics-dashboard.tsx` + one `src/registry/charts/` file |
 | **nqchart embeds / stuck hover / clipped intro** | `.cursor/skills/nqchart-embed/SKILL.md` → `blocks-charts.tsx` or `blocks-report.tsx` |
 | **Docs TOC diamond / rail vanish** | `.agents/skills/fixed/index.md` → `docs-toc-indicator.tsx` |
-| **Docs library (`/docs`)** | `content/docs/` · `src/pages/docs-page.tsx` · sync: `pnpm docs:sync:nqchart` · `pnpm docs:sync:nqgantt` |
+| **Docs library (`/docs`)** | `content/docs/` · `src/pages/docs-page.tsx` · sync: `pnpm docs:sync:nqchart` · `pnpm docs:sync:nqgantt` · `pnpm docs:sync:nqui` |
+| **nqui app / composition guide** | `docs/nqui/` (wikilinks SSOT) → live `/docs/nqui` via `pnpm docs:sync:nqui` · catalog `/catalog` |
 | **Remember / prior gotcha** | `memory/INDEX.md` (never bulk-read `memory/`) |
 | Local nqgrid toggle | `NQGRID-WORKSPACE.md`, `pnpm nqgrid:status` |
 | Local nqui toggle | `pnpm nqui:local` / `nqui:status` — verify catalog before publishing nqui |

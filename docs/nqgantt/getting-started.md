@@ -4,16 +4,19 @@
 
 ## Prerequisites
 
-- Showcase running locally (for lab: `make local` or `pnpm make:local` / `pnpm dev:local` so unpublished engine fixes apply).
-- Open **`/gantt-lab`** (dev only) or the Timeline block on **`/blocks`**.
+```bash
+pnpm add @nqlib/nqgantt @nqlib/nqgantt-engine
+```
+
+Details: [Installation](/docs/nqgantt/installation). Optional: try the same gestures on the live Timeline block at [**/blocks**](/blocks).
 
 ## First path (15 minutes)
 
 ### 1. Orient the timeline
 
-1. Pick **Dataset → Full** (shared work-management tasks).
-2. Set **Range → Week** (or Day if you want finer drag).
-3. Confirm **Auto-schedule** is on (default in the lab) so successors move when you test.
+1. Pick a dataset with several linked tasks.
+2. Set range to **Week** (or Day if you want finer drag).
+3. Confirm **Auto-schedule** is on so successors move when you test.
 
 See [[bars-and-timeline]] and [[practice-in-gantt-lab]].
 
@@ -45,8 +48,7 @@ Toggle **Critical path** to see which work sits on the long path through the net
 
 ## When not to start here
 
-- You only need install/API notes → `/docs/nqgantt` (Fumadocs) or package README.
-- You are debugging engine math → sibling `../nqgantt/docs/engine/`.
+- You only need install/API notes → [Installation](/docs/nqgantt/installation).
 
 ## Related
 

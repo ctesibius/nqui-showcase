@@ -24,6 +24,7 @@ const loaders: Record<string, () => Promise<Record<string, ComponentType>>> = {
   "ex-loading-state-histogram-chart.tsx": () => import("./adapters/ex-loading-state-histogram-chart") as Promise<Record<string, ComponentType>>,
   "ex-loading-state-line-chart.tsx": () => import("./adapters/ex-loading-state-line-chart") as Promise<Record<string, ComponentType>>,
   "ex-loading-state-pareto-chart.tsx": () => import("./adapters/ex-loading-state-pareto-chart") as Promise<Record<string, ComponentType>>,
+  "ex-mark-click-budget-chart.tsx": () => import("./adapters/ex-mark-click-budget-chart") as Promise<Record<string, ComponentType>>,
   "ex-pareto-chart.tsx": () => import("./adapters/ex-pareto-chart") as Promise<Record<string, ComponentType>>,
   "ex-percent-type-bar-chart.tsx": () => import("./adapters/ex-percent-type-bar-chart") as Promise<Record<string, ComponentType>>,
   "ex-pie-chart.tsx": () => import("./adapters/ex-pie-chart") as Promise<Record<string, ComponentType>>,

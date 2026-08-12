@@ -56,7 +56,7 @@ function needsChart(e: CaseEvidence, id: string, label: string): CheckResult | n
   return pending(
     id,
     label,
-    "no chart handle — `chartRef` landed in 0.3.0, so run `pnpm dev:local:charts`",
+    "no chart handle — this package build is missing `chartRef` (need @nqlib/nqchart@0.3.0+)",
   );
 }
 

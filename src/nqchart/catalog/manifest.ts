@@ -20,7 +20,7 @@ export type CatalogEntry = {
 };
 
 export const CATALOG_SOURCE = "becocharts" as const;
-export const CATALOG_COUNT = 96 as const;
+export const CATALOG_COUNT = 97 as const;
 
 export const NQCHART_CATALOG: CatalogEntry[] = [
   {
@@ -634,6 +634,15 @@ export const NQCHART_CATALOG: CatalogEntry[] = [
     "family": "waterfall",
     "category": "loading",
     "component": "waterfall-chart"
+  },
+  {
+    "id": "ex-mark-click-budget-chart",
+    "name": "Mark Click Budget",
+    "exportName": "NQExampleMarkClickBudgetChart",
+    "adapterFile": "ex-mark-click-budget-chart.tsx",
+    "family": "bar",
+    "category": "example",
+    "component": "bar-chart"
   },
   {
     "id": "ex-monotoney-curve-type-area-chart",

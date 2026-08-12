@@ -26,7 +26,7 @@ Load **1–3 files** per task. Do not bulk-read skill folders or sibling engine 
 | **Analytics / chart gallery** | `src/components/analytics/analytics-dashboard.tsx` | one file in `src/registry/charts/` | all 12 chart files |
 | **nqchart embed / stuck axisPointer / clipped intro** | `.cursor/skills/nqchart-embed/SKILL.md` | `blocks-report.tsx` or `charts-page.tsx` | bulk `ex-doc-charts` |
 | **Docs TOC diamond / rail drift / vanish** | `.agents/skills/fixed/index.md` | `src/components/docs/docs-toc-indicator.tsx` | inventing a new stride formula |
-| **Docs library / MDX / nqchart sync** | `docs/nqchart/` + `content/docs/` + `src/pages/docs-page.tsx` | `pnpm docs:sync:nqchart` · `pnpm docs:sync:nqgantt` · `src/components/docs/` | inventing a second docs site in `../nqui` |
+| **Docs library / MDX / sync** | `docs/nqchart/` · `docs/nqgantt/` · `docs/nqui/` + `content/docs/` + `src/pages/docs-page.tsx` | `pnpm docs:sync:nqchart` · `pnpm docs:sync:nqgantt` · `pnpm docs:sync:nqui` · `src/components/docs/` | inventing a second docs site in `../nqui` |
 | **Prior gotcha / “what do we know”** | `memory/INDEX.md` | matching `memory/<slug>.md` | bulk-read `memory/` |
 | **Local nqgrid vs published** | `NQGRID-WORKSPACE.md` | `pnpm nqgrid:status` | `vite.config.ts` unless alias broken |
 | **Local nqui vs published** | nqui `nqui-local-published-toggle/SKILL.md` | `pnpm nqui:local` → `/catalog` | relink docs |

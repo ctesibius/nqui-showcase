@@ -19,6 +19,7 @@ import {
   SkillsBlock,
 } from "./nqchart-blocks";
 import { GanttExample } from "./gantt-example";
+import { CatalogLink, NquiExample } from "./nqui-example";
 
 /**
  * MDX component map for showcase docs (nqui + synced nqchart pages).
@@ -64,7 +65,7 @@ export const mdxComponents: MDXComponents = {
       <ScrollArea orientation="horizontal" fadeMask={false} className="w-full max-w-full">
         <pre
           className={cn(
-            "shiki m-0 bg-transparent p-4 font-mono text-[0.8125rem] leading-relaxed whitespace-pre",
+            "shiki m-0 bg-transparent p-4 font-mono text-sm leading-relaxed whitespace-pre",
             className,
           )}
           {...props}
@@ -82,7 +83,7 @@ export const mdxComponents: MDXComponents = {
     return (
       <code
         className={cn(
-          "rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em] text-foreground",
+          "rounded bg-muted px-1.5 py-0.5 font-mono text-sm text-foreground",
           className,
         )}
         {...props}
@@ -90,10 +91,17 @@ export const mdxComponents: MDXComponents = {
     );
   },
   strong: (props) => <strong className="font-semibold text-foreground" {...props} />,
-  img: (props) => (
-    // eslint-disable-next-line jsx-a11y/alt-text -- MDX authors supply alt
-    <img className="my-4 rounded-lg border border-border" {...props} />
-  ),
+  img: ({ src, alt, ...props }) => {
+    if (!src) return null;
+    return (
+      <img
+        src={src}
+        alt={alt ?? ""}
+        className="my-4 rounded-lg border border-border"
+        {...props}
+      />
+    );
+  },
 
   // nqchart / fumadocs-style blocks
   Steps,
@@ -113,6 +121,8 @@ export const mdxComponents: MDXComponents = {
   ComponentPreview,
   ComponentSource,
   GanttExample,
+  NquiExample,
+  CatalogLink,
   ComponentProps,
   Alert,
   AlertContent,

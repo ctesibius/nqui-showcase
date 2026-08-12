@@ -14,14 +14,9 @@ import {
   formatPct,
   formatUsd,
 } from "./dataset";
-import { asPart, asRoot, optionalPart } from "./lab-casts";
+import { asPart, asRoot } from "./lab-casts";
 import type { CaseProbe } from "./use-case-probe";
 
-/**
- * Components are read off the module namespace so a lagging published npm
- * build still mounts. `optionalPart` is the 0.3.0-only children; missing
- * exports show a "requires local nqchart" plate instead of crashing.
- */
 const composedNs = Composed as unknown as Record<string, unknown>;
 
 const NQComposedChart = asRoot(composedNs.NQComposedChart);
@@ -32,10 +27,9 @@ const XAxis = asPart(composedNs.XAxis);
 const YAxis = asPart(composedNs.YAxis);
 const Tooltip = asPart(composedNs.Tooltip);
 const Legend = asPart(composedNs.Legend);
-
-const Area = optionalPart(composedNs, "Area");
-const ReferenceLine = optionalPart(composedNs, "ReferenceLine");
-const ReferenceBand = optionalPart(composedNs, "ReferenceBand");
+const Area = asPart(composedNs.Area);
+const ReferenceLine = asPart(composedNs.ReferenceLine);
+const ReferenceBand = asPart(composedNs.ReferenceBand);
 
 const lineNs = LineChart as unknown as Record<string, unknown>;
 const NQLineChart = asRoot(lineNs.NQLineChart);
@@ -62,15 +56,6 @@ const PieTooltip = asPart(pieNs.Tooltip);
 
 const chartClass = "h-full w-full p-4";
 
-function MissingApi({ name }: { name: string }) {
-  return (
-    <div className="flex size-full items-center justify-center p-4 text-center text-xs text-muted-foreground">
-      Requires local nqchart with <code className="text-foreground">{name}</code>. Run{" "}
-      <code className="text-foreground">pnpm dev:local:charts</code>.
-    </div>
-  );
-}
-
 export function DualAxisComposed({
   probe,
   clickable = false,
@@ -89,11 +74,6 @@ export function DualAxisComposed({
   withRefs?: boolean;
   withArea?: boolean;
 }) {
-  if (withRefs && (!ReferenceLine || !ReferenceBand)) {
-    return <MissingApi name="ReferenceLine / ReferenceBand" />;
-  }
-  if (withArea && !Area) return <MissingApi name="Area in composed-chart" />;
-
   return (
     <NQComposedChart
       config={LAB_CONFIG}
@@ -127,7 +107,7 @@ export function DualAxisComposed({
             : undefined
         }
       />
-      {withRefs && ReferenceBand && ReferenceLine ? (
+      {withRefs ? (
         <>
           <ReferenceBand y={[400_000, 450_000]} yAxisId="left" />
           <ReferenceLine y={430_000} yAxisId="left" label="Budget" />
@@ -142,7 +122,7 @@ export function DualAxisComposed({
         area as a line series with `areaStyle`, so the composition check still
         sees bar + line + area.
       */}
-      {withArea && Area ? (
+      {withArea ? (
         <Area dataKey="otd" yAxisId="right" />
       ) : (
         <Line dataKey="otd" yAxisId="right" curveType="monotone" />

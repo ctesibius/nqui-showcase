@@ -6,7 +6,7 @@
  * mark or on background?"). Reading the *compiled* option and the *rendered*
  * display list means we assert the library's output, never our own input.
  *
- * All helpers are defensive: the published 0.2.2 build has no `chartRef`, and
+ * All helpers are defensive: a missing `chartRef` / option must not throw, and
  * zrender internals are unsupported surface. Anything missing degrades to a
  * null / empty result, which the checks report as `pending`, not `fail`.
  */

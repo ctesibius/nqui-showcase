@@ -9,7 +9,7 @@
 | Auto-schedule | **Off** while WBS/links are messy | **On** once the network is trusted |
 | Default new link type | FS | FS (still allow SS/FF per link) |
 | Critical path display | Off in workshops | On for status / slip reviews |
-| Bar look | Flat + rail (showcase default) | Team preference; keep readable contrast |
+| Bar look | Flat + rail | Team preference; keep readable contrast |
 
 Train the **difference** between link geometry ([[dependency-types]]) and enforcement ([[auto-schedule]]) early. Most people arrive looking for a single “flexible vs strict” switch and need to learn that the link type and whether it is enforced are two separate decisions.
 
@@ -35,8 +35,7 @@ Train the **difference** between link geometry ([[dependency-types]]) and enforc
 ## Governance tips
 
 - Decide whether **strict** is a project policy or a personal editing mode.
-- When ready for product work: prefer **per-edge** flex/strict (future) over only a global toggle—document the intention even if the lab is still chart-level.
-- Keep engineer docs (`../nqgantt/docs/`) for kernel changes; keep this folder for PM meaning.
+- When ready for product work: prefer **per-edge** flex/strict (future) over only a global toggle—document the intention even if the UI is still chart-level.
 
 ## Related
 

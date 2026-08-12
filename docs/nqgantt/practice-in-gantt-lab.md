@@ -1,6 +1,6 @@
 # Practice in Gantt lab
 
-**Intention:** `/gantt-lab` is the safe sandbox to learn links, lag, and strict vs flexible without worrying about production data.
+**Intention:** The live Timeline demo is a safe sandbox to learn links, lag, and strict vs flexible without worrying about production data.
 
 ## Lab controls (toolbar)
 
@@ -13,7 +13,7 @@
 | **Critical path** | See [[critical-path]] styling |
 | **Auto-schedule** | Strict on/off — see [[auto-schedule]] |
 | **Style matrix** | Compare bar looks |
-| **Bare package** | Drop showcase theme/hooks; raw package |
+| **Bare package** | Drop demo theme/hooks; raw package |
 | **Design menu** | Flat / rail / etc. (defaults: flat + rail) |
 
 ## Suggested drills
@@ -43,9 +43,9 @@
 2. Toggle Critical path; identify the chain.
 3. Add a parallel branch; see what stays critical.
 
-## Blocks timeline
+## Live timeline
 
-`/blocks` Timeline lab uses the same `RoadmapGantt` patterns with design menu persistence in `localStorage`. Prefer `/gantt-lab` for toggles like auto-schedule.
+The [**/blocks**](/blocks) Timeline demo uses the same Gantt patterns. Use it to run the drills above.
 
 ## When not to
 

@@ -12,7 +12,7 @@ import {
   cn,
 } from "@nqlib/nqui";
 import type * as PageTree from "fumadocs-core/page-tree";
-import { docsSidebarScope } from "@/lib/docs-nav";
+import { docsSidebarScope, docsUrlMatches } from "@/lib/docs-nav";
 import { usePinnedColumnLeft } from "./use-pinned-column-left";
 
 function isSeparator(node: PageTree.Node): node is PageTree.Separator {
@@ -67,13 +67,16 @@ function DocsTreeNodes({ nodes, depth = 0 }: { nodes: PageTree.Node[]; depth?: n
         if (isFolder(node)) {
           const folderUrl = node.index?.url;
           const childActive = node.children.some(
-            (c) => isPage(c) && (pathname === c.url || pathname.startsWith(`${c.url}/`)),
+            (c) =>
+              isPage(c) &&
+              (docsUrlMatches(pathname, c.url) || pathname.startsWith(`${c.url}/`)),
           );
-          const active = (folderUrl != null && pathname === folderUrl) || childActive;
+          const folderActive = folderUrl != null && docsUrlMatches(pathname, folderUrl);
+          const active = folderActive || childActive;
           return (
             <li key={`folder-${nodeName(node)}-${i}`} className="flex flex-col gap-0.5">
               {folderUrl ? (
-                <Link to={folderUrl} className={linkClass(pathname === folderUrl, depth)}>
+                <Link to={folderUrl} className={linkClass(folderActive, depth)}>
                   {nodeName(node)}
                 </Link>
               ) : (
@@ -92,7 +95,7 @@ function DocsTreeNodes({ nodes, depth = 0 }: { nodes: PageTree.Node[]; depth?: n
         }
 
         if (isPage(node)) {
-          const active = pathname === node.url;
+          const active = docsUrlMatches(pathname, node.url);
           return (
             <li key={node.url}>
               <Link to={node.url} className={linkClass(active, depth)} aria-current={active ? "page" : undefined}>

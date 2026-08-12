@@ -1,19 +1,20 @@
 ---
 title: Concepts
-description: How @nqlib/nqgantt shows up in this showcase.
+description: How @nqlib/nqgantt splits engine and Gantt UI.
 ---
 
-nqgantt splits **engine** (schedule math) from **bar UI**. This app wires both in roadmap demos.
+nqgantt splits **engine** (schedule math, `@nqlib/nqgantt-engine`) from **bar UI** (`@nqlib/nqgantt`). Your app owns tasks, dependencies, and persistence.
 
-| Concept | Where |
-|---------|--------|
-| Roadmap / timeline demo | `src/nqgantt/demos/` |
-| Bar UI reference copies | `src/nqgantt/lib/` (sync with `pnpm nqgantt:sync-lib`) |
-| Theme overrides | `src/nqgantt/gantt-theme.css` |
+| Layer | Package |
+|-------|---------|
+| Schedule math | `@nqlib/nqgantt-engine` |
+| Bars, ports, edges | `@nqlib/nqgantt` |
+| Host | Your task list, save/load, product defaults |
 
 For board views over the same work set, see [nqgrid](/docs/nqgrid). For surrounding chrome, see [nqui](/docs/nqui).
 
 | Next | |
 |------|--|
-| [Installation](/docs/nqgantt/installation) | Package + sync |
+| [Installation](/docs/nqgantt/installation) | Add the package |
+| [Getting started](/docs/nqgantt/getting-started) | First session |
 | Related | [nqgrid concepts](/docs/nqgrid/concepts) |

@@ -1,18 +1,63 @@
 ---
-title: nqui
-description: Install and compose @nqlib/nqui — React components for Tailwind v4 apps.
+title: "nqui"
+description: "Component kit, composition guide, and adoption playbook for @nqlib/nqui."
 ---
 
-`@nqlib/nqui` is the component library for nqlib surfaces. This guide covers install, CLI, CSS, and imports.
+Plain-language guide for **app builders**, **designers**, and **inexperienced UI engineers** learning how `@nqlib/nqui` thinks about actions, forms, surfaces, and overlays.
 
-| Next | |
-|------|--|
-| [Installation](/docs/nqui/installation) | Peers, skills, suggested setup |
-| [Changelog](/docs/nqui/changelog) | What’s shipping |
-| [Components](/docs/nqui/components) | Live catalog entry points |
-| [CLI](/docs/nqui/cli) | `dlx @nqlib/nqui` commands |
-| [CSS](/docs/nqui/css) | Tailwind v4 `@source` and styles import |
-| [Imports](/docs/nqui/imports) | Subpaths and app shell |
-| Live | [Component catalog](/catalog) · [Patterns](/patterns) · [Recipes](/nqui) |
+Install with `pnpm add @nqlib/nqui`. API notes: [Installation](/docs/nqui/installation).
 
-Related: [nqchart](/docs/nqchart) for charts.
+## Who this is for
+
+| Reader | Start here |
+|--------|------------|
+| First screen in an app | [Getting started](/docs/nqui/getting-started) → [Practice in catalog](/docs/nqui/practice-in-catalog) |
+| Why the API looks like this | [Design philosophy](/docs/nqui/philosophy) → [concepts](/docs/nqui/concepts) |
+| Picking Button vs Toggle vs Select | [Actions and selection](/docs/nqui/actions-and-selection) |
+| Shipping forms without spacing debt | [Forms and fields](/docs/nqui/forms-and-fields) |
+| Need a term | [Glossary](/docs/nqui/glossary) |
+| Need a one-pager | [Cheatsheet](/docs/nqui/cheatsheet) |
+| Rolling this out on a team | [Adoption playbook](/docs/nqui/adoption-playbook) |
+
+## How to read
+
+1. **Intention** — what the product is trying to do.
+2. **How** — what you import / compose in the UI.
+3. **When not to** — anti-patterns and wrong control for the job.
+
+Prefer concrete screens over abstract prop tables. Practice on the live [**/catalog**](/catalog) and [**/nqui**](/nqui) recipes — safe places to try variants.
+
+## All pages
+
+| Page | What it covers |
+|------|----------------|
+| [Design philosophy](/docs/nqui/philosophy) | Tokens, composition, catalog-not-API-list, peers vs core |
+| [Getting started](/docs/nqui/getting-started) | First session: CSS → Button → Field → catalog |
+| [Actions and selection](/docs/nqui/actions-and-selection) | Button, Toggle, ToggleGroup vs Radio/Select |
+| [Forms and fields](/docs/nqui/forms-and-fields) | FieldGroup, InputGroup, invalid states |
+| [Layout and surfaces](/docs/nqui/layout-and-surfaces) | Card, size scale, headers, scroll |
+| [Overlays](/docs/nqui/overlays) | Dialog, Sheet, Drawer, Popover, z-index |
+| [Feedback and states](/docs/nqui/feedback-and-states) | Empty, Skeleton, Alert, toast |
+| [Theming and tokens](/docs/nqui/theming-and-tokens) | Semantic colors, light/dark, variants |
+| [Icons and styling](/docs/nqui/icons-and-styling) | Hugeicons, `data-icon`, className budget |
+| [Practice in catalog](/docs/nqui/practice-in-catalog) | Live drills on /catalog and recipes |
+| [Adoption playbook](/docs/nqui/adoption-playbook) | Team defaults, training, anti-patterns |
+| [Glossary](/docs/nqui/glossary) | Product terms ↔ UI language |
+| [Cheatsheet](/docs/nqui/cheatsheet) | One-page reference |
+
+## Live demos
+
+| Surface | Route |
+|---------|-------|
+| Component catalog | [/catalog](/catalog) |
+| Recipes hub | [/nqui](/nqui) |
+| Patterns | [/patterns](/patterns) |
+| Design system | [/design-system](/design-system) |
+| Installation | [/docs/nqui/installation](/docs/nqui/installation) |
+| Changelog | [/docs/nqui/changelog](/docs/nqui/changelog) |
+
+## Related
+
+- [Design philosophy](/docs/nqui/philosophy)
+- [Getting started](/docs/nqui/getting-started)
+- [Cheatsheet](/docs/nqui/cheatsheet)

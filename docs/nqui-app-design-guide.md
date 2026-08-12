@@ -1,5 +1,7 @@
 # nqui App Design Guide
 
+> **Live guide:** the maintained, nqgantt-shaped docs live at [`/docs/nqui`](../content/docs/nqui/index.mdx) (SSOT: `docs/nqui/`, sync with `pnpm docs:sync:nqui`). Prefer those pages for new work; this file remains a long-form checklist.
+
 Use this guide when building an app with `@nqlib/nqui`. It keeps the UI consistent, accessible, and aligned with nqui's component patterns.
 
 ## Setup

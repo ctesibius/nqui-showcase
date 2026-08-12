@@ -38,7 +38,7 @@ Toggle on when the network is real; off while sketching. → [[critical-path]]
 
 ## Practice
 
-`/gantt-lab` drills → [[practice-in-gantt-lab]] · first session → [[getting-started]]
+Drills → [[practice-in-gantt-lab]] · first session → [[getting-started]] · live [**/blocks**](/blocks)
 
 ## PMO
 
