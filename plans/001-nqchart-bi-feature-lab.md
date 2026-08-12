@@ -199,10 +199,9 @@ Two rules keep it honest:
 - Cases no longer carry an `expected` string. The expectation lives in `case-checks.ts`,
   where it is asserted rather than described — one place to change, and it cannot drift
   from what is actually tested.
-- `nqchart-030.ts` declares the 0.3.0 prop surface locally. Without it `tsc -b` fails on
-  every `chartRef` / `onMarkClick` / `tickFormatter` in the lab, because the installed
-  `@nqlib/nqchart@0.2.2` types predate them — `pnpm build` could not run at all. **Delete
-  it when 0.3.0 ships.**
+- Lab BI types (`NQMarkEvent`, `ChartHandle`, `ChartBrushRange`) import from
+  `@nqlib/nqchart@^0.3.0`. `lab-casts.ts` only holds namespace casts so a lagging
+  npm publish still mounts. Until npm has 0.3.0, iterate with `pnpm dev:local:charts`.
 - `?eager=1` mounts every chart at once instead of on scroll, for environments where
   `IntersectionObserver` does not fire.
 

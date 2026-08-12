@@ -22,6 +22,7 @@ Load **1–3 files** per task via **`.cursor/READ_BUDGET.md`**:
 | Projects / PM board | `src/nqgrid/demos/projects/` |
 | Gantt / timeline | `src/nqgantt/demos/roadmap-gantt.tsx`, `NQGANTT-WORKSPACE.md` |
 | **Gantt PM / PMO guide** | `docs/nqgantt/` (wikilinks SSOT) → live `/docs/nqgantt` via `pnpm docs:sync:nqgantt` |
+| **nqchart BI hub** | `docs/nqchart/` (wikilinks SSOT) → live `/docs/nqchart` via `pnpm docs:sync:nqchart` · lab `/charts/lab` |
 | Charts / analytics dashboard | `src/components/analytics/analytics-dashboard.tsx` + one `src/registry/charts/` file |
 | **nqchart embeds / stuck hover / clipped intro** | `.cursor/skills/nqchart-embed/SKILL.md` → `blocks-charts.tsx` or `blocks-report.tsx` |
 | **Docs TOC diamond / rail vanish** | `.agents/skills/fixed/index.md` → `docs-toc-indicator.tsx` |

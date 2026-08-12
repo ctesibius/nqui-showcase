@@ -34,7 +34,7 @@ import {
   yAxisOrientation,
   type ZrEvent,
 } from "./echarts-probe";
-import type { ChartBrushRange, ChartHandle, NQMarkEvent } from "./nqchart-030";
+import type { ChartBrushRange, ChartHandle, NQMarkEvent } from "@nqlib/nqchart";
 import type { CaseEvidence, MarkSample, Modifiers, RawClick } from "./probe-types";
 
 const NO_MODIFIERS: Modifiers = { shift: false, meta: false, alt: false, ctrl: false };

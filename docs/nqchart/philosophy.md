@@ -1,0 +1,36 @@
+# Design philosophy
+
+**Intention:** NQChart is a **compound renderer** for BI dashboards. It draws and reports; the host owns filters, drills, and persistence.
+
+Distilled from the package philosophy. Full text lives in sibling `../becocharts/docs/product/philosophy.md`.
+
+## What we optimize for
+
+1. **Composition, not a type enum** — `NQ*Chart` + children (`Bar`, `Grid`, `Tooltip`, `ReferenceLine`). A single `<Chart type="bar" isStacked />` hides what renders and explodes boolean props.
+2. **Primitives + recipes** — histogram, Pareto, gauge, bullet are data shapes on bar / composed / radial, not extra registry families. `@nqlib/nqchart/recipes` holds shared prep.
+3. **Events, not state** — `onMarkClick`, `onBrushChange`, controlled `Legend` selection notify. Cross-filter sets live in the host.
+4. **Theme tokens over hex** — `ChartConfig` resolves light/dark. Reference marks use semantic `tone`. Export defaults to the surface color.
+5. **Wallpaper XOR grid** — decorative `<ChartBackground />` and value `<Grid />` compete. Never both.
+6. **Pass through ECharts** — tick formatters, log scale, `getDataURL`. Invest library code where ECharts is hostile (hover-focus, brush footer, a11y table).
+7. **One documented escape hatch** — `onChartReady` / `chartRef.getInstance()` are **unsupported**. Prefer promoting a repeated escape into a typed prop (`onMarkClick` earned its place that way).
+
+## Library vs host
+
+| Layer | Owns | Does not own |
+|-------|------|----------------|
+| **NQChart** | Geometry, tokens, mark events, a11y table, PNG export | Your filters, drill stack, query |
+| **Host app** | Selection, URLs, data fetch, empty/error copy | Reinventing hover-focus or series `id` |
+
+## What we refuse
+
+- `seriesKey` as a display label (it is `dataKey` / series `id`).
+- Chart-owned multi-select that fights the host store.
+- Wallpaper and grid on the same plot.
+- Forking the package because `onChartReady` was unused once.
+
+## Related
+
+- [[interaction]]
+- [[getting-started]]
+- [[cheatsheet]]
+- [[index]]

@@ -1,0 +1,58 @@
+# Interaction
+
+**Intention:** The 0.3.0 BI surface is a small set of props. Click, isolate, brush, keyboard, export — then stop. The host owns what those events mean.
+
+Practice every case on **`/charts/lab`**.
+
+## Mark click — `onMarkClick`
+
+Fires on **bar / line / area / composed / scatter / pie / waterfall / funnel**. Not radar, radial, or treemap.
+
+```ts
+type NQMarkEvent = {
+  category: unknown;       // raw x / category from the datum
+  categoryLabel?: string;
+  seriesKey: string;       // series dataKey (or pie/funnel nameKey value)
+  datum: Record<string, unknown>;
+  value: number | null;
+  index: number;           // index into root `data` (not brush-window relative)
+  modifiers: { shift: boolean; meta: boolean; alt: boolean; ctrl: boolean };
+};
+```
+
+- Series ECharts `id` is the `dataKey`. The click mapper prefers `seriesId`, then a reverse-map from the display label.
+- Empty plot and `null` datums must **not** fire.
+- No handler → no pointer cursor on marks.
+- Shift / meta / alt / ctrl land on `modifiers` so the host can add-to-filter without a second API.
+
+## Legend
+
+Controlled: `selected` + `onSelectChange` isolate a series. Uncontrolled default is unchanged. Legend clicks are not mark clicks.
+
+## Brush — `showBrush` + `onBrushChange`
+
+Reports `{ startIndex, endIndex }` while dragging. Indices are into the root `data` array. Pair with `onMarkClick` for “filter the window, then pick a bar.”
+
+## Keyboard
+
+Tab to the plot, arrows move the focused mark, Enter fires `onMarkClick`. Reduced-motion suppresses intro. Hidden a11y table is present when `a11yTable` is on; canvas stays `aria-hidden`.
+
+## Export — `chartRef.toDataURL`
+
+```ts
+chartRef.current?.toDataURL({ type: "png" })
+```
+
+PNG with a themed, non-transparent background. `getInstance()` exists as an unsupported escape — do not build product on it.
+
+## When not to
+
+- Radar / radial / treemap mark-click is out of 0.3.0. Do not polyfill via `onChartReady` unless you are promoting a typed prop next.
+- Do not treat `categoryLabel` as a join key — use `category` + `seriesKey`.
+
+## Related
+
+- [[getting-started]]
+- [[cheatsheet]]
+- [[philosophy]]
+- [[index]]

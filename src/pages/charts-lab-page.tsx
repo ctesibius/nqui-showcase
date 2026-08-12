@@ -9,7 +9,7 @@ import {
   INITIAL_LAB_EVENTS,
   type LabEventState,
 } from "../nqchart/lab/lab-events";
-import type { ChartBrushRange, NQMarkEvent } from "../nqchart/lab/nqchart-030";
+import type { ChartBrushRange, NQMarkEvent } from "@nqlib/nqchart";
 import type { CheckStatus } from "../nqchart/lab/probe-types";
 import type { PageSink } from "../nqchart/lab/use-case-probe";
 import { CURRENT_RELEASE, whatsNewIds } from "../nqchart/lab/whats-new";

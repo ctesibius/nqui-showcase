@@ -1,0 +1,63 @@
+# Cheatsheet
+
+One page. Details live in the linked notes.
+
+## Install / import
+
+```bash
+pnpm add @nqlib/nqchart echarts motion
+```
+
+```ts
+import { NQBarChart, Bar, XAxis, Grid, Tooltip } from "@nqlib/nqchart/bar-chart";
+import { NQLineChart, Line } from "@nqlib/nqchart/line-chart";
+import { NQComposedChart } from "@nqlib/nqchart/composed-chart";
+import type { ChartConfig, NQMarkEvent, ChartHandle } from "@nqlib/nqchart";
+import { binForHistogram, prepareParetoData } from "@nqlib/nqchart/recipes";
+```
+
+Until npm **0.3.0** is published: `pnpm dev:local:charts`.
+
+## Config keys = series ids
+
+```ts
+const config = {
+  plan: { label: "Plan", color: "var(--chart-1)" },
+  actual: { label: "Actual", color: "var(--chart-2)" },
+} satisfies ChartConfig;
+```
+
+`<Bar dataKey="plan" />` → `onMarkClick` `seriesKey` is `"plan"`, not `"Plan"`.
+
+## BI props (0.3.0)
+
+| Prop | Where | Does |
+|------|--------|------|
+| `onMarkClick` | bar/line/area/composed/scatter/pie/waterfall/funnel | Mark → `NQMarkEvent` |
+| `showBrush` + `onBrushChange` | cartesian | `{ startIndex, endIndex }` |
+| `Legend selected` / `onSelectChange` | families with Legend | Isolate series |
+| `YAxis tickFormatter` / `yAxisId` | cartesian | Dual axis, `$` vs `%` |
+| `ReferenceLine` / `ReferenceBand` | composed (and cartesian hosts) | Thresholds; not legend, not clicks |
+| `a11yTable` | roots | Hidden data table |
+| `chartRef.toDataURL` | roots | PNG, themed background |
+| `isLoading` / `error` / empty `data` | roots | Skeleton / error / no-data plate |
+
+## Craft
+
+| Do | Don't |
+|----|--------|
+| `ChartBackground` **or** `Grid` | Both |
+| Recipes for histogram / Pareto / gauge | New registry family for a synonym |
+| Host owns filter state | Chart-owned multi-select |
+
+→ [[philosophy]] · [[interaction]]
+
+## Practice
+
+`/charts/lab` → [[getting-started]] · gallery `/charts` · embeds `/blocks`
+
+## Related
+
+- [[index]]
+- [[getting-started]]
+- [[interaction]]

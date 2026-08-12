@@ -14,14 +14,13 @@ import {
   formatPct,
   formatUsd,
 } from "./dataset";
-import { asPart, asRoot, optionalPart } from "./nqchart-030";
+import { asPart, asRoot, optionalPart } from "./lab-casts";
 import type { CaseProbe } from "./use-case-probe";
 
 /**
- * Components are read off the module namespace and re-typed against the 0.3.0
- * surface (see `nqchart-030.ts`). Anything added in 0.3.0 is resolved through
- * `optionalPart`, so the lab still renders on the published 0.2.2 package and
- * says which API is missing rather than crashing.
+ * Components are read off the module namespace so a lagging published npm
+ * build still mounts. `optionalPart` is the 0.3.0-only children; missing
+ * exports show a "requires local nqchart" plate instead of crashing.
  */
 const composedNs = Composed as unknown as Record<string, unknown>;
 

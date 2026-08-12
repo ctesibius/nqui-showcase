@@ -1,4 +1,4 @@
-import type { ChartBrushRange, NQMarkEvent } from "./nqchart-030";
+import type { ChartBrushRange, NQMarkEvent } from "@nqlib/nqchart";
 
 export type LabEventState = {
   markClick: NQMarkEvent | null;

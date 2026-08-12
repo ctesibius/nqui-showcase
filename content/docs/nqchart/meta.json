@@ -1,8 +1,13 @@
 {
+  "title": "nqchart",
   "pages": [
     "index",
     "installation",
     "changelog",
+    "getting-started",
+    "philosophy",
+    "interaction",
+    "cheatsheet",
     "components",
     "area-chart",
     "line-chart",
@@ -24,6 +29,5 @@
     "chart-config",
     "hover-focus",
     "chart-recipes"
-  ],
-  "title": "nqchart"
+  ]
 }

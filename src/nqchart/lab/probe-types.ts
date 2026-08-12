@@ -1,5 +1,5 @@
 import type { AxisOrientation } from "./echarts-probe";
-import type { ChartBrushRange, NQMarkEvent } from "./nqchart-030";
+import type { ChartBrushRange, NQMarkEvent } from "@nqlib/nqchart";
 
 export type CheckStatus = "pass" | "fail" | "pending";
 

@@ -1,0 +1,78 @@
+# Getting started
+
+**Intention:** In one short session, install `@nqlib/nqchart`, compose one bar, and click a mark so you see `seriesKey` and `category` land in your handler.
+
+## Prerequisites
+
+- Showcase running with local charts: `pnpm dev:local:charts` (aliases `../becocharts/dist` until npm has **0.3.0**).
+- Open **`/charts/lab`**. The gallery at `/charts` does not exercise BI props.
+
+## First path (15 minutes)
+
+### 1. Install
+
+```bash
+pnpm add @nqlib/nqchart echarts motion
+```
+
+Current line: **0.3.0**. Details: [Installation](/docs/nqchart/installation).
+
+### 2. Compose one bar
+
+```tsx
+import {
+  NQBarChart,
+  Bar,
+  XAxis,
+  Grid,
+  Tooltip,
+} from "@nqlib/nqchart/bar-chart";
+import type { ChartConfig } from "@nqlib/nqchart";
+
+const config = {
+  plan: { label: "Plan", color: "var(--chart-1)" },
+} satisfies ChartConfig;
+
+export function SpendBar({ data, onMarkClick }) {
+  return (
+    <NQBarChart config={config} data={data} onMarkClick={onMarkClick}>
+      <XAxis dataKey="month" />
+      <Grid />
+      <Bar dataKey="plan" />
+      <Tooltip />
+    </NQBarChart>
+  );
+}
+```
+
+`config` keys **are** series ids (`dataKey`). Display labels live on `config.plan.label`, not as the event key. See [[cheatsheet]].
+
+### 3. Click a mark in the lab
+
+1. Open **`/charts/lab`**.
+2. Find **Interaction → mark click** (composed / bar / line / pie).
+3. Click a bar. The sticky event panel must show `seriesKey` (= `dataKey`, e.g. `plan`) and the category (month), not the legend label.
+4. Click empty plot — nothing fires. Click a `null` datum — nothing fires.
+
+That panel is the contract. If `seriesKey` is a pretty label, the host filter will miss.
+
+### 4. Wire the host
+
+Keep selection in **your** state. The chart only reports:
+
+```tsx
+onMarkClick={(e) => setFilter({ month: e.category, series: e.seriesKey })}
+```
+
+Do not ask the chart to own a cross-filter set. See [[philosophy]] and [[interaction]].
+
+## When not to start here
+
+- You only need primitive API notes → [Components](/docs/nqchart/components).
+- You are debugging compile / ECharts options → sibling `../becocharts/docs/`.
+
+## Related
+
+- [[interaction]]
+- [[cheatsheet]]
+- [[index]]

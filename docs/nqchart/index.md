@@ -1,7 +1,4 @@
----
-title: "nqchart"
-description: "Composable ECharts charts for BI dashboards — live lab, interaction, and API reference."
----
+# nqchart — BI engineer guide
 
 Short guide for **dashboard engineers** wiring `@nqlib/nqchart` as a renderer: compose a primitive, listen for mark events, leave filter state in the host.
 
@@ -11,10 +8,10 @@ Published at **`/docs/nqchart`**. This folder (`docs/nqchart/`) is the Markdown 
 
 | Reader | Start here |
 |--------|------------|
-| First chart in an app | [Getting started](/docs/nqchart/getting-started) |
-| Why the API looks like this | [Design philosophy](/docs/nqchart/philosophy) |
-| Click / legend / brush / export | [Interaction](/docs/nqchart/interaction) |
-| Need a one-pager | [Cheatsheet](/docs/nqchart/cheatsheet) |
+| First chart in an app | [[getting-started]] |
+| Why the API looks like this | [[philosophy]] |
+| Click / legend / brush / export | [[interaction]] |
+| Need a one-pager | [[cheatsheet]] |
 | Primitive props | [Components](/docs/nqchart/components) |
 
 ## How to read
@@ -29,10 +26,10 @@ Practice on **`/charts/lab`** (dev). The gallery at **`/charts`** only proves dr
 
 | Page | What it covers |
 |------|----------------|
-| [Getting started](/docs/nqchart/getting-started) | Install → one bar → click a mark in the lab |
-| [Design philosophy](/docs/nqchart/philosophy) | Compound charts, recipes, events-not-state, wallpaper XOR grid |
-| [Interaction](/docs/nqchart/interaction) | `onMarkClick`, legend, brush, keyboard, `chartRef.toDataURL` |
-| [Cheatsheet](/docs/nqchart/cheatsheet) | Imports, config keys, BI props |
+| [[getting-started]] | Install → one bar → click a mark in the lab |
+| [[philosophy]] | Compound charts, recipes, events-not-state, wallpaper XOR grid |
+| [[interaction]] | `onMarkClick`, legend, brush, keyboard, `chartRef.toDataURL` |
+| [[cheatsheet]] | Imports, config keys, BI props |
 
 ## Live surfaces in this showcase
 
@@ -53,7 +50,7 @@ Practice on **`/charts/lab`** (dev). The gallery at **`/charts`** only proves dr
 
 ## Related
 
-- [Getting started](/docs/nqchart/getting-started)
-- [Design philosophy](/docs/nqchart/philosophy)
-- [Interaction](/docs/nqchart/interaction)
-- [Cheatsheet](/docs/nqchart/cheatsheet)
+- [[getting-started]]
+- [[philosophy]]
+- [[interaction]]
+- [[cheatsheet]]

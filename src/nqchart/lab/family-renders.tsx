@@ -37,7 +37,7 @@ import {
   SPARK_CONFIG,
   SPARK_DATA,
 } from "./family-dataset";
-import { asPart, asRoot } from "./nqchart-030";
+import { asPart, asRoot } from "./lab-casts";
 import type { CaseProbe } from "./use-case-probe";
 
 const ns = (m: unknown) => m as unknown as Record<string, unknown>;
