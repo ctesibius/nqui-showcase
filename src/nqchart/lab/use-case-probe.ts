@@ -68,6 +68,7 @@ function emptyEvidence(reducedMotion: boolean): CaseEvidence {
     brushPlotted: [],
     arrowKeys: 0,
     exportSample: null,
+    importWarnings: [],
     reducedMotion,
     epoch: 0,
   };
@@ -78,6 +79,8 @@ export type PageSink = {
   onLegendSelect?: (selected: string | null) => void;
   onBrushChange?: (range: ChartBrushRange) => void;
   setExportNote?: (note: string) => void;
+  /** Page-level ECharts import warnings — same list for every case. */
+  importWarnings?: string[];
 };
 
 export type CaseProbe = {
@@ -204,6 +207,21 @@ export function useCaseProbe(sink?: PageSink, caseId?: string): CaseProbe {
       prev.root === root ? prev : { ...prev, root, handleTimedOut: false },
     );
   }, [root]);
+
+  // Page-level import warnings — a pie miss must fail the modules case even
+  // when this card's own chart is fine.
+  useEffect(() => {
+    const next = sink?.importWarnings ?? [];
+    setEvidence((prev) => {
+      if (
+        prev.importWarnings.length === next.length &&
+        prev.importWarnings.every((w, i) => w === next[i])
+      ) {
+        return prev;
+      }
+      return { ...prev, importWarnings: next };
+    });
+  }, [sink?.importWarnings]);
 
   /**
    * When a check disagrees with what you can plainly see, the question is
@@ -386,9 +404,12 @@ export function useCaseProbe(sink?: PageSink, caseId?: string): CaseProbe {
   const reset = useCallback(() => {
     markCount.current = 0;
     markAtDown.current = 0;
-    setEvidence(emptyEvidence(prefersReducedMotion()));
+    setEvidence({
+      ...emptyEvidence(prefersReducedMotion()),
+      importWarnings: sink?.importWarnings ?? [],
+    });
     window.setTimeout(snapshot, 0);
-  }, [snapshot]);
+  }, [snapshot, sink?.importWarnings]);
 
   return useMemo(
     () => ({

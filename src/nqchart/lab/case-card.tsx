@@ -6,7 +6,7 @@ import { runCaseChecks } from "./case-checks";
 import type { LabCase } from "./cases";
 import { rollUp, type CheckResult, type CheckStatus } from "./probe-types";
 import { useCaseProbe, type PageSink } from "./use-case-probe";
-import { isNew } from "./whats-new";
+import { isNew, CURRENT_RELEASE } from "./whats-new";
 
 const STATUS_LABEL: Record<CheckStatus, string> = {
   pass: "pass",
@@ -109,7 +109,9 @@ export function LabCaseCard({
         <span className="truncate text-sm font-medium">{labCase.title}</span>
         <span className="flex shrink-0 items-center gap-1.5">
           {isNew(labCase.id) ? (
-            <Badge className="font-mono text-xs font-normal">New</Badge>
+            <Badge className="font-mono text-xs font-normal" title={`New in ${CURRENT_RELEASE}`}>
+              New
+            </Badge>
           ) : null}
           <Badge variant="outline" className={cn("font-mono text-xs font-normal", STATUS_TONE[status])}>
             {STATUS_LABEL[status]}
@@ -117,7 +119,15 @@ export function LabCaseCard({
         </span>
       </Tray.Caption>
 
-      <Tray.Stage variant="chart" className="aspect-[16/10]">
+      {/* 4/3 from Tray.Stage; min-h so dual-axis ticks + legend (and brush) aren't crushed. */}
+      <Tray.Stage
+        variant="chart"
+        className={
+          labCase.group === "Brush" || labCase.id.includes("brush")
+            ? "min-h-[26rem]"
+            : "min-h-[22rem]"
+        }
+      >
         {eager ? (
           <div ref={attachRoot} className="size-full min-h-0">
             {labCase.render(probe)}

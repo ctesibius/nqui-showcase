@@ -59,6 +59,9 @@ export interface Block {
 const chart = (name: keyof typeof import("./blocks-charts")) =>
   lazy(() => import("./blocks-charts").then((m) => ({ default: m[name] as ComponentType })));
 
+const composed = (name: keyof typeof import("./blocks-composed")) =>
+  lazy(() => import("./blocks-composed").then((m) => ({ default: m[name] as ComponentType })));
+
 const report = (name: keyof typeof import("./blocks-report")) =>
   lazy(() => import("./blocks-report").then((m) => ({ default: m[name] as ComponentType })));
 
@@ -274,12 +277,25 @@ export const BLOCKS: Block[] = [
   },
   {
     id: "composed",
-    name: "Composed",
-    blurb: "Bars and a line on independent left/right axes.",
+    name: "Plan vs delivery",
+    blurb:
+      "Cost in $ and on-time delivery in % on independent axes. May actual is a gap, not a zero.",
     lib: "nqchart",
-    bom: ["NQComposedChart", "Bar", "Line"],
-    tall: false,
-    Render: chart("ComposedBlock"),
+    bom: ["NQComposedChart", "Bar", "Line", "YAxis yAxisId", "Legend"],
+    stage: "table",
+    wide: true,
+    tall: true,
+    Render: composed("PlanDeliveryBlock"),
+  },
+  {
+    id: "composed-area",
+    name: "OTD as area",
+    blurb:
+      "Same dual-axis ops set — cost bars on the left, on-time delivery as an area on the right.",
+    lib: "nqchart",
+    bom: ["NQComposedChart", "Bar", "Area", "YAxis yAxisId"],
+    tall: true,
+    Render: composed("ComposedAreaBlock"),
   },
   {
     id: "radar",

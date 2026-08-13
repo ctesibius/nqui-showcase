@@ -18,20 +18,11 @@ import {
   UncontrolledLegendCase,
   YAxisIdFallbackCase,
 } from "./case-renders";
-import {
-  AreaFamily,
-  CalendarFamily,
-  FunnelFamily,
-  HeatmapFamily,
-  RadarFamily,
-  RadialFamily,
-  ScatterFamily,
-  SparklineFamily,
-  TreemapFamily,
-  WaterfallFamily,
-} from "./family-renders";
+import { FamilyChart } from "./families/load";
+import { FAMILY_IDS, type FamilyId } from "./families/ids";
 
 export type LabCaseGroup =
+  | "Modules"
   | "Interaction"
   | "Legend"
   | "Brush"
@@ -57,38 +48,85 @@ export type LabCase = {
   render: (probe: CaseProbe) => ReactNode;
 };
 
+const FAMILY_TITLES: Record<FamilyId, string> = {
+  area: "Area",
+  scatter: "Scatter",
+  funnel: "Funnel",
+  waterfall: "Waterfall",
+  treemap: "Treemap",
+  radar: "Radar",
+  radial: "Radial / gauge",
+  sparkline: "Sparkline",
+  heatmap: "Heatmap",
+  calendar: "Calendar",
+};
+
 /**
  * The families `/charts` draws but the interaction groups never touch. Same
  * shape for each so the group reads as a coverage matrix; the checks live in
  * `case-checks.ts` under `families.*` and are identical across all ten.
+ *
+ * Renders are lazy per family so `?only=Interaction` never evaluates heatmap
+ * (and `?family=heatmap` cannot pull funnel).
  */
-const FAMILY_CASES: LabCase[] = (
-  [
-    ["area", "Area", AreaFamily],
-    ["scatter", "Scatter", ScatterFamily],
-    ["funnel", "Funnel", FunnelFamily],
-    ["waterfall", "Waterfall", WaterfallFamily],
-    ["treemap", "Treemap", TreemapFamily],
-    ["radar", "Radar", RadarFamily],
-    ["radial", "Radial / gauge", RadialFamily],
-    ["sparkline", "Sparkline", SparklineFamily],
-    ["heatmap", "Heatmap", HeatmapFamily],
-    ["calendar", "Calendar", CalendarFamily],
-  ] as const
-).map(([id, title, Render]) => ({
+const FAMILY_CASES: LabCase[] = FAMILY_IDS.map((id) => ({
   id: `families.${id}`,
   group: "Families" as const,
-  title,
+  title: FAMILY_TITLES[id],
   instruction: "Click a mark three times.",
-  render: (probe) => <Render probe={probe} />,
+  render: (probe: CaseProbe) => <FamilyChart id={id} probe={probe} />,
 }));
 
 export const LAB_CASES: LabCase[] = [
   {
+    id: "modules.not-imported",
+    group: "Modules",
+    title: "No missing ECharts modules",
+    instruction: "Scroll this card into view — it fails if any chart on the page logs “used but not imported”.",
+    render: (probe) => <DualAxisComposed probe={probe} />,
+  },
+  {
+    id: "modules.cartesian-omits-zoom",
+    group: "Modules",
+    title: "Cartesian omits dataZoom",
+    render: (probe) => <DualAxisComposed probe={probe} />,
+  },
+  {
+    id: "modules.heatmap-extras",
+    group: "Modules",
+    title: "Heatmap extras",
+    render: (probe) => <FamilyChart id="heatmap" probe={probe} />,
+  },
+  {
+    id: "modules.calendar-extras",
+    group: "Modules",
+    title: "Calendar extras",
+    render: (probe) => <FamilyChart id="calendar" probe={probe} />,
+  },
+  {
+    id: "modules.radar-extras",
+    group: "Modules",
+    title: "Radar extras",
+    render: (probe) => <FamilyChart id="radar" probe={probe} />,
+  },
+  {
+    id: "modules.funnel-extras",
+    group: "Modules",
+    title: "Funnel extras",
+    render: (probe) => <FamilyChart id="funnel" probe={probe} />,
+  },
+  {
+    id: "modules.brush-mini",
+    group: "Modules",
+    title: "Brush mini-preview",
+    instruction: "Confirm the footer spark draws under the brush window.",
+    render: (probe) => <DualAxisComposed probe={probe} showBrush />,
+  },
+  {
     id: "interaction.composed-mark-click",
     group: "Interaction",
     title: "Composed mark click",
-    instruction: "Click a planned or actual bar.",
+    instruction: "Click a planned or actual bar on the plot (not the hidden table). A lone synthetic click does not reach ECharts — use a real pointer.",
     render: (probe) => <DualAxisComposed probe={probe} clickable />,
   },
   {
@@ -199,6 +237,18 @@ export const LAB_CASES: LabCase[] = [
     render: (probe) => <DualAxisComposed probe={probe} withArea />,
   },
   {
+    id: "composition.dashed-line",
+    group: "Composition",
+    title: "Dashed line variant",
+    render: (probe) => <DualAxisComposed probe={probe} dashedLine />,
+  },
+  {
+    id: "composition.shared-datakey",
+    group: "Composition",
+    title: "Area + Line same dataKey",
+    render: (probe) => <DualAxisComposed probe={probe} fillUnderLine />,
+  },
+  {
     id: "states.empty",
     group: "States",
     title: "Empty data",
@@ -230,6 +280,12 @@ export const LAB_CASES: LabCase[] = [
     render: (probe) => <A11yTableCase probe={probe} />,
   },
   {
+    id: "a11y.pie-table",
+    group: "A11y",
+    title: "Pie data table",
+    render: (probe) => <PieClickCase probe={probe} />,
+  },
+  {
     id: "a11y.reduced-motion",
     group: "A11y",
     title: "Reduced motion",
@@ -240,7 +296,7 @@ export const LAB_CASES: LabCase[] = [
     id: "export.to-data-url",
     group: "Export",
     title: "toDataURL export",
-    instruction: "Click Export PNG.",
+    instruction: "Click Export PNG — SVG is not a format this renderer produces.",
     render: (probe) => <ExportCase probe={probe} />,
   },
 
@@ -252,6 +308,7 @@ export const LAB_CASES: LabCase[] = [
 export const LAB_CASE_IDS = LAB_CASES.map((c) => c.id);
 
 export const LAB_GROUPS: LabCaseGroup[] = [
+  "Modules",
   "Interaction",
   "Legend",
   "Brush",

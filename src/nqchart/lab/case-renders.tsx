@@ -64,6 +64,8 @@ export function DualAxisComposed({
   onLegendSelect,
   withRefs = false,
   withArea = false,
+  fillUnderLine = false,
+  dashedLine = false,
 }: {
   probe: CaseProbe;
   /** Bind onMarkClick. Off for the cursor case, which must see no handler. */
@@ -73,6 +75,10 @@ export function DualAxisComposed({
   onLegendSelect?: (key: string | null) => void;
   withRefs?: boolean;
   withArea?: boolean;
+  /** Area + Line on the same `otd` key (fill under the line). 0.3.1 must not throw `id duplicates`. */
+  fillUnderLine?: boolean;
+  /** `variant="dashed"` on the line — 0.3.1 ask; the check fails until the compiler honours it. */
+  dashedLine?: boolean;
 }) {
   return (
     <NQComposedChart
@@ -116,16 +122,19 @@ export function DualAxisComposed({
       <Bar dataKey="planned" yAxisId="left" />
       <Bar dataKey="actual" yAxisId="left" />
       {/*
-        Area and Line must not share a dataKey — two parts on `otd` give the
-        legend two children with the same React key. The area case therefore
-        swaps the line out rather than sitting beside it; ECharts compiles an
-        area as a line series with `areaStyle`, so the composition check still
-        sees bar + line + area.
+        `withArea` swaps the line for an area (bar + area). `fillUnderLine`
+        stacks Area + Line on the same `otd` key — 0.3.1 uniquifies series ids
+        and keeps one legend row.
       */}
       {withArea ? (
         <Area dataKey="otd" yAxisId="right" />
+      ) : fillUnderLine ? (
+        <>
+          <Area dataKey="otd" yAxisId="right" />
+          <Line dataKey="otd" yAxisId="right" curveType="monotone" />
+        </>
       ) : (
-        <Line dataKey="otd" yAxisId="right" curveType="monotone" />
+        <Line dataKey="otd" yAxisId="right" curveType="monotone" variant={dashedLine ? "dashed" : undefined} />
       )}
     </NQComposedChart>
   );

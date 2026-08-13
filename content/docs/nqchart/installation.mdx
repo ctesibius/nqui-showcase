@@ -6,7 +6,7 @@ image: /og/og-image.png
 
 NQChart ships two ways:
 
-1. **npm package** `@nqlib/nqchart` — versioned dependency (recommended).
+1. **npm package** `@nqlib/nqchart` — versioned dependency (recommended for apps and this showcase).
 2. **shadcn-compatible registry** — CLI copies chart source into your repo (typically `components/nqchart/`).
 
 Agent **skills** are separate: they install markdown guidance for Cursor / Claude Code and do **not** copy chart files.
@@ -22,7 +22,7 @@ Agent **skills** are separate: they install markdown guidance for Cursor / Claud
       </StepDescription>
       <CommandBlock commands={["@nqlib/nqchart", "echarts", "motion"]} />
       <StepDescription className="mt-4">
-        Current line: **0.3.0**. Peer React 18/19. Optional peer `@nqlib/nqui` when you want shared chrome tokens.
+        Current line: **0.3.1**. Peer React 18/19. Optional peer `@nqlib/nqui` when you want shared chrome tokens.
       </StepDescription>
     </StepContent>
   </Step>
@@ -149,4 +149,4 @@ Run from your **app project root**. Use `--list` to see available skills.
 
 <SkillsBlock commands={["ctesibius/nqchart", "--skill", "nqchart", "-y"]} />
 
-After install, start at [Getting started](/docs/nqchart/getting-started).
+Canonical skill source: `skills/consumer/nqchart/` in the repo. Live docs on the nqlib showcase: [nqchart docs](https://www.nqlib.com/docs/nqchart) · [installation](https://www.nqlib.com/docs/nqchart/installation).

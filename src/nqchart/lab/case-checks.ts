@@ -20,8 +20,10 @@ import { LAB_DATA, PIE_DATA, ROTATE_DATA } from "./dataset";
 import {
   axesOf,
   dataSeries,
+  hasCompiledComponent,
   isGapValue,
   legendsOf,
+  optionHasKey,
   seriesOf,
   seriesValueAt,
 } from "./echarts-probe";
@@ -139,6 +141,37 @@ function fmtMods(m: Modifiers): string {
 function sameMods(a: Modifiers, b: Modifiers): boolean {
   return a.shift === b.shift && a.meta === b.meta && a.alt === b.alt && a.ctrl === b.ctrl;
 }
+
+/**
+ * A present key that is not an empty ECharts placeholder. `undefined` / `null`
+ * still count — that is the 0.3.1 leak (`dataZoom: undefined` makes ECharts
+ * demand the component).
+ */
+function leakedComponent(option: CaseEvidence["option"], key: string): boolean {
+  if (!optionHasKey(option, key)) return false;
+  const value = option![key];
+  if (value == null) return true;
+  return hasCompiledComponent(option, key);
+}
+
+function leakedKeys(option: CaseEvidence["option"], keys: string[]): string[] {
+  return keys.filter((key) => leakedComponent(option, key));
+}
+
+const noImportWarning: CheckFn = (e) => {
+  const id = "not-imported";
+  const label = "No ECharts module is used but not imported";
+  if (e.importWarnings.length > 0) {
+    return fail(id, label, e.importWarnings[0]);
+  }
+  if (!e.ready && !e.root) {
+    return pending(id, label, "scroll this card into view to mount the chart");
+  }
+  if (!e.ready && !e.handleTimedOut) {
+    return pending(id, label, "chart still initialising");
+  }
+  return verdict(id, label, true, "no import warnings");
+};
 
 /* ------------------------------------------------------------------ */
 /* Shared checks                                                       */
@@ -850,6 +883,42 @@ export const CASE_CHECKS: Record<string, CheckFn[]> = {
     }),
   ],
 
+  "composition.dashed-line": [
+    structural("dashed-type", "Line compiles with lineStyle.type dashed", (e) => {
+      const line = dataSeries(e.option).find((s) => s.type === "line" && s.areaStyle == null);
+      const type = (line?.lineStyle as { type?: unknown } | undefined)?.type;
+      return {
+        ok: type === "dashed",
+        detail: line
+          ? `otd lineStyle.type = ${String(type ?? "unset")} — need variant="dashed" to set it`
+          : "no line series compiled",
+      };
+    }),
+  ],
+
+  "composition.shared-datakey": [
+    structural("unique-ids", "Area + Line on otd compile unique series ids", (e) => {
+      const ids = dataSeries(e.option).map((s) => String(s.id ?? ""));
+      const unique = new Set(ids);
+      return {
+        ok: unique.size === ids.length && ids.includes("otd") && ids.includes("otd__nq_area"),
+        detail: `ids: ${ids.join(", ") || "none"}`,
+      };
+    }),
+    domCheck("one-legend-otd", "Legend has one On-time delivery row, not two", (root) => {
+      const items = [...root.querySelectorAll<HTMLElement>("div")].filter(
+        (el) =>
+          /(^|\s)transition-opacity(\s|$)/.test(el.className) &&
+          /(^|\s)gap-1\.5(\s|$)/.test(el.className),
+      );
+      const otd = items.filter((el) => /on-time/i.test(el.textContent ?? ""));
+      return {
+        ok: otd.length === 1 && items.length === 3,
+        detail: `legend rows: ${items.length} · otd rows: ${otd.length} (${items.map((el) => el.textContent?.trim()).join(" · ")})`,
+      };
+    }),
+  ],
+
   "states.empty": [
     domCheck("plate-not-frame", "Empty data shows a status plate, not bare axes", (root) => {
       const plate = root.querySelector('[role="status"]');
@@ -967,6 +1036,59 @@ export const CASE_CHECKS: Record<string, CheckFn[]> = {
         detail: `${heads} columns (category + planned + actual + otd = 4)`,
       };
     }),
+    domCheck("null-is-empty-cell", "The missing actual is an empty cell, not a zero", (root) => {
+      const row = root.querySelectorAll(".sr-only table tbody tr")[NULL_INDEX];
+      const cells = [...(row?.querySelectorAll("td") ?? [])].map((td) => td.textContent ?? "");
+      // planned, actual, otd — actual is the gap.
+      const actual = cells[1];
+      const ok = actual === "";
+      return {
+        ok,
+        detail: ok
+          ? `${LAB_DATA[NULL_INDEX]?.month} actual is empty`
+          : `${LAB_DATA[NULL_INDEX]?.month} actual cell is ${JSON.stringify(actual)}`,
+      };
+    }),
+  ],
+
+  "a11y.pie-table": [
+    domCheck("table-present", "A visually hidden pie table is rendered", (root) => {
+      const table = root.querySelector(".sr-only table");
+      const rows = table?.querySelectorAll("tbody tr").length ?? 0;
+      return {
+        ok: Boolean(table) && rows === PIE_DATA.length,
+        detail: table ? `${rows} rows (expected ${PIE_DATA.length})` : "no .sr-only table",
+      };
+    }),
+    domCheck("values-not-blank", "Each slice has a real value, not a blank cell", (root) => {
+      const rows = [...root.querySelectorAll(".sr-only table tbody tr")];
+      if (rows.length !== PIE_DATA.length) {
+        return { ok: false, detail: `${rows.length} rows (expected ${PIE_DATA.length})` };
+      }
+      const blanks: string[] = [];
+      const mismatches: string[] = [];
+      for (let i = 0; i < PIE_DATA.length; i += 1) {
+        const slice = PIE_DATA[i]!;
+        const tds = [...rows[i]!.querySelectorAll("td")].map((td) => td.textContent?.trim() ?? "");
+        const texts = tds.filter((t) => t !== "");
+        if (texts.length === 0) {
+          blanks.push(slice.name);
+          continue;
+        }
+        if (!texts.includes(String(slice.value))) {
+          mismatches.push(`${slice.name} got ${JSON.stringify(texts)} want ${slice.value}`);
+        }
+      }
+      const ok = blanks.length === 0 && mismatches.length === 0;
+      return {
+        ok,
+        detail: ok
+          ? PIE_DATA.map((s) => `${s.name}=${s.value}`).join(", ")
+          : blanks.length
+            ? `blank rows: ${blanks.join(", ")} — pie table is keyed off slice names, not the value column`
+            : mismatches.join("; "),
+      };
+    }),
   ],
 
   "a11y.reduced-motion": [
@@ -1015,6 +1137,116 @@ export const CASE_CHECKS: Record<string, CheckFn[]> = {
         detail: `corner pixel ${e.exportSample!.corner}`,
       }),
     ),
+  ],
+
+  "modules.not-imported": [noImportWarning],
+
+  "modules.cartesian-omits-zoom": [
+    noImportWarning,
+    structural("omits-specialty", "Cartesian option omits dataZoom, calendar, visualMap", (e) => {
+      const leaked = leakedKeys(e.option, ["dataZoom", "calendar", "visualMap"]);
+      return {
+        ok: leaked.length === 0,
+        detail: leaked.length ? `leaked keys: ${leaked.join(", ")}` : "no specialty keys on the option",
+      };
+    }),
+  ],
+
+  "modules.heatmap-extras": [
+    noImportWarning,
+    structural("heatmap-series", "Compiles a heatmap series", (e) => {
+      const heat = dataSeries(e.option).filter((s) => s.type === "heatmap");
+      return {
+        ok: heat.length > 0,
+        detail: heat.length
+          ? `${heat.length} heatmap series`
+          : `types: ${dataSeries(e.option).map((s) => s.type ?? "?").join(", ") || "none"}`,
+      };
+    }),
+    structural("visual-map", "visualMap is compiled", (e) => ({
+      ok: hasCompiledComponent(e.option, "visualMap"),
+      detail: hasCompiledComponent(e.option, "visualMap") ? "visualMap present" : "visualMap missing",
+    })),
+    structural("data-zoom", "dataZoom is compiled (heatmap is the only family that emits it)", (e) => ({
+      ok: hasCompiledComponent(e.option, "dataZoom"),
+      detail: hasCompiledComponent(e.option, "dataZoom") ? "dataZoom present" : "dataZoom missing",
+    })),
+  ],
+
+  "modules.calendar-extras": [
+    noImportWarning,
+    structural("calendar", "calendar component is compiled", (e) => ({
+      ok: hasCompiledComponent(e.option, "calendar"),
+      detail: hasCompiledComponent(e.option, "calendar") ? "calendar present" : "calendar missing",
+    })),
+    structural("heatmap-series", "Compiles a heatmap series", (e) => {
+      const heat = dataSeries(e.option).filter((s) => s.type === "heatmap");
+      return {
+        ok: heat.length > 0,
+        detail: heat.length
+          ? `${heat.length} heatmap series`
+          : `types: ${dataSeries(e.option).map((s) => s.type ?? "?").join(", ") || "none"}`,
+      };
+    }),
+    structural("visual-map", "visualMap is compiled", (e) => ({
+      ok: hasCompiledComponent(e.option, "visualMap"),
+      detail: hasCompiledComponent(e.option, "visualMap") ? "visualMap present" : "visualMap missing",
+    })),
+    structural("no-data-zoom", "Calendar does not emit dataZoom", (e) => {
+      const leaked = leakedComponent(e.option, "dataZoom");
+      return {
+        ok: !leaked,
+        detail: leaked ? "dataZoom present — calendar should omit it" : "no dataZoom",
+      };
+    }),
+  ],
+
+  "modules.radar-extras": [
+    noImportWarning,
+    structural("radar", "radar component is compiled", (e) => ({
+      ok: hasCompiledComponent(e.option, "radar"),
+      detail: hasCompiledComponent(e.option, "radar") ? "radar present" : "radar missing",
+    })),
+    structural("radar-series", "Compiles a radar series", (e) => {
+      const radar = dataSeries(e.option).filter((s) => s.type === "radar");
+      return {
+        ok: radar.length > 0,
+        detail: radar.length
+          ? `${radar.length} radar series`
+          : `types: ${dataSeries(e.option).map((s) => s.type ?? "?").join(", ") || "none"}`,
+      };
+    }),
+  ],
+
+  "modules.funnel-extras": [
+    noImportWarning,
+    structural("funnel-series", "Compiles a funnel series", (e) => {
+      const funnel = dataSeries(e.option).filter((s) => s.type === "funnel");
+      return {
+        ok: funnel.length > 0,
+        detail: funnel.length
+          ? `${funnel.length} funnel series`
+          : `types: ${dataSeries(e.option).map((s) => s.type ?? "?").join(", ") || "none"}`,
+      };
+    }),
+  ],
+
+  "modules.brush-mini": [
+    noImportWarning,
+    structural("omits-data-zoom", "Brush host does not compile dataZoom", (e) => {
+      const leaked = leakedComponent(e.option, "dataZoom");
+      return {
+        ok: !leaked,
+        detail: leaked ? "main option has dataZoom — cartesian brush must omit it" : "no dataZoom on the plot",
+      };
+    }),
+    domCheck("mini-host", "Brush footer inits a second canvas (mini-preview)", (root) => {
+      const canvases = root.querySelectorAll("canvas").length;
+      return {
+        ok: canvases >= 2,
+        detail: canvases >= 2 ? `${canvases} canvases (plot + mini-preview)` : `${canvases} canvas — mini-preview did not init`,
+      };
+    }),
   ],
 };
 

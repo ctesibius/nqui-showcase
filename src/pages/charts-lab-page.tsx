@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Badge, NquiLogo, cn } from "@nqlib/nqui";
 import { ShowcaseTopBar, devTopBarLinks } from "../components/showcase-top-bar";
@@ -13,6 +13,12 @@ import type { ChartBrushRange, NQMarkEvent } from "@nqlib/nqchart";
 import type { CheckStatus } from "../nqchart/lab/probe-types";
 import type { PageSink } from "../nqchart/lab/use-case-probe";
 import { CURRENT_RELEASE, whatsNewIds } from "../nqchart/lab/whats-new";
+import {
+  startImportWarningCapture,
+  stopImportWarningCapture,
+  subscribeImportWarnings,
+} from "../nqchart/lab/capture-import-warnings";
+import { isIsolatedFamily } from "../nqchart/lab/families/ids";
 import "../components/landing/landing.css";
 import "../components/blocks/blocks.css";
 import "./charts-page.css";
@@ -53,7 +59,34 @@ export function ChartsLabPage() {
     return LAB_GROUPS.find((g) => g.toLowerCase() === wanted) ?? null;
   }, []);
 
-  const groups = only ? [only] : LAB_GROUPS;
+  /**
+   * `?family=heatmap` (also calendar, radar, funnel) mounts that family alone.
+   * Those four register extras no other chart loads — a full-page run cannot
+   * stand in for that smoke test.
+   */
+  const family = useMemo(() => {
+    const raw = new URLSearchParams(window.location.search).get("family");
+    if (!raw) return null;
+    const wanted = raw.toLowerCase();
+    return isIsolatedFamily(wanted) ? wanted : null;
+  }, []);
+
+  const groups = family ? (["Modules"] as const) : only ? [only] : LAB_GROUPS;
+
+  useLayoutEffect(() => {
+    startImportWarningCapture();
+    const unsub = subscribeImportWarnings((msg) => {
+      setEvents((prev) =>
+        prev.importWarnings.includes(msg)
+          ? prev
+          : { ...prev, importWarnings: [...prev.importWarnings, msg] },
+      );
+    });
+    return () => {
+      unsub();
+      stopImportWarningCapture();
+    };
+  }, []);
 
   const onMarkClick = useCallback((event: NQMarkEvent) => {
     setEvents((prev) => ({
@@ -76,8 +109,14 @@ export function ChartsLabPage() {
   }, []);
 
   const sink: PageSink = useMemo(
-    () => ({ onMarkClick, onLegendSelect, onBrushChange, setExportNote }),
-    [onMarkClick, onLegendSelect, onBrushChange, setExportNote],
+    () => ({
+      onMarkClick,
+      onLegendSelect,
+      onBrushChange,
+      setExportNote,
+      importWarnings: events.importWarnings,
+    }),
+    [onMarkClick, onLegendSelect, onBrushChange, setExportNote, events.importWarnings],
   );
 
   const onStatus = useCallback((id: string, status: CheckStatus) => {
@@ -86,12 +125,16 @@ export function ChartsLabPage() {
 
   // Counts follow what is on screen: reporting "3 / 34" while filtered to one
   // group would read as a catastrophic run rather than a focused one.
-  const shown = only ? LAB_CASES.filter((c) => c.group === only) : LAB_CASES;
+  const shown = family
+    ? LAB_CASES.filter((c) => c.id === `modules.${family}-extras`)
+    : only
+      ? LAB_CASES.filter((c) => c.group === only)
+      : LAB_CASES;
   const total = shown.length;
   const passed = shown.filter((c) => statuses[c.id] === "pass").length;
   const failed = shown.filter((c) => statuses[c.id] === "fail").length;
   const pendingCount = total - passed - failed;
-  const gateOpen = passed === total && !only;
+  const gateOpen = passed === total && !only && !family;
 
   return (
     <div className="fl-page">
@@ -150,10 +193,12 @@ export function ChartsLabPage() {
                   : "border-border bg-muted text-muted-foreground",
               )}
             >
-              {only
+              {family
+                ? `filtered to family=${family} — not a full run`
+                : only
                 ? `filtered to ${only} — not a full run`
                 : gateOpen
-                  ? `release gate open — nqchart ${CURRENT_RELEASE} may publish`
+                  ? `lab green — @nqlib/nqchart@${CURRENT_RELEASE}`
                   : `release gate closed — ${failed ? `${failed} failing` : `${pendingCount} unproven`}`}
             </p>
           </div>
@@ -180,12 +225,12 @@ export function ChartsLabPage() {
 
         <div className="mt-12 space-y-14">
           {groups.map((group) => {
-            const cases = LAB_CASES.filter((c) => c.group === group);
+            const cases = shown.filter((c) => c.group === group);
             if (cases.length === 0) return null;
             return (
               <section key={group} className="space-y-4">
                 <h2 className="text-lg font-semibold tracking-tight">{group}</h2>
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid gap-4 lg:grid-cols-2">
                   {cases.map((c) => (
                     <LabCaseCard
                       key={c.id}
@@ -204,9 +249,14 @@ export function ChartsLabPage() {
         <p className="mt-16 max-w-[70ch] font-mono text-xs leading-relaxed text-muted-foreground">
           Charts mount as you scroll to them. Append{" "}
           <code className="text-foreground">?eager=1</code> to mount all{" "}
-          {LAB_CASES.length} at once, and{" "}
-          <code className="text-foreground">?only={LAB_GROUPS[0]}</code> to work through a
-          single group. Repeat the page in dark mode and with OS reduced motion on.
+          {LAB_CASES.length} at once,{" "}
+          <code className="text-foreground">?only={LAB_GROUPS[0]}</code> to work
+          through a single group, or{" "}
+          <code className="text-foreground">?family=heatmap</code> (calendar,
+          radar, funnel) for an isolated extras smoke. Clicks must be a real
+          pointer on the canvas — a synthetic <code className="text-foreground">click</code>{" "}
+          alone does not reach ECharts. Repeat the page in dark mode and with OS
+          reduced motion on.
         </p>
       </div>
     </div>

@@ -20,7 +20,7 @@ type NQMarkEvent = {
 };
 ```
 
-- Series ECharts `id` is the `dataKey`. The click mapper prefers `seriesId`, then a reverse-map from the display label.
+- Series ECharts `id` is the `dataKey`. When composed Area + Line share a key, the second id is `${dataKey}__nq_<kind>` and `seriesKey` still strips to the dataKey. The click mapper prefers `seriesId`, then a reverse-map from the display label.
 - Empty plot and `null` datums must **not** fire.
 - No handler → no pointer cursor on marks.
 - Shift / meta / alt / ctrl land on `modifiers` so the host can add-to-filter without a second API.

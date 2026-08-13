@@ -16,7 +16,7 @@ import type { ChartConfig, NQMarkEvent, ChartHandle } from "@nqlib/nqchart";
 import { binForHistogram, prepareParetoData } from "@nqlib/nqchart/recipes";
 ```
 
-Current line: **0.3.0**.
+Current line: **0.3.1**.
 
 ## Config keys = series ids
 
@@ -27,9 +27,9 @@ const config = {
 } satisfies ChartConfig;
 ```
 
-`<Bar dataKey="plan" />` → `onMarkClick` `seriesKey` is `"plan"`, not `"Plan"`.
+`<Bar dataKey="plan" />` → `onMarkClick` `seriesKey` is `"plan"`, not `"Plan"`. Area + Line may share a `dataKey` (fill under the line); `seriesKey` stays that key.
 
-## BI props (0.3.0)
+## BI props (0.3.0+)
 
 | Prop | Where | Does |
 |------|--------|------|

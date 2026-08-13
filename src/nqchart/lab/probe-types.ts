@@ -112,6 +112,11 @@ export type CaseEvidence = {
   brushPlotted: number[];
   arrowKeys: number;
   exportSample: ExportSample | null;
+  /**
+   * ECharts `is used but not imported` messages captured on this page.
+   * Page-level — a warning from any chart fails every case that reads this.
+   */
+  importWarnings: string[];
 
   reducedMotion: boolean;
   /** Bumped by the Re-run button so checks re-read the option. */
@@ -125,6 +130,10 @@ export type EChartsOptionLike = {
   yAxis?: AxisLike[];
   legend?: LegendLike[];
   dataZoom?: DataZoomLike[];
+  calendar?: unknown;
+  visualMap?: unknown;
+  radar?: unknown;
+  polar?: unknown;
   animation?: boolean;
   animationDuration?: number | ((idx: number) => number);
   [key: string]: unknown;

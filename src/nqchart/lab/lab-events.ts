@@ -6,6 +6,7 @@ export type LabEventState = {
   legend: string | null;
   brush: ChartBrushRange | null;
   exportNote: string | null;
+  importWarnings: string[];
 };
 
 export const INITIAL_LAB_EVENTS: LabEventState = {
@@ -14,6 +15,7 @@ export const INITIAL_LAB_EVENTS: LabEventState = {
   legend: null,
   brush: null,
   exportNote: null,
+  importWarnings: [],
 };
 
 export type LabEventApi = {

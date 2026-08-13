@@ -77,6 +77,25 @@ export function dataZoomsOf(option: EChartsOptionLike | null) {
   return Array.isArray(z) ? z : [z];
 }
 
+/** True when the compiled option actually carries the key — `undefined` counts. */
+export function optionHasKey(option: EChartsOptionLike | null, key: string): boolean {
+  return Boolean(option) && Object.prototype.hasOwnProperty.call(option, key);
+}
+
+/**
+ * A specialty component is present when the key exists and is not an empty
+ * placeholder. ECharts `getOption()` sometimes materialises `[]` for unused
+ * components; that is not "the family compiled this extra".
+ */
+export function hasCompiledComponent(option: EChartsOptionLike | null, key: string): boolean {
+  if (!optionHasKey(option, key)) return false;
+  const value = option![key];
+  if (value == null) return false;
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === "object") return Object.keys(value as object).length > 0;
+  return true;
+}
+
 /** Series the library synthesises for reference lines / bands. */
 export function isReferenceSeries(s: SeriesLike): boolean {
   const id = typeof s.id === "string" ? s.id : "";

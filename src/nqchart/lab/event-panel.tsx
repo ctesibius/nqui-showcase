@@ -36,6 +36,18 @@ export function LabEventPanel({ state }: { state: LabEventState }) {
           <dt className="text-muted-foreground">export</dt>
           <dd className="truncate text-foreground">{state.exportNote ?? "—"}</dd>
         </div>
+        <div className="min-w-0 sm:col-span-2">
+          <dt className="text-muted-foreground">import warnings</dt>
+          <dd
+            className={
+              state.importWarnings.length > 0 ? "text-destructive" : "text-foreground"
+            }
+          >
+            {state.importWarnings.length > 0
+              ? state.importWarnings[0]
+              : "— none —"}
+          </dd>
+        </div>
       </dl>
     </section>
   );

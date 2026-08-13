@@ -9,6 +9,7 @@ Next id = highest `NNN` below + 1. Add a row when you create a plan; keep **Stat
 | # | Plan | Category | Effort | Status |
 |---|------|----------|--------|--------|
 | 001 | [NQChart BI feature lab (`/charts/lab`)](001-nqchart-bi-feature-lab.md) | charts / testing | M | DONE |
+| 002 | [Lab checks for nqchart 0.3.1 (modules + PNG-only)](002-nqchart-lab-modules.md) | charts / testing | S | DONE |
 
 Executors: update Status to IN-PROGRESS / DONE / BLOCKED (with a one-line reason) as you work.
 
@@ -18,6 +19,7 @@ This repo is a **consumer**. A plan here often waits on a library plan:
 
 ```
 becocharts 014 (interaction props consumable)  ──►  showcase 001 (BI feature lab)
+becocharts 016 (per-family ECharts modules)    ──►  showcase 002 (lab module checks)
 ```
 
 Library work is tracked in `../becocharts/plans/`. When a plan here is blocked on one, name

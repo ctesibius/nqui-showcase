@@ -6,7 +6,7 @@
  * A pill shows only while `NEW_IN[id] === CURRENT_RELEASE`. Bump CURRENT_RELEASE
  * to retire last release's pills automatically.
  */
-export const CURRENT_RELEASE = "0.3.0";
+export const CURRENT_RELEASE = "0.3.1";
 
 export const NEW_IN: Record<string, string> = {
   "interaction.composed-mark-click": "0.3.0",
@@ -33,6 +33,16 @@ export const NEW_IN: Record<string, string> = {
   "a11y.table": "0.3.0",
   "a11y.reduced-motion": "0.3.0",
   "export.to-data-url": "0.3.0",
+  "modules.not-imported": "0.3.1",
+  "modules.cartesian-omits-zoom": "0.3.1",
+  "modules.heatmap-extras": "0.3.1",
+  "modules.calendar-extras": "0.3.1",
+  "modules.radar-extras": "0.3.1",
+  "modules.funnel-extras": "0.3.1",
+  "modules.brush-mini": "0.3.1",
+  "a11y.pie-table": "0.3.1",
+  "composition.dashed-line": "0.3.1",
+  "composition.shared-datakey": "0.3.1",
 };
 
 export function isNew(id: string): boolean {

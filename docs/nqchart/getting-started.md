@@ -11,7 +11,7 @@
 pnpm add @nqlib/nqchart echarts motion
 ```
 
-Current line: **0.3.0**.
+Current line: **0.3.1**.
 
 Optional: try the same flow on the live lab at [**/charts/lab**](/charts/lab). The gallery at [**/charts**](/charts) only proves drawing.
 
