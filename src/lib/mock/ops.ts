@@ -8,12 +8,14 @@ export { Q3_TASKS as TASKS } from "@/lib/pm/fixtures/q3-tasks";
 
 import { Q3_SEED_TODAY, Q3_TASKS } from "@/lib/pm/fixtures/q3-tasks";
 import { shiftToNow } from "@/lib/pm/calendar";
+import { patchPmIssueField } from "@/lib/pm/status-progress-sync";
 import type { PmIssue as Task } from "@/lib/pm/types";
 
 const q3Date = (iso: string) => shiftToNow(iso, { seedToday: Q3_SEED_TODAY });
 
+/** Commit a raw scalar; status/progress go through {@link patchPmIssueField}. */
 export function setTaskValue(task: Task, columnId: string, raw: unknown): Task {
-  return { ...(task as unknown as Record<string, unknown>), [columnId]: raw } as Task;
+  return patchPmIssueField(task, columnId, raw);
 }
 
 export const DEFAULT_STATUS_OPTIONS = [

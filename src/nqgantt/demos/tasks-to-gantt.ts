@@ -21,7 +21,12 @@ const SHOWCASE_STATUSES: PMStatus[] = Q3_STATUS_OPTIONS.map((o) => ({
   color: o.color ?? "var(--muted-foreground)",
 }));
 
-const SHOWCASE_DEPENDENCIES: GanttDependency[] = Q3_SCHEDULE.dependencies;
+const SHOWCASE_DEPENDENCIES: GanttDependency[] = Q3_SCHEDULE.dependencies.map((d) => ({
+  fromId: d.fromId,
+  toId: d.toId,
+  type: d.type,
+  lag: d.lag,
+}));
 
 export type FeatureHealth = "on-track" | "at-risk" | "off-track";
 

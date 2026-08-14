@@ -1,6 +1,7 @@
 /**
  * Bridge PmIssue[] + PmSchedule → nqgantt via existing tasks-to-gantt helpers.
  */
+import type { GanttDependency } from "@nqlib/nqgantt";
 import type { GanttRootData } from "@nqlib/nqgantt/ui";
 import {
   tasksToGanttRootData,
@@ -8,7 +9,17 @@ import {
   type TasksToGanttOptions,
 } from "@/nqgantt/demos/tasks-to-gantt";
 import { withParentIds } from "@/nqgantt/demos/gantt-tree-groups";
-import type { PmIssue, PmSchedule } from "../types";
+import type { PmDependency, PmIssue, PmSchedule } from "../types";
+
+function toGanttDependencies(deps: PmDependency[] | undefined): GanttDependency[] | undefined {
+  if (!deps) return undefined;
+  return deps.map((d) => ({
+    fromId: d.fromId,
+    toId: d.toId,
+    type: d.type,
+    lag: d.lag,
+  }));
+}
 
 export function scheduleToGanttOptions(issues: PmIssue[], schedule?: PmSchedule): TasksToGanttOptions {
   const laneById = new Map<string, string>();
@@ -28,7 +39,7 @@ export function scheduleToGanttOptions(issues: PmIssue[], schedule?: PmSchedule)
   }
 
   return {
-    dependencies: schedule?.dependencies as TasksToGanttOptions["dependencies"],
+    dependencies: toGanttDependencies(schedule?.dependencies),
     statuses: schedule?.statuses?.map((s) => ({
       id: s.id,
       name: s.name,

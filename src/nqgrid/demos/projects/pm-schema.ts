@@ -11,6 +11,7 @@ import {
   type SelectOption,
 } from "@nqlib/nqgrid/engine";
 import { Q3_TASKS } from "@/lib/pm/fixtures/q3-tasks";
+import { patchPmIssueField } from "@/lib/pm/status-progress-sync";
 import { TEAM, TEAM_BY_ID } from "@/lib/pm/team";
 import type { PmIssue as Task, PmPerson as Person } from "@/lib/pm/types";
 
@@ -114,5 +115,5 @@ export function taskValue(task: Task, columnId: string): unknown {
 
 /** Commit a raw scalar back onto a task row (editors write ids, never labels). */
 export function setTaskValue(task: Task, columnId: string, raw: unknown): Task {
-  return { ...(task as unknown as Record<string, unknown>), [columnId]: raw } as Task;
+  return patchPmIssueField(task, columnId, raw);
 }

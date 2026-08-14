@@ -182,7 +182,7 @@ export function GanttShowcasePanel({ className }: { className?: string }) {
             tasks={tasks}
             onTasksChange={setTasks}
             grouped={false}
-            visibleColumnIds={["tasks", "status", "timeline", "duration", "priority", "progress"]}
+            visibleColumnIds={["tasks", "status", "timeline", "duration", "priority", "progress", "c:remaining-pct"]}
           />
         );
       case "gantt-demo":

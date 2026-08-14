@@ -13,12 +13,17 @@
 import { getDefaultColumnDefs } from "@nqlib/nqgantt";
 import type { GanttSidebarColumnDef, GanttColumnOption } from "@nqlib/nqgantt";
 import { DEFAULT_STATUS_OPTIONS, TEAM, type Task } from "../../lib/mock/ops";
+import { PRIORITY_OPTIONS as PM_PRIORITY_OPTIONS } from "../../nqgrid/demos/projects/pm-schema";
 
-export const PRIORITY_OPTIONS: GanttColumnOption[] = [
-  { id: "low", label: "Low", color: "oklch(0.72 0.15 150)", order: 0 },
-  { id: "medium", label: "Medium", color: "oklch(0.78 0.16 85)", order: 1 },
-  { id: "high", label: "High", color: "oklch(0.65 0.20 25)", order: 2 },
-];
+/** Same ids/colors as the projects board (`low` / `med` / `high`). */
+export const PRIORITY_OPTIONS: GanttColumnOption[] = PM_PRIORITY_OPTIONS.map(
+  (o) => ({
+    id: o.id,
+    label: o.label,
+    color: o.color,
+    order: o.order,
+  }),
+);
 
 const STATUS_OPTIONS: GanttColumnOption[] = DEFAULT_STATUS_OPTIONS.map(o => ({
   id: o.id,
@@ -90,11 +95,13 @@ export function buildRoadmapColumnDefs(editable: boolean): GanttSidebarColumnDef
         extras.editVariant = "select";
         break;
       case "progress":
+        // Percent collapsed into Number: 0–100 with % unit + progress meter.
         extras.editVariant = "slider";
         extras.cellVariant = "progress-bar";
-        extras.valueType = "percentage";
+        extras.valueType = "number";
         extras.min = 0;
         extras.max = 100;
+        extras.unit = "%";
         break;
       case "effort":
         extras.editVariant = "number-with-unit";

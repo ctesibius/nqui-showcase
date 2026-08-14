@@ -3,6 +3,7 @@ export type {
   PmSchedule,
   PmStatusOption,
   PmDependency,
+  PmDependencyType,
   PmMarker,
   PmPerson,
   PmPriority,
@@ -23,6 +24,15 @@ export {
   isoToday,
   shiftToNow,
 } from "./calendar";
+
+export {
+  applyStatusProgressSync,
+  patchPmIssueField,
+  type StatusProgressChange,
+  type StatusProgressFields,
+  type StatusProgressSyncDirection,
+  type StatusProgressSyncOptions,
+} from "./status-progress-sync";
 
 export {
   CAMPAIGN_ISSUES,

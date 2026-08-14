@@ -116,7 +116,6 @@ export function TimelineLabBlock({ className }: { className?: string }) {
           tasks={CAMPAIGN_ISSUES}
           scheduleOptions={toGanttOptions(CAMPAIGN_ISSUES, CAMPAIGN_SCHEDULE)}
           groupByFeatures={groupCampaignByLane}
-          grouped={features.grouped}
           colorBy={features.colorBy}
           density={features.density}
           defaultRange={features.range}

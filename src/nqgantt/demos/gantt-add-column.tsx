@@ -30,32 +30,65 @@ import {
   GANTT_COLUMN_TYPES,
   OPTION_COLORS,
   catalogEntry,
+  draftFormulaExpression,
   draftIsValid,
   draftToColumnDef,
   emptyDraft,
   type CatalogGroup,
   type ColumnDraft,
 } from "./gantt-column-catalog";
+import {
+  listFormulaLinkables,
+  type FormulaColumnSetting,
+  type FormulaVarInfo,
+} from "./gantt-formula-column";
+import { FormulaExpressionInput } from "./gantt-formula-expression-input";
 
 const GROUP_ORDER: CatalogGroup[] = ["basic", "people", "advanced"];
 
+export type GanttAddColumnMeta = {
+  /** Present when the new column is a host formula (expression → project settings). */
+  formulaExpression?: string;
+};
+
 export function GanttAddColumnButton({
   existingIds,
+  columnDefs,
+  formulaSettings = [],
+  formulaLinkables,
   onAdd,
 }: {
   existingIds: readonly string[];
-  onAdd: (def: GanttSidebarColumnDef) => void;
+  /** Current sidebar defs — used to discover custom number fields for formulas. */
+  columnDefs?: readonly GanttSidebarColumnDef[];
+  formulaSettings?: readonly FormulaColumnSetting[];
+  formulaLinkables?: readonly FormulaVarInfo[];
+  onAdd: (def: GanttSidebarColumnDef, meta?: GanttAddColumnMeta) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<ColumnDraft>(() => emptyDraft());
   const entry = catalogEntry(draft.typeId);
   const valid = draftIsValid(draft);
 
+  const linkables = useMemo(
+    () =>
+      formulaLinkables ??
+      listFormulaLinkables({
+        columnDefs: columnDefs ?? [],
+        formulaSettings,
+      }),
+    [formulaLinkables, columnDefs, formulaSettings],
+  );
+
   const grouped = useMemo(
     () =>
       GROUP_ORDER.map(g => ({
         group: g,
-        entries: GANTT_COLUMN_TYPES.filter(e => e.group === g),
+        // Hide legacy Percent (collapsed into Number) and other retired ids
+        // rather than showing a "soon" chip for a type that will never return.
+        entries: GANTT_COLUMN_TYPES.filter(
+          e => e.group === g && e.id !== "percent",
+        ),
       })).filter(g => g.entries.length > 0),
     [],
   );
@@ -64,7 +97,11 @@ export function GanttAddColumnButton({
 
   const create = () => {
     if (!valid) return;
-    onAdd(draftToColumnDef(draft, existingIds));
+    const expression = draftFormulaExpression(draft);
+    onAdd(
+      draftToColumnDef(draft, existingIds),
+      expression ? { formulaExpression: expression } : undefined,
+    );
     setDraft(emptyDraft());
     setOpen(false);
   };
@@ -108,7 +145,7 @@ export function GanttAddColumnButton({
               <div className="flex flex-wrap gap-1">
                 {grouped.map(({ group, entries }) => (
                   <div key={group} className="w-full">
-                    <p className="mb-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                    <p className="mb-1 text-xs uppercase tracking-wider text-muted-foreground">
                       {CATALOG_GROUP_LABELS[group]}
                     </p>
                     <div className="mb-1.5 flex flex-wrap gap-1">
@@ -119,7 +156,7 @@ export function GanttAddColumnButton({
                           disabled={!e.available}
                           onClick={() => setDraft(emptyDraft(e.id))}
                           className={cn(
-                            "rounded-md border px-2 py-1 text-[11px] transition-colors",
+                            "rounded-md border px-2 py-1 text-xs transition-colors",
                             draft.typeId === e.id
                               ? "border-primary bg-primary/10 text-foreground"
                               : "border-border hover:bg-accent",
@@ -128,7 +165,7 @@ export function GanttAddColumnButton({
                         >
                           {e.label}
                           {!e.available ? (
-                            <Badge variant="outline" className="ml-1 text-[9px]">
+                            <Badge variant="outline" className="ml-1 text-xs">
                               soon
                             </Badge>
                           ) : null}
@@ -139,7 +176,7 @@ export function GanttAddColumnButton({
                 ))}
               </div>
               {entry ? (
-                <p className="text-[11px] leading-snug text-muted-foreground">
+                <p className="text-xs leading-snug text-muted-foreground">
                   {entry.description}
                 </p>
               ) : null}
@@ -152,7 +189,16 @@ export function GanttAddColumnButton({
                   <Label className="text-xs">Shows as</Label>
                   <Select
                     value={draft.cellVariant ?? entry.cellVariant ?? ""}
-                    onValueChange={v => patch({ cellVariant: v as ColumnDraft["cellVariant"] })}
+                    onValueChange={v => {
+                      const cellVariant = v as ColumnDraft["cellVariant"]
+                      const next: Partial<ColumnDraft> = { cellVariant }
+                      // Progress meter defaults to a 0–100 scale when bounds unset.
+                      if (cellVariant === "progress-bar") {
+                        if (draft.min == null) next.min = 0
+                        if (draft.max == null) next.max = 100
+                      }
+                      patch(next)
+                    }}
                   >
                     <SelectTrigger className="h-8 text-xs">
                       <SelectValue />
@@ -174,7 +220,15 @@ export function GanttAddColumnButton({
                 <Label className="text-xs">Edits with</Label>
                 <Select
                   value={draft.editVariant ?? entry.editVariant}
-                  onValueChange={v => patch({ editVariant: v as ColumnDraft["editVariant"] })}
+                  onValueChange={v => {
+                    const editVariant = v as ColumnDraft["editVariant"]
+                    const next: Partial<ColumnDraft> = { editVariant }
+                    if (editVariant === "slider") {
+                      if (draft.min == null) next.min = 0
+                      if (draft.max == null) next.max = 100
+                    }
+                    patch(next)
+                  }}
                 >
                   <SelectTrigger className="h-8 text-xs">
                     <SelectValue />
@@ -193,7 +247,7 @@ export function GanttAddColumnButton({
             {entry?.valueType === "number" || entry?.valueType === "percentage" ? (
               <div className="grid grid-cols-3 gap-2">
                 <div className="space-y-1">
-                  <Label className="text-[11px]">Unit</Label>
+                  <Label className="text-xs">Unit</Label>
                   <Input
                     value={draft.unit ?? ""}
                     placeholder="h, $"
@@ -202,7 +256,7 @@ export function GanttAddColumnButton({
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-[11px]">Min</Label>
+                  <Label className="text-xs">Min</Label>
                   <Input
                     type="number"
                     value={draft.min ?? ""}
@@ -213,7 +267,7 @@ export function GanttAddColumnButton({
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-[11px]">Max</Label>
+                  <Label className="text-xs">Max</Label>
                   <Input
                     type="number"
                     value={draft.max ?? ""}
@@ -226,11 +280,28 @@ export function GanttAddColumnButton({
               </div>
             ) : null}
 
-            {entry?.needsOptions ? (
+            {draft.typeId === "formula" ? (
+              <div className="space-y-1.5">
+                <Label className="text-xs">Expression</Label>
+                <FormulaExpressionInput
+                  value={draft.expression ?? ""}
+                  onChange={expression => patch({ expression })}
+                  linkables={linkables}
+                  placeholder="100 - progress"
+                />
+              </div>
+            ) : null}
+
+            {entry?.needsOptions ||
+            entry?.valueType === "tags" ||
+            entry?.valueType === "people" ? (
               <>
                 <Separator />
                 <OptionsEditor
                   options={draft.options}
+                  allowEmpty={
+                    entry?.valueType === "tags" || entry?.valueType === "people"
+                  }
                   onChange={options => patch({ options })}
                 />
               </>
@@ -281,9 +352,11 @@ const VARIANT_LABELS: Record<string, string> = {
 function OptionsEditor({
   options,
   onChange,
+  allowEmpty = false,
 }: {
   options: ColumnDraft["options"];
   onChange: (next: ColumnDraft["options"]) => void;
+  allowEmpty?: boolean;
 }) {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
 
@@ -303,7 +376,7 @@ function OptionsEditor({
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
         <Label className="text-xs">Options</Label>
-        <span className="text-[10px] text-muted-foreground">drag to set order</span>
+        <span className="text-xs text-muted-foreground">drag to set order</span>
       </div>
       {options.map((opt, i) => (
         <div
@@ -321,7 +394,7 @@ function OptionsEditor({
             dragIndex === i && "opacity-50",
           )}
         >
-          <span aria-hidden className="cursor-grab px-0.5 text-[10px] text-muted-foreground">
+          <span aria-hidden className="cursor-grab px-0.5 text-xs text-muted-foreground">
             ⠿
           </span>
           <button
@@ -348,7 +421,7 @@ function OptionsEditor({
             variant="ghost"
             className="h-6 w-6 shrink-0 p-0 text-xs"
             aria-label={`Remove ${opt.label}`}
-            disabled={options.length <= 1}
+            disabled={!allowEmpty && options.length <= 1}
             onClick={() => onChange(options.filter((_, j) => j !== i))}
           >
             ×

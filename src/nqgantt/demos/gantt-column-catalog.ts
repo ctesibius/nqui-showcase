@@ -65,7 +65,8 @@ export const GANTT_COLUMN_TYPES: GanttColumnTypeEntry[] = [
   {
     id: "number",
     label: "Number",
-    description: "Numeric value with an optional unit. Sorts and filters by range.",
+    description:
+      "Numeric value with optional unit and bounds. Use min 0 / max 100 and unit % for percent-style fields; show as a progress bar or edit with a slider.",
     group: "basic",
     available: true,
     valueType: "number",
@@ -75,24 +76,30 @@ export const GANTT_COLUMN_TYPES: GanttColumnTypeEntry[] = [
     editVariants: ["number-with-unit", "number", "slider"],
     defaults: { minWidth: 110 },
   },
+  /**
+   * Legacy catalog id — Percent collapsed into Number. Hidden from the add-
+   * column picker (`available: false` + filtered out); `draftToColumnDef`
+   * still resolves it to a number 0–100 / progress-bar preset so old drafts
+   * and deep-links do not break.
+   */
   {
     id: "percent",
     label: "Percent",
-    description: "0–100 value. Draws as a bar, edits as a slider.",
+    description: "Use Number with min 0, max 100, and unit %.",
     group: "basic",
-    available: true,
-    valueType: "percentage",
+    available: false,
+    valueType: "number",
     cellVariant: "progress-bar",
     editVariant: "slider",
     cellVariants: ["progress-bar", "number-with-unit"],
-    editVariants: ["slider", "number"],
-    defaults: { min: 0, max: 100, step: 1, minWidth: 120 },
+    editVariants: ["slider", "number", "number-with-unit"],
+    defaults: { min: 0, max: 100, step: 1, unit: "%", minWidth: 120 },
   },
   {
     id: "select",
     label: "Select",
     description:
-      "Closed set of options. Cells store the option id — rename or recolor once and every row follows.",
+      "Closed set of options. Cells store the option id — rename or recolor once and every row follows. Not creatable from the cell (Configure adds options); orphan ids still merge into the list if somehow committed.",
     group: "basic",
     available: true,
     valueType: "status",
@@ -130,7 +137,8 @@ export const GANTT_COLUMN_TYPES: GanttColumnTypeEntry[] = [
   {
     id: "tags",
     label: "Tags",
-    description: "Multiple free-form labels on one row.",
+    description:
+      "Multiple labels on one row. New tags join the column’s option set (reusable across rows).",
     group: "basic",
     available: true,
     valueType: "tags",
@@ -138,13 +146,15 @@ export const GANTT_COLUMN_TYPES: GanttColumnTypeEntry[] = [
     editVariant: "tag-input",
     cellVariants: ["badge-list"],
     editVariants: ["tag-input"],
+    /** Options grow as tags are created — seed empty so the def always has a list. */
+    needsOptions: false,
     defaults: { minWidth: 160 },
   },
   {
     id: "people",
     label: "People",
     description:
-      "Team members, drawn as an avatar stack. Independent of the built-in assignees — name it Observer, Reviewer, Approver.",
+      "Team members, drawn as an avatar stack. Independent of the built-in assignees — name it Observer, Reviewer, Approver. Picker = column options ∪ workspace directory; new names join the column’s option set.",
     group: "people",
     available: true,
     valueType: "people",
@@ -166,12 +176,17 @@ export const GANTT_COLUMN_TYPES: GanttColumnTypeEntry[] = [
   },
   {
     id: "formula",
+    // Host-evaluated — expression lives in mock/project formula settings.
     label: "Formula",
-    description: "Derived from other columns. Read-only by definition.",
+    description:
+      "Read-only computed column. Expression is stored in project settings and evaluated host-side (e.g. 100 - progress, 100 + duration). Links progress, effort, budget, duration, and custom number fields. Engine does not parse formulas.",
     group: "advanced",
-    available: false,
+    available: true,
     valueType: "number",
+    cellVariant: "number-with-unit",
     editVariant: "number",
+    cellVariants: ["number-with-unit", "progress-bar"],
+    defaults: { minWidth: 120, editable: false },
   },
   {
     id: "relation",
@@ -212,6 +227,8 @@ export interface ColumnDraft {
   unit?: string;
   min?: number;
   max?: number;
+  /** Formula columns only — host-evaluated expression (see gantt-formula-column.ts). */
+  expression?: string;
   options: GanttColumnOption[];
 }
 
@@ -238,9 +255,10 @@ export function emptyDraft(typeId = "text"): ColumnDraft {
     typeId,
     cellVariant: entry?.cellVariant,
     editVariant: entry?.editVariant,
-    unit: undefined,
+    unit: entry?.defaults?.unit,
     min: entry?.defaults?.min,
     max: entry?.defaults?.max,
+    expression: typeId === "formula" ? "100 - progress" : undefined,
     options: seedOptions(entry),
   };
 }
@@ -248,11 +266,29 @@ export function emptyDraft(typeId = "text"): ColumnDraft {
 /** A select-like column with no options can never hold a value — refuse it. */
 export function draftIsValid(draft: ColumnDraft): boolean {
   const entry = catalogEntry(draft.typeId);
-  if (!entry?.available) return false;
+  if (!entry) return false;
+  // Legacy percent is hidden from the picker but still a valid create path
+  // (emits Number 0–100 via draftToColumnDef).
+  if (!entry.available && draft.typeId !== "percent") return false;
   if (!draft.label.trim()) return false;
   if (entry.needsOptions && draft.options.length === 0) return false;
   return true;
 }
+
+/**
+ * Former Percent catalog type → Number 0–100 with progress/slider defaults.
+ * Kept so callers that still pass `typeId: "percent"` get a number column.
+ */
+export const PERCENT_NUMBER_PRESET: Partial<GanttSidebarColumnDef> = {
+  valueType: "number",
+  cellVariant: "progress-bar",
+  editVariant: "slider",
+  min: 0,
+  max: 100,
+  step: 1,
+  unit: "%",
+  minWidth: 120,
+};
 
 /** Turn a draft into a column def. Ids are `c:`-prefixed like SecoLab's. */
 export function draftToColumnDef(
@@ -264,23 +300,40 @@ export function draftToColumnDef(
   let id = `c:${slug || "field"}`;
   for (let n = 2; existingIds.includes(id); n++) id = `c:${slug}-${n}`;
 
+  // Percent is no longer a value type in the catalog — emit number 0–100.
+  const percentAlias = draft.typeId === "percent";
+  const isFormula = draft.typeId === "formula";
+  const defaults = percentAlias
+    ? { ...entry.defaults, ...PERCENT_NUMBER_PRESET }
+    : entry.defaults;
+
   return {
-    ...entry.defaults,
+    ...defaults,
     id,
     type: "custom",
     label: draft.label.trim(),
     dataKey: id.slice(2),
-    valueType: entry.valueType,
+    valueType: percentAlias ? "number" : entry.valueType,
     cellVariant: draft.cellVariant ?? entry.cellVariant,
-    editVariant: draft.editVariant ?? entry.editVariant,
-    editable: true,
+    editVariant: isFormula ? undefined : draft.editVariant ?? entry.editVariant,
+    // Formulas are host-stamped — never cell-editable.
+    editable: isFormula ? false : true,
     sortable: true,
     filterable: true,
-    unit: draft.unit || undefined,
-    min: draft.min,
-    max: draft.max,
+    unit: draft.unit || defaults?.unit || undefined,
+    min: draft.min ?? defaults?.min,
+    max: draft.max ?? defaults?.max,
     options: entry.needsOptions
       ? draft.options.map((o, i) => ({ ...o, order: i }))
-      : undefined,
+      : entry.valueType === "tags"
+        ? (draft.options ?? []).map((o, i) => ({ ...o, order: i }))
+        : undefined,
   };
+}
+
+/** Expression captured at Add-column time for formula drafts. */
+export function draftFormulaExpression(draft: ColumnDraft): string | undefined {
+  if (draft.typeId !== "formula") return undefined;
+  const trimmed = draft.expression?.trim();
+  return trimmed || "100 - progress";
 }

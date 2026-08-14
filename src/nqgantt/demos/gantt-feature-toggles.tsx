@@ -5,6 +5,9 @@
  *   2) bar card chrome + sidebar columns + CP style
  *   3) Demo→Root chrome (insights, legend, history/undo)
  *   4) Sidebar: WBS outline codes, multi-select, extra columns
+ *
+ * Group-by lives on the Gantt toolbar Select (Status / Assignee / None /
+ * custom select columns) — not duplicated here.
  */
 import {
   Toggle,
@@ -54,11 +57,12 @@ export const GANTT_LAB_COLUMN_IDS: GanttSidebarColumnId[] = [
   "duration",
   "status",
   "progress",
+  // Host formula column(s) from project settings — default Remaining % (editable).
+  "c:remaining-pct",
   "dependencies",
 ]
 
 export type GanttFeatureToggleState = {
-  grouped: boolean
   autoSchedule: boolean
   showCriticalPath: boolean
   criticalPathStyle: GanttCriticalPathStyle
@@ -80,7 +84,6 @@ export type GanttFeatureToggleState = {
 }
 
 export const GANTT_FEATURE_TOGGLE_DEFAULTS: GanttFeatureToggleState = {
-  grouped: true,
   autoSchedule: true,
   showCriticalPath: true,
   // Ring = crisp spine accent; float work dims (focus mode).
@@ -130,7 +133,7 @@ function Flag({
       pressed={pressed}
       onPressedChange={onPressedChange}
       title={title}
-      className="h-6 px-1.5 text-[10px] font-medium data-[state=on]:border-foreground/30 data-[state=on]:bg-foreground/5"
+      className="h-6 px-1.5 text-xs font-medium data-[state=on]:border-foreground/30 data-[state=on]:bg-foreground/5"
     >
       {children}
     </Toggle>
@@ -163,7 +166,7 @@ function Seg<T extends string>({
         <ToggleGroupItem
           key={o.id}
           value={o.id}
-          className="h-6 px-1.5 text-[10px]"
+          className="h-6 px-1.5 text-xs"
         >
           {o.label}
         </ToggleGroupItem>
@@ -181,7 +184,7 @@ function Row({
 }) {
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-      <span className="mr-1 shrink-0 font-mono text-[9px] tracking-[0.14em] text-muted-foreground uppercase">
+      <span className="mr-1 shrink-0 font-mono text-xs tracking-[0.14em] text-muted-foreground uppercase">
         {label}
       </span>
       {children}
@@ -227,13 +230,6 @@ export function GanttFeatureToggles({
     >
       {/* Sweep 1 — schedule + timeline chrome */}
       <Row label="Schedule">
-        <Flag
-          pressed={value.grouped}
-          onPressedChange={(v) => set("grouped", v)}
-          title="Group rows by lane"
-        >
-          Groups
-        </Flag>
         <Flag
           pressed={value.autoSchedule}
           onPressedChange={(v) => set("autoSchedule", v)}

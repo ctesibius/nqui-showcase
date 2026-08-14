@@ -1,4 +1,5 @@
 import type { KanbanColumns } from "@nqlib/nqui/dnd";
+import { applyStatusProgressSync } from "../status-progress-sync";
 import type { PmIssue, PmStatusOption } from "../types";
 import { PM_BOARD_STATUS_ORDER } from "../types";
 
@@ -51,7 +52,11 @@ export function issuesFromKanbanColumns(
       const issue = byId.get(id);
       if (!issue) continue;
       seen.add(id);
-      next.push(issue.status === status ? issue : { ...issue, status });
+      next.push(
+        issue.status === status
+          ? issue
+          : applyStatusProgressSync(issue, { status }),
+      );
     }
   }
   for (const issue of issues) {

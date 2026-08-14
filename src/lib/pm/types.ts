@@ -42,12 +42,20 @@ export type PmIssue = {
   isMilestone?: boolean;
   /** Parent issue id — Gantt WBS tree (`1` / `1.1` / `1.2`). */
   parentId?: string;
+  /**
+   * Host-authored custom column values (gantt `c:` fields, etc.).
+   * Bridged into `feature.customFields` by tasks-to-gantt.
+   */
+  custom?: Record<string, unknown>;
 };
+
+/** Dependency link types — aligned with `@nqlib/nqgantt` `GanttDependencyType`. */
+export type PmDependencyType = "FS" | "SS" | "FF" | "SF";
 
 export type PmDependency = {
   fromId: string;
   toId: string;
-  type: "FS" | "SS" | "FF" | "SF" | string;
+  type: PmDependencyType;
   lag?: number;
 };
 

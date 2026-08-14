@@ -35,12 +35,20 @@ import type {
   GanttSidebarColumnDef,
 } from "@nqlib/nqgantt";
 import { OPTION_COLORS } from "./gantt-column-catalog";
+import {
+  listFormulaLinkables,
+  type FormulaColumnSetting,
+  type FormulaVarInfo,
+} from "./gantt-formula-column";
+import { FormulaExpressionInput } from "./gantt-formula-expression-input";
 
 /** Display treatments a value type can legally take. */
 const CELL_VARIANTS_BY_VALUE: Record<string, GanttCellVariant[]> = {
   number: ["number-with-unit", "progress-bar"],
+  // Legacy valueType — same treatments as number (percent collapsed into number).
   percentage: ["progress-bar", "number-with-unit"],
   status: ["colored-pill", "badge"],
+  priority: ["colored-pill", "badge"],
   people: ["avatar-stack", "colored-pill"],
   tags: ["badge-list"],
   rating: ["star-rating"],
@@ -48,8 +56,9 @@ const CELL_VARIANTS_BY_VALUE: Record<string, GanttCellVariant[]> = {
 
 const EDIT_VARIANTS_BY_VALUE: Record<string, GanttEditVariant[]> = {
   number: ["number-with-unit", "number", "slider"],
-  percentage: ["slider", "number"],
+  percentage: ["slider", "number", "number-with-unit"],
   status: ["select"],
+  priority: ["select"],
   people: ["select"],
   tags: ["tag-input"],
   rating: ["star-picker"],
@@ -76,11 +85,26 @@ const VARIANT_LABELS: Record<string, string> = {
 
 export function GanttColumnConfigButton({
   columns,
+  formulaSettings = [],
+  formulaLinkables,
   onPatch,
+  onPatchFormula,
   onDelete,
 }: {
   columns: GanttSidebarColumnDef[];
+  /** Host formula settings keyed by column id (expression lives here, not on the def). */
+  formulaSettings?: readonly FormulaColumnSetting[];
+  /**
+   * Precomputed linkable vars (cores + custom numbers). When omitted, derived
+   * from `columns` + `formulaSettings`.
+   */
+  formulaLinkables?: readonly FormulaVarInfo[];
   onPatch: (id: string, patch: Partial<GanttSidebarColumnDef>) => void;
+  /** Update expression / formula chrome for a host formula column. */
+  onPatchFormula?: (
+    id: string,
+    patch: Partial<FormulaColumnSetting>,
+  ) => void;
   onDelete: (id: string) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -89,12 +113,25 @@ export function GanttColumnConfigButton({
     () => columns.find(c => c.id === selectedId) ?? columns[0],
     [columns, selectedId],
   );
+  const formulaSetting = useMemo(
+    () => formulaSettings.find(s => s.id === column?.id),
+    [formulaSettings, column?.id],
+  );
+  const linkables = useMemo(
+    () =>
+      formulaLinkables ??
+      listFormulaLinkables({ columnDefs: columns, formulaSettings }),
+    [formulaLinkables, columns, formulaSettings],
+  );
 
   if (!column) return null;
 
   const isCustom = column.id.startsWith("c:");
+  const isFormula = formulaSetting != null;
   const cellVariants = CELL_VARIANTS_BY_VALUE[column.valueType ?? ""] ?? [];
-  const editVariants = EDIT_VARIANTS_BY_VALUE[column.valueType ?? ""] ?? [];
+  const editVariants = isFormula
+    ? []
+    : (EDIT_VARIANTS_BY_VALUE[column.valueType ?? ""] ?? []);
   const numeric = column.valueType === "number" || column.valueType === "percentage";
 
   return (
@@ -120,7 +157,11 @@ export function GanttColumnConfigButton({
                 {columns.map(c => (
                   <SelectItem key={c.id} value={c.id} className="text-xs">
                     {c.label}
-                    {c.id.startsWith("c:") ? " ·  custom" : ""}
+                    {formulaSettings.some(s => s.id === c.id)
+                      ? " · formula"
+                      : c.id.startsWith("c:")
+                        ? " · custom"
+                        : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -133,17 +174,39 @@ export function GanttColumnConfigButton({
             <Label className="text-xs">Name</Label>
             <Input
               value={column.label}
-              onChange={e => onPatch(column.id, { label: e.target.value })}
+              onChange={e => {
+                const label = e.target.value;
+                onPatch(column.id, { label });
+                if (isFormula) onPatchFormula?.(column.id, { label });
+              }}
               className="h-8 text-xs"
             />
           </div>
+
+          {isFormula && formulaSetting ? (
+            <div className="space-y-1.5">
+              <Label className="text-xs">Expression</Label>
+              <FormulaExpressionInput
+                value={formulaSetting.expression}
+                onChange={expression =>
+                  onPatchFormula?.(column.id, { expression })
+                }
+                linkables={linkables}
+                placeholder="100 - progress"
+              />
+            </div>
+          ) : null}
 
           {cellVariants.length > 1 ? (
             <div className="space-y-1.5">
               <Label className="text-xs">Shows as</Label>
               <Select
                 value={column.cellVariant ?? cellVariants[0]}
-                onValueChange={v => onPatch(column.id, { cellVariant: v as GanttCellVariant })}
+                onValueChange={v => {
+                  const cellVariant = v as GanttCellVariant;
+                  onPatch(column.id, { cellVariant });
+                  if (isFormula) onPatchFormula?.(column.id, { cellVariant });
+                }}
               >
                 <SelectTrigger className="h-8 text-xs">
                   <SelectValue />
@@ -183,36 +246,42 @@ export function GanttColumnConfigButton({
           {numeric ? (
             <div className="grid grid-cols-3 gap-2">
               <div className="space-y-1">
-                <Label className="text-[11px]">Unit</Label>
+                <Label className="text-xs">Unit</Label>
                 <Input
                   value={column.unit ?? ""}
-                  onChange={e => onPatch(column.id, { unit: e.target.value || undefined })}
+                  onChange={e => {
+                    const unit = e.target.value || undefined;
+                    onPatch(column.id, { unit });
+                    if (isFormula) onPatchFormula?.(column.id, { unit });
+                  }}
                   className="h-7 text-xs"
                 />
               </div>
               <div className="space-y-1">
-                <Label className="text-[11px]">Min</Label>
+                <Label className="text-xs">Min</Label>
                 <Input
                   type="number"
                   value={column.min ?? ""}
-                  onChange={e =>
-                    onPatch(column.id, {
-                      min: e.target.value === "" ? undefined : Number(e.target.value),
-                    })
-                  }
+                  onChange={e => {
+                    const min =
+                      e.target.value === "" ? undefined : Number(e.target.value);
+                    onPatch(column.id, { min });
+                    if (isFormula) onPatchFormula?.(column.id, { min });
+                  }}
                   className="h-7 text-xs"
                 />
               </div>
               <div className="space-y-1">
-                <Label className="text-[11px]">Max</Label>
+                <Label className="text-xs">Max</Label>
                 <Input
                   type="number"
                   value={column.max ?? ""}
-                  onChange={e =>
-                    onPatch(column.id, {
-                      max: e.target.value === "" ? undefined : Number(e.target.value),
-                    })
-                  }
+                  onChange={e => {
+                    const max =
+                      e.target.value === "" ? undefined : Number(e.target.value);
+                    onPatch(column.id, { max });
+                    if (isFormula) onPatchFormula?.(column.id, { max });
+                  }}
                   className="h-7 text-xs"
                 />
               </div>
@@ -230,18 +299,29 @@ export function GanttColumnConfigButton({
               checked={column.filterable !== false}
               onChange={v => onPatch(column.id, { filterable: v })}
             />
-            <ToggleRow
-              label="Editable"
-              checked={column.editable === true}
-              onChange={v => onPatch(column.id, { editable: v })}
-            />
+            {!isFormula ? (
+              <ToggleRow
+                label="Editable"
+                checked={column.editable === true}
+                onChange={v => onPatch(column.id, { editable: v })}
+              />
+            ) : (
+              <span className="text-xs text-muted-foreground">Read-only</span>
+            )}
           </div>
 
-          {column.options?.length ? (
+          {column.options?.length ||
+          column.valueType === "tags" ||
+          column.valueType === "people" ||
+          column.editVariant === "select" ||
+          column.editVariant === "tag-input" ? (
             <>
               <Separator />
               <OptionsEditor
-                options={column.options}
+                options={column.options ?? []}
+                allowEmpty={
+                  column.valueType === "tags" || column.valueType === "people"
+                }
                 onChange={options => onPatch(column.id, { options })}
               />
             </>
@@ -263,7 +343,7 @@ export function GanttColumnConfigButton({
               </Button>
             </>
           ) : (
-            <p className="text-[10px] leading-snug text-muted-foreground">
+            <p className="text-xs leading-snug text-muted-foreground">
               Built-in columns can be renamed and restyled but not deleted. Hide it from the
               Columns menu instead.
             </p>
@@ -284,7 +364,7 @@ function ToggleRow({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-1.5 text-[11px]">
+    <label className="flex cursor-pointer items-center gap-1.5 text-xs">
       <input
         type="checkbox"
         checked={checked}
@@ -300,9 +380,12 @@ function ToggleRow({
 function OptionsEditor({
   options,
   onChange,
+  allowEmpty = false,
 }: {
   options: GanttColumnOption[];
   onChange: (next: GanttColumnOption[]) => void;
+  /** Tags/people may clear the set; closed selects must keep at least one. */
+  allowEmpty?: boolean;
 }) {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
 
@@ -322,7 +405,7 @@ function OptionsEditor({
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
         <Label className="text-xs">Options</Label>
-        <span className="text-[10px] text-muted-foreground">drag to set order</span>
+        <span className="text-xs text-muted-foreground">drag to set order</span>
       </div>
       {options.map((opt, i) => (
         <div
@@ -340,7 +423,7 @@ function OptionsEditor({
             dragIndex === i && "opacity-50",
           )}
         >
-          <span aria-hidden className="cursor-grab px-0.5 text-[10px] text-muted-foreground">
+          <span aria-hidden className="cursor-grab px-0.5 text-xs text-muted-foreground">
             ⠿
           </span>
           <button
@@ -362,7 +445,7 @@ function OptionsEditor({
             onChange={e => patchAt(i, { label: e.target.value })}
             className="h-6 min-w-0 flex-1 text-xs"
           />
-          <Badge variant="outline" className="shrink-0 font-mono text-[9px]">
+          <Badge variant="outline" className="shrink-0 font-mono text-xs">
             {String(opt.id)}
           </Badge>
           <Button
@@ -370,7 +453,7 @@ function OptionsEditor({
             variant="ghost"
             className="h-6 w-6 shrink-0 p-0 text-xs"
             aria-label={`Remove ${opt.label}`}
-            disabled={options.length <= 1}
+            disabled={!allowEmpty && options.length <= 1}
             onClick={() => onChange(options.filter((_, j) => j !== i))}
           >
             ×
