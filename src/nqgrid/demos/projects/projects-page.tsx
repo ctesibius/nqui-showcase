@@ -35,6 +35,7 @@ import {
   visibleColumns,
   type PmColumnModel,
 } from "./pm-column-model";
+import { addDays, formatLocalISO, localToday } from "@/lib/pm/calendar";
 import { DEFAULT_STATUS_OPTIONS, TITLE_FIELD, TASKS, pmRegistry, taskValue, type Task } from "./pm-schema";
 import type { ColumnTypeCatalogEntry } from "./column-model-catalog";
 import { ProjectsAddFieldMenu } from "./projects-column-editor";
@@ -118,6 +119,9 @@ export function ProjectsPage() {
 
   const addTask = () => {
     const id = `t${Date.now()}`;
+    const origin = localToday();
+    const start = formatLocalISO(addDays(origin, 8));
+    const end = formatLocalISO(addDays(origin, 14));
     setTasks((prev) => [
       ...prev,
       {
@@ -129,8 +133,8 @@ export function ProjectsPage() {
         effort: 3,
         progress: 0,
         budget: 0,
-        due: "2026-06-30",
-        timeline: { start: "2026-06-24", end: "2026-06-30" },
+        due: end,
+        timeline: { start, end },
       },
     ]);
     setViewMode("table");

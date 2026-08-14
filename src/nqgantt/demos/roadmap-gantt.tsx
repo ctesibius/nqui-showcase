@@ -20,9 +20,11 @@ import type {
 import { applyAutoSchedule, levelResources } from "@nqlib/nqgantt-engine";
 import { syncInboundDependencyLags } from "../lib/sync-inbound-lags";
 import { cn } from "@nqlib/nqui";
-import { TASKS, setTaskValue, type Task } from "../../lib/mock/ops";
-import { groupTasksByStatus, intervalToRangeRaw, tasksToGanttRootData, type TasksToGanttOptions } from "./tasks-to-gantt";
+import { DEFAULT_STATUS_OPTIONS, TASKS, setTaskValue, type Task } from "../../lib/mock/ops";
+import { applyWbsDisplay, intervalToRangeRaw, tasksToGanttRootData, type TasksToGanttOptions } from "./tasks-to-gantt";
+import { groupFeaturesKeepingTree, retreeHostGroups, withParentIds } from "./gantt-tree-groups";
 import { buildRoadmapColumnDefs, taskFieldForColumn } from "./roadmap-gantt-columns";
+import { WBS_COLUMN_DEF, withWbsColumn } from "./gantt-wbs-column";
 import { applyRoadmapColumnEditing } from "./roadmap-gantt-editability";
 import { GanttAddColumnButton } from "./gantt-add-column";
 import { GanttColumnConfigButton } from "./gantt-column-config";
@@ -30,7 +32,6 @@ import { renderNquiDateEditor } from "./gantt-date-editor";
 import { GanttPmpPanel } from "./gantt-pmp-panel";
 import type { GanttRootGroup } from "@nqlib/nqgantt/ui";
 import { GanttBarDebugProbe } from "./gantt-bar-debug-probe";
-import { useGanttPinScrollSignal } from "./use-gantt-pin-scroll-signal";
 
 export type RoadmapGanttColorBy = "status" | "assignee" | "phase" | "health";
 export type RoadmapGanttDensity = "compact" | "default" | "comfortable";
@@ -93,6 +94,8 @@ export type RoadmapGanttProps = {
   /** Opt-in GanttRoot chrome promoted from GanttDemo. */
   showInsights?: boolean;
   showLegend?: boolean;
+  /** Stamp outline codes and show a WBS column before the task name. */
+  showWbs?: boolean;
   /** Enable sidebar multi-select + floating bulk bar. */
   enableSelection?: boolean;
   /** Session undo/redo for drag + leveling (host-owned stack). */
@@ -103,6 +106,10 @@ export type RoadmapGanttProps = {
    * of the timeline itself.
    */
   showPmpPanel?: boolean;
+  /** Bar appearance preset — forwarded to GanttRoot (`data-gantt-bar-style`). */
+  barStyle?: import("@/nqgantt/bar-design").GanttBarStyleId;
+  /** Group row treatment — forwarded to GanttRoot (`data-gantt-group-rows`). */
+  groupRows?: import("@/nqgantt/bar-design").GanttGroupRowsId;
 };
 
 function parseDay(iso: string): Date {
@@ -145,9 +152,12 @@ export function RoadmapGantt({
   loading = false,
   showInsights = false,
   showLegend = false,
+  showWbs = false,
   enableSelection = false,
   enableHistory = false,
   showPmpPanel = false,
+  barStyle,
+  groupRows,
 }: RoadmapGanttProps) {
   // Controlled only when the parent owns both value + setter. Passing `tasks`
   // alone (gantt lab fixtures) seeds writable internal state — otherwise
@@ -219,16 +229,17 @@ export function RoadmapGantt({
 
   const ganttData = useMemo(() => {
     const data = tasksToGanttRootData(tasks, scheduleOptions);
+    const catalog = withParentIds(data.features, tasks);
     const seed = baselineSeedRef.current;
     const showMilestone = defaultCardDisplay?.showMilestone !== false;
     const showProgress = defaultCardDisplay?.showProgress !== false;
     const features =
       showBaselines && seed
-        ? data.features.map((f) => {
+        ? catalog.map((f) => {
             const baseline = seed.get(f.id);
             return baseline ? { ...f, baseline } : f;
           })
-        : data.features.map((f) =>
+        : catalog.map((f) =>
             f.baseline ? { ...f, baseline: undefined } : f,
           );
     // Published @nqlib/nqgantt paints milestone diamonds / progress fills without
@@ -270,9 +281,21 @@ export function RoadmapGantt({
 
   const groups = useMemo(() => {
     if (!grouped) return undefined;
-    if (groupByFeatures) return groupByFeatures(ganttData.features);
-    return groupsOverride ?? groupTasksByStatus(ganttData.features);
+    const raw = groupByFeatures
+      ? groupByFeatures(ganttData.features)
+      : groupsOverride ??
+        groupFeaturesKeepingTree(
+          ganttData.features,
+          (feature) => feature.status?.name ?? "Uncategorized",
+          DEFAULT_STATUS_OPTIONS.map((o) => o.label),
+        );
+    return retreeHostGroups(raw);
   }, [grouped, ganttData.features, groupsOverride, groupByFeatures]);
+
+  const wbsView = useMemo(
+    () => applyWbsDisplay(ganttData.features, groups, showWbs),
+    [ganttData.features, groups, showWbs],
+  );
 
   const onFeatureMove = useCallback(
     (id: string, startAt: Date, endAt: Date | null) => {
@@ -338,21 +361,26 @@ export function RoadmapGantt({
   const columnDefs = useMemo(
     () =>
       applyRoadmapColumnEditing(
-        [...buildRoadmapColumnDefs(editableSidebar), ...customDefs],
+        [
+          WBS_COLUMN_DEF,
+          ...buildRoadmapColumnDefs(editableSidebar),
+          ...customDefs,
+        ],
         editableSidebar,
       ).map(def =>
         columnOverrides[def.id] ? { ...def, ...columnOverrides[def.id] } : def,
       ),
     [editableSidebar, customDefs, columnOverrides],
   );
+  const syncedVisibleIds = withWbsColumn(visibleColumnIdsProp, showWbs);
   const [visibleColumnIds, setVisibleColumnIds] =
-    useState<GanttSidebarColumnId[]>(visibleColumnIdsProp);
+    useState<GanttSidebarColumnId[]>(syncedVisibleIds);
   // Re-sync only on a real change: callers commonly pass a fresh array literal,
   // and comparing identity alone would clobber the user's column choices on
   // every parent render.
-  const visibleColumnKey = visibleColumnIdsProp.join("|");
+  const visibleColumnKey = `${visibleColumnIdsProp.join("|")}:${showWbs}`;
   useEffect(() => {
-    setVisibleColumnIds(visibleColumnIdsProp);
+    setVisibleColumnIds(withWbsColumn(visibleColumnIdsProp, showWbs));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleColumnKey]);
   const [sortState, setSortState] = useState<GanttSortState | null>(null);
@@ -362,8 +390,8 @@ export function RoadmapGantt({
   // GanttRoot reads column defs off `data`, so merge ours in here rather than
   // letting the adapter's plain defaults through.
   const rootData = useMemo(
-    () => ({ ...ganttData, columnDefs }),
-    [ganttData, columnDefs],
+    () => ({ ...ganttData, features: wbsView.features, columnDefs }),
+    [ganttData, wbsView.features, columnDefs],
   );
 
   // Bars carry progress; the package default leaves it off. Turn it on unless
@@ -480,7 +508,6 @@ export function RoadmapGantt({
   }, []);
 
   const containerRef = useRef<HTMLDivElement>(null);
-  useGanttPinScrollSignal(containerRef);
 
   /** Schedule written back by leveling-with-availability or an MSPDI import. */
   const onPmpFeaturesChange = useCallback(
@@ -498,15 +525,17 @@ export function RoadmapGantt({
       data-gantt-hide-deps={showDependencies ? undefined : ""}
       className={cn(
         "flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border border-border bg-muted/40",
-        showPmpPanel ? undefined : className,
+        className,
       )}
     >
       {debugProbe ? <GanttBarDebugProbe rootRef={containerRef} /> : null}
       <GanttRoot
         className="min-h-0 flex-1"
         data={rootData}
-        groups={groups}
+        groups={wbsView.groups}
         density={density}
+        barStyle={barStyle}
+        groupRows={groupRows}
         defaultRange={defaultRange}
         defaultZoom={100}
         colorBy={colorBy}

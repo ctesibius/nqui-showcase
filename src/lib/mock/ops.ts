@@ -6,8 +6,11 @@ export { TEAM, TEAM_BY_ID } from "@/lib/pm/team";
 export type { PmPerson as Person, PmIssue as Task } from "@/lib/pm/types";
 export { Q3_TASKS as TASKS } from "@/lib/pm/fixtures/q3-tasks";
 
-import { Q3_TASKS } from "@/lib/pm/fixtures/q3-tasks";
+import { Q3_SEED_TODAY, Q3_TASKS } from "@/lib/pm/fixtures/q3-tasks";
+import { shiftToNow } from "@/lib/pm/calendar";
 import type { PmIssue as Task } from "@/lib/pm/types";
+
+const q3Date = (iso: string) => shiftToNow(iso, { seedToday: Q3_SEED_TODAY });
 
 export function setTaskValue(task: Task, columnId: string, raw: unknown): Task {
   return { ...(task as unknown as Record<string, unknown>), [columnId]: raw } as Task;
@@ -24,9 +27,9 @@ export const Q3_PROGRAM = {
   id: "q3-2026",
   name: "Q3 Delivery Program",
   periodLabel: "Q3 2026",
-  periodStart: "2026-06-01",
-  periodEnd: "2026-09-30",
-} as const;
+  periodStart: q3Date("2026-06-01"),
+  periodEnd: q3Date("2026-09-30"),
+};
 
 export type OpsHealth = "on_track" | "at_risk" | "blocked";
 export type OpsPhase = "discovery" | "build" | "validate" | "launch";
@@ -76,7 +79,13 @@ const TASK_PROJECT: Record<string, string> = {
   t1: "p-checkout",
   t2: "p-checkout",
   t3: "p-checkout",
+  t3a: "p-checkout",
+  t3b: "p-checkout",
+  t3c: "p-checkout",
   t4: "p-growth",
+  t4a: "p-growth",
+  t4b: "p-growth",
+  t4c: "p-growth",
   t5: "p-launch",
   t6: "p-launch",
   t7: "p-growth",
@@ -91,7 +100,7 @@ export const PROJECTS: OpsProject[] = [
     ownerId: "ava",
     phase: "build",
     progress: 72,
-    due: "2026-06-18",
+    due: q3Date("2026-06-18"),
     health: "on_track",
     budget: 54000,
     budgetPlanned: 52000,
@@ -103,7 +112,7 @@ export const PROJECTS: OpsProject[] = [
     ownerId: "cleo",
     phase: "build",
     progress: 38,
-    due: "2026-06-28",
+    due: q3Date("2026-06-28"),
     health: "at_risk",
     budget: 41000,
     budgetPlanned: 36000,
@@ -115,7 +124,7 @@ export const PROJECTS: OpsProject[] = [
     ownerId: "ava",
     phase: "validate",
     progress: 55,
-    due: "2026-07-04",
+    due: q3Date("2026-07-04"),
     health: "at_risk",
     budget: 46000,
     budgetPlanned: 42000,

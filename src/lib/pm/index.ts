@@ -15,6 +15,16 @@ export { PM_BOARD_STATUS_ORDER } from "./types";
 export { TEAM, TEAM_BY_ID } from "./team";
 
 export {
+  localToday,
+  parseLocalISO,
+  formatLocalISO,
+  addDays,
+  daysBetween,
+  isoToday,
+  shiftToNow,
+} from "./calendar";
+
+export {
   CAMPAIGN_ISSUES,
   CAMPAIGN_TASKS,
   CAMPAIGN_SCHEDULE,
@@ -24,6 +34,7 @@ export {
   CAMPAIGN_LANE_BY_ID,
   CAMPAIGN_HEALTH_BY_ID,
   CAMPAIGN_CRITICAL_IDS,
+  CAMPAIGN_SEED_TODAY,
   cloneCampaignIssues,
   groupCampaignByLane,
   type CampaignLane,
@@ -34,6 +45,8 @@ export {
   Q3_TASKS,
   Q3_SCHEDULE,
   Q3_STATUS_OPTIONS,
+  Q3_SEED_TODAY,
 } from "./fixtures/q3-tasks";
 
-export * from "./adapters";
+/** View adapters only — gantt adapters import tasks-to-gantt and must not live on this barrel. */
+export * from "./adapters/views";

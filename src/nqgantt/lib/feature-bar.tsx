@@ -1,7 +1,6 @@
 /**
  * Showcase-owned copy of @nqlib/nqgantt GanttFeatureBarShell / ProjectSummaryBar.
- * Source of truth for bar chrome polish. Not imported at runtime — see README.md.
- * Sync: pnpm nqgantt:sync-lib
+ * Not imported at runtime — see README.md. Sync: pnpm nqgantt:sync-lib
  */
 "use client"
 
@@ -15,6 +14,7 @@ import {
 } from "./critical-path"
 import {
   clampGanttProgress,
+  getGanttBarBorderRadius,
   getGanttPillFillColors,
   getSummaryBracketOpacity,
   ganttProgressAriaLabel,
@@ -23,12 +23,14 @@ import {
   GANTT_SUMMARY_BRACKET_STYLE_DEFAULT,
   SUMMARY_BAR_VIEW_HEIGHT,
   SUMMARY_BRACKET_SEAM_OVERLAP,
+  SUMMARY_PROGRESS_FEATHER_PX,
   SUMMARY_PROGRESS_MIN_BAR_WIDTH_PX,
   buildSummaryFootGeometry,
   getSummaryProgressClipWidthVb,
   getSummaryProgressSolidStopPercent,
   getSummaryRailEndY,
   normalizeSummaryBracketStyle,
+  readCssPx,
   summaryTopRailPath,
   type GanttSummaryBracketStyle,
 } from "./summary-bracket"
@@ -46,11 +48,14 @@ export interface GanttFeatureBarShellProps {
   /** Group lane color — tints summary brackets and task fills. */
   groupColor?: string
   progress?: number
-  /** Marks the bar as on the critical path (style via criticalPathStyle). */
+  /** Subtle animated glow when the bar is on the critical path (border stays standard). */
   isCritical?: boolean
-  /** Parent/summary row — bracket bar spanning rolled-up child schedule. */
+  /**
+   * WBS parent / summary row. Kept for callers; parents paint as normal
+   * feature bars. Bracket chrome is only for `isGroupRollup`.
+   */
   isSummary?: boolean
-  /** Swimlane group rollup (vs WBS parent summary). */
+  /** Swimlane group rollup — bracket / group-band bar (not WBS parents). */
   isGroupRollup?: boolean
   /** Bar width in px — drives external summary label placement. */
   barWidthPx?: number
@@ -72,6 +77,9 @@ function ProjectSummaryBar({
   const rawId = useId()
   const [barWidthPx, setBarWidthPx] = useState(0)
   const [barHeightPx, setBarHeightPx] = useState(0)
+  const [featherPx, setFeatherPx] = useState(SUMMARY_PROGRESS_FEATHER_PX)
+  const [seamWidthPx, setSeamWidthPx] = useState(0)
+  const [seamMix, setSeamMix] = useState(0)
 
   const height = SUMMARY_BAR_VIEW_HEIGHT
   const railEndY = getSummaryRailEndY(height, bracketStyle.topRailRatio)
@@ -85,15 +93,28 @@ function ProjectSummaryBar({
   useLayoutEffect(() => {
     const node = containerRef.current
     if (!node) return
+    const gantt = node.closest(".gantt")
     const update = () => {
       const rect = node.getBoundingClientRect()
       setBarWidthPx(rect.width)
       setBarHeightPx(Math.max(1, rect.height))
+      const style = getComputedStyle(node)
+      setFeatherPx(readCssPx(style, "--gantt-bar-feather-px", SUMMARY_PROGRESS_FEATHER_PX))
+      setSeamWidthPx(readCssPx(style, "--gantt-bar-seam-width", 0))
+      setSeamMix(readCssPx(style, "--gantt-bar-seam-mix", 0))
     }
     update()
     const observer = new ResizeObserver(update)
     observer.observe(node)
-    return () => observer.disconnect()
+    let mo: MutationObserver | null = null
+    if (gantt) {
+      mo = new MutationObserver(update)
+      mo.observe(gantt, { attributes: true, attributeFilter: ["data-gantt-bar-style"] })
+    }
+    return () => {
+      observer.disconnect()
+      mo?.disconnect()
+    }
   }, [height, railEndY])
 
   const topRailBottomY = railEndY + SUMMARY_BRACKET_SEAM_OVERLAP
@@ -110,12 +131,26 @@ function ProjectSummaryBar({
     && barWidthPx >= SUMMARY_PROGRESS_MIN_BAR_WIDTH_PX
     && railEndY > 0
 
-  const progressClipWidthVb = getSummaryProgressClipWidthVb(clampedProgress, barWidthPx)
+  const progressClipWidthVb = getSummaryProgressClipWidthVb(
+    clampedProgress,
+    barWidthPx,
+    featherPx,
+  )
   const progressSolidStopPercent = getSummaryProgressSolidStopPercent(
     progressClipWidthVb,
     barWidthPx,
+    featherPx,
   )
   const showProgressFill = showProgress && progressClipWidthVb > 0
+  const useHardSeam = featherPx <= 0
+  const seamWidthVb =
+    showProgressFill
+    && seamWidthPx > 0
+    && (clampedProgress ?? 0) < 100
+    && barWidthPx > 0
+      ? Math.min(progressClipWidthVb, (seamWidthPx / barWidthPx) * 100)
+      : 0
+  const seamColor = `color-mix(in srgb, white ${seamMix}%, ${accent ?? doneColor})`
   const bracketClipId = `gantt-bracket-clip${rawId.replace(/:/g, "")}`
 
   return (
@@ -138,8 +173,10 @@ function ProjectSummaryBar({
         viewBox={`0 0 100 ${height}`}
         preserveAspectRatio="none"
         aria-hidden
+        // Lift the bracket off the surface the same way task pills do — a soft
+        // drop shadow in screen px (immune to the non-uniform viewBox stretch).
+        style={{ filter: "drop-shadow(0 1px 1.5px rgba(0,0,0,0.22))" }}
       >
-
         <defs>
           {/* Bracket silhouette = union of rail + both feet. We paint each
               layer as ONE full-bar rect and clip it to this shape, so the
@@ -180,7 +217,7 @@ function ProjectSummaryBar({
             <stop offset={`${(railEndY / height) * 100}%`} stopColor="black" stopOpacity={0} />
             <stop offset="100%" stopColor="black" stopOpacity={0.2} />
           </linearGradient>
-          {showProgressFill ? (
+          {showProgressFill && !useHardSeam ? (
             <linearGradient
               id={progressFillId}
               gradientUnits="userSpaceOnUse"
@@ -205,7 +242,16 @@ function ProjectSummaryBar({
               y={0}
               width={progressClipWidthVb}
               height={height}
-              fill={`url(#${progressFillId})`}
+              fill={useHardSeam ? doneColor : `url(#${progressFillId})`}
+            />
+          ) : null}
+          {seamWidthVb > 0 ? (
+            <rect
+              x={progressClipWidthVb - seamWidthVb}
+              y={0}
+              width={seamWidthVb}
+              height={height}
+              fill={seamColor}
             />
           ) : null}
           {/* Fold shade is clear through the rail and deepens across the foot
@@ -221,7 +267,8 @@ function ProjectSummaryBar({
 }
 
 /**
- * Timeline task bar chrome. Summary/group rows use bracket rails; tasks use filled pills.
+ * Timeline task bar chrome. Swimlane group rollups use bracket rails;
+ * WBS parents and leaf tasks use filled feature pills.
  */
 export function GanttFeatureBarShell({
   className,
@@ -252,16 +299,23 @@ export function GanttFeatureBarShell({
   // lane color regardless of the user's `colorBy` choice. (Phase 18 fix.)
   const accent = statusColor ?? groupColor
   const { baseColor: baseBg, hoverColor: hoverBg, ringColor } = getGanttPillFillColors(accent)
+  const barRadius = getGanttBarBorderRadius(
+    barWidthPx,
+    // Row band minus `--gantt-bar-inset-y` (3px) on each side.
+    Math.max(0, gantt.rowHeight - 6),
+  )
+  const barRadiusStyle = {
+    borderRadius: barRadius,
+  } as CSSProperties
 
-  if (isSummary || isGroupRollup) {
-    const labelRight = barWidthPx >= 96
-    const labelTop = `${bracketStyle.topRailRatio * 50}%`
-
+  // Group rollups keep bracket chrome. WBS parents (`isSummary`) use the
+  // normal feature/task bar path below — same look as leaves.
+  if (isGroupRollup) {
     return (
       <div
         data-gantt-feature-bar
         data-gantt-summary="true"
-        data-gantt-group-rollup={isGroupRollup ? "true" : undefined}
+        data-gantt-group-rollup="true"
         data-gantt-bracket-preset={bracketStyle.presetId}
         data-gantt-bracket-foot={bracketStyle.footStyle}
         className={cn("relative h-full w-full overflow-visible", className)}
@@ -274,13 +328,7 @@ export function GanttFeatureBarShell({
         />
         {summaryLabel ? (
           <div
-            className={cn(
-              "pointer-events-none absolute z-[var(--z-content)] max-w-[min(240px,calc(100vw-2rem))] truncate text-xs font-semibold text-foreground",
-              labelRight
-                ? "left-full ml-3 -translate-y-1/2 rounded-sm bg-background/85 px-1.5 py-0.5 backdrop-blur-sm"
-                : "bottom-full left-0 mb-1.5 rounded-sm bg-background/85 px-1.5 py-0.5 backdrop-blur-sm",
-            )}
-            style={labelRight ? { top: labelTop } : undefined}
+            className="pointer-events-none absolute top-1/2 left-full z-[var(--z-content)] ml-3 max-w-[min(240px,calc(100vw-2rem))] -translate-y-1/2 truncate gantt-bar-outside-label text-xs font-semibold text-foreground"
           >
             {summaryLabel}
           </div>
@@ -290,13 +338,15 @@ export function GanttFeatureBarShell({
     )
   }
 
-  const bar = (
+  return (
     <div
       data-gantt-feature-bar
+      data-gantt-critical={isCritical ? "true" : undefined}
+      data-gantt-wbs-parent={isSummary ? "true" : undefined}
       className={cn(
         // overflow-visible so outside labels (milestone-style) are not clipped;
         // progress/sheen use their own overflow-hidden inner layers.
-        "relative h-full w-full overflow-visible rounded-full text-xs text-card-foreground",
+        "relative h-full w-full overflow-visible text-xs text-card-foreground",
         "px-2 py-1 transition-[background-color,box-shadow] duration-150 ease-out",
         // Dimensional depth (nqui button philosophy): the bar separates from the
         // surface by *lifting* — a soft drop shadow below — not by a hard border.
@@ -307,11 +357,13 @@ export function GanttFeatureBarShell({
         "bg-[var(--gantt-bar-bg)] group-hover/bar:bg-[var(--gantt-bar-hover-bg)]",
         "shadow-[0_1px_2px_rgba(0,0,0,0.10),inset_0_1px_0_rgba(255,255,255,0.30),inset_0_0_0_1px_var(--gantt-bar-ring)]",
         "group-hover/bar:shadow-[0_2px_4px_rgba(0,0,0,0.13),inset_0_1px_0_rgba(255,255,255,0.35),inset_0_0_0_1px_var(--gantt-bar-ring)]",
+        isCritical && criticalPathBarWrapperClass(criticalPathStyle),
         className,
       )}
       style={
         {
           ...style,
+          ...barRadiusStyle,
           "--gantt-bar-bg": baseBg,
           "--gantt-bar-hover-bg": hoverBg,
           "--gantt-bar-accent": accent ?? "var(--muted-foreground)",
@@ -325,22 +377,8 @@ export function GanttFeatureBarShell({
           the fill can never cover it. This is what keeps depth consistent. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-1 rounded-full bg-linear-to-b from-white/15 to-transparent dark:from-white/8"
+        className="pointer-events-none absolute inset-0 z-1 [border-radius:inherit] bg-linear-to-b from-white/15 to-transparent dark:from-white/8"
       />
-    </div>
-  )
-
-  if (!isCritical) return bar
-
-  return (
-    <div
-      className={cn(
-        criticalPathBarWrapperClass(criticalPathStyle),
-        "relative h-full w-full rounded-full",
-      )}
-      data-gantt-critical="true"
-    >
-      {bar}
     </div>
   )
 }

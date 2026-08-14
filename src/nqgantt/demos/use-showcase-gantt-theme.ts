@@ -1,21 +1,16 @@
 import { useEffect } from "react"
 
 /**
- * Dev-only: switch the showcase's gantt override layer off, so a gantt can be
- * judged as the package alone renders it.
+ * Dev-only: switch the showcase's thin gantt overlay off, so a gantt can be
+ * judged as `@nqlib/nqgantt/styles` alone.
  *
- * `gantt-theme.css` is a consumer layer — bar tokens, the group rail, row
- * hover, scrollbars, the weekend hatch, grip geometry. Every one of those is a
- * patch over something `@nqlib/nqgantt` doesn't do yet, which means a lab
- * running with it on cannot answer "did the upstream fix actually land?" — the
- * override would paper over a regression just as convincingly as a fix.
+ * Package CSS now ships the lab look (Flat, Rail, tree, hover, pin). The
+ * showcase sheet is only host hooks (`data-card-*`, deps-hide). Bare mode
+ * disables that overlay stylesheet in Vite dev — the package theme stays on.
  *
  * Vite serves each CSS module as its own `<style data-vite-dev-id="…">`, so in
- * dev the whole layer can be disabled at the stylesheet level. That is a dev
- * trick and deliberately so: this only ever runs from `/gantt-lab`, which is
- * itself stripped from production builds. In a bundled build the rules are
- * merged into one asset and there is nothing to single out — the toggle simply
- * finds no sheet and does nothing.
+ * dev the overlay can be disabled at the stylesheet level. `/gantt-lab` is
+ * stripped from production builds.
  */
 export function useShowcaseGanttTheme(enabled: boolean) {
   useEffect(() => {
@@ -24,9 +19,15 @@ export function useShowcaseGanttTheme(enabled: boolean) {
         'style[data-vite-dev-id*="gantt-theme.css"]',
       ),
     ]
-    for (const sheet of sheets) sheet.disabled = !enabled
+    // Prefer the showcase overlay path; never disable the package styles sheet.
+    const overlay = sheets.filter((sheet) => {
+      const id = sheet.getAttribute("data-vite-dev-id") ?? ""
+      return id.includes("/src/nqgantt/gantt-theme.css")
+    })
+    const targets = overlay.length > 0 ? overlay : sheets
+    for (const sheet of targets) sheet.disabled = !enabled
     return () => {
-      for (const sheet of sheets) sheet.disabled = false
+      for (const sheet of targets) sheet.disabled = false
     }
   }, [enabled])
 }

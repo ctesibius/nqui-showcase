@@ -40,6 +40,8 @@ export type PmIssue = {
   health?: PmHealth;
   plan?: { start: string; end: string };
   isMilestone?: boolean;
+  /** Parent issue id — Gantt WBS tree (`1` / `1.1` / `1.2`). */
+  parentId?: string;
 };
 
 export type PmDependency = {

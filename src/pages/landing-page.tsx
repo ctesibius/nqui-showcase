@@ -121,20 +121,20 @@ export function LandingPage() {
               </p>
 
               <div className="mt-8 flex flex-wrap items-center gap-3.5" data-fl-reveal>
-                <Button className="rounded-full" asChild>
+                <Button asChild>
                   <Link to="/blocks">See it live — take the tour</Link>
                 </Button>
-                <Button variant="outline" className="rounded-full" asChild>
+                <Button variant="outline" asChild>
                   <Link to="/catalog">Component catalog</Link>
                 </Button>
-                <Button variant="outline" className="rounded-full" asChild>
+                <Button variant="outline" asChild>
                   <Link to="/charts">Browse all charts</Link>
                 </Button>
                 <button
                   type="button"
                   onClick={copyInstall}
                   aria-live="polite"
-                  className="rounded-lg border bg-muted/40 px-2.5 py-1.5 font-mono text-xs text-muted-foreground transition-colors duration-150 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="rounded-md border bg-muted/40 px-2.5 py-1.5 font-mono text-xs text-muted-foreground transition-colors duration-150 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   {copied ? "copied ✓" : `$ ${INSTALL_CMD}`}
                 </button>
@@ -154,13 +154,13 @@ export function LandingPage() {
               className="ml-[clamp(0px,4vw,3rem)] max-w-[44ch] rounded-xl border bg-muted/30 px-4 py-3.5 max-[560px]:ml-0"
               data-fl-reveal
             >
-              <p className="mb-2 font-mono text-[0.72rem] uppercase tracking-[0.12em] text-muted-foreground">
+              <p className="mb-2 font-mono text-xs uppercase tracking-[0.12em] text-muted-foreground">
                 What&rsquo;s inside
               </p>
               <ul className="flex flex-col gap-1.5">
                 {PACKAGES.map((p) => (
                   <li key={p.name} className="flex items-baseline gap-2.5 text-sm">
-                    <span className="shrink-0 font-mono text-[0.8rem] text-foreground">
+                    <span className="shrink-0 font-mono text-xs text-foreground">
                       {p.name}
                       <span className="text-muted-foreground/70"> {p.version}</span>
                     </span>
@@ -171,7 +171,7 @@ export function LandingPage() {
             </aside>
 
             <footer
-              className="font-mono text-[0.72rem] tracking-[0.04em] text-muted-foreground/70"
+              className="font-mono text-xs tracking-[0.04em] text-muted-foreground/70"
               data-fl-reveal
             >
               nqlib · this site is built with its own packages

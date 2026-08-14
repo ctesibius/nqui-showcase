@@ -3,7 +3,7 @@
  * Copy bar UI sources from sibling nqgantt into src/nqgantt/lib/ (reference copies).
  * Usage: pnpm nqgantt:sync-lib
  */
-import { copyFileSync, existsSync, mkdirSync } from "node:fs"
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -41,4 +41,27 @@ for (const [from, to] of files) {
   console.log(`[nqgantt:sync-lib] ${to} ← ${from}`)
 }
 
-console.info("[nqgantt:sync-lib] Re-apply lib import paths in feature-bar.tsx if needed (./bar-progress, ./summary-bracket, ./critical-path).")
+// Rewrite package-relative imports to showcase lib filenames.
+const rewrite = {
+  '"./gantt-critical-path"': '"./critical-path"',
+  '"./gantt-bar-progress"': '"./bar-progress"',
+  '"./gantt-summary-bracket"': '"./summary-bracket"',
+}
+for (const [, to] of files) {
+  const dest = path.join(libDir, to)
+  if (!existsSync(dest)) continue
+  let text = readFileSync(dest, "utf8")
+  let next = text
+  for (const [a, b] of Object.entries(rewrite)) next = next.replaceAll(a, b)
+  if (to === "feature-bar.tsx" && !next.includes("Showcase-owned copy")) {
+    next =
+      "/**\n" +
+      " * Showcase-owned copy of @nqlib/nqgantt GanttFeatureBarShell / ProjectSummaryBar.\n" +
+      " * Not imported at runtime — see README.md. Sync: pnpm nqgantt:sync-lib\n" +
+      " */\n" +
+      next
+  }
+  if (next !== text) writeFileSync(dest, next)
+}
+
+console.info("[nqgantt:sync-lib] Import paths rewritten to ./bar-progress, ./summary-bracket, ./critical-path.")

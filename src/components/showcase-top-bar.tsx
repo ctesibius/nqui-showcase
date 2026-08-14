@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowDown01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { ArrowDown01Icon, Menu01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import {
   Button,
   DropdownMenu,
@@ -70,9 +70,10 @@ type ShowcaseTopBarProps = {
   /** nqui FrostedGlass backdrop (docs / catalog sticky headers). */
   frosted?: boolean;
   /**
-   * Wrap links + theme controls in a floating liquid-glass pill
+   * Wrap links + theme controls in a floating liquid-glass chip
    * (token-wired blur wash). Default on unless bordered docs chrome.
-   * Uses `position: fixed` — sticky cannot pierce `.fl-page` overflow-x.
+   * Uses `position: fixed` from `lg` up — sticky cannot pierce `.fl-page`
+   * overflow-x. Below `lg` the chip stays in the header row.
    */
   floatingActions?: boolean;
   className?: string;
@@ -80,7 +81,8 @@ type ShowcaseTopBarProps = {
 
 /**
  * Shared product top bar — segment is a menu + ScrollArea on small screens,
- * contrast sliding Tabs from `md` up.
+ * contrast sliding Tabs from `md` up. Nav links collapse to a menu below `lg`
+ * so the floating glass chip does not cover sticky page filters.
  */
 export function ShowcaseTopBar({
   brand,
@@ -103,8 +105,9 @@ export function ShowcaseTopBar({
           variant="ghost"
           asChild
           className={cn(
+            "hidden lg:inline-flex",
             floatingActions &&
-              "rounded-full px-3 text-foreground hover:bg-[color-mix(in_oklch,var(--accent)_70%,transparent)]",
+              "px-3 text-foreground hover:bg-[color-mix(in_oklch,var(--accent)_70%,transparent)]",
           )}
         >
           <Link to={link.to}>
@@ -117,6 +120,9 @@ export function ShowcaseTopBar({
           </Link>
         </Button>
       ))}
+      {links && links.length > 0 ? (
+        <NavLinksMenu links={links} embedded={floatingActions} />
+      ) : null}
       {trailing ?? (
         <ThemeControls
           embedded={floatingActions}
@@ -138,7 +144,7 @@ export function ShowcaseTopBar({
         bordered && "border-b border-border px-4 py-3",
         frosted && bordered && "border-border/50 bg-transparent",
         /* Reserve trailing width so brand doesn't jump when the pill is fixed. */
-        floatingActions && !bordered && "pr-[min(22rem,48vw)]",
+        floatingActions && !bordered && "lg:pr-[min(22rem,48vw)]",
         className,
       )}
     >
@@ -171,9 +177,10 @@ export function ShowcaseTopBar({
           "flex shrink-0 items-center",
           frosted && "relative z-[var(--z-content,1)]",
           !floatingActions && "gap-1.5",
-          /* Fixed float — sticky fails under .fl-page overflow-x:hidden. */
+          /* Fixed only from lg — below that it stays in the header so sticky
+             filters (blocks / charts) are not covered on small viewports. */
           floatingActions &&
-            "fixed right-4 top-3 z-[var(--z-sticky-page,40)] pointer-events-auto",
+            "lg:fixed lg:right-4 lg:top-3 lg:z-[var(--z-sticky-page,40)] lg:pointer-events-auto",
         )}
       >
         {floatingActions ? (
@@ -183,6 +190,65 @@ export function ShowcaseTopBar({
         )}
       </div>
     </header>
+  );
+}
+
+function linkIsActive(pathname: string, to: string) {
+  return pathname === to || pathname.startsWith(`${to}/`);
+}
+
+function NavLinksMenu({
+  links,
+  embedded,
+}: {
+  links: ReadonlyArray<ShowcaseTopBarLink>;
+  embedded?: boolean;
+}) {
+  const { pathname } = useLocation();
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          aria-label="Open navigation"
+          className={cn(
+            "size-7 shrink-0 lg:hidden",
+            embedded
+              ? "text-foreground hover:bg-[color-mix(in_oklch,var(--accent)_70%,transparent)]"
+              : undefined,
+          )}
+        >
+          <HugeiconsIcon icon={Menu01Icon} className="size-4" strokeWidth={2} />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-[11rem]">
+        {links.map((link) => {
+          const active = linkIsActive(pathname, link.to);
+          return (
+            <DropdownMenuItem key={link.to} asChild className="gap-2">
+              <Link to={link.to}>
+                <HugeiconsIcon
+                  icon={Tick02Icon}
+                  size={14}
+                  strokeWidth={2}
+                  className={cn("shrink-0", active ? "opacity-100" : "opacity-0")}
+                  aria-hidden
+                />
+                <span className="flex-1">{link.label}</span>
+                {link.badge ? (
+                  <span className="rounded-md bg-foreground/10 px-1.5 py-px font-mono text-xs uppercase tracking-wide text-muted-foreground">
+                    {link.badge}
+                  </span>
+                ) : null}
+              </Link>
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 

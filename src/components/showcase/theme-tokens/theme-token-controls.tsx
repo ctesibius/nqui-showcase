@@ -1,6 +1,7 @@
 import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, cn } from "@nqlib/nqui";
 import {
   ACCENT_CHIPS,
+  PAPER_PRIMARY_PRESETS,
   RADIUS_PRESETS,
   useThemeTokens,
   type RadiusPresetId,
@@ -9,23 +10,18 @@ import {
 type Variant = "full" | "compact";
 
 function AccentSwatch({
-  hue,
   label,
   active,
   onSelect,
   compact,
+  swatch,
 }: {
-  hue: number | null;
   label: string;
   active: boolean;
   onSelect: () => void;
   compact?: boolean;
+  swatch: string;
 }) {
-  const swatchStyle =
-    hue === null
-      ? { background: "oklch(0.35 0.004 95)" }
-      : { background: `oklch(0.55 0.22 ${hue})` };
-
   return (
     <button
       type="button"
@@ -40,9 +36,15 @@ function AccentSwatch({
           ? "border-foreground ring-2 ring-foreground/25 ring-offset-2 ring-offset-background"
           : "border-border hover:scale-105",
       )}
-      style={swatchStyle}
+      style={{ background: swatch }}
     />
   );
+}
+
+function chipSwatch(hue: number, recommended?: boolean): string {
+  if (recommended && hue === 230) return "oklch(0.45 0.11 230)";
+  if (recommended && hue === 205) return "oklch(0.46 0.09 205)";
+  return `oklch(0.55 0.22 ${hue})`;
 }
 
 /**
@@ -61,30 +63,75 @@ export function ThemeTokenControls({ variant = "full" }: { variant?: Variant }) 
           <div>
             <p className="text-sm font-medium">Primary color</p>
             <p className="text-xs text-muted-foreground">
-              Overrides the brand primary scale app-wide. Default is nqui monochrome ink.
+              Paper-fit picks first (Ink, Slate, Teal), then more hues. Default Ink matches
+              nqui monochrome on cream.
             </p>
           </div>
         ) : (
-          <p className="truncate px-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground group-data-[collapsible=icon]:hidden">
+          <p className="truncate px-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground group-data-[collapsible=icon]:hidden">
             Primary
           </p>
         )}
+        {!compact ? (
+          <div
+            className="flex flex-wrap gap-2"
+            role="group"
+            aria-label="Paper-fit primary presets"
+          >
+            {PAPER_PRIMARY_PRESETS.map((preset) => {
+              const active =
+                preset.hue === null
+                  ? accentHue === null
+                  : accentHue === preset.hue;
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  aria-pressed={active}
+                  title={preset.blurb}
+                  onClick={() => {
+                    if (preset.hue === null) setAccentHue(null);
+                    else setAccentHue(preset.hue, preset.shade);
+                  }}
+                  className={cn(
+                    "flex min-w-[5.5rem] flex-col gap-1.5 rounded-lg border px-2.5 py-2 text-left transition-colors",
+                    active
+                      ? "border-foreground bg-accent/40"
+                      : "border-border bg-background hover:bg-muted/50",
+                  )}
+                >
+                  <span
+                    className="h-6 w-full rounded-md border border-border"
+                    style={{ background: preset.swatch }}
+                    aria-hidden
+                  />
+                  <span className="text-xs font-medium leading-tight">{preset.label}</span>
+                  <span className="text-xs leading-snug text-muted-foreground">
+                    {preset.blurb}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
         <div className={cn("flex flex-wrap items-center", compact ? "gap-1.5 justify-center group-data-[collapsible=icon]:flex-col" : "gap-2")}>
-          <AccentSwatch
-            hue={null}
-            label="Default"
-            active={accentHue === null}
-            onSelect={() => setAccentHue(null)}
-            compact={compact}
-          />
+          {compact ? (
+            <AccentSwatch
+              label="Ink"
+              active={accentHue === null}
+              onSelect={() => setAccentHue(null)}
+              compact={compact}
+              swatch="oklch(0.35 0.004 95)"
+            />
+          ) : null}
           {ACCENT_CHIPS.map((chip) => (
             <AccentSwatch
               key={chip.hue}
-              hue={chip.hue}
               label={chip.label}
               active={accentHue === chip.hue}
               onSelect={() => setAccentHue(chip.hue)}
               compact={compact}
+              swatch={chipSwatch(chip.hue, "recommended" in chip && chip.recommended)}
             />
           ))}
         </div>
@@ -99,7 +146,7 @@ export function ThemeTokenControls({ variant = "full" }: { variant?: Variant }) 
             </p>
           </div>
         ) : (
-          <p className="truncate px-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground group-data-[collapsible=icon]:hidden">
+          <p className="truncate px-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground group-data-[collapsible=icon]:hidden">
             Radius
           </p>
         )}
@@ -120,7 +167,7 @@ export function ThemeTokenControls({ variant = "full" }: { variant?: Variant }) 
               className={cn(
                 "border text-xs font-medium transition-colors",
                 compact
-                  ? "flex size-7 items-center justify-center rounded-md p-0 text-[9px] font-semibold uppercase group-data-[collapsible=icon]:size-6"
+                  ? "flex size-7 items-center justify-center rounded-md p-0 font-semibold uppercase group-data-[collapsible=icon]:size-6"
                   : "rounded-md px-3 py-1.5",
                 radiusPreset === preset.id
                   ? "border-primary bg-primary text-primary-foreground"

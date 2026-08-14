@@ -43,7 +43,7 @@ export function ThemeTokenSheet({
       size="icon"
       variant="ghost"
       className={cn(
-        "size-7 shrink-0 rounded-full text-foreground",
+        "size-7 shrink-0 text-foreground",
         "transition-colors motion-safe:duration-[var(--duration-quick)]",
         embedded
           ? "border-transparent bg-transparent hover:bg-[color-mix(in_oklch,var(--accent)_70%,transparent)] hover:text-accent-foreground"
@@ -73,7 +73,7 @@ export function ThemeTokenSheet({
 }
 
 /** Light / dark with nqui sliding-pill RadioGroup (same motion as Tabs). */
-function ThemeModeSwitch({
+export function ThemeModeSwitch({
   className,
   embedded,
 }: {

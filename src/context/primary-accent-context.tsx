@@ -31,6 +31,7 @@ import {
 } from "../lib/appearance/serialize-theme"
 import {
   ACCENT_CHIPS,
+  PAPER_PRIMARY_PRESETS,
   RADIUS_PRESETS,
   previewMenuAccentVars,
   previewPrimaryVars,
@@ -41,6 +42,7 @@ import {
 
 export {
   ACCENT_CHIPS,
+  PAPER_PRIMARY_PRESETS,
   RADIUS_PRESETS,
   previewMenuAccentVars,
   previewPrimaryVars,

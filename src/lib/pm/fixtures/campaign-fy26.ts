@@ -2,11 +2,22 @@
  * FY26 retail campaign — canonical rich PM fixture (list / table / kanban / gantt).
  *
  * Critical path uses same-day FS handoffs (succ.start === pred.end).
+ * Dates below are a seed calendar whose "today" is CAMPAIGN_SEED_TODAY;
+ * they resolve at load via shiftToNow so the Timeline lab always has
+ * past / spanning / future bars.
  */
 import type { GanttFeature } from "@nqlib/nqgantt";
 import type { GanttRootGroup } from "@nqlib/nqgantt/ui";
+import { shiftToNow } from "../calendar";
 import type { PmHealth, PmIssue, PmSchedule, PmStatusOption } from "../types";
 import { TEAM } from "../team";
+
+/** Seed "today": Back-to-school buy and catalog proofs still include this day. */
+export const CAMPAIGN_SEED_TODAY = "2026-08-06";
+
+function liveDate(iso: string): string {
+  return shiftToNow(iso, { seedToday: CAMPAIGN_SEED_TODAY });
+}
 
 export const CAMPAIGN_LANES = ["Merchandising", "Media & Creative", "Ops & Logistics"] as const;
 export type CampaignLane = (typeof CAMPAIGN_LANES)[number];
@@ -39,7 +50,8 @@ export const CAMPAIGN_CRITICAL_IDS = [
   "o2",
   "c3",
   "m5",
-  "c4",
+  "c4a",
+  "c4d",
   "o5",
   "o4",
   "c5",
@@ -62,6 +74,7 @@ type CampaignSeed = {
   priority: "high" | "med" | "low";
   health: CampaignHealth;
   isMilestone?: boolean;
+  parentId?: string;
 };
 
 const CAMPAIGN_ROWS: CampaignSeed[] = [
@@ -195,6 +208,74 @@ const CAMPAIGN_ROWS: CampaignSeed[] = [
     health: "on-track",
   },
   {
+    id: "c4a",
+    name: "Hero film edit",
+    startAt: "2026-08-07",
+    endAt: "2026-08-28",
+    planStart: "2026-08-07",
+    planEnd: "2026-08-28",
+    status: "in_progress",
+    progress: 40,
+    lane: "Media & Creative",
+    assignee: "cleo",
+    effort: 8,
+    budget: 32000,
+    priority: "high",
+    health: "on-track",
+    parentId: "c4",
+  },
+  {
+    id: "c4b",
+    name: "PDP stills",
+    startAt: "2026-08-21",
+    endAt: "2026-09-18",
+    planStart: "2026-08-21",
+    planEnd: "2026-09-18",
+    status: "review",
+    progress: 70,
+    lane: "Media & Creative",
+    assignee: "dane",
+    effort: 5,
+    budget: 18000,
+    priority: "med",
+    health: "on-track",
+    parentId: "c4",
+  },
+  {
+    id: "c4c",
+    name: "Email suite",
+    startAt: "2026-09-01",
+    endAt: "2026-09-25",
+    planStart: "2026-09-01",
+    planEnd: "2026-09-25",
+    status: "todo",
+    progress: 0,
+    lane: "Media & Creative",
+    assignee: "ava",
+    effort: 5,
+    budget: 14000,
+    priority: "med",
+    health: "on-track",
+    parentId: "c4",
+  },
+  {
+    id: "c4d",
+    name: "Paid social cutdowns",
+    startAt: "2026-09-15",
+    endAt: "2026-10-09",
+    planStart: "2026-09-15",
+    planEnd: "2026-10-09",
+    status: "todo",
+    progress: 0,
+    lane: "Media & Creative",
+    assignee: "cleo",
+    effort: 3,
+    budget: 12000,
+    priority: "low",
+    health: "on-track",
+    parentId: "c4",
+  },
+  {
     id: "o5",
     name: "Last inbound cut-off",
     startAt: "2026-10-09",
@@ -309,6 +390,57 @@ const CAMPAIGN_ROWS: CampaignSeed[] = [
     health: "at-risk",
   },
   {
+    id: "m4a",
+    name: "Vendor assortment lock",
+    startAt: "2026-06-15",
+    endAt: "2026-07-01",
+    planStart: "2026-06-15",
+    planEnd: "2026-07-01",
+    status: "done",
+    progress: 100,
+    lane: "Merchandising",
+    assignee: "ava",
+    effort: 5,
+    budget: 22000,
+    priority: "high",
+    health: "on-track",
+    parentId: "m4",
+  },
+  {
+    id: "m4b",
+    name: "Store planogram",
+    startAt: "2026-07-01",
+    endAt: "2026-07-22",
+    planStart: "2026-07-01",
+    planEnd: "2026-07-22",
+    status: "in_progress",
+    progress: 62,
+    lane: "Merchandising",
+    assignee: "ben",
+    effort: 8,
+    budget: 28000,
+    priority: "high",
+    health: "at-risk",
+    parentId: "m4",
+  },
+  {
+    id: "m4c",
+    name: "Buy sheet sign-off",
+    startAt: "2026-07-22",
+    endAt: "2026-08-07",
+    planStart: "2026-07-22",
+    planEnd: "2026-08-07",
+    status: "review",
+    progress: 80,
+    lane: "Merchandising",
+    assignee: "ava",
+    effort: 3,
+    budget: 12000,
+    priority: "med",
+    health: "on-track",
+    parentId: "m4",
+  },
+  {
     id: "o3",
     name: "Carrier rate renegotiation",
     startAt: "2026-06-10",
@@ -358,22 +490,27 @@ const CAMPAIGN_ROWS: CampaignSeed[] = [
   },
 ];
 
-export const CAMPAIGN_ISSUES: PmIssue[] = CAMPAIGN_ROWS.map((r) => ({
-  id: r.id,
-  title: r.name,
-  status: r.status,
-  priority: r.priority,
-  assignee: r.assignee,
-  effort: r.effort,
-  progress: r.progress,
-  budget: r.budget,
-  due: r.endAt,
-  timeline: { start: r.startAt, end: r.endAt },
-  lane: r.lane,
-  health: r.health,
-  plan: { start: r.planStart, end: r.planEnd },
-  isMilestone: r.isMilestone ?? r.startAt === r.endAt,
-}));
+export const CAMPAIGN_ISSUES: PmIssue[] = CAMPAIGN_ROWS.map((r) => {
+  const startAt = liveDate(r.startAt);
+  const endAt = liveDate(r.endAt);
+  return {
+    id: r.id,
+    title: r.name,
+    status: r.status,
+    priority: r.priority,
+    assignee: r.assignee,
+    effort: r.effort,
+    progress: r.progress,
+    budget: r.budget,
+    due: endAt,
+    timeline: { start: startAt, end: endAt },
+    lane: r.lane,
+    health: r.health,
+    plan: { start: liveDate(r.planStart), end: liveDate(r.planEnd) },
+    isMilestone: r.isMilestone ?? r.startAt === r.endAt,
+    parentId: r.parentId,
+  };
+});
 
 /** @deprecated Prefer CAMPAIGN_ISSUES */
 export const CAMPAIGN_TASKS = CAMPAIGN_ISSUES;
@@ -386,6 +523,7 @@ export const CAMPAIGN_HEALTH_BY_ID = new Map(
 );
 
 export const CAMPAIGN_SCHEDULE: PmSchedule = {
+  // Leaf-only: c4 / m4 are WBS parents — edges attach to children, not rollups.
   dependencies: [
     { fromId: "m1", toId: "m2", type: "FS" },
     { fromId: "m2", toId: "m3", type: "FS" },
@@ -393,22 +531,24 @@ export const CAMPAIGN_SCHEDULE: PmSchedule = {
     { fromId: "c2", toId: "o2", type: "FS" },
     { fromId: "o2", toId: "c3", type: "FS" },
     { fromId: "c3", toId: "m5", type: "FS" },
-    { fromId: "m5", toId: "c4", type: "FS" },
-    { fromId: "c4", toId: "o5", type: "FS" },
+    { fromId: "m5", toId: "c4a", type: "FS" },
+    // Reconnect the package after leaf-only retarget (was a single c4 bar).
+    { fromId: "c4a", toId: "c4d", type: "FS" },
+    { fromId: "c4d", toId: "o5", type: "FS" },
     { fromId: "o5", toId: "o4", type: "FS" },
     { fromId: "o4", toId: "c5", type: "FS" },
     { fromId: "c5", toId: "o6", type: "FS" },
     { fromId: "o2", toId: "o3", type: "SS", lag: 10 },
-    { fromId: "c4", toId: "c6", type: "SS", lag: 7 },
-    { fromId: "m4", toId: "m6", type: "FS" },
+    { fromId: "c4a", toId: "c6", type: "SS", lag: 7 },
+    { fromId: "m4c", toId: "m6", type: "FS" },
   ],
   statuses: CAMPAIGN_STATUSES,
   markers: [
-    { id: "q2", date: "2026-04-01", label: "Q2 open" },
-    { id: "bts", date: "2026-08-07", label: "BTS lock" },
-    { id: "peak", date: "2026-09-15", label: "Peak load" },
-    { id: "bf", date: "2026-11-27", label: "Black Friday" },
-    { id: "ye", date: "2026-12-15", label: "Year-end push" },
+    { id: "q2", date: liveDate("2026-04-01"), label: "Q2 open" },
+    { id: "bts", date: liveDate("2026-08-07"), label: "BTS lock" },
+    { id: "peak", date: liveDate("2026-09-15"), label: "Peak load" },
+    { id: "bf", date: liveDate("2026-11-27"), label: "Black Friday" },
+    { id: "ye", date: liveDate("2026-12-15"), label: "Year-end push" },
   ],
 };
 

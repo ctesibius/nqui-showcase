@@ -86,13 +86,13 @@ export function BlocksPage() {
         </div>
 
         {/* ── Filter — nqui Tabs sliding pill (ToggleGroup only cross-fades) ─ */}
-        <div className="sticky top-3 z-[var(--z-sticky-content)] mt-8 max-w-full">
+        <div className="sticky top-3 z-[var(--z-sticky-content)] mt-8 max-w-full lg:max-w-[calc(100%-min(22rem,48vw))]">
           <Tabs
             value={lib}
             onValueChange={(v) => setLib(v as Lib | "all")}
             className="w-fit max-w-full"
           >
-            <LiquidGlassBar shape="pill" className="max-w-full" contentClassName="p-0.5">
+            <LiquidGlassBar className="max-w-full" contentClassName="p-0.5">
               <TabsList
                 aria-label="Filter blocks by library"
                 className={contrastSlidingTabsListClass(
@@ -127,7 +127,7 @@ export function BlocksPage() {
                 interactive
                 className={cn(
                   (fullBleed || b.wide) && "col-span-full",
-                  stage === "gantt" && "min-h-[28rem]",
+                  stage === "gantt" && "min-h-[48rem]",
                   stage === "report" && "min-h-[48rem]",
                   stage === "table" && "min-h-[22rem]",
                   b.tall && "min-h-[28rem]",
@@ -176,7 +176,7 @@ export function BlocksPage() {
           <p className="font-mono text-xs tracking-[0.04em] text-muted-foreground/70">
             nqlib · this page is built with its own packages
           </p>
-          <Button size="sm" variant="outline" className="rounded-full" asChild>
+          <Button size="sm" variant="outline" asChild>
             <Link to="/docs">Install guide</Link>
           </Button>
         </footer>

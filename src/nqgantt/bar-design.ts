@@ -51,7 +51,7 @@ export const GANTT_BAR_STYLES: GanttBarStyleOption[] = [
   {
     id: "capsule",
     label: "Capsule",
-    blurb: "Full pill radius, long feather.",
+    blurb: "Long feather, glass rim.",
   },
 ]
 
@@ -64,7 +64,7 @@ export const GANTT_GROUP_ROWS: GanttGroupRowsOption[] = [
   {
     id: "rail",
     label: "Rail",
-    blurb: "A hairline span with end stops.",
+    blurb: "A hairline span, rounded ends.",
   },
   {
     id: "pill",
@@ -136,7 +136,7 @@ export const GANTT_BAR_TOKENS: GanttBarTokenSpec[] = [
   {
     token: "radius",
     label: "Corner radius",
-    hint: "Short bars still cap to half their height",
+    hint: "Follows appearance --radius; short bars cap to half their height",
     min: 0,
     max: 16,
     step: 1,

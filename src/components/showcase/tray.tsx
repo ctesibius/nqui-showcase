@@ -49,7 +49,7 @@ const stageVariantClass = {
   ),
   table: cn("min-h-64 flex-1 overflow-auto p-0", stageFillChild),
   gantt: cn(
-    "h-[36rem] min-h-[36rem] flex-none overflow-hidden p-0",
+    "h-[48rem] min-h-[48rem] flex-none overflow-hidden p-0",
     stageFillChild,
   ),
   report: cn(

@@ -31,7 +31,7 @@ const VALUE_EDIT_VARIANTS: Partial<Record<string, GanttEditVariant>> = {
 };
 
 /** No inline editor exists for these yet (boolean icon-toggle, etc.). */
-const NEVER_EDITABLE_IDS = new Set(["blocked"]);
+const NEVER_EDITABLE_IDS = new Set(["blocked", "wbs"]);
 
 function resolvedEditVariant(def: GanttSidebarColumnDef): GanttEditVariant | null {
   if (def.editVariant) return def.editVariant;

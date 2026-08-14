@@ -6,7 +6,7 @@ type LiquidGlassBarProps = {
   className?: string
   /** Inner content padding / gap. */
   contentClassName?: string
-  /** Pill (default) vs softer rounded rect for wider toolbars. */
+  /** Token radius (default) vs explicit capsule. */
   shape?: "pill" | "rounded"
 }
 
@@ -18,13 +18,13 @@ export function LiquidGlassBar({
   children,
   className,
   contentClassName,
-  shape = "pill",
+  shape = "rounded",
 }: LiquidGlassBarProps) {
   return (
     <div
       className={cn(
         "story-nav-pill relative isolate inline-flex max-w-full items-center overflow-hidden",
-        shape === "pill" ? "rounded-full" : "rounded-2xl",
+        shape === "pill" ? "rounded-full" : "rounded-lg",
         className,
       )}
     >

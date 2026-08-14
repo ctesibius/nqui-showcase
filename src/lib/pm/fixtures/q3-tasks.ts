@@ -1,7 +1,18 @@
 /**
  * Q3 Delivery Program tasks — table / list / board / thin gantt pack.
+ *
+ * Dates below are a seed calendar whose "today" is Q3_SEED_TODAY (in-progress
+ * bars include that day). They resolve at load via shiftToNow.
  */
+import { shiftToNow } from "../calendar";
 import type { PmIssue, PmSchedule, PmStatusOption } from "../types";
+
+/** Seed "today": Apple Pay / cart recovery still include this day. */
+export const Q3_SEED_TODAY = "2026-06-16";
+
+function liveDate(iso: string): string {
+  return shiftToNow(iso, { seedToday: Q3_SEED_TODAY });
+}
 
 export const Q3_STATUS_OPTIONS: PmStatusOption[] = [
   { id: "backlog", name: "Backlog", order: 0, color: "#94a3b8" },
@@ -10,7 +21,7 @@ export const Q3_STATUS_OPTIONS: PmStatusOption[] = [
   { id: "done", name: "Done", order: 3, color: "#22c55e" },
 ];
 
-export const Q3_TASKS: PmIssue[] = [
+const Q3_TASK_SEEDS: PmIssue[] = [
   {
     id: "t1",
     title: "Finalize checkout wireframes",
@@ -48,6 +59,45 @@ export const Q3_TASKS: PmIssue[] = [
     timeline: { start: "2026-06-05", end: "2026-06-18" },
   },
   {
+    id: "t3a",
+    title: "Wallet entitlement",
+    status: "done",
+    priority: "high",
+    assignee: "ava",
+    effort: 3,
+    progress: 100,
+    budget: 4000,
+    due: "2026-06-09",
+    timeline: { start: "2026-06-05", end: "2026-06-09" },
+    parentId: "t3",
+  },
+  {
+    id: "t3b",
+    title: "Sandbox certificates",
+    status: "in_progress",
+    priority: "high",
+    assignee: "ben",
+    effort: 5,
+    progress: 55,
+    budget: 6000,
+    due: "2026-06-14",
+    timeline: { start: "2026-06-08", end: "2026-06-14" },
+    parentId: "t3",
+  },
+  {
+    id: "t3c",
+    title: "Production cutover",
+    status: "review",
+    priority: "high",
+    assignee: "ava",
+    effort: 3,
+    progress: 85,
+    budget: 5000,
+    due: "2026-06-18",
+    timeline: { start: "2026-06-14", end: "2026-06-18" },
+    parentId: "t3",
+  },
+  {
     id: "t4",
     title: "Cart abandonment recovery",
     status: "in_progress",
@@ -58,6 +108,45 @@ export const Q3_TASKS: PmIssue[] = [
     budget: 16000,
     due: "2026-06-20",
     timeline: { start: "2026-06-10", end: "2026-06-20" },
+  },
+  {
+    id: "t4a",
+    title: "Trigger rules",
+    status: "done",
+    priority: "med",
+    assignee: "cleo",
+    effort: 2,
+    progress: 100,
+    budget: 3000,
+    due: "2026-06-13",
+    timeline: { start: "2026-06-10", end: "2026-06-13" },
+    parentId: "t4",
+  },
+  {
+    id: "t4b",
+    title: "Email templates",
+    status: "in_progress",
+    priority: "med",
+    assignee: "cleo",
+    effort: 3,
+    progress: 50,
+    budget: 5000,
+    due: "2026-06-17",
+    timeline: { start: "2026-06-12", end: "2026-06-17" },
+    parentId: "t4",
+  },
+  {
+    id: "t4c",
+    title: "Holdout analysis",
+    status: "backlog",
+    priority: "low",
+    assignee: "dane",
+    effort: 2,
+    progress: 0,
+    budget: 2000,
+    due: "2026-06-20",
+    timeline: { start: "2026-06-16", end: "2026-06-20" },
+    parentId: "t4",
   },
   {
     id: "t5",
@@ -121,8 +210,18 @@ export const Q3_TASKS: PmIssue[] = [
   },
 ];
 
+export const Q3_TASKS: PmIssue[] = Q3_TASK_SEEDS.map((task) => ({
+  ...task,
+  due: liveDate(task.due),
+  timeline: {
+    start: liveDate(task.timeline.start),
+    end: liveDate(task.timeline.end),
+  },
+}));
+
 export const Q3_SCHEDULE: PmSchedule = {
-  dependencies: [{ fromId: "t1", toId: "t3", type: "FS" }],
+  // Leaf-only: t3 is the Apple Pay WBS parent — link into its first child.
+  dependencies: [{ fromId: "t1", toId: "t3a", type: "FS" }],
   statuses: Q3_STATUS_OPTIONS,
-  markers: [{ id: "launch", date: "2026-07-04", label: "Target launch" }],
+  markers: [{ id: "launch", date: liveDate("2026-07-04"), label: "Target launch" }],
 };

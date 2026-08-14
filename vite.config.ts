@@ -70,8 +70,19 @@ function localNqganttAliases(): Alias[] {
     { find: /^@nqlib\/nqgantt\/mock$/, replacement: path.join(src, "mock.ts") },
     { find: /^@nqlib\/nqgantt\/engine$/, replacement: path.join(src, "engine.ts") },
     { find: /^@nqlib\/nqgantt\/item-gantt-adapter$/, replacement: path.join(src, "item-gantt-adapter.ts") },
+    { find: /^@nqlib\/nqgantt\/styles$/, replacement: path.join(src, "gantt-theme.css") },
     ...engineAlias,
   ]
+}
+
+/** Resolve theme CSS from the sibling checkout until the styles export is on npm. */
+function nqganttStylesAlias(): Alias[] {
+  if (process.env.USE_LOCAL_NQGANTT === "true") return [] // already in localNqganttAliases
+  const workspaceRoot = process.env.NQGANTT_DIR ?? path.resolve(__dirname, "../nqgantt/packages")
+  const localCss = path.join(workspaceRoot, "nqgantt", "src", "gantt-theme.css")
+  if (!existsSync(localCss)) return []
+  console.info(`[nqui-showcase] @nqlib/nqgantt/styles → ${localCss}`)
+  return [{ find: /^@nqlib\/nqgantt\/styles$/, replacement: localCss }]
 }
 
 /**
@@ -113,7 +124,7 @@ export default defineConfig(async ({ mode }) => ({
     "process.env.NODE_ENV": JSON.stringify(mode === "production" ? "production" : "development"),
     "process.env.NEXT_PUBLIC_APP_URL": JSON.stringify(""),
   },
-  // nqui is published (^0.7.2) by default, but `USE_LOCAL_NQUI=true` still
+  // nqui is published (^0.7.7) by default, but `USE_LOCAL_NQUI=true` still
   // dev-links the sibling repo — the dep optimizer mangles a symlinked
   // package's named exports (e.g. InlineTabsList disappears), so keep this
   // exclude to serve its ESM dist unbundled whenever local mode is active.
@@ -135,6 +146,7 @@ export default defineConfig(async ({ mode }) => ({
     alias: [
       ...localNqgridAliases(),
       ...localNqganttAliases(),
+      ...nqganttStylesAlias(),
       ...localNqchartAliases(),
       // Force one nqui graph. Local nqgantt otherwise resolves its nested
       // @nqlib/nqui@0.6.x and ships a second Radix Tooltip context.

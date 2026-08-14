@@ -27,8 +27,6 @@ import { GanttDesignMenu } from "@/nqgantt/demos/gantt-design-menu"
 import { GanttDesignLab, useGanttLabEnabled } from "@/nqgantt/demos/gantt-design-lab"
 import { useGanttBarDesign } from "@/nqgantt/demos/use-gantt-bar-design"
 import { useGanttFocusWork } from "@/nqgantt/demos/use-gantt-focus-work"
-import { useGanttRowHover } from "@/nqgantt/demos/use-gantt-row-hover"
-import { useGanttSidebarResize } from "@/nqgantt/demos/use-gantt-sidebar-resize"
 import { useShowcaseGanttTheme } from "@/nqgantt/demos/use-showcase-gantt-theme"
 import {
   GANTT_BAR_DESIGN_DEFAULT,
@@ -37,6 +35,7 @@ import {
   type GanttBarDesign,
 } from "@/nqgantt/bar-design"
 import { TASKS, type Task } from "@/lib/mock/ops"
+import { addDays, formatLocalISO, localToday } from "@/lib/pm/calendar"
 
 type FixtureId = "full" | "dense" | "single" | "empty"
 /** Mirrors the package's unions; neither is re-exported from its entrypoint. */
@@ -58,13 +57,14 @@ const RANGES: { id: Range; label: string }[] = [
 ]
 const DENSITIES: GanttDensity[] = ["compact", "default", "comfortable"]
 
-/** Collapse every task onto one week so bars pile up and have to resolve. */
+/** Collapse every task onto one week around today so bars pile up and have to resolve. */
 function densify(tasks: Task[]): Task[] {
+  const origin = localToday()
   return tasks.map((task, i) => ({
     ...task,
     timeline: {
-      start: `2026-08-0${(i % 5) + 3}`,
-      end: `2026-08-${String(8 + (i % 7)).padStart(2, "0")}`,
+      start: formatLocalISO(addDays(origin, (i % 5) - 3)),
+      end: formatLocalISO(addDays(origin, 2 + (i % 7))),
     },
   }))
 }
@@ -108,17 +108,19 @@ function BareGantt({
   grouped,
   critical,
   autoSchedule,
+  showWbs,
   className,
 }: LabGanttProps) {
   return (
     <div className={cn("min-h-0 flex-1", className)}>
       <RoadmapGantt
         key={`bare:${range}:${density}:${grouped}:${critical}:${autoSchedule}:${tasks.length}`}
-        className="h-full"
+        className="h-full border-0 bg-transparent"
         tasks={tasks}
         grouped={grouped}
         showCriticalPath={critical}
         autoSchedule={autoSchedule}
+        showWbs={showWbs}
         colorBy="status"
         density={density}
         defaultRange={range}
@@ -135,6 +137,7 @@ interface LabGanttProps {
   grouped: boolean
   critical: boolean
   autoSchedule: boolean
+  showWbs?: boolean
   /** PMP side panel — baseline / worklog / availability / MSPDI. */
   pmp?: boolean
   className?: string
@@ -149,13 +152,12 @@ function LabGantt({
   grouped,
   critical,
   autoSchedule,
+  showWbs,
   pmp,
   className,
 }: LabGanttProps) {
   const stageRef = useRef<HTMLDivElement>(null)
   useGanttBarDesign(stageRef, design)
-  useGanttSidebarResize(stageRef)
-  useGanttRowHover(stageRef)
   useGanttFocusWork(stageRef)
 
   return (
@@ -164,15 +166,18 @@ function LabGantt({
         // Range and density are constructor-time defaults in the package, so
         // the key forces a fresh instance rather than a stale toolbar.
         key={`${range}:${density}:${grouped}:${critical}:${autoSchedule}:${tasks.length}`}
-        className="h-full"
+        className="h-full border-0 bg-transparent"
         tasks={tasks}
         grouped={grouped}
         showCriticalPath={critical}
         autoSchedule={autoSchedule}
         showPmpPanel={pmp}
+        showWbs={showWbs}
         colorBy="status"
         density={density}
         defaultRange={range}
+        barStyle={design.barStyle}
+        groupRows={design.groupRows}
       />
     </div>
   )
@@ -186,6 +191,7 @@ export function GanttLabPage() {
   const [grouped, setGrouped] = useState(true)
   const [critical, setCritical] = useState(false)
   const [autoSchedule, setAutoSchedule] = useState(true)
+  const [showWbs, setShowWbs] = useState(true)
   const [pmp, setPmp] = useState(false)
   const [matrix, setMatrix] = useState(false)
   const [bare, setBare] = useState(false)
@@ -296,6 +302,13 @@ export function GanttLabPage() {
           </label>
           <label
             className="flex items-center gap-2 text-xs"
+            title="WBS column with outline codes (1, 1.1, 2…) before the task name"
+          >
+            <Switch checked={showWbs} onCheckedChange={setShowWbs} />
+            WBS
+          </label>
+          <label
+            className="flex items-center gap-2 text-xs"
             title="Baseline capture, worklog, availability and MS Project import/export"
           >
             <Switch checked={pmp} onCheckedChange={setPmp} />
@@ -353,6 +366,7 @@ export function GanttLabPage() {
                     grouped={grouped}
                     critical={critical}
                     autoSchedule={autoSchedule}
+                    showWbs={showWbs}
                   />
                 ) : (
                   <LabGantt
@@ -363,6 +377,7 @@ export function GanttLabPage() {
                     grouped={grouped}
                     critical={critical}
                     autoSchedule={autoSchedule}
+                    showWbs={showWbs}
                   />
                 )}
               </section>
@@ -380,7 +395,7 @@ export function GanttLabPage() {
               grouped={grouped}
               critical={critical}
               autoSchedule={autoSchedule}
-              className="rounded-md border border-border"
+              showWbs={showWbs}
             />
           ) : (
             <LabGantt
@@ -391,8 +406,8 @@ export function GanttLabPage() {
               grouped={grouped}
               critical={critical}
               autoSchedule={autoSchedule}
+              showWbs={showWbs}
               pmp={pmp}
-              className="rounded-md border border-border"
             />
           )}
         </div>

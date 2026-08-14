@@ -18,7 +18,7 @@ export const GANTT_CRITICAL_PATH_STYLE_OPTIONS: {
   {
     value: "glow",
     label: "Glow",
-    description: "Legacy option — prefer stripe/ring (showcase theme disables bar glow)",
+    description: "Soft pulsing halo on bars and links",
   },
   {
     value: "ring",
@@ -33,12 +33,12 @@ export const GANTT_CRITICAL_PATH_STYLE_OPTIONS: {
   {
     value: "stripe",
     label: "Stripe",
-    description: "Left accent stripe + link pulse",
+    description: "Left accent stripe with soft bar glow + link pulse",
   },
   {
     value: "beacon",
     label: "Beacon",
-    description: "Strong tint — best for dark mode",
+    description: "Strong tint + glow — best for dark mode",
   },
 ]
 

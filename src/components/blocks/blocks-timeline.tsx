@@ -12,20 +12,19 @@ import { GanttDesignMenu } from "@/nqgantt/demos/gantt-design-menu"
 import { GanttDesignLab, useGanttLabEnabled } from "@/nqgantt/demos/gantt-design-lab"
 import { useGanttBarDesign } from "@/nqgantt/demos/use-gantt-bar-design"
 import { useGanttFocusWork } from "@/nqgantt/demos/use-gantt-focus-work"
-import { useGanttRowHover } from "@/nqgantt/demos/use-gantt-row-hover"
-import { useGanttSidebarResize } from "@/nqgantt/demos/use-gantt-sidebar-resize"
 import {
   GANTT_FEATURE_TOGGLE_DEFAULTS,
   GANTT_LAB_COLUMN_IDS,
   GanttFeatureToggles,
   type GanttFeatureToggleState,
 } from "@/nqgantt/demos/gantt-feature-toggles"
+import { withWbsColumn } from "@/nqgantt/demos/gantt-wbs-column"
 import {
   CAMPAIGN_ISSUES,
   CAMPAIGN_SCHEDULE,
   groupCampaignByLane,
-  toGanttOptions,
 } from "@/lib/pm"
+import { toGanttOptions } from "@/lib/pm/adapters"
 import {
   GANTT_BAR_DESIGN_DEFAULT,
   isGanttBarStyleId,
@@ -61,15 +60,15 @@ function readStoredDesign(): GanttBarDesign {
 export function TimelineLabBlock({ className }: { className?: string }) {
   const stageRef = useRef<HTMLDivElement>(null)
   const [design, setDesign] = useState<GanttBarDesign>(readStoredDesign)
-  const [features, setFeatures] = useState<GanttFeatureToggleState>(
-    GANTT_FEATURE_TOGGLE_DEFAULTS,
-  )
+  const [features, setFeatures] = useState<GanttFeatureToggleState>({
+    ...GANTT_FEATURE_TOGGLE_DEFAULTS,
+    showWbs: true,
+  })
   const labEnabled = useGanttLabEnabled()
 
+  // Tuning sliders only — barStyle/groupRows go through GanttRoot props.
   useGanttBarDesign(stageRef, design)
-  useGanttSidebarResize(stageRef)
   useGanttFocusWork(stageRef)
-  useGanttRowHover(stageRef)
 
   useEffect(() => {
     try {
@@ -129,14 +128,18 @@ export function TimelineLabBlock({ className }: { className?: string }) {
           showDependencies={features.showDependencies}
           showBaselines={features.showBaselines}
           defaultCardDisplay={features.card}
-          visibleColumnIds={
-            features.showColumns ? GANTT_LAB_COLUMN_IDS : ["tasks"]
-          }
+          visibleColumnIds={withWbsColumn(
+            features.showColumns ? GANTT_LAB_COLUMN_IDS : ["tasks"],
+            features.showWbs,
+          )}
           loading={features.loading}
           showInsights={features.showInsights}
           showLegend={features.showLegend}
           enableSelection={features.enableSelection}
+          showWbs={features.showWbs}
           enableHistory={features.enableHistory}
+          barStyle={design.barStyle}
+          groupRows={design.groupRows}
         />
       </div>
 

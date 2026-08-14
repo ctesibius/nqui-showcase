@@ -7,6 +7,7 @@ import {
   tasksToPMInput,
   type TasksToGanttOptions,
 } from "@/nqgantt/demos/tasks-to-gantt";
+import { withParentIds } from "@/nqgantt/demos/gantt-tree-groups";
 import type { PmIssue, PmSchedule } from "../types";
 
 export function scheduleToGanttOptions(issues: PmIssue[], schedule?: PmSchedule): TasksToGanttOptions {
@@ -58,10 +59,11 @@ export function toGantt(
   issues: PmIssue[],
   schedule?: PmSchedule,
 ): GanttRootData {
-  return tasksToGanttRootData(
+  const data = tasksToGanttRootData(
     withDemoRating(issues),
     scheduleToGanttOptions(issues, schedule),
   )
+  return { ...data, features: withParentIds(data.features, issues) }
 }
 
 export function toGanttPMInput(issues: PmIssue[], schedule?: PmSchedule) {

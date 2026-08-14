@@ -57,11 +57,7 @@ function GroupSwatch({ rows }: { rows: GanttGroupRowsId }) {
           <path d="M40 5h-4l4 6Z" />
         </>
       ) : rows === "rail" ? (
-        <>
-          <rect x="0" y="4.75" width="40" height="2.5" rx="1.25" />
-          <rect x="0" y="2" width="2.5" height="8" rx="0.75" />
-          <rect x="37.5" y="2" width="2.5" height="8" rx="0.75" />
-        </>
+        <rect x="0" y="4.5" width="40" height="3" rx="1.5" />
       ) : (
         <rect x="0" y="2" width="40" height="8" rx="2.5" />
       )}
@@ -97,7 +93,7 @@ export function GanttDesignMenu({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-80">
-        <DropdownMenuLabel className="font-mono text-[10px] font-normal tracking-[0.16em] text-muted-foreground uppercase">
+        <DropdownMenuLabel className="font-mono text-xs font-normal tracking-[0.16em] text-muted-foreground uppercase">
           Bar style
         </DropdownMenuLabel>
         <DropdownMenuRadioGroup
@@ -114,7 +110,7 @@ export function GanttDesignMenu({
             >
               <span className="min-w-0 flex-1">
                 <span className="block font-medium">{style.label}</span>
-                <span className="block text-[11px] leading-snug text-muted-foreground">
+                <span className="block text-xs leading-snug text-muted-foreground">
                   {style.blurb}
                 </span>
               </span>
@@ -124,7 +120,7 @@ export function GanttDesignMenu({
         </DropdownMenuRadioGroup>
 
         <DropdownMenuSeparator />
-        <DropdownMenuLabel className="font-mono text-[10px] font-normal tracking-[0.16em] text-muted-foreground uppercase">
+        <DropdownMenuLabel className="font-mono text-xs font-normal tracking-[0.16em] text-muted-foreground uppercase">
           Group rows
         </DropdownMenuLabel>
         <DropdownMenuRadioGroup
@@ -141,7 +137,7 @@ export function GanttDesignMenu({
             >
               <span className="min-w-0 flex-1">
                 <span className="block font-medium">{option.label}</span>
-                <span className="block text-[11px] leading-snug text-muted-foreground">
+                <span className="block text-xs leading-snug text-muted-foreground">
                   {option.blurb}
                 </span>
               </span>

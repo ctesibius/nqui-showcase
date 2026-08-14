@@ -16,6 +16,7 @@ import {
 } from "@nqlib/nqui"
 import {
   LOOK_PRESETS,
+  PAPER_PRIMARY_PRESETS,
   RADIUS_PRESETS,
   useThemeTokens,
   type LookId,
@@ -31,7 +32,7 @@ type Variant = "page" | "sheet" | "studio" | "settings"
 function AppearanceSpecimen() {
   return (
     <div className="rounded-lg border border-border bg-card p-3 shadow-(--shadow-elevated)">
-      <p className="mb-3 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+      <p className="mb-3 font-mono text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
         Preview
       </p>
       <div className="flex flex-wrap items-center gap-2">
@@ -264,20 +265,50 @@ export function AppearanceControls({
         <div>
           <p className="text-sm font-medium">Accent</p>
           <p className="text-xs text-muted-foreground">
-            Brand primary — hue family + shade
-            {full ? ". Use theory to see related hues." : "."}
+            Brand primary on warm paper. Try Ink (nqui default), Slate, or Teal —
+            then refine on the wheel
+            {full ? " / theory." : "."}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            type="button"
-            size="sm"
-            variant={draft.accentHue === null ? "secondary" : "outline"}
-            aria-pressed={draft.accentHue === null}
-            onClick={() => setAccentHue(null)}
-          >
-            Default ink
-          </Button>
+        <div
+          className="flex flex-wrap gap-2"
+          role="group"
+          aria-label="Paper-fit primary presets"
+        >
+          {PAPER_PRIMARY_PRESETS.map((preset) => {
+            const active =
+              preset.hue === null
+                ? draft.accentHue === null
+                : draft.accentHue === preset.hue
+            return (
+              <button
+                key={preset.id}
+                type="button"
+                aria-pressed={active}
+                title={preset.blurb}
+                onClick={() => {
+                  if (preset.hue === null) setAccentHue(null)
+                  else setAccentHue(preset.hue, preset.shade)
+                }}
+                className={cn(
+                  "flex min-w-[5.5rem] flex-col gap-1.5 rounded-lg border px-2.5 py-2 text-left transition-colors",
+                  active
+                    ? "border-foreground bg-accent/40"
+                    : "border-border bg-background hover:bg-muted/50",
+                )}
+              >
+                <span
+                  className="h-6 w-full rounded-md border border-border"
+                  style={{ background: preset.swatch }}
+                  aria-hidden
+                />
+                <span className="text-xs font-medium leading-tight">{preset.label}</span>
+                <span className="text-xs leading-snug text-muted-foreground">
+                  {preset.blurb}
+                </span>
+              </button>
+            )
+          })}
         </div>
         {full ? (
           <WheelTheoryControls
@@ -311,7 +342,7 @@ export function AppearanceControls({
             />
             <FieldDescription>
               {draft.accentHue === null
-                ? "Pick a hue on the wheel first"
+                ? "Pick Ink, Slate, Teal, or a wheel hue first"
                 : `Same hue · ${draft.accentShade < 1.5 ? "darker" : draft.accentShade > 2.5 ? "lighter" : "mid"} (${draft.accentShade.toFixed(2)})`}
             </FieldDescription>
           </Field>

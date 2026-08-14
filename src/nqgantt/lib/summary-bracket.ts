@@ -1,9 +1,9 @@
 /** Summary / group bracket geometry — top rail + grid-aligned feet. */
 
+import { GANTT_BAR_RADIUS_PX } from "./bar-progress"
+
 /** Screen-pixel width of bracket feet at the rail line (constant across zoom/range). */
 export const SUMMARY_BRACKET_CAP_PX_DEFAULT = 12
-/** Top-rail corner radius — matches task pill `rounded-md`. */
-export const GANTT_BAR_RADIUS_PX = 6
 /** SVG viewBox height for summary bracket geometry. */
 export const SUMMARY_BAR_VIEW_HEIGHT = 14
 /** Overlap at rail/foot seam to avoid sub-pixel gaps when the SVG stretches. */
@@ -12,11 +12,21 @@ export const SUMMARY_BRACKET_SEAM_OVERLAP = 0.2
 export const SUMMARY_PROGRESS_MIN_BAR_WIDTH_PX = 24
 
 /**
- * Leading-edge feather (screen px) for the bracket progress fill — mirrors the
- * task-pill `+6px` overshoot so the completed slice reads as a soft tone shift
- * rather than a hard seam.
+ * Leading-edge feather (screen px) when `--gantt-bar-feather-px` is absent.
+ * Task pills and summary rails share that token so Flat (0) and Studio (8)
+ * stay one language. This constant is the unthemed fallback only.
  */
 export const SUMMARY_PROGRESS_FEATHER_PX = 6
+
+/** Parse a CSS custom property as a non-negative px number. */
+export function readCssPx(
+  style: CSSStyleDeclaration,
+  property: string,
+  fallback: number,
+): number {
+  const n = Number.parseFloat(style.getPropertyValue(property).trim())
+  return Number.isFinite(n) ? Math.max(0, n) : fallback
+}
 
 /**
  * Width (in viewBox units, 0–100) of the left-anchored clip rect that reveals
@@ -34,7 +44,7 @@ export function getSummaryProgressClipWidthVb(
   return Math.min(viewBoxWidth, (filledPx / barWidthPx) * viewBoxWidth)
 }
 
-/** Feather width in viewBox units — mirrors task-pill `6px` leading-edge soft seam. */
+/** Feather width in viewBox units — same `--gantt-bar-feather-px` as task pills. */
 export function getSummaryProgressFeatherVb(
   barWidthPx: number,
   featherPx = SUMMARY_PROGRESS_FEATHER_PX,
@@ -47,7 +57,8 @@ export function getSummaryProgressFeatherVb(
 /**
  * Solid-stop offset (0–100) for the progress veil gradient. The completed slice
  * stays full `doneColor` until the last feather band, then fades to transparent
- * — same contract as task pills (`calc(100% - 6px), transparent`).
+ * — same contract as task pills (`calc(100% - var(--gantt-bar-feather-px) * 1px)`).
+ * When `featherPx` is 0 (Flat), this returns 100 so callers can skip the fade.
  */
 export function getSummaryProgressSolidStopPercent(
   clipWidthVb: number,

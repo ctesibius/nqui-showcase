@@ -3,6 +3,7 @@ import { Cancel01Icon, PaintBoardIcon } from "@hugeicons/core-free-icons"
 import { Button, ScrollArea, cn } from "@nqlib/nqui"
 import { AppearanceControls } from "@/components/showcase/appearance/appearance-controls"
 import { StudioExportActions } from "@/components/showcase/appearance/studio-export-actions"
+import { ThemeModeSwitch } from "@/components/showcase/theme-tokens/theme-token-sheet"
 import { useThemeStudio } from "@/context/theme-studio-context"
 import { useThemeTokens } from "@/context/primary-accent-context"
 
@@ -55,8 +56,8 @@ export function ThemeStudioHost() {
           )}
         >
           <header className="flex shrink-0 items-start justify-between gap-2 border-b border-border px-4 py-3">
-            <div className="min-w-0 space-y-0.5 pr-8">
-              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            <div className="min-w-0 space-y-0.5 pr-10">
+              <p className="font-mono text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
                 Floating
               </p>
               <h2
@@ -65,9 +66,12 @@ export function ThemeStudioHost() {
               >
                 Theme Studio
               </h2>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Live on this page — scroll and click while you tune. Export when ready.
               </p>
+              <div className="pt-2">
+                <ThemeModeSwitch />
+              </div>
             </div>
             <Button
               type="button"

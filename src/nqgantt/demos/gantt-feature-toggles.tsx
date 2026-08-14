@@ -3,7 +3,8 @@
  * Timeline lab can exercise:
  *   1) schedule + chrome (CP, deps, markers, baselines, range, density…)
  *   2) bar card chrome + sidebar columns + CP style
- *   3) Demo→Root chrome (insights, legend, select, history/undo)
+ *   3) Demo→Root chrome (insights, legend, history/undo)
+ *   4) Sidebar: WBS outline codes, multi-select, extra columns
  */
 import {
   Toggle,
@@ -66,6 +67,7 @@ export type GanttFeatureToggleState = {
   showDependencies: boolean
   showBaselines: boolean
   showColumns: boolean
+  showWbs: boolean
   loading: boolean
   showInsights: boolean
   showLegend: boolean
@@ -88,6 +90,7 @@ export const GANTT_FEATURE_TOGGLE_DEFAULTS: GanttFeatureToggleState = {
   showDependencies: true,
   showBaselines: false,
   showColumns: false,
+  showWbs: false,
   loading: false,
   showInsights: false,
   showLegend: false,
@@ -274,13 +277,6 @@ export function GanttFeatureToggles({
           Assignees
         </Flag>
         <Flag
-          pressed={value.showColumns}
-          onPressedChange={(v) => set("showColumns", v)}
-          title="Extra sidebar columns (duration, status, progress, deps)"
-        >
-          Columns
-        </Flag>
-        <Flag
           pressed={value.loading}
           onPressedChange={(v) => set("loading", v)}
           title="Skeleton loading state"
@@ -302,18 +298,35 @@ export function GanttFeatureToggles({
           Legend
         </Flag>
         <Flag
-          pressed={value.enableSelection}
-          onPressedChange={(v) => set("enableSelection", v)}
-          title="Multi-select + floating bulk actions"
-        >
-          Select
-        </Flag>
-        <Flag
           pressed={value.enableHistory}
           onPressedChange={(v) => set("enableHistory", v)}
           title="Undo / redo toolbar buttons (session history)"
         >
           History
+        </Flag>
+      </Row>
+
+      <Row label="Sidebar">
+        <Flag
+          pressed={value.showWbs}
+          onPressedChange={(v) => set("showWbs", v)}
+          title="Outline codes on task rows (1, 1.1, 2…)"
+        >
+          WBS
+        </Flag>
+        <Flag
+          pressed={value.enableSelection}
+          onPressedChange={(v) => set("enableSelection", v)}
+          title="Multi-select + floating bulk actions"
+        >
+          Multi-select
+        </Flag>
+        <Flag
+          pressed={value.showColumns}
+          onPressedChange={(v) => set("showColumns", v)}
+          title="Extra sidebar columns (duration, status, progress, deps)"
+        >
+          Columns
         </Flag>
       </Row>
 

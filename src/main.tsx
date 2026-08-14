@@ -12,6 +12,7 @@ import { ThemeTokensProvider } from "./context/primary-accent-context";
 import { ThemeStudioProvider } from "./context/theme-studio-context";
 import { ThemeStudioHost } from "./components/showcase/appearance/theme-studio-host";
 import "./index.css";
+import "@nqlib/nqgantt/styles";
 import "./nqgantt/gantt-theme.css";
 import App from "./App";
 

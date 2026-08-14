@@ -225,7 +225,7 @@ export function ChartsPage() {
 
         <LiquidGlassBar
           shape="rounded"
-          className="charts-toolbar sticky top-3 z-[var(--z-sticky-content)] mt-8 w-full max-w-full"
+          className="charts-toolbar sticky top-3 z-[var(--z-sticky-content)] mt-8 w-full max-w-full lg:max-w-[calc(100%-min(22rem,48vw))]"
           contentClassName="w-full flex-col items-stretch gap-3 p-3"
         >
           <div className="flex flex-wrap items-center gap-2">
@@ -236,7 +236,7 @@ export function ChartsPage() {
                 setPage(0);
               }}
               placeholder="Search examples…"
-              className="h-8 max-w-xs rounded-full text-xs"
+              className="h-8 max-w-xs text-xs"
             />
             <ToggleGroup
               type="single"
@@ -354,7 +354,6 @@ export function ChartsPage() {
             <Button
               size="sm"
               variant="outline"
-              className="rounded-full"
               disabled={safePage <= 0}
               onClick={() => setPage((p) => Math.max(0, p - 1))}
             >
@@ -363,7 +362,6 @@ export function ChartsPage() {
             <Button
               size="sm"
               variant="outline"
-              className="rounded-full"
               disabled={safePage >= pageCount - 1}
               onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
             >
@@ -376,7 +374,7 @@ export function ChartsPage() {
           <p className="font-mono text-xs tracking-[0.04em] text-muted-foreground/70">
             synced via <code>pnpm nqchart:sync</code> · {PAGE_SIZE} charts mounted per page
           </p>
-          <Button size="sm" variant="outline" className="rounded-full" asChild>
+          <Button size="sm" variant="outline" asChild>
             <Link to="/blocks">Component blocks</Link>
           </Button>
         </footer>

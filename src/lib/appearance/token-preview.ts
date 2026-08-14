@@ -19,14 +19,49 @@ export const RADIUS_PRESETS: ReadonlyArray<{
   { id: "pill", label: "Pill", value: "1.1rem" },
 ] as const
 
-/** Accent chips: hue (deg) matches nqui primary scale shape in colors.css */
+/**
+ * Accent chips for Theme Studio / catalog.
+ * First two are tuned for nqui warm paper (`--background` hue ~95): cool
+ * primaries that stay distinct from cream without going violet/rose.
+ */
 export const ACCENT_CHIPS = [
+  { hue: 230, label: "Slate", recommended: true },
+  { hue: 205, label: "Teal", recommended: true },
   { hue: 240, label: "Blue" },
-  { hue: 280, label: "Violet" },
+  { hue: 195, label: "Cyan" },
   { hue: 150, label: "Emerald" },
   { hue: 75, label: "Amber" },
+  { hue: 280, label: "Violet" },
   { hue: 350, label: "Rose" },
-  { hue: 195, label: "Cyan" },
+] as const
+
+/** Exact paper-fit primaries for Studio quick picks (light targets). */
+export const PAPER_PRIMARY_PRESETS = [
+  {
+    id: "ink",
+    label: "Ink",
+    blurb: "nqui default — monochrome on cream",
+    hue: null as number | null,
+    shade: 2,
+    /** Swatch paint (matches `--primary-500` warm ink). */
+    swatch: "oklch(0.35 0.004 95)",
+  },
+  {
+    id: "slate",
+    label: "Slate",
+    blurb: "Best chromatic fit on warm paper",
+    hue: 230,
+    shade: 2.6,
+    swatch: "oklch(0.45 0.11 230)",
+  },
+  {
+    id: "teal",
+    label: "Teal",
+    blurb: "Softer editorial cool",
+    hue: 205,
+    shade: 2.8,
+    swatch: "oklch(0.46 0.09 205)",
+  },
 ] as const
 
 /** Override primary scale for the accent picker (ring stays nqui’s neutral token). */
