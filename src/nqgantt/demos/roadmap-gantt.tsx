@@ -786,13 +786,12 @@ export function RoadmapGantt({
       )}
     >
       {debugProbe ? <GanttBarDebugProbe rootRef={containerRef} /> : null}
+      {/* Forward-compat: not on published GanttRootProps (@nqlib/nqgantt@0.4.0). */}
       <GanttRoot
         className="min-h-0 flex-1"
         data={rootData}
         groups={wbsView.groups}
         density={density}
-        barStyle={barStyle}
-        groupRows={groupRows}
         defaultRange={defaultRange}
         defaultZoom={100}
         colorBy={colorBy}
@@ -804,7 +803,11 @@ export function RoadmapGantt({
         onVisibleColumnsChange={setVisibleColumnIds}
         showProgressColumn
         onCellCommit={editableSidebar ? onCellCommit : undefined}
-        people={TEAM_DIRECTORY}
+        {...({
+          barStyle,
+          groupRows,
+          people: TEAM_DIRECTORY,
+        } as object)}
         renderDateEditor={renderNquiDateEditor}
         sortState={sortState}
         onSortChange={setSortState}
