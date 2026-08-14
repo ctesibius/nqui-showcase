@@ -75,14 +75,18 @@ function localNqganttAliases(): Alias[] {
   ]
 }
 
-/** Resolve theme CSS from the sibling checkout until the styles export is on npm. */
+/**
+ * `@nqlib/nqgantt/styles` — published 0.4.1 ships the CSS, but Vite 8/rolldown
+ * resolves export conditions (`module`/`browser`/`production`/`import`) and
+ * rejects a string `"./styles"` mapping. Point at the file on disk so Vercel
+ * does not need a sibling checkout.
+ */
 function nqganttStylesAlias(): Alias[] {
   if (process.env.USE_LOCAL_NQGANTT === "true") return [] // already in localNqganttAliases
-  const workspaceRoot = process.env.NQGANTT_DIR ?? path.resolve(__dirname, "../nqgantt/packages")
-  const localCss = path.join(workspaceRoot, "nqgantt", "src", "gantt-theme.css")
-  if (!existsSync(localCss)) return []
-  console.info(`[nqui-showcase] @nqlib/nqgantt/styles → ${localCss}`)
-  return [{ find: /^@nqlib\/nqgantt\/styles$/, replacement: localCss }]
+  const pkgCss = path.resolve(__dirname, "node_modules/@nqlib/nqgantt/src/gantt-theme.css")
+  if (!existsSync(pkgCss)) return []
+  console.info(`[nqui-showcase] @nqlib/nqgantt/styles → ${pkgCss}`)
+  return [{ find: /^@nqlib\/nqgantt\/styles$/, replacement: pkgCss }]
 }
 
 /**

@@ -4,8 +4,8 @@ Consumer app pattern: **published `@nqlib/nqgantt` UI + engine**, showcase-owned
 
 ## Current pin
 
-`@nqlib/nqgantt` / `@nqlib/nqgantt-engine` at **`^0.4.0`** (baselines, earned value,
-worklog, resource calendars, MS Project import/export). Deploy uses published npm:
+`@nqlib/nqgantt` / `@nqlib/nqgantt-engine` at **`^0.4.1`** (includes `./styles`
+theme CSS). Deploy uses published npm:
 
 ```bash
 pnpm build           # published path
