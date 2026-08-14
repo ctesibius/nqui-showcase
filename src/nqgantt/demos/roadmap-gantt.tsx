@@ -786,7 +786,7 @@ export function RoadmapGantt({
       )}
     >
       {debugProbe ? <GanttBarDebugProbe rootRef={containerRef} /> : null}
-      {/* Forward-compat: not on published GanttRootProps (@nqlib/nqgantt@0.4.0). */}
+      {/* Forward-compat: barStyle/groupRows/people land in newer nqgantt; published 0.4.0 types omit them. */}
       <GanttRoot
         className="min-h-0 flex-1"
         data={rootData}
@@ -807,7 +807,7 @@ export function RoadmapGantt({
           barStyle,
           groupRows,
           people: TEAM_DIRECTORY,
-        } as object)}
+        } as unknown as Record<string, never>)}
         renderDateEditor={renderNquiDateEditor}
         sortState={sortState}
         onSortChange={setSortState}
