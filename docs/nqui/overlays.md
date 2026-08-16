@@ -43,6 +43,10 @@ Prefer CSS variables from the design system:
 
 Modals / sheets / popovers sit **above** the page (subtle elevation). Inline Cards stay flat. Do not use `backdrop-blur` on inline content — reserve blur for overlays and sticky chrome over scroll.
 
+### PopoverAnchor
+
+Position the panel on a chip or cell while a **separate** control opens it. `asChild` is ignored — nqui wraps a measurable host so a sibling trigger (SKU + button) does not park the panel at the viewport origin.
+
 ## When not to
 
 - Long forms in a `Dialog` (>~5 fields) → Sheet or route ([[forms-and-fields]]).

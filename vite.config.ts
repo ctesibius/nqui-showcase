@@ -128,7 +128,7 @@ export default defineConfig(async ({ mode }) => ({
     "process.env.NODE_ENV": JSON.stringify(mode === "production" ? "production" : "development"),
     "process.env.NEXT_PUBLIC_APP_URL": JSON.stringify(""),
   },
-  // nqui is published (^0.7.7) by default, but `USE_LOCAL_NQUI=true` still
+  // nqui is published (^0.7.8) by default, but `USE_LOCAL_NQUI=true` still
   // dev-links the sibling repo — the dep optimizer mangles a symlinked
   // package's named exports (e.g. InlineTabsList disappears), so keep this
   // exclude to serve its ESM dist unbundled whenever local mode is active.
