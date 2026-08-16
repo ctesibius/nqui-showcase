@@ -31,6 +31,7 @@ Load **1–3 files** per task via **`.cursor/READ_BUDGET.md`**:
 | **Remember / prior gotcha** | `memory/INDEX.md` (never bulk-read `memory/`) |
 | Local nqgrid toggle | `NQGRID-WORKSPACE.md`, `pnpm nqgrid:status` |
 | Local nqui toggle | `pnpm nqui:local` / `nqui:status` — verify catalog before publishing nqui |
+| Bump `@nqlib/*` / lockfile | `.cursor/rules/pnpm-lockfile.mdc` → `pnpm update <pkg>` + `pnpm lockfile:check` |
 | Engine bug / patch sibling? | `.cursor/NQLIB.md` → ask user |
 
 Refresh nqui skills: `npx @nqlib/nqui init-skills --force`
@@ -128,6 +129,8 @@ pnpm dev:local        # local nqgrid source
 pnpm dev:local:charts # local @nqlib/nqchart from ../becocharts/dist
 pnpm nqgrid:status
 pnpm nqchart:status
+pnpm nqui:status
+pnpm lockfile:check   # same check as Vercel (frozen-lockfile)
 pnpm build
 rm -rf node_modules/.vite && pnpm dev   # after rebuilding linked @nqlib/*
 ```

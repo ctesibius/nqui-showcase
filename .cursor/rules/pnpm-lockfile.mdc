@@ -1,0 +1,26 @@
+---
+description: Keep pnpm-lock.yaml in the same commit as package.json — Vercel frozen-lockfile
+alwaysApply: true
+---
+
+# pnpm lockfile (Vercel)
+
+Vercel runs `pnpm install` with **frozen-lockfile**. A `package.json` bump without a matching `pnpm-lock.yaml` fails the deploy (`ERR_PNPM_OUTDATED_LOCKFILE`). Do not set `--no-frozen-lockfile` on Vercel.
+
+## When `package.json` dependencies or specifiers change
+
+In the **same commit**:
+
+1. The version must already be on the registry (`npm view @nqlib/nqui version`). Never bump to an unpublished tag.
+2. Refresh the lockfile: `pnpm update <pkg>` (or `pnpm install` after a specifier edit).
+3. Confirm: `pnpm lockfile:check`.
+4. Commit **both** `package.json` and `pnpm-lock.yaml`.
+
+`scripts/toggle-nqui.js` `PUBLISHED_VERSION` must match `package.json` (`@nqlib/nqui`). `pnpm nqui:published` rewrites the specifier from that constant.
+
+```bash
+# ❌ package.json only
+# ✅ after npm has 0.7.8:
+pnpm update @nqlib/nqui
+pnpm lockfile:check
+```

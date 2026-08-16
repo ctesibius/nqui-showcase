@@ -23,7 +23,7 @@ const pkgPath = join(root, "package.json")
 const installedDir = join(root, "node_modules", "@nqlib", "nqui")
 
 // --- CUSTOMIZE ---
-const PUBLISHED_VERSION = "^0.7.7"
+const PUBLISHED_VERSION = "^0.7.8"
 // --- END CUSTOMIZE ---
 
 const nquiDir = resolve(process.env.NQUI_DIR ?? join(root, "..", "nqui"))
@@ -136,9 +136,10 @@ if (useLocal) {
     pkg.dependencies["@nqlib/nqui"] = PUBLISHED_VERSION
     writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n")
     console.log(`Updated package.json → "@nqlib/nqui": "${PUBLISHED_VERSION}"`)
-    execSync("pnpm install", { cwd: root, stdio: "inherit" })
   } else {
     console.log("Already on published version", PUBLISHED_VERSION)
   }
+  // Always reinstall so pnpm-lock.yaml matches package.json (Vercel frozen-lockfile).
+  execSync("pnpm install", { cwd: root, stdio: "inherit" })
   console.log(`\nSwitched to PUBLISHED nqui ${installedVersion()}\n`)
 }

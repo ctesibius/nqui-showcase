@@ -13,4 +13,6 @@ Read [`CLAUDE.md`](./CLAUDE.md) first.
 
 **nqui catalog** lives here (`/catalog`, `/nqui`, recipes) — not in `../nqui`. Pre-publish QA: `pnpm nqui:local` → `pnpm dev`. Marketing chrome (`/`, `/blocks`) stays factory-glass; catalog/recipes stay the labeled admin shell.
 
-Dev: `pnpm dev` · local nqgrid: `pnpm dev:local` · `pnpm nqgrid:status` · `pnpm nqui:status` · `pnpm build`
+Dev: `pnpm dev` · local nqgrid: `pnpm dev:local` · `pnpm nqgrid:status` · `pnpm nqui:status` · `pnpm lockfile:check` · `pnpm build`
+
+Bumping `package.json` without `pnpm-lock.yaml` in the **same commit** fails Vercel (`frozen-lockfile`). See `.cursor/rules/pnpm-lockfile.mdc`.

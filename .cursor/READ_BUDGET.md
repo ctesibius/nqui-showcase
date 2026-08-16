@@ -30,6 +30,7 @@ Load **1–3 files** per task. Do not bulk-read skill folders or sibling engine 
 | **Prior gotcha / “what do we know”** | `memory/INDEX.md` | matching `memory/<slug>.md` | bulk-read `memory/` |
 | **Local nqgrid vs published** | `NQGRID-WORKSPACE.md` | `pnpm nqgrid:status` | `vite.config.ts` unless alias broken |
 | **Local nqui vs published** | nqui `nqui-local-published-toggle/SKILL.md` | `pnpm nqui:local` → `/catalog` | relink docs |
+| **Bump `@nqlib/*` / lockfile** | `.cursor/rules/pnpm-lockfile.mdc` | `pnpm update <pkg>` · `pnpm lockfile:check` | committing `package.json` without `pnpm-lock.yaml` |
 | **Engine bug / patch sibling?** | `.cursor/NQLIB.md` | sibling `CLAUDE.md` | silent `../` patches |
 
 ## Rules of thumb
