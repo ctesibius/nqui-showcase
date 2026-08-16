@@ -9,12 +9,14 @@
 | **Catalog** | [/catalog](/catalog) | Variants, sizes, states per component |
 | **Buttons & Actions** | [/catalog#buttons-actions](/catalog#buttons-actions) | Button, Toggle, ToggleGroup |
 | **Form Components** | [/catalog#form-components](/catalog#form-components) | Field, Input, Select, Radio |
-| **Overlays & Dialogs** | [/catalog#overlays-dialogs](/catalog#overlays-dialogs) | Dialog, Sheet, Drawer |
+| **Overlays & Dialogs** | [/catalog#overlays-dialogs](/catalog#overlays-dialogs) | Dialog, Sheet, Drawer, AlertDialog (specimens in `overlay-demos.tsx`) |
 | **Layout Components** | [/catalog#layout-components](/catalog#layout-components) | Card, ScrollArea, separators |
 | **Display Components** | [/catalog#display-components](/catalog#display-components) | Empty, Skeleton, Badge, Avatar |
-| **Recipes** | [/nqui](/nqui) | Product-shaped compositions |
+| **Recipes** | [/nqui](/nqui) | Product-shaped compositions (not the marketing landing) |
 | **Patterns** | [/patterns](/patterns) | Commerce / dashboard layouts |
+| **Appearance** | [/settings/appearance](/settings/appearance) | Look, accent, corners — accent does not tint hover |
 | **Design system** | [/design-system](/design-system) | Tokens, radius, elevation |
+| **Blocks tour** | [/blocks](/blocks) | Paste-ready composed patterns |
 
 ## Suggested drills
 

@@ -6,6 +6,7 @@ import {
   HomeIcon,
   LayoutIcon,
   Moon01Icon,
+  PaintBoardIcon,
   SettingsIcon,
   Sun01Icon,
 } from "@hugeicons/core-free-icons"
@@ -13,7 +14,6 @@ import { useTheme } from "next-themes"
 import { getShowcaseThemeLabel, nextShowcaseTheme } from "../lib/showcase-theme"
 import { useLocation, Link } from "react-router-dom"
 import { LANDING_PATH, NQUI_HUB_PATH, showcaseRoutes } from "../config/showcase-nav"
-import { NavUser } from "./nav-user"
 import {
   NquiLogo,
   Sidebar,
@@ -33,14 +33,8 @@ const navIcons: Record<string, typeof HomeIcon> = {
   "/patterns": LayoutIcon,
   "/recipes/elevation": LayoutIcon,
   "/catalog": FileIcon,
+  "/settings/appearance": PaintBoardIcon,
   "/design-system": SettingsIcon,
-}
-
-const showcaseUser = {
-  name: "Nqui",
-  email: "dev@nqui.local",
-  // No asset at /avatars/* — leave empty so NavUser renders flat initials (not a muted chip).
-  avatar: "",
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -107,7 +101,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={showcaseUser} />
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton

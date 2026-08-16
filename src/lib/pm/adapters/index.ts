@@ -7,6 +7,16 @@ export {
   toTableRows,
   toStatusMix,
   type StatusMixPoint,
+  BLOCK_CELL_SEP,
+  blockCellId,
+  parseBlockCellId,
+  quarterIndex,
+  quarterKeyOf,
+  makeQuarter,
+  coveringQuarters,
+  toBlockColumns,
+  issuesFromBlockColumns,
+  type PmQuarter,
 } from "./views";
 
 export {

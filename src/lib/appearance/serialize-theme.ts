@@ -11,7 +11,6 @@ import {
   type PaperSeed,
 } from "./derive-surface"
 import {
-  previewMenuAccentVars,
   previewPrimaryVars,
   previewRadiusVars,
   radiusValue,
@@ -73,14 +72,11 @@ function modeVars(
   const primary =
     draft.accentHue === null
       ? null
-      : mergeVars(
-          previewPrimaryVars(
-            draft.accentHue,
-            mode,
-            draft.accentShade,
-            draft.shadeBias,
-          ),
-          previewMenuAccentVars(draft.accentHue, mode),
+      : previewPrimaryVars(
+          draft.accentHue,
+          mode,
+          draft.accentShade,
+          draft.shadeBias,
         )
 
   const radius =

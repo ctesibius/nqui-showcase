@@ -68,6 +68,7 @@ Override the primary scale in your app's CSS, after nqui's import:
 - One hue. Don't override into two hues alternating — that breaks the focus + selection consistency.
 - Match the L (lightness) values of nqui's defaults to keep contrast guarantees.
 - OKLCH only — don't mix HSL/RGB here.
+- Do **not** copy the brand hue onto `--accent` / `--interactive`. Those stay muted so hover and selected rows are a wash, not a primary fill. This site's Appearance picker follows that split.
 
 ### Radius (rounder or sharper)
 

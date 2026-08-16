@@ -42,6 +42,8 @@ Avoid raw palette colors and manual `dark:` overrides when tokens already flip w
 
 Host apps typically wrap with `ThemeProvider` (`next-themes`, `attribute="class"`) — see [Imports](/docs/nqui/imports). Token values live in `@nqlib/nqui/styles` and your CSS entry ([CSS](/docs/nqui/css)).
 
+This site's Appearance picker writes brand hue to `--primary` only. `--accent` and `--interactive` stay muted so hover/menu wash is not a primary fill. Try it at [/settings/appearance](/settings/appearance).
+
 ### Conditional classes
 
 ```tsx

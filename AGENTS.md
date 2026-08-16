@@ -11,6 +11,6 @@ Read [`CLAUDE.md`](./CLAUDE.md) first.
 | 3 | Before editing siblings (`../nqui`, `../nqgrid`, …), read **`.cursor/NQLIB.md`** |
 | 4 | Bug regressions: search **`.agents/skills/fixed/index.md`** first · durable gotchas: **`memory/INDEX.md`** |
 
-**nqui catalog** lives here (`/catalog`, `/nqui`, recipes) — not in `../nqui`. Pre-publish QA: `pnpm nqui:local` → `pnpm dev`.
+**nqui catalog** lives here (`/catalog`, `/nqui`, recipes) — not in `../nqui`. Pre-publish QA: `pnpm nqui:local` → `pnpm dev`. Marketing chrome (`/`, `/blocks`) stays factory-glass; catalog/recipes stay the labeled admin shell.
 
 Dev: `pnpm dev` · local nqgrid: `pnpm dev:local` · `pnpm nqgrid:status` · `pnpm nqui:status` · `pnpm build`

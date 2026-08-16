@@ -27,3 +27,6 @@ dist-ssr
 
 # Local design-tooling state — regenerated, not source
 .impeccable/
+
+# pnpm content-addressable store if created inside the repo
+.pnpm-store/

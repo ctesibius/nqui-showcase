@@ -50,7 +50,7 @@ Empty · Skeleton · Alert · Badge · Separator · Sonner toaster
 ## Practice
 
 Drills → [[practice-in-catalog]] · first session → [[getting-started]]  
-Live: [/catalog](/catalog) · [Buttons](/catalog#buttons-actions) · [Forms](/catalog#form-components) · [/nqui](/nqui)
+Live: [/catalog](/catalog) · [Buttons](/catalog#buttons-actions) · [Forms](/catalog#form-components) · [/nqui](/nqui) · [Appearance](/settings/appearance)
 
 ## Team
 

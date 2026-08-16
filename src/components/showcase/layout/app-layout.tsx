@@ -46,26 +46,11 @@ const routeToBreadcrumbs: Record<string, { label: string; path: string }[]> = {
     { label: "Recipes", path: NQUI_HUB_PATH },
     { label: "Elevation philosophy", path: "/recipes/elevation" },
   ],
-  "/catalog": [
-    { label: "Recipes", path: NQUI_HUB_PATH },
-    { label: "Component catalog", path: "/catalog" },
-  ],
-  "/design-system": [
-    { label: "Recipes", path: NQUI_HUB_PATH },
-    { label: "Design system", path: "/design-system" },
-  ],
-  "/studio": [
-    { label: "Recipes", path: NQUI_HUB_PATH },
-    { label: "Theme Studio", path: "/studio" },
-  ],
-  "/settings/appearance": [
-    { label: "Recipes", path: NQUI_HUB_PATH },
-    { label: "Appearance", path: "/settings/appearance" },
-  ],
-  "/command": [
-    { label: "Recipes", path: NQUI_HUB_PATH },
-    { label: "Command lab", path: "/command" },
-  ],
+  "/catalog": [{ label: "Component catalog", path: "/catalog" }],
+  "/design-system": [{ label: "Design system", path: "/design-system" }],
+  "/studio": [{ label: "Theme Studio", path: "/studio" }],
+  "/settings/appearance": [{ label: "Appearance", path: "/settings/appearance" }],
+  "/command": [{ label: "Command lab", path: "/command" }],
 }
 
 // Context to share scroll container ref with TOC
@@ -294,7 +279,7 @@ export function AppLayout() {
     <SidebarProvider
       style={
         {
-          "--sidebar-width": "var(--sidebar-width-icon)",
+          "--sidebar-width": "13rem",
         } as React.CSSProperties
       }
     >

@@ -16,7 +16,7 @@ Load **1–3 files** per task. Do not bulk-read skill folders or sibling engine 
 
 | Task | Read THIS | Then maybe | Do NOT read |
 |------|-----------|------------|-------------|
-| **nqui catalog / recipes** | `src/components/showcase/pages/` (one page) | `src/components/showcase/layout/` | `../nqui/src/pages` (removed) |
+| **nqui catalog / recipes** | `src/components/showcase/pages/` (one page) | `overlay-demos.tsx`, `src/components/showcase/layout/` | `../nqui/src/pages` (removed) |
 | **Component gallery / site chrome** | nqui `READ_BUDGET.md` | one `components/nqui-<name>.md` | all component docs |
 | **Spreadsheet / formula bar / pivot** | `NQGRID-WORKSPACE.md` | `src/nqgrid/demos/spreadsheet/spreadsheet-page.tsx` | all of `../nqgrid/src/` |
 | **Projects / PM board / columns** | `src/nqgrid/demos/projects/projects-page.tsx` | `pm-column-model.ts`, `pm-schema.ts` | nqgrid engine internals |

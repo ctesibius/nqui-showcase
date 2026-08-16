@@ -40,7 +40,12 @@ Refresh nqui skills: `npx @nqlib/nqui init-skills --force`
 ## What this project is
 
 **nqui-showcase** is a Vite + React marketing/demo app that embeds live surfaces from the
-**nqlib** workspace on one page (`/`):
+**nqlib** workspace. Two chrome systems (do not flatten):
+
+| Chrome | Routes | Look |
+|--------|--------|------|
+| Marketing | `/`, `/blocks`, `/charts` | factory-glass, `LiquidGlassBar` |
+| Operate | `/catalog`, `/nqui`, `/design-system`, recipes | labeled sidebar + Tray |
 
 | Section | npm package | Live surface |
 |---------|-------------|--------------|
@@ -48,7 +53,7 @@ Refresh nqui skills: `npx @nqlib/nqui init-skills --force`
 | Blocks tour | `@nqlib/*` | `/blocks` composed patterns |
 | Charts | `@nqlib/nqchart` | `/charts` registry catalog |
 
-This app is the **only** home for the nqui component catalog — do not recreate it in `../nqui`.
+Satoshi is the **library** default (`@nqlib/nqui/styles`). This app is the **only** home for the nqui component catalog — do not recreate it in `../nqui`.
 
 ---
 
@@ -76,7 +81,8 @@ Before editing engine/library internals, read the sibling guide (`../nqgrid/CLAU
 nqui-showcase/
 ├── src/
 │   ├── components/showcase/     # nqui catalog + recipes (canonical)
-│   ├── components/blocks/       # /blocks composed tour
+│   ├── components/showcase/overlay-demos.tsx  # catalog overlay specimens
+│   ├── components/blocks/       # /blocks composed tour (+ drilldown, issues lab)
 │   ├── nqgrid/                  # styling + spreadsheet + projects demos
 │   ├── nqgantt/demos/           # roadmap gantt + tasks-to-gantt bridge
 │   ├── nqgantt/lib/             # bar UI reference copies (sync, not runtime)

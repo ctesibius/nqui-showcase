@@ -111,28 +111,6 @@ import {
   NavigationMenuLink,
   PaginationAdaptive,
   // Overlays & Dialogs
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogAction,
-  AlertDialogCancel,
-  Sheet,
-  SheetTrigger,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
   Popover,
   PopoverAnchor,
   PopoverTrigger,
@@ -207,15 +185,6 @@ import {
   CommandSeparator,
 } from "@nqlib/nqui/command"
 import {
-  Drawer,
-  DrawerTrigger,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerFooter,
-} from "@nqlib/nqui/drawer"
-import {
   Carousel,
   CarouselContent,
   CarouselItem,
@@ -251,6 +220,12 @@ import {
   catalogShell,
 } from "../catalog-layout"
 import { CatalogSpecimen } from "../catalog-specimen"
+import {
+  BoardFiltersDrawer,
+  InviteReviewerDialog,
+  RevokeKeyAlertDialog,
+  TaskInspectorSheet,
+} from "../overlay-demos"
 
 type Person = { id: string; name: string; avatarUrl?: string }
 
@@ -1081,6 +1056,18 @@ function InputGroupBudgetField() {
   )
 }
 
+function CatalogPaginationSpecimen() {
+  const [page, setPage] = React.useState(18)
+  return (
+    <div className="flex w-full min-w-0 flex-col gap-2">
+      <p className="font-mono text-xs tabular-nums text-muted-foreground">
+        Page {page} of 40
+      </p>
+      <PaginationAdaptive page={page} totalPages={40} onPageChange={setPage} />
+    </div>
+  )
+}
+
 export default function ComponentShowcase() {
   const [open, setOpen] = React.useState(false)
   const [radioValue, setRadioValue] = React.useState("option1")
@@ -1143,42 +1130,19 @@ export default function ComponentShowcase() {
       {/* Header Section */}
       <div className="space-y-3">
         <div>
-          <h1 className="text-3xl font-bold">Component catalog</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Component catalog</h1>
           <p className="text-muted-foreground">
-            Variant and API reference for @nqlib/nqui. For composition guidance, start on{" "}
-            <Link to="/nqui" className="font-medium underline-offset-4 hover:underline">
-              Recipes
+            Variants and props for @nqlib/nqui. Start with composition on{" "}
+            <Link to="/blocks" className="font-medium underline-offset-4 hover:underline">
+              /blocks
             </Link>
+            , or jump with{" "}
+            <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs">
+              ⌘K
+            </kbd>
             .
           </p>
         </div>
-
-        <Alert>
-          <AlertTitle>Catalog mode</AlertTitle>
-          <AlertDescription className="flex flex-col gap-3">
-            <p>
-              This page lists components in isolation. For product layout patterns (when to use
-              what, avoiding busy UI), read{" "}
-              <code className="text-xs">docs/nqui-skills/COMPOSITION.md</code> or open{" "}
-              <Link to="/nqui" className="font-medium underline-offset-4 hover:underline">
-                Recipes
-              </Link>
-              . Use the sidebar or{" "}
-              <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs">
-                ⌘K
-              </kbd>{" "}
-              to jump between catalog sections.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/patterns">Commerce dashboard</Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/blocks">Workspace settings</Link>
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
       </div>
 
       {/* Buttons & Actions Section */}
@@ -1187,33 +1151,41 @@ export default function ComponentShowcase() {
         <div className={catalogGridLedger}>
           <CatalogSpecimen
             title="Button Variants"
-            description="All 9 EnhancedButton variants including semantic (success, warning, info), plus disabled primary"
+            description="Default, outline, ghost, destructive — the four you reach for first. Semantic and extra variants are below."
             className="md:col-span-2"
             stageClassName="space-y-3"
           >
             <div className="flex flex-wrap gap-2">
               <Button variant="default">Default</Button>
-              <Button variant="destructive">Destructive</Button>
               <Button variant="outline">Outline</Button>
-              <Button variant="secondary">Secondary</Button>
-              <Button variant="success">Success</Button>
-              <Button variant="warning">Warning</Button>
-              <Button variant="info">Info</Button>
               <Button variant="ghost">Ghost</Button>
-              <Button variant="link">Link</Button>
+              <Button variant="destructive">Destructive</Button>
             </div>
-            <div className="flex flex-wrap items-center gap-2 border-t border-border/60 pt-3">
-              <span className="text-xs font-medium text-muted-foreground">Disabled</span>
-              <Button variant="default" disabled>
-                Primary
-              </Button>
-              <span className="text-xs text-muted-foreground">
-                <code className="text-[0.65rem]">variant=&quot;default&quot; disabled</code>
-              </span>
-            </div>
-            <div className="text-xs text-muted-foreground pt-2">
-              asChild: <Button asChild><a href="#">Render as link</a></Button>
-            </div>
+            <Collapsible>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="px-0 text-muted-foreground">
+                  Semantic and extra variants
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-3 pt-2">
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="secondary">Secondary</Button>
+                  <Button variant="success">Success</Button>
+                  <Button variant="warning">Warning</Button>
+                  <Button variant="info">Info</Button>
+                  <Button variant="link">Link</Button>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 border-t border-border/60 pt-3">
+                  <span className="text-xs font-medium text-muted-foreground">Disabled</span>
+                  <Button variant="default" disabled>
+                    Primary
+                  </Button>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  asChild: <Button asChild><a href="#">Render as link</a></Button>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </CatalogSpecimen>
 
           <CatalogSpecimen
@@ -2300,8 +2272,10 @@ export default function ComponentShowcase() {
             title="Tabs"
             description={
               <>
-                Default pill tabs with sliding indicator. Use{" "}
-                <code className="text-xs">InlineTabsList</code> /{" "}
+                Default pill tabs with sliding indicator.{" "}
+                <code className="text-xs">variant=&quot;line&quot;</code> is a sliding underline
+                that sits on a <code className="text-xs">border-b</code> hairline.
+                Use <code className="text-xs">InlineTabsList</code> /{" "}
                 <code className="text-xs">InlineTabsTrigger</code> inside page-level scrollers (0.6.3+).
               </>
             }
@@ -2318,6 +2292,33 @@ export default function ComponentShowcase() {
                 <TabsContent value="tab1">Content for tab 1</TabsContent>
                 <TabsContent value="tab2">Content for tab 2</TabsContent>
                 <TabsContent value="tab3">Content for tab 3</TabsContent>
+              </Tabs>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Line (underline)</Label>
+              <p className="text-xs text-muted-foreground">
+                Sliding bar sits on the list edge — <code className="text-xs">border-b</code> hairline
+                should line up, not sit above the indicator.
+              </p>
+              <Tabs defaultValue="tab1" className="gap-0">
+                <TabsList
+                  variant="line"
+                  className="w-full justify-start border-b border-border"
+                >
+                  <TabsTrigger value="tab1">Tab 1</TabsTrigger>
+                  <TabsTrigger value="tab2">Tab 2</TabsTrigger>
+                  <TabsTrigger value="tab3">Tab 3</TabsTrigger>
+                </TabsList>
+                <TabsContent value="tab1" className="pt-3">
+                  Content for tab 1
+                </TabsContent>
+                <TabsContent value="tab2" className="pt-3">
+                  Content for tab 2
+                </TabsContent>
+                <TabsContent value="tab3" className="pt-3">
+                  Content for tab 3
+                </TabsContent>
               </Tabs>
             </div>
 
@@ -2466,12 +2467,10 @@ export default function ComponentShowcase() {
 
           <CatalogSpecimen
             title="Pagination"
-            description="Adaptive — shrinks page count in narrow cards"
+            description="Adaptive — click through 40 pages; hover for arrows. Strip pans in place."
             stageClassName="min-h-0"
           >
-            <ScrollArea orientation="horizontal" fadeMask={false} className="w-full">
-              <PaginationAdaptive page={3} totalPages={10} onPageChange={() => {}} />
-            </ScrollArea>
+            <CatalogPaginationSpecimen />
           </CatalogSpecimen>
 
           <CatalogSpecimen
@@ -2602,74 +2601,28 @@ export default function ComponentShowcase() {
         <h2 id="overlays-dialogs" className={catalogHeading}>Overlays & Dialogs</h2>
         <div className={catalogGridLedger}>
           <CatalogSpecimen
-            title="Dialog · Alert Dialog · Drawer · Sheet"
-            description="Modal overlays—button names indicate component"
-            stageClassName="flex flex-wrap gap-2"
+            title="Dialog"
+            description="Short form — invite, rename, create. Click Invite."
           >
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button>Dialog</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Are you sure?</DialogTitle>
-                  <DialogDescription>
-                    This action cannot be undone. This will permanently delete your account.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <Button variant="outline">Cancel</Button>
-                  <Button variant="destructive">Delete</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive">Alert Dialog</Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete your data.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel variant="outline" size="default">Cancel</AlertDialogCancel>
-                  <AlertDialogAction variant="default" size="default">Continue</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-
-            <Drawer>
-              <DrawerTrigger asChild>
-                <Button>Drawer</Button>
-              </DrawerTrigger>
-              <DrawerContent>
-                <DrawerHeader>
-                  <DrawerTitle>Drawer Title</DrawerTitle>
-                  <DrawerDescription>Drawer description</DrawerDescription>
-                </DrawerHeader>
-                <div className="p-4">Drawer content</div>
-                <DrawerFooter>
-                  <Button>Submit</Button>
-                </DrawerFooter>
-              </DrawerContent>
-            </Drawer>
-
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button>Sheet</Button>
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>Sheet Title</SheetTitle>
-                  <SheetDescription>Sheet description</SheetDescription>
-                </SheetHeader>
-                <div className="mt-4">Sheet content</div>
-              </SheetContent>
-            </Sheet>
+            <InviteReviewerDialog />
+          </CatalogSpecimen>
+          <CatalogSpecimen
+            title="Alert Dialog"
+            description="Destructive confirm only. Click Revoke."
+          >
+            <RevokeKeyAlertDialog />
+          </CatalogSpecimen>
+          <CatalogSpecimen
+            title="Drawer"
+            description="Bottom sheet for mobile filters. Click Filters."
+          >
+            <BoardFiltersDrawer />
+          </CatalogSpecimen>
+          <CatalogSpecimen
+            title="Sheet"
+            description="Right inspector for longer edits. Click the issue."
+          >
+            <TaskInspectorSheet />
           </CatalogSpecimen>
 
           <CatalogSpecimen
@@ -3389,7 +3342,7 @@ export default function ComponentShowcase() {
 
           <CatalogSpecimen
             title="Calendar - Range"
-            description="Date range selection"
+            description="Date range. Drag start or end to resize."
           >
             <Calendar
               mode="range"
@@ -3414,7 +3367,7 @@ export default function ComponentShowcase() {
 
           <CatalogSpecimen
             title="Calendar - Multi Panel"
-            description="Two months side-by-side"
+            description="Two months. Drag either endpoint across months."
           >
             <Calendar
               mode="range"

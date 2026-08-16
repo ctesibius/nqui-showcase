@@ -16,40 +16,9 @@
    package" toggle switches off to judge the package unstyled. Load order is
    unchanged — main.tsx imports it immediately after this file. */
 
-/*
- * Satoshi (PRODUCT.md) — override nqui's Inter Variable without forking the library.
- * Variable face covers wght 300–900; italic companion for emphasis.
- */
-@font-face {
-  font-family: "Satoshi";
-  src:
-    url("./assets/Satoshi/Fonts/WEB/fonts/Satoshi-Variable.woff2") format("woff2"),
-    url("./assets/Satoshi/Fonts/WEB/fonts/Satoshi-Variable.woff") format("woff");
-  font-weight: 300 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Satoshi";
-  src:
-    url("./assets/Satoshi/Fonts/WEB/fonts/Satoshi-VariableItalic.woff2") format("woff2"),
-    url("./assets/Satoshi/Fonts/WEB/fonts/Satoshi-VariableItalic.woff") format("woff");
-  font-weight: 300 900;
-  font-style: italic;
-  font-display: swap;
-}
-
-/* After nqui `@theme inline` so Tailwind `font-sans` and `var(--font-sans)` resolve here. */
-@theme inline {
-  --font-sans: "Satoshi", system-ui, sans-serif;
-}
-
 /* Primary brand: monochrome. Near-black primary in light, near-white in dark —
  * semantic accents (badges) and the chart palette carry all the color. */
 :root {
-  --font-sans: "Satoshi", system-ui, sans-serif;
-
   --primary-100: oklch(0.95 0 0);
   --primary-200: oklch(0.9 0 0);
   --primary-300: oklch(0.8 0 0);

@@ -33,7 +33,6 @@ import {
   ACCENT_CHIPS,
   PAPER_PRIMARY_PRESETS,
   RADIUS_PRESETS,
-  previewMenuAccentVars,
   previewPrimaryVars,
   previewRadiusVars,
   radiusValue,
@@ -44,7 +43,6 @@ export {
   ACCENT_CHIPS,
   PAPER_PRIMARY_PRESETS,
   RADIUS_PRESETS,
-  previewMenuAccentVars,
   previewPrimaryVars,
   previewRadiusVars,
   type RadiusPresetId,
@@ -84,10 +82,9 @@ const PRIMARY_VARS = [
 ] as const
 
 /**
- * Menu highlight tokens. nqui menus (dropdown, menubar, context-menu, select,
- * command, sidebar) style `data-[highlighted]` / `aria-selected` from
- * `--accent`, never `--primary` — so the accent picker cannot reach them
- * unless we tint these too.
+ * Quiet hover / highlight tokens. nqui ghost buttons, menus, sidebar, and
+ * list rows wash with `--accent` / `--interactive` — never `--primary`.
+ * Brand hue must not write these, or every hover becomes a primary tint.
  */
 const MENU_ACCENT_VARS = [
   "--accent",
@@ -290,9 +287,6 @@ function applyAppearance(state: AppearanceState, mode: ThemeMode) {
 
   if (state.accentHue === null) {
     clearHtmlVars(PRIMARY_VARS)
-    // deriveSurfaceVars owns the accent keys when paper is active; clearing
-    // here would wipe the values just applied above.
-    if (!paperDrivesSurface) clearHtmlVars(MENU_ACCENT_VARS)
   } else {
     applyHtmlVars(
       previewPrimaryVars(
@@ -302,10 +296,11 @@ function applyAppearance(state: AppearanceState, mode: ThemeMode) {
         state.shadeBias,
       ),
     )
-    // After the surface pass on purpose: an explicit accent hue outranks
-    // paper's neutral accent derivation.
-    applyHtmlVars(previewMenuAccentVars(state.accentHue, mode))
   }
+  // Hover wash stays on kit/paper `--accent` (muted family). Brand hue
+  // only paints `--primary` — otherwise ghost/menu/sidebar hover reads as
+  // a primary fill.
+  if (!paperDrivesSurface) clearHtmlVars(MENU_ACCENT_VARS)
 
   if (state.radiusPreset === "default") {
     clearHtmlVars(RADIUS_VARS)

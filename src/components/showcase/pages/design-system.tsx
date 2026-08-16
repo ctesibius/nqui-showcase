@@ -216,7 +216,9 @@ export default function DesignSystem() {
         <Card>
           <CardHeader>
             <CardTitle>Type Scale</CardTitle>
-            <CardDescription>Font: Satoshi (--font-sans). sm: text-xs, default: text-sm, base: text-base</CardDescription>
+            <CardDescription>
+              Library default: Satoshi Variable, shipped with @nqlib/nqui/styles. Override --font-sans after the import to use a different face. sm: text-xs, default: text-sm, base: text-base
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">

@@ -265,8 +265,9 @@ export function AppearanceControls({
         <div>
           <p className="text-sm font-medium">Accent</p>
           <p className="text-xs text-muted-foreground">
-            Brand primary on warm paper. Try Ink (nqui default), Slate, or Teal —
-            then refine on the wheel
+            Brand primary for filled CTAs and selected states. Hover stays on
+            muted/accent. Try Ink (nqui default), Slate, or Teal — then refine
+            on the wheel
             {full ? " / theory." : "."}
           </p>
         </div>

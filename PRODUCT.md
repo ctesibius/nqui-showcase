@@ -7,7 +7,7 @@ Two audiences in one page: (1) engineering/product evaluators scrolling the mark
 Precise, composed, engineered. Not playful, not soft, not corporate-generic. Think Linear / Vercel / Stripe / Attio register — restrained chrome, confident typography, color spent only when it carries meaning.
 
 ### Aesthetic Direction
-- Typeface: Satoshi (already in `src/assets/Satoshi`) — geometric, not a reflex-list font.
+- Typeface: Satoshi Variable from `@nqlib/nqui/styles` (library `--font-sans`). Do not re-host or override it in the showcase unless judging an unstyled package.
 - Primary accent: monochrome (near-black in light mode, near-white in dark) — buttons/focus rings/primary CTAs, NOT decorative. Confirmed via live A/B in-browser comparison against the original blue and chosen deliberately.
 - Semantic color is reserved exclusively for meaning: emerald (healthy/positive), amber (watch/negotiation), rose (at-risk/negative), sky (informational/rising signal), violet (expansion/economic-buyer tier) — used on StatusBadge dots/pills, Delta arrows, MicroTrend sparkbars. Never decorative.
 - Surfaces: subtle borders + `bg-muted/40` tints, frosted glass (`backdrop-blur-md` + `bg-background/60`) only over the 3D city backdrop layer (nav pill, hero blocks, carousel figures) — not layered elsewhere.
@@ -33,7 +33,16 @@ Generic AI dashboard tells: gradient text, border-left accent stripes, glassmorp
 
 **Never let a surface claim a package it doesn't import.** Crumbs/labels name what actually renders.
 
-`/` = the landing (one viewport, living window). `/blocks` = the tour: a shelf of many live, interactive blocks, each with a bill of materials so a reader knows what to import. Prefer varied card heights (`tall`) over an identical card grid.
+`/` = the landing (one viewport, living window). CTAs: See it live (`/blocks`) and Component catalog. `/blocks` = the tour: a shelf of many live, interactive blocks, each with a bill of materials so a reader knows what to import. Prefer varied card heights (`tall`) over an identical card grid.
+
+### Two chrome systems (intentional)
+
+Keep both. Do not flatten one into the other.
+
+1. **Marketing** (`/`, `/blocks`, `/charts`) — factory-glass: grid wallpaper, one bloom (`.fl-glow`), `LiquidGlassBar`. Satoshi. This is the pitch surface.
+2. **Operate** (`/catalog`, `/nqui`, `/design-system`, recipes) — labeled admin shell (`--sidebar-width: 13rem`, no fake user chip) + hybrid **Tray** for specimens. nqui `Card` for product panels. Satoshi is the library default (`@nqlib/nqui/styles`). Brand accent writes `--primary` only; hover/menu wash stays `--accent` / `--interactive` (muted).
+
+Frosted glass stays on marketing chrome. Do not put `FrostedGlass` on nqui `Card` sticky headers or treat Tray as an `@nqlib/nqui` export.
 
 ### Block stage sizing (intent → room)
 Card size follows the **job of the surface**, not the package name:
@@ -50,10 +59,12 @@ Rule of thumb: if the component needs to show a time axis or many columns at onc
 
 ### Shared PM feed (2026-08-08)
 One contract in `src/lib/pm` (`PmIssue` + `PmSchedule` + adapters) powers:
-- **Issues lab** (`report`) — Board | List + status-mix chart (nqui DnD + nqchart); table density stays on Work breakdown
+- **Issues lab** (`report`) — Blocks | Board | List + status-mix chart on Board/List (nqui DnD + nqchart); table density stays on Work breakdown
 - **Timeline lab** (`gantt`) — same FY26 campaign rows via `toGanttOptions`
 
 Q3 checkout tasks are a second fixture (`Q3_TASKS`) for projects/ops — same `PmIssue` type, not a divergent `Task`.
+
+Kanban / list / **blocks** (quarter × status cells) adapters live in `src/lib/pm/adapters/views.ts`. Overlay catalog specimens (invite dialog, revoke alert, filters drawer, issue sheet) live in `src/components/showcase/overlay-demos.tsx`. Compact PM drilldowns (assign, filter, add-column, …) live in `src/components/blocks/blocks-drilldown.tsx`.
 
 ### Timeless report block (2026-07-15)
 The **Sales ledger** (`/blocks` → report) is the multi-package composition: ink-blue monochrome charts + hairline pivot, Companion: Category pivot (`table`). FY26 campaign gantt lives in Timeline lab (Issues lab shares that feed).

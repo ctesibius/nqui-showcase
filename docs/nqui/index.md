@@ -49,7 +49,10 @@ Prefer concrete screens over abstract prop tables. Practice on the live [**/cata
 | Component catalog | [/catalog](/catalog) |
 | Recipes hub | [/nqui](/nqui) |
 | Patterns | [/patterns](/patterns) |
+| Appearance | [/settings/appearance](/settings/appearance) |
 | Design system | [/design-system](/design-system) |
+| Blocks tour | [/blocks](/blocks) |
+| Marketing landing | [/](/) |
 | Installation | [/docs/nqui/installation](/docs/nqui/installation) |
 | Changelog | [/docs/nqui/changelog](/docs/nqui/changelog) |
 

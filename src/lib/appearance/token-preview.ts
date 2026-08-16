@@ -64,7 +64,10 @@ export const PAPER_PRIMARY_PRESETS = [
   },
 ] as const
 
-/** Override primary scale for the accent picker (ring stays nqui’s neutral token). */
+/**
+ * Brand primary scale for the accent picker. Does not write `--accent` /
+ * `--interactive` — those stay muted so hover is not a primary fill.
+ */
 export function previewPrimaryVars(
   hue: number,
   mode: ThemeMode,
@@ -104,30 +107,6 @@ export function previewPrimaryVars(
     "--primary": primary,
     "--primary-foreground": fg,
     "--primary-hover": `oklch(${Math.max(0.36, 0.48 + bias).toFixed(3)} 0.2 ${hue})`,
-  }
-}
-
-/**
- * Menu highlight wash tinted toward the chosen hue.
- * Holds nqui's default accent lightness; swaps hue + modest chroma.
- */
-export function previewMenuAccentVars(
-  hue: number,
-  mode: ThemeMode,
-): Record<string, string> {
-  if (mode === "light") {
-    return {
-      "--accent": `oklch(0.880 0.040 ${hue})`,
-      "--accent-foreground": `oklch(0.260 0.045 ${hue})`,
-      "--sidebar-accent": `oklch(0.940 0.028 ${hue})`,
-      "--sidebar-accent-foreground": `oklch(0.230 0.045 ${hue})`,
-    }
-  }
-  return {
-    "--accent": `oklch(0.320 0.048 ${hue})`,
-    "--accent-foreground": `oklch(0.930 0.014 ${hue})`,
-    "--sidebar-accent": `oklch(0.290 0.040 ${hue})`,
-    "--sidebar-accent-foreground": `oklch(0.930 0.014 ${hue})`,
   }
 }
 

@@ -25,6 +25,7 @@ import {
   ItemTitle,
   Kbd,
   Label,
+  PaginationAdaptive,
   Progress,
   RadioGroup,
   RadioGroupItem,
@@ -204,7 +205,102 @@ export function UptimeBlock() {
   );
 }
 
-// 06 — Accounts table
+// 06 — Pagination lab: live strip + a page of invoices
+const PAGE_COUNTS = ["5", "12", "40"] as const
+const INVOICE_FIRMS = ["Northwind", "Vertex", "Meridian", "Helios", "Aperture", "Lumen"] as const
+const INVOICE_STATUS = ["Paid", "Open", "Overdue"] as const
+const PAGE_SIZE = 6
+
+function invoiceAt(i: number) {
+  return {
+    id: `INV-${2401 + i}`,
+    firm: INVOICE_FIRMS[i % INVOICE_FIRMS.length],
+    amount: 420 + ((i * 137) % 9800),
+    status: INVOICE_STATUS[i % INVOICE_STATUS.length],
+  }
+}
+
+function formatUsd(n: number) {
+  return `$${n.toLocaleString("en-US")}`
+}
+
+export function PaginationLabBlock() {
+  const [page, setPage] = useState(3)
+  const [totalPages, setTotalPages] = useState(12)
+
+  const total = totalPages * PAGE_SIZE
+  const start = (page - 1) * PAGE_SIZE
+  const rows = Array.from({ length: PAGE_SIZE }, (_, i) => invoiceAt(start + i))
+
+  const setPageCount = (value: string) => {
+    const next = Number(value)
+    if (!Number.isFinite(next) || next < 1) return
+    setTotalPages(next)
+    setPage((p) => Math.min(p, next))
+  }
+
+  return (
+    <div className="flex h-full min-h-0 flex-col gap-4">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex min-w-0 items-baseline gap-3">
+          <p className="text-sm font-medium">Invoices</p>
+          <p className="font-mono text-xs tabular-nums text-muted-foreground">
+            {start + 1}–{Math.min(start + PAGE_SIZE, total)} of {total}
+          </p>
+        </div>
+        <ToggleGroup
+          type="single"
+          size="sm"
+          variant="outline"
+          value={String(totalPages)}
+          onValueChange={(v) => v && setPageCount(v)}
+          aria-label="Total pages"
+        >
+          {PAGE_COUNTS.map((n) => (
+            <ToggleGroupItem key={n} value={n} className="tabular-nums">
+              {n}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+      </div>
+
+      <Table>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead className="h-8">Invoice</TableHead>
+            <TableHead className="h-8">Account</TableHead>
+            <TableHead className="h-8 text-right">Amount</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((row) => (
+            <TableRow key={row.id}>
+              <TableCell className="py-1.5">
+                <p className="font-mono text-xs tabular-nums">{row.id}</p>
+                <p className="text-xs text-muted-foreground">{row.status}</p>
+              </TableCell>
+              <TableCell className="py-1.5 text-xs">{row.firm}</TableCell>
+              <TableCell className="py-1.5 text-right text-xs font-medium tabular-nums">
+                {formatUsd(row.amount)}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      <div className="mt-auto min-w-0 border-t border-border pt-4">
+        <PaginationAdaptive
+          className="w-full"
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
+      </div>
+    </div>
+  )
+}
+
+// 07 — Accounts table
 const ACCOUNTS = [
   { name: "Northwind", owner: 0, stage: "Negotiation", arr: "$480K" },
   { name: "Vertex", owner: 3, stage: "Committed", arr: "$720K" },
@@ -242,7 +338,7 @@ export function TableBlock() {
               <TableCell className="py-1.5">
                 <Avatar className="size-5">
                   <AvatarImage src={PEOPLE[a.owner].img} alt="" />
-                  <AvatarFallback className="text-[9px]">{PEOPLE[a.owner].initials}</AvatarFallback>
+                  <AvatarFallback className="text-[10px]">{PEOPLE[a.owner].initials}</AvatarFallback>
                 </Avatar>
               </TableCell>
               <TableCell className="py-1.5 text-right text-xs font-medium tabular-nums">{a.arr}</TableCell>

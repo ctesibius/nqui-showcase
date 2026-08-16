@@ -1,11 +1,10 @@
 /**
- * Issues lab — Linear-inspired Board | List over the shared FY26 PM feed.
+ * Issues lab — Linear-inspired Blocks | Board | List over the shared FY26 PM feed.
  */
 import { useMemo, useState } from "react";
 import {
   Avatar,
   AvatarFallback,
-  Badge,
   ScrollArea,
   ToggleGroup,
   ToggleGroupItem,
@@ -41,78 +40,22 @@ import {
   toStatusMix,
   type PmIssue,
 } from "@/lib/pm";
+import { IssuesBlockView } from "./issues-block-view";
+import { IssueBlockCard, LaneMark, initials } from "./issues-card";
 
-type ViewMode = "board" | "list";
+type ViewMode = "blocks" | "board" | "list";
 
 const STATUS_MIX_CFG = {
   count: { label: "Issues", color: "var(--chart-1)" },
-};
-
-const PRIORITY_TONE: Record<string, string> = {
-  high: "border-destructive/40 text-destructive",
-  med: "border-border text-muted-foreground",
-  low: "border-border text-muted-foreground/80",
 };
 
 function statusLabel(id: string) {
   return CAMPAIGN_STATUSES.find((s) => s.id === id)?.name ?? id;
 }
 
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .map((p) => p[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
-
-function IssueId({ id }: { id: string }) {
-  return (
-    <span className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
-      {id}
-    </span>
-  );
-}
-
-function IssueCardBody({ issue }: { issue: PmIssue }) {
-  const person = TEAM_BY_ID.get(issue.assignee);
-  return (
-    <div className="flex flex-col gap-2 p-2.5">
-      <div className="flex items-start justify-between gap-2">
-        <IssueId id={issue.id} />
-        <Badge
-          variant="outline"
-          className={cn("h-5 px-1.5 text-[10px] font-normal", PRIORITY_TONE[issue.priority])}
-        >
-          {issue.priority}
-        </Badge>
-      </div>
-      <p className="text-[13px] leading-snug text-foreground">{issue.title}</p>
-      <div className="flex items-center justify-between gap-2">
-        {issue.lane ? (
-          <span className="truncate text-[11px] text-muted-foreground">{issue.lane}</span>
-        ) : (
-          <span />
-        )}
-        {person ? (
-          <Avatar className="size-5">
-            <AvatarFallback
-              className="text-[9px] text-white"
-              style={{ backgroundColor: person.color }}
-            >
-              {initials(person.name)}
-            </AvatarFallback>
-          </Avatar>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
 export function IssuesLabBlock({ className }: { className?: string }) {
   const [issues, setIssues] = useState<PmIssue[]>(() => cloneCampaignIssues());
-  const [view, setView] = useState<ViewMode>("list");
+  const [view, setView] = useState<ViewMode>("blocks");
   const [listOrder, setListOrder] = useState<string[] | null>(null);
 
   const byId = useMemo(() => issuesById(issues), [issues]);
@@ -145,9 +88,9 @@ export function IssuesLabBlock({ className }: { className?: string }) {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
           <p className="text-sm font-medium text-foreground">Issues lab</p>
-          <p className="text-[11px] text-muted-foreground">
-            Same FY26 campaign rows as Timeline lab — board and list over one{" "}
-            <code className="font-mono text-[10px]">PmIssue</code> feed.
+          <p className="text-xs text-muted-foreground">
+            Same FY26 campaign rows as Timeline lab — blocks, board, and list over one{" "}
+            <code className="font-mono text-[0.625rem]">PmIssue</code> feed.
           </p>
         </div>
         <ToggleGroup
@@ -155,32 +98,38 @@ export function IssuesLabBlock({ className }: { className?: string }) {
           size="sm"
           value={view}
           onValueChange={(v) => {
-            if (v === "board" || v === "list") setView(v);
+            if (v === "blocks" || v === "board" || v === "list") setView(v);
           }}
           aria-label="Issue view"
         >
+          <ToggleGroupItem value="blocks">Blocks</ToggleGroupItem>
           <ToggleGroupItem value="board">Board</ToggleGroupItem>
           <ToggleGroupItem value="list">List</ToggleGroupItem>
         </ToggleGroup>
       </div>
 
-      <div className="h-28 shrink-0 overflow-hidden rounded-md border border-border bg-background">
-        <NQBarChart
-          config={STATUS_MIX_CFG}
-          data={statusMix}
-          xDataKey="label"
-          showBrush={false}
-          className="h-full w-full px-2 pt-2"
-        >
-          <Grid />
-          <XAxis />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="count" />
-        </NQBarChart>
-      </div>
+      {view !== "blocks" ? (
+        <div className="h-28 shrink-0 overflow-hidden rounded-md border border-border bg-background">
+          <NQBarChart
+            config={STATUS_MIX_CFG}
+            data={statusMix}
+            xDataKey="label"
+            showBrush={false}
+            className="h-full w-full px-2 pt-2"
+          >
+            <Grid />
+            <XAxis />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="count" />
+          </NQBarChart>
+        </div>
+      ) : null}
 
       <div className="min-h-0 flex-1 overflow-hidden">
+        {view === "blocks" ? (
+          <IssuesBlockView issues={issues} onDrop={setIssues} />
+        ) : null}
         {view === "board" ? (
           <BoardView columns={columns} byId={byId} onCardDrop={onCardDrop} />
         ) : null}
@@ -215,21 +164,22 @@ function BoardView({
         onCardDrop={onCardDrop}
         className="flex h-full w-max min-h-[22rem] gap-2.5 p-0.5"
       >
-        {CAMPAIGN_BOARD_ORDER.map((columnId) => {
+        {CAMPAIGN_BOARD_ORDER.map((columnId, columnIndex) => {
           const ids = columns[columnId] ?? [];
           return (
             <KanbanColumn
               key={columnId}
               columnId={columnId}
+              index={columnIndex}
               disableColumnDrag
-              className="h-full max-h-full w-60 shrink-0 border-0 bg-muted"
+              className="h-full max-h-full w-72 shrink-0 border-0 bg-muted"
               header={
                 <div className="flex items-center gap-2 px-1.5 py-1">
-                  <StatusDot status={columnId} />
-                  <span className="text-[13px] font-medium text-foreground">
+                  <LaneMark status={columnId} />
+                  <span className="text-sm font-medium text-foreground">
                     {statusLabel(columnId)}
                   </span>
-                  <span className="text-[13px] tabular-nums text-muted-foreground">
+                  <span className="ml-auto text-sm tabular-nums text-muted-foreground">
                     {ids.length}
                   </span>
                 </div>
@@ -243,9 +193,9 @@ function BoardView({
                     key={cardId}
                     cardId={cardId}
                     index={index}
-                    className="border-0 bg-background p-0 shadow-none ring-0"
+                    className="border-0 bg-background p-0 shadow-none ring-0 hover:bg-muted/40"
                   >
-                    <IssueCardBody issue={issue} />
+                    <IssueBlockCard issue={issue} />
                   </KanbanCard>
                 );
               })}
@@ -361,7 +311,9 @@ function ListView({
                     className="group flex h-9 items-center gap-2.5 border-b border-border/40 px-2 hover:bg-muted/40 data-[dragging=true]:bg-muted/60"
                   >
                     <PriorityMark priority={String(issue.priority)} />
-                    <IssueId id={issue.id} />
+                    <span className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
+                      {issue.id}
+                    </span>
                     <StatusDot status={issue.status} />
                     <span className="min-w-0 flex-1 truncate text-[13px] text-foreground">
                       {issue.title}

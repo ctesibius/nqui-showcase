@@ -122,13 +122,10 @@ export function LandingPage() {
 
               <div className="mt-8 flex flex-wrap items-center gap-3.5" data-fl-reveal>
                 <Button asChild>
-                  <Link to="/blocks">See it live — take the tour</Link>
+                  <Link to="/blocks">See it live</Link>
                 </Button>
                 <Button variant="outline" asChild>
                   <Link to="/catalog">Component catalog</Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <Link to="/charts">Browse all charts</Link>
                 </Button>
                 <button
                   type="button"
@@ -136,17 +133,9 @@ export function LandingPage() {
                   aria-live="polite"
                   className="rounded-md border bg-muted/40 px-2.5 py-1.5 font-mono text-xs text-muted-foreground transition-colors duration-150 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  {copied ? "copied ✓" : `$ ${INSTALL_CMD}`}
+                  {copied ? "copied" : `$ ${INSTALL_CMD}`}
                 </button>
               </div>
-              <p className="mt-3 text-sm text-muted-foreground/70" data-fl-reveal>
-                <Link
-                  to="/docs"
-                  className="underline decoration-foreground/20 underline-offset-[0.2em] transition-colors duration-150 hover:text-foreground hover:decoration-foreground/40"
-                >
-                  Read the install guide
-                </Link>
-              </p>
             </section>
 
             {/* Package inventory — the functional heart of the page. */}

@@ -82,7 +82,7 @@ border-radius: calc(var(--radius-lg) - var(--spacing-3));
 | default | `text-sm` | Body, inputs, buttons |
 | base | `text-base` | Section titles, headings |
 
-Font: `--font-sans` (Inter Variable). Leading: `leading-normal` or `text-xs/relaxed`.
+Font: `--font-sans` (Satoshi Variable, shipped with `@nqlib/nqui/styles`). Leading: `leading-normal` or `text-xs/relaxed`. Override `--font-sans` after the package import to use a different face.
 
 ## When Adding a New Component
 

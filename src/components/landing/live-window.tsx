@@ -42,7 +42,7 @@ const SCENES = [
   { id: "components", crumb: "nqui / deploy panel", label: "Components" },
   { id: "charts", crumb: "nqchart / area", label: "Charts" },
   { id: "grid", crumb: "nqui / table", label: "Table" },
-  { id: "plan", crumb: "nqui / schedule", label: "Schedule" },
+  { id: "plan", crumb: "nqui / bars", label: "Schedule" },
 ] as const;
 
 const HOLD = 4200;
@@ -210,7 +210,7 @@ function GridScene() {
         </Table>
       </div>
       <p className="shrink-0 font-mono text-[10px] text-muted-foreground">
-        sortable · selectable · sticky header
+        nqui Table · spreadsheet is on /blocks
       </p>
     </div>
   );
@@ -253,7 +253,7 @@ function PlanScene() {
         </div>
       </div>
       <p className="shrink-0 font-mono text-[10px] text-muted-foreground">
-        dependencies · drag to reschedule
+        sketch · live Gantt is on /blocks
       </p>
     </div>
   );
@@ -266,7 +266,8 @@ export function LiveWindow({ reducedMotion }: { reducedMotion: boolean }) {
   // rather than inside the scene, so nothing writes state during render.
   const [seen, setSeen] = useState<ReadonlySet<number>>(() => new Set([0]));
   const timer = useRef(0);
-  const paused = useRef(false);
+  const hoverPaused = useRef(false);
+  const [held, setHeld] = useState(false);
 
   const go = (n: number) => {
     setIdx(n);
@@ -277,7 +278,7 @@ export function LiveWindow({ reducedMotion }: { reducedMotion: boolean }) {
     if (reducedMotion) return;
     const tick = () => {
       timer.current = window.setTimeout(() => {
-        if (!paused.current) {
+        if (!hoverPaused.current && !held) {
           setIdx((n) => {
             const next = (n + 1) % SCENES.length;
             setSeen((s) => (s.has(next) ? s : new Set(s).add(next)));
@@ -289,17 +290,25 @@ export function LiveWindow({ reducedMotion }: { reducedMotion: boolean }) {
     };
     tick();
     return () => window.clearTimeout(timer.current);
-  }, [reducedMotion]);
+  }, [reducedMotion, held]);
 
   return (
     <div
       className="fl-win"
-      onPointerEnter={() => { paused.current = true; }}
-      onPointerLeave={() => { paused.current = false; }}
+      onPointerEnter={() => { hoverPaused.current = true; }}
+      onPointerLeave={() => { hoverPaused.current = false; }}
     >
       <div className="fl-win__bar">
         <span className="fl-win__lights" aria-hidden><i /><i /><i /></span>
         <span className="fl-win__crumb">{SCENES[idx].crumb}</span>
+        <button
+          type="button"
+          className="ml-auto font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground"
+          aria-pressed={held || reducedMotion}
+          onClick={() => setHeld((v) => !v)}
+        >
+          {held || reducedMotion ? "Play" : "Pause"}
+        </button>
         <span className="fl-win__spark" aria-hidden />
       </div>
 

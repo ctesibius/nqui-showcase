@@ -161,7 +161,7 @@ Showcase `--chart-1`…`--chart-5` in `src/index.css` (violet → teal → slate
 
 ## Typography
 
-**Display / Body Font:** Satoshi Variable (showcase `--font-sans` override; system-ui fallback) — geometric files under `src/assets/Satoshi`
+**Display / Body Font:** Satoshi Variable (library `--font-sans`, shipped with `@nqlib/nqui/styles`)
 **Label/Mono Font:** `ui-monospace` stack (`font-mono`) for eyebrows, tray captions, and spec labels — with fallback because `--font-mono` is not a nqui token
 
 **Character:** Spec-sheet register — tabular nums on metrics, mono uppercase tracking on labels only, restrained size ladder. Engineered feel from alignment, not ornament.
@@ -184,7 +184,9 @@ Operate density for product demos; Experience/Persuade for the marketing landing
 
 **Responsive:** Re-compose with container queries / fluid sizing rather than cramming at a fixed breakpoint. Docs sidebar breakpoint token: `--breakpoint-sidebar: 940px`.
 
-**Frosted glass** (`backdrop-blur` + translucent background) is reserved for chrome over shifting marketing layers (story nav pill, selected hero/carousel frosts) — not layered on every panel.
+**Frosted glass** (`backdrop-blur` + translucent background) is reserved for **marketing chrome** over shifting layers (`/`, `/blocks`, `/charts` — story nav pill, `LiquidGlassBar`, `.fl-glow`). Operate surfaces (`/catalog`, recipes, `/design-system`) use labeled sidebar + Tray. Do not layer glass on nqui `Card` sticky headers.
+
+**Two chrome systems (intentional).** Marketing stays factory-glass. Catalog/recipes stay an admin shell. Unify each internally; do not flatten one into the other.
 
 ## Elevation & Depth
 
@@ -238,7 +240,7 @@ Base radius token `--radius: 0.45rem` with ladder `sm` / `md` / `lg` / `xl` via 
 - **Forms:** Prefer nqui `Field` / `FieldGroup`; inline selection uses `ToggleGroup`, not `RadioGroup`.
 
 ### Navigation
-- Catalog sidebar: Home, Recipes, composition demos, Component catalog, Appearance, Design system — Theme Studio is **not** in the primary sidebar (route/label for `/studio` may still exist).
+- Catalog sidebar: Home, Recipes, composition demos, Component catalog, Appearance, Design system — labeled `13rem` shell, no fake user footer. Theme Studio is **not** in the primary sidebar (route/label for `/studio` may still exist).
 - Marketing: frosted story nav pill over the living window; sticky showcase headers use frosted `bg-background/40` at `h-12`.
 - Docs: left nav at `--breakpoint-sidebar` (~940px).
 
@@ -261,4 +263,5 @@ Shared elevation primitive for catalog/blocks/charts/docs previews. Compose `Tra
 - **Don't** add decorative box glow, multi-layer shadows on inline surfaces, or glassmorphism on every panel.
 - **Don't** use primary/brand fill to encode status, or invent parallel tokens when `--ease-out`, `--radius-*`, `--duration-*`, `--shadow-*`, `--z-*`, `--chart-N` already exist.
 - **Don't** ship skeleton demos or claim a package a surface does not import.
-- **Don't** put Theme Studio back in the catalog sidebar without an explicit product decision (route may remain).
+- **Don't** override `--font-sans` in the showcase to re-host Satoshi — the library ships it. Override only when judging the package unstyled.
+- **Don't** tint `--accent` / `--interactive` with the brand hue picker — hover would become a primary fill.

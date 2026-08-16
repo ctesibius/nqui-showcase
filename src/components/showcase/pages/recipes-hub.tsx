@@ -1,8 +1,5 @@
 import { Link } from "react-router-dom"
 import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
   Button,
   Card,
   CardDescription,
@@ -21,37 +18,19 @@ export default function RecipesHub() {
   return (
     <div className="flex flex-1 flex-col gap-8 p-6 min-w-0">
       <div className="flex flex-col gap-2 max-w-2xl">
-        <h1 className="text-3xl font-bold tracking-tight">Recipes</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Recipes</h1>
         <p className="text-muted-foreground">
-          Full-page composition demos. Compact patterns (settings, toolbar, forms) live on{" "}
+          Full-page composition demos. Compact patterns live on{" "}
           <Link to="/blocks" className="underline-offset-4 hover:underline">
             /blocks
+          </Link>
+          ; props live on{" "}
+          <Link to="/catalog" className="underline-offset-4 hover:underline">
+            /catalog
           </Link>
           .
         </p>
       </div>
-
-      <Alert>
-        <AlertTitle>How to use this app</AlertTitle>
-        <AlertDescription className="flex flex-col gap-2">
-          <p>
-            <strong>Blocks</strong> are paste-ready composed patterns. <strong>Recipes</strong>{" "}
-            here are full screens. <strong>Catalog</strong> lists every component variant.{" "}
-            <strong>Design system</strong> documents tokens.
-          </p>
-          <p className="text-sm">
-            Start at{" "}
-            <Link to="/blocks" className="underline-offset-4 hover:underline">
-              /blocks
-            </Link>
-            , then dip into{" "}
-            <Link to="/catalog" className="underline-offset-4 hover:underline">
-              /catalog
-            </Link>{" "}
-            for props.
-          </p>
-        </AlertDescription>
-      </Alert>
 
       <section className="flex flex-col gap-4">
         <div>
