@@ -181,6 +181,8 @@ export type PreviewControlOpts = {
   tooltip: TooltipPreviewMode;
   /** Catalog entry family — used so minified `NQ*Chart` roots still get the right SSOT path. */
   family?: string;
+  /** Hover sibling-dim. Default on. Catalog wrappers ignore extra props; clone onto the real `NQ*Chart` root. */
+  hoverFocus?: boolean;
 };
 
 /**
@@ -267,6 +269,9 @@ function patchElement(
   });
 
   const nextProps: Record<string, unknown> = {};
+  if (isChartRootElement(el) && opts.hoverFocus !== undefined) {
+    nextProps.hoverFocus = opts.hoverFocus;
+  }
   const propDriven = hasBackgroundVariantProp(el);
 
   if (propDriven) {

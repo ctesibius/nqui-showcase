@@ -258,8 +258,8 @@ function CategoryPivot() {
 /**
  * `/charts` stacked-area mount with ledger category data.
  * Ledger-only diffs from NQExampleStackedTypeAreaChart: `data` / `config` /
- * `xDataKey`, `showBrush={false}` (no range strip), and a static legend
- * (`isClickable` off — no series isolate / focus).
+ * `xDataKey`, `showBrush={false}` (no range strip), `hoverFocus={false}`
+ * (tooltip without sibling dim), and a static legend (`isClickable` off).
  *
  * No nested LazyMount (blocks-page already lazy-mounts the report). Block pointer
  * events until the staggered area intro finishes — published nqchart can still
@@ -315,6 +315,7 @@ function WeeklyTrend() {
           xDataKey="period"
           stackType="stacked"
           showBrush={false}
+          hoverFocus={false}
         >
           <Grid />
           <XAxis dataKey="period" />

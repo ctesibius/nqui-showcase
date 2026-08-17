@@ -54,6 +54,11 @@ const TIP_OPTIONS: Array<{ id: TooltipPreviewMode; label: string }> = [
   { id: "hidden", label: "Hidden" },
 ];
 
+const FOCUS_OPTIONS = [
+  { id: "on", label: "On" },
+  { id: "off", label: "Off" },
+] as const;
+
 const CATEGORIES = [
   { id: "all", label: "All" },
   { id: "example", label: "Examples" },
@@ -79,10 +84,12 @@ function ChartPreview({
   entry,
   background,
   tooltip,
+  hoverFocus,
 }: {
   entry: CatalogEntry;
   background: BackgroundVariant | "none";
   tooltip: TooltipPreviewMode;
+  hoverFocus: boolean;
 }) {
   const Comp = use(loadCached(entry));
   /*
@@ -97,6 +104,7 @@ function ChartPreview({
       {applyChartPreviewControls(tree, {
         background,
         tooltip,
+        hoverFocus,
         family: entry.family,
       })}
     </>
@@ -107,10 +115,12 @@ function ChartCard({
   entry,
   background,
   tooltip,
+  hoverFocus,
 }: {
   entry: CatalogEntry;
   background: BackgroundVariant | "none";
   tooltip: TooltipPreviewMode;
+  hoverFocus: boolean;
 }) {
   return (
     <Tray interactive>
@@ -135,7 +145,12 @@ function ChartCard({
         <LazyMount fallback={<Skeleton className="size-full rounded-md" />}>
           <Suspense fallback={<Skeleton className="size-full rounded-md" />}>
             <div className="size-full min-h-0">
-              <ChartPreview entry={entry} background={background} tooltip={tooltip} />
+              <ChartPreview
+                entry={entry}
+                background={background}
+                tooltip={tooltip}
+                hoverFocus={hoverFocus}
+              />
             </div>
           </Suspense>
         </LazyMount>
@@ -159,6 +174,7 @@ export function ChartsPage() {
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]["id"]>("all");
   const [background, setBackground] = useState<BackgroundVariant | "none">("none");
   const [tooltip, setTooltip] = useState<TooltipPreviewMode>("default");
+  const [hoverFocus, setHoverFocus] = useState(true);
   const [page, setPage] = useState(0);
 
   const filtered = useMemo(() => {
@@ -218,8 +234,8 @@ export function ChartsPage() {
             Every NQChart, live.
           </h1>
           <p className="mt-4 leading-relaxed text-muted-foreground">
-            Full catalog of registry examples. Background and tooltip controls
-            apply to every chart on the page — no duplicate cards per chrome variant.
+            Full catalog of registry examples. Background, tooltip, and focus
+            controls apply to every chart on the page — no duplicate cards per chrome variant.
           </p>
         </div>
 
@@ -330,6 +346,24 @@ export function ChartsPage() {
               ))}
             </ToggleGroup>
 
+            <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+              Focus
+            </span>
+            <ToggleGroup
+              type="single"
+              value={hoverFocus ? "on" : "off"}
+              onValueChange={(v) => {
+                if (v === "on") setHoverFocus(true);
+                if (v === "off") setHoverFocus(false);
+              }}
+            >
+              {FOCUS_OPTIONS.map((f) => (
+                <ToggleGroupItem key={f.id} value={f.id} className="h-7 rounded-full px-2.5 text-xs">
+                  {f.label}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+
             <span className="ml-auto font-mono text-xs tabular-nums text-muted-foreground">
               {filtered.length} match · page {safePage + 1}/{pageCount}
             </span>
@@ -343,6 +377,7 @@ export function ChartsPage() {
               entry={entry}
               background={background}
               tooltip={tooltip}
+              hoverFocus={hoverFocus}
             />
           ))}
         </div>

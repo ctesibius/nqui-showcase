@@ -32,6 +32,10 @@ type NQMarkEvent = {
 
 Controlled: `selected` + `onSelectChange` isolate a series. Uncontrolled default is unchanged. Legend clicks are not mark clicks.
 
+## Hover focus — `hoverFocus`
+
+Default **on**: hovered mark stays full opacity, siblings dim to `0.2`. Pass `hoverFocus={false}` to keep the tooltip and skip sibling fade. Sparkline and single-arc gauge stay tooltip-only either way. Legend isolate (`<Legend isClickable />`) and the brush are separate switches.
+
 ## Brush — `showBrush` + `onBrushChange`
 
 Reports `{ startIndex, endIndex }` while dragging. Indices are into the root `data` array. Pair with `onMarkClick` for “filter the window, then pick a bar.”

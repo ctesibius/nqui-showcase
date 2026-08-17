@@ -6,7 +6,7 @@
  * A pill shows only while `NEW_IN[id] === CURRENT_RELEASE`. Bump CURRENT_RELEASE
  * to retire last release's pills automatically.
  */
-export const CURRENT_RELEASE = "0.3.1";
+export const CURRENT_RELEASE = "0.3.2";
 
 export const NEW_IN: Record<string, string> = {
   "interaction.composed-mark-click": "0.3.0",

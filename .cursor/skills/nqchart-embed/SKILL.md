@@ -36,7 +36,7 @@ description: >-
 ```
 
 - Prefer **docs adapters** (`ex-doc-charts`) over hand-rolled compact charts.
-- Sales ledger weekly trend: **same mount** as `NQExampleStackedTypeAreaChart` (`Tray.Stage variant="chart"` + `h-full w-full p-4`) with ledger `data`/`config` only — **no nested LazyMount** (blocks-page already lazy-mounts the report). Do not change host props (`showBrush={false}`, `aspect-auto`, fixed rem parents).
+- Sales ledger weekly trend: **same mount** as `NQExampleStackedTypeAreaChart` (`Tray.Stage variant="chart"` + `h-full w-full p-4`) with ledger `data`/`config` only — **no nested LazyMount** (blocks-page already lazy-mounts the report). Keep `showBrush={false}` and `hoverFocus={false}` (tooltip without sibling dim). Do not stretch with `aspect-auto` / fixed rem parents.
 - Optional belt: showcase `pointer-events-none` until area intro ms (kept for one release after 0.1.8; engine silence is enough on `0.1.8+`).
 - `.nq-echarts-tooltip { pointer-events: none !important; }` (already in `blocks.css` / `charts-page.css`).
 - One scrollport for reports; chart islands must **not** be the scroll container.

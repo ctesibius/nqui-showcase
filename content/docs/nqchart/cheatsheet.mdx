@@ -19,7 +19,7 @@ import type { ChartConfig, NQMarkEvent, ChartHandle } from "@nqlib/nqchart";
 import { binForHistogram, prepareParetoData } from "@nqlib/nqchart/recipes";
 ```
 
-Current line: **0.3.1**.
+Current line: **0.3.2**. Independent of `@nqlib/nqui` — install any nqui version (or none).
 
 ## Config keys = series ids
 
@@ -38,6 +38,7 @@ const config = {
 |------|--------|------|
 | `onMarkClick` | bar/line/area/composed/scatter/pie/waterfall/funnel | Mark → `NQMarkEvent` |
 | `showBrush` + `onBrushChange` | cartesian | `{ startIndex, endIndex }` |
+| `hoverFocus` | every `NQ*Chart` root (default on) | Sibling dim on hover. `false` keeps tooltip, skips fade |
 | `Legend selected` / `onSelectChange` | families with Legend | Isolate series |
 | `YAxis tickFormatter` / `yAxisId` | cartesian | Dual axis, `$` vs `%` |
 | `ReferenceLine` / `ReferenceBand` | composed (and cartesian hosts) | Thresholds; not legend, not clicks |
