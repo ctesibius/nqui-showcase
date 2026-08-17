@@ -236,7 +236,6 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-  TableOfContents,
   Textarea,
   Toggle,
   ToggleGroup,
@@ -287,7 +286,7 @@ import {
 } from "@nqlib/nqui/sortable"
 import { Calendar } from "@nqlib/nqui/calendar"
 import { Toaster } from "@nqlib/nqui/sonner"
-import type { TOCItem } from "@nqlib/nqui"
+import { TableOfContents, type TOCItem } from "@nqlib/nqui/toc"
 import { inputFieldShellBase } from "../lib/input-field-shell"
 import { cn } from "@/lib/utils"
 

@@ -62,7 +62,6 @@ import {
   Spinner,
   Progress,
   Separator,
-  TableOfContents,
   Card,
   CardHeader,
   CardTitle,
@@ -193,6 +192,7 @@ import {
 } from "@nqlib/nqui/carousel"
 import { Calendar } from "@nqlib/nqui/calendar"
 import { Toaster } from "@nqlib/nqui/sonner"
+import { TableOfContents } from "@nqlib/nqui/toc"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
   HomeIcon,
