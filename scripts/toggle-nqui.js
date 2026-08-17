@@ -11,6 +11,7 @@
  *   USE_LOCAL_NQUI=false node scripts/toggle-nqui.js   # published npm
  *   node scripts/toggle-nqui.js --check                # status only
  *   SKIP_BUILD=true      skip `pnpm build:lib` in ../nqui when dist exists
+ *   SKIP_TYPECHECK=true  skip showcase `tsc -b` after linking (default: run it)
  */
 import { existsSync, readFileSync, realpathSync, writeFileSync } from "node:fs"
 import { execSync } from "node:child_process"
@@ -29,6 +30,7 @@ const PUBLISHED_VERSION = "^0.7.8"
 const nquiDir = resolve(process.env.NQUI_DIR ?? join(root, "..", "nqui"))
 const useLocal = process.env.USE_LOCAL_NQUI === "true"
 const skipBuild = process.env.SKIP_BUILD === "true"
+const skipTypecheck = process.env.SKIP_TYPECHECK === "true"
 const checkOnly = process.argv.includes("--check") || process.argv.includes("--status")
 
 const pkg = JSON.parse(readFileSync(pkgPath, "utf-8"))
@@ -77,6 +79,15 @@ function isLinked() {
  */
 function linkDrifted() {
   return !resolvesInsideSiblingRepo()
+}
+
+function typecheckShowcase() {
+  if (skipTypecheck) {
+    console.log("Skipping showcase typecheck (SKIP_TYPECHECK=true)")
+    return
+  }
+  console.log("Typechecking showcase against this nqui (pnpm typecheck)...")
+  execSync("pnpm typecheck", { cwd: root, stdio: "inherit" })
 }
 
 if (checkOnly) {
@@ -129,7 +140,10 @@ if (useLocal) {
   }
 
   const version = JSON.parse(readFileSync(join(nquiDir, "package.json"), "utf-8")).version
+  typecheckShowcase()
   console.log(`\nSwitched to LOCAL nqui ${version} (${nquiDir})`)
+  console.log("This tsc sees linked source/dist — not the npm tarball.")
+  console.log("Before publishing nqui latest: cd ../nqui && make prove-showcase")
   console.log("Restart vite after nqui rebuilds: rm -rf node_modules/.vite && pnpm dev\n")
 } else {
   if (declared !== PUBLISHED_VERSION) {

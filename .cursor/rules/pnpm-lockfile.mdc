@@ -13,8 +13,12 @@ In the **same commit**:
 
 1. The version must already be on the registry (`npm view @nqlib/nqui version`). Never bump to an unpublished tag.
 2. Refresh the lockfile: `pnpm update <pkg>` (or `pnpm install` after a specifier edit).
-3. Confirm: `pnpm lockfile:check`.
+3. Confirm: `pnpm lockfile:check` **and** `pnpm build` (Vercel runs both; type errors after an `@nqlib/*` bump are as fatal as a stale lockfile).
 4. Commit **both** `package.json` and `pnpm-lock.yaml`.
+
+Never bump `@nqlib/nqui` until that version is on npm **and** a local `pnpm build` against the **registry package** (not `pnpm nqui:local`) has passed. Linked/local types are not the Vercel `.d.ts`.
+
+Never push a showcase `main` bump without a local `pnpm build`. Frozen-lockfile passing is not enough.
 
 `scripts/toggle-nqui.js` `PUBLISHED_VERSION` must match `package.json` (`@nqlib/nqui`). `pnpm nqui:published` rewrites the specifier from that constant.
 

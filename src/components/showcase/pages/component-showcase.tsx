@@ -2268,6 +2268,7 @@ export default function ComponentShowcase() {
             </Breadcrumb>
           </CatalogSpecimen>
 
+          <div id="tabs" className="scroll-mt-24">
           <CatalogSpecimen
             title="Tabs"
             description={
@@ -2282,7 +2283,11 @@ export default function ComponentShowcase() {
             stageClassName="space-y-8"
           >
             <div className="space-y-2">
-              <Label className="text-sm font-semibold">Default</Label>
+              <Label className="text-sm font-semibold">TabsList children</Label>
+              <p className="text-xs text-muted-foreground">
+                Triggers live inside <code className="text-xs">TabsList</code> as children — labels
+                stay full width (not ellipsized).
+              </p>
               <Tabs defaultValue="tab1">
                 <TabsList>
                   <TabsTrigger value="tab1">Tab 1</TabsTrigger>
@@ -2348,6 +2353,7 @@ export default function ComponentShowcase() {
               </Tabs>
             </div>
           </CatalogSpecimen>
+          </div>
 
           <CatalogSpecimen
             title="Dropdown Menu · Navigation Menu"

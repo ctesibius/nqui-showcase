@@ -30,7 +30,7 @@ Load **1–3 files** per task via **`.cursor/READ_BUDGET.md`**:
 | **nqui app / composition guide** | `docs/nqui/` (wikilinks SSOT) → live `/docs/nqui` via `pnpm docs:sync:nqui` · catalog `/catalog` |
 | **Remember / prior gotcha** | `memory/INDEX.md` (never bulk-read `memory/`) |
 | Local nqgrid toggle | `NQGRID-WORKSPACE.md`, `pnpm nqgrid:status` |
-| Local nqui toggle | `pnpm nqui:local` / `nqui:status` — verify catalog before publishing nqui |
+| Local nqui toggle | `pnpm nqui:local` / `nqui:status` — builds, links, then `tsc -b` (Vercel typecheck) |
 | Bump `@nqlib/*` / lockfile | `.cursor/rules/pnpm-lockfile.mdc` → `pnpm update <pkg>` + `pnpm lockfile:check` |
 | Engine bug / patch sibling? | `.cursor/NQLIB.md` → ask user |
 
@@ -130,8 +130,11 @@ pnpm dev:local:charts # local @nqlib/nqchart from ../becocharts/dist
 pnpm nqgrid:status
 pnpm nqchart:status
 pnpm nqui:status
+pnpm nqui:local       # link ../nqui, then tsc -b (SKIP_TYPECHECK=true to skip)
+pnpm nqui:prove       # pack ../nqui tarball, tsc -b against it, restore lockfile
 pnpm lockfile:check   # same check as Vercel (frozen-lockfile)
-pnpm build
+pnpm typecheck        # fumadocs-mdx && tsc -b
+pnpm build            # required before push/deploy — lockfile:check is not enough
 rm -rf node_modules/.vite && pnpm dev   # after rebuilding linked @nqlib/*
 ```
 

@@ -9,7 +9,7 @@ description: >-
 
 **Agents:** When the user asks to fix a bug here, **search this file first**. Open the fix note before changing code.
 
-Last updated: 2026-07-25
+Last updated: 2026-08-16
 
 ---
 
@@ -20,6 +20,7 @@ Last updated: 2026-07-25
 | **docs-toc** | TOC diamond drifts down; rail/glow missing; step shorter than TOC | [domains/docs-toc.md](./domains/docs-toc.md) | [diamond step drift](./fixes/docs-toc-diamond-step-drift.md) |
 | **floating-lists** | Select/Combobox/Command scroll stuck; dual highlight; multi-line density bad | [domains/floating-lists.md](./domains/floating-lists.md) | [scroll + highlight + multiline](./fixes/floating-lists-scroll-highlight-multiline.md) |
 | **vite-deps** | `/blocks` crash: `bind` export missing from `bind-event-listener` / honey-pot | — | [PdD CJS bind](./fixes/pdd-bind-event-listener-cjs.md) |
+| **nqui-types** | `tsc`: TabsList missing `children` / `className` / `variant` after `@nqlib/nqui` bump | — | [TabsList packed types](./fixes/nqui-078-tabslist-children.md) |
 
 ---
 
@@ -38,6 +39,7 @@ Last updated: 2026-07-25
 | keyboard then pointer fight; scrollIntoView under cursor | Select | [floating-lists-scroll-highlight-multiline](./fixes/floating-lists-scroll-highlight-multiline.md) |
 | does not provide an export named 'bind'; make-honey-pot-fix; bind-event-listener | `/blocks` DnD | [pdd-bind-event-listener-cjs](./fixes/pdd-bind-event-listener-cjs.md) |
 | pragmatic-drag-and-drop; honey pot; React error boundary on LazyMount | Vite + PdD | [pdd-bind-event-listener-cjs](./fixes/pdd-bind-event-listener-cjs.md) |
+| TabsList children/className/variant missing; EnhancedTabsListProps; 0.7.8–0.7.9 tsc Vercel | nqui types | [nqui-078-tabslist-children](./fixes/nqui-078-tabslist-children.md) |
 
 ---
 
@@ -49,6 +51,7 @@ Last updated: 2026-07-25
 | `src/components/docs/docs-toc.tsx` | docs-toc |
 | `src/components/docs/docs-article.tsx` | docs-toc |
 | `src/components/showcase/pages/component-showcase.tsx` (Select/Combobox/Command) | floating-lists |
+| `src/components/showcase/pages/component-showcase.tsx` (TabsList) | nqui-types |
 | `src/components/showcase/layout/app-layout.tsx` (⌘K) | floating-lists |
 | `src/components/showcase/pages/command-lab.tsx` | floating-lists |
 | `../nqui/src/components/ui/{select,combobox,command}.tsx` | floating-lists (upstream) |
