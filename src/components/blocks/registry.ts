@@ -104,7 +104,7 @@ export const BLOCKS: Block[] = [
       "FY26 campaign as blocks, board, and list — one PmIssue feed shared with Timeline lab.",
     lib: "report",
     libs: ["report", "nqui", "nqchart"],
-    bom: ["KanbanBoard", "SortableList", "ToggleGroup", "Avatar", "NQBarChart", "@/lib/pm"],
+    bom: ["KanbanBoard", "ScrollArea", "SortableList", "ToggleGroup", "Avatar", "NQBarChart", "@/lib/pm"],
     stage: "report",
     Render: issues("IssuesLabBlock"),
   },

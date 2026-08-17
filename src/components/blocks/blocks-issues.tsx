@@ -147,6 +147,14 @@ export function IssuesLabBlock({ className }: { className?: string }) {
   );
 }
 
+const BOARD_VIEWPORT_STYLE = {
+  position: "absolute" as const,
+  inset: 0,
+  minHeight: 0,
+  minWidth: 0,
+  overscrollBehavior: "contain",
+};
+
 function BoardView({
   columns,
   byId,
@@ -156,13 +164,19 @@ function BoardView({
   byId: Map<string, PmIssue>;
   onCardDrop: (result: Parameters<typeof applyCardDrop>[1]) => void;
 }) {
-  // Native overflow-x: columns own vertical scroll. ScrollArea alone only
-  // paints a vertical thumb, so wide boards clipped the last columns.
+  // Horizontal ScrollArea for the column strip. Default vertical orientation
+  // sets overflow-x: hidden and clips the last columns. Each KanbanColumn
+  // still owns its own vertical card list.
   return (
-    <div className="h-full min-w-0 overflow-x-auto overflow-y-hidden overscroll-x-contain">
+    <ScrollArea
+      orientation="horizontal"
+      fadeMask={false}
+      className="h-full min-h-0 min-w-0 w-full overflow-hidden [&_[data-slot=scroll-area-viewport]>div]:block [&_[data-slot=scroll-area-viewport]>div]:h-full [&_[data-slot=scroll-area-viewport]>div]:min-h-0"
+      viewportStyle={BOARD_VIEWPORT_STYLE}
+    >
       <KanbanBoard
         onCardDrop={onCardDrop}
-        className="flex h-full w-max min-h-[22rem] gap-2.5 p-0.5"
+        className="flex h-full w-max min-h-[22rem] gap-2.5 overflow-visible p-0.5"
       >
         {CAMPAIGN_BOARD_ORDER.map((columnId, columnIndex) => {
           const ids = columns[columnId] ?? [];
@@ -203,7 +217,7 @@ function BoardView({
           );
         })}
       </KanbanBoard>
-    </div>
+    </ScrollArea>
   );
 }
 

@@ -8,6 +8,7 @@ import {
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
+  ScrollArea,
   cn,
 } from "@nqlib/nqui";
 import {
@@ -72,7 +73,18 @@ export function IssuesBlockView({
   };
 
   return (
-    <div className="h-full min-h-0 overflow-auto overscroll-contain">
+    <ScrollArea
+      orientation="both"
+      fadeMask={false}
+      className="h-full min-h-0 min-w-0 w-full overflow-hidden"
+      viewportStyle={{
+        position: "absolute",
+        inset: 0,
+        minHeight: 0,
+        minWidth: 0,
+        overscrollBehavior: "contain",
+      }}
+    >
       <KanbanBoard
         onCardDrop={onCardDrop}
         className="h-auto w-max min-w-full flex-col items-stretch gap-0 overflow-visible"
@@ -147,7 +159,7 @@ export function IssuesBlockView({
           );
         })}
       </KanbanBoard>
-    </div>
+    </ScrollArea>
   );
 }
 
