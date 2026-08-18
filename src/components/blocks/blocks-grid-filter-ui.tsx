@@ -7,13 +7,6 @@
  */
 import {
   Button,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
   ToggleGroup,
   ToggleGroupItem,
   cn,
@@ -48,68 +41,36 @@ function XIcon() {
   );
 }
 
-/** Multi-select as a compact popover of checkable rows. */
+const nativeSelectClass =
+  "h-7 shrink-0 rounded-md border border-input bg-background px-1.5 text-xs text-foreground outline-none focus-visible:border-ring";
+
+/** In-panel checkboxes — a nested Popover would take the same modal lock as Select. */
 function ValueMultiSelect({
   options,
   selected,
   onChange,
-  placeholder,
 }: {
   options: { id: string; label: string }[];
   selected: string[];
   onChange: (next: string[]) => void;
-  placeholder: string;
 }) {
-  const label =
-    selected.length === 0
-      ? placeholder
-      : selected.length <= 2
-        ? options.filter((o) => selected.includes(o.id)).map((o) => o.label).join(", ")
-        : `${selected.length} selected`;
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className={cn("h-7 min-w-0 flex-1 justify-start text-xs font-normal", selected.length === 0 && "text-muted-foreground")}
-        >
-          <span className="truncate">{label}</span>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-48 p-1">
-        <div className="flex flex-col">
-          {options.map((o) => {
-            const on = selected.includes(o.id);
-            return (
-              <button
-                key={o.id}
-                type="button"
-                role="checkbox"
-                aria-checked={on}
-                onClick={() => onChange(on ? selected.filter((v) => v !== o.id) : [...selected, o.id])}
-                className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-left text-xs hover:bg-interactive"
-              >
-                <span
-                  className={cn(
-                    "grid size-3.5 shrink-0 place-content-center rounded-[3px] border",
-                    on ? "border-primary bg-primary text-primary-foreground" : "border-input"
-                  )}
-                  aria-hidden
-                >
-                  {on ? (
-                    <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M3.5 8.5l3 3 6-6" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  ) : null}
-                </span>
-                <span className="truncate">{o.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </PopoverContent>
-    </Popover>
+    <div className="flex min-w-0 flex-1 flex-wrap gap-x-2 gap-y-1">
+      {options.map((o) => {
+        const on = selected.includes(o.id);
+        return (
+          <label key={o.id} className="inline-flex max-w-full items-center gap-1 text-xs">
+            <input
+              type="checkbox"
+              checked={on}
+              onChange={() => onChange(on ? selected.filter((v) => v !== o.id) : [...selected, o.id])}
+              className="size-3.5 shrink-0 accent-primary"
+            />
+            <span className="truncate">{o.label}</span>
+          </label>
+        );
+      })}
+    </div>
   );
 }
 
@@ -130,38 +91,34 @@ function RuleRow({
 
   return (
     <div className="flex items-center gap-1.5">
-      <Select
+      <select
+        aria-label="Field"
         value={rule.field}
-        onValueChange={(v) => {
-          const nextDef = defs.find((d) => d.id === (v as FilterFieldId)) ?? defs[0];
-          // Field change resets op/value — the old operator rarely applies.
+        onChange={(e) => {
+          const nextDef = defs.find((d) => d.id === (e.target.value as FilterFieldId)) ?? defs[0];
           onPatch({ field: nextDef.id, op: nextDef.ops[0], values: [], value: "" });
         }}
+        className={cn(nativeSelectClass, "w-[92px]")}
       >
-        <SelectTrigger size="sm" className="h-7 w-[92px] shrink-0 text-xs">
-          {def.label}
-        </SelectTrigger>
-        <SelectContent>
-          {defs.map((d) => (
-            <SelectItem key={d.id} value={d.id} className="text-xs">
-              {d.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        {defs.map((d) => (
+          <option key={d.id} value={d.id}>
+            {d.label}
+          </option>
+        ))}
+      </select>
 
-      <Select value={rule.op} onValueChange={(v) => onPatch({ op: v as FilterOp })}>
-        <SelectTrigger size="sm" className="h-7 w-[116px] shrink-0 text-xs">
-          {OP_LABEL[rule.op]}
-        </SelectTrigger>
-        <SelectContent>
-          {def.ops.map((op) => (
-            <SelectItem key={op} value={op} className="text-xs">
-              {OP_LABEL[op]}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <select
+        aria-label="Operator"
+        value={rule.op}
+        onChange={(e) => onPatch({ op: e.target.value as FilterOp })}
+        className={cn(nativeSelectClass, "w-[116px]")}
+      >
+        {def.ops.map((op) => (
+          <option key={op} value={op}>
+            {OP_LABEL[op]}
+          </option>
+        ))}
+      </select>
 
       {showValue ? (
         isMulti && def.options ? (
@@ -169,7 +126,6 @@ function RuleRow({
             options={def.options}
             selected={rule.values}
             onChange={(values) => onPatch({ values })}
-            placeholder="Select…"
           />
         ) : (
           <input
@@ -218,20 +174,15 @@ function CombinatorChip({
   onChange: (next: Combinator) => void;
 }) {
   return (
-    <Select value={combinator} onValueChange={(v) => onChange(v as Combinator)}>
-      <SelectTrigger
-        size="sm"
-        aria-label="Combine these conditions with and / or"
-        // nqui's SelectTrigger ships min-w-[120px]; min-w-0 lets it size down.
-        className="h-6 w-[58px] min-w-0 justify-center rounded-full bg-background px-1.5 text-[11px]"
-      >
-        {combinator === "and" ? "and" : "or"}
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="and" className="text-xs">and</SelectItem>
-        <SelectItem value="or" className="text-xs">or</SelectItem>
-      </SelectContent>
-    </Select>
+    <select
+      aria-label="Combine these conditions with and / or"
+      value={combinator}
+      onChange={(e) => onChange(e.target.value as Combinator)}
+      className="h-6 w-[58px] rounded-full border border-input bg-background px-1 text-center text-[11px] outline-none focus-visible:border-ring"
+    >
+      <option value="and">and</option>
+      <option value="or">or</option>
+    </select>
   );
 }
 
@@ -340,18 +291,25 @@ function GroupEditor({
           className="h-6 px-2 text-[11px]"
           onClick={() => onChange(addChild(group, group.id, makeRule("status", defs)))}
         >
-          + Condition
+          + {group.combinator === "and" ? "And" : "Or"} condition
         </Button>
         {depth < MAX_DEPTH ? (
           <Button
             variant="ghost"
             size="sm"
             className="h-6 px-2 text-[11px]"
-            onClick={() =>
-              onChange(addChild(group, group.id, makeGroup("or", [makeRule("priority", defs)])))
-            }
+            onClick={() => {
+              const inner: Combinator = group.combinator === "and" ? "or" : "and";
+              onChange(
+                addChild(
+                  group,
+                  group.id,
+                  makeGroup(inner, [makeRule("status", defs), makeRule("priority", defs)]),
+                ),
+              );
+            }}
           >
-            + Group
+            + {group.combinator === "and" ? "Or" : "And"} group
           </Button>
         ) : null}
       </div>
