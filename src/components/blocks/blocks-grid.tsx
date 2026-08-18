@@ -1261,7 +1261,7 @@ export function WorkBreakdownBlock() {
                 ) : null}
               </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-[440px] p-0">
+            <PopoverContent align="end" className="w-[520px] p-0">
               <FilterBuilder
                 root={filterTree}
                 defs={fieldDefs}

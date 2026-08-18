@@ -206,8 +206,11 @@ export function nodeMatches(
   priority: number | undefined
 ): boolean {
   if (node.kind === "rule") return ruleMatches(node, item, priority);
-  const active = node.children.filter((c) => c.kind === "group" || isRuleActive(c));
-  // An empty group constrains nothing, whichever combinator it carries.
+  // isRuleActive covers groups too (a group with no active rules is inert).
+  // Filtering with it — rather than waving groups through — is what stops an
+  // empty group from making an OR vacuously true.
+  const active = node.children.filter(isRuleActive);
+  // Nothing to constrain by: match everything, whichever combinator we carry.
   if (active.length === 0) return true;
   return node.combinator === "and"
     ? active.every((c) => nodeMatches(c, item, priority))

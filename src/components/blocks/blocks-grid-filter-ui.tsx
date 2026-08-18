@@ -10,7 +10,6 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  ScrollArea,
   Select,
   SelectContent,
   SelectItem,
@@ -139,7 +138,7 @@ function RuleRow({
           onPatch({ field: nextDef.id, op: nextDef.ops[0], values: [], value: "" });
         }}
       >
-        <SelectTrigger size="sm" className="h-7 w-[104px] shrink-0 text-xs">
+        <SelectTrigger size="sm" className="h-7 w-[92px] shrink-0 text-xs">
           {def.label}
         </SelectTrigger>
         <SelectContent>
@@ -152,7 +151,7 @@ function RuleRow({
       </Select>
 
       <Select value={rule.op} onValueChange={(v) => onPatch({ op: v as FilterOp })}>
-        <SelectTrigger size="sm" className="h-7 w-[124px] shrink-0 text-xs">
+        <SelectTrigger size="sm" className="h-7 w-[116px] shrink-0 text-xs">
           {OP_LABEL[rule.op]}
         </SelectTrigger>
         <SelectContent>
@@ -198,6 +197,58 @@ function RuleRow({
   );
 }
 
+/**
+ * Connector cell to the left of every row.
+ *
+ * Row 0 reads "Where"; row 1 carries the editable combinator; rows 2+ repeat it
+ * as static text. This is the Notion / Airtable / Linear shape: the combinator
+ * is a *connector between* rows, not a header over them, so a group reads as a
+ * sentence ("Where status is Done / and / (priority is P0 or due is before …)")
+ * and a nested group's connector shows how the group joins its siblings.
+ *
+ * It also removes a control that used to lie: with a single child there is no
+ * connector at all, because AND and OR are indistinguishable for one condition.
+ */
+function Connector({
+  index,
+  combinator,
+  onChange,
+}: {
+  index: number;
+  combinator: Combinator;
+  onChange: (next: Combinator) => void;
+}) {
+  if (index === 0) {
+    return (
+      <span className="w-[62px] shrink-0 pt-1.5 text-right text-[11px] text-muted-foreground">
+        Where
+      </span>
+    );
+  }
+  if (index === 1) {
+    return (
+      <Select value={combinator} onValueChange={(v) => onChange(v as Combinator)}>
+        <SelectTrigger
+          size="sm"
+          aria-label="Combine conditions with and / or"
+          className="h-7 w-[62px] shrink-0 text-xs"
+        >
+          {combinator === "and" ? "and" : "or"}
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="and" className="text-xs">and</SelectItem>
+          <SelectItem value="or" className="text-xs">or</SelectItem>
+        </SelectContent>
+      </Select>
+    );
+  }
+  return (
+    <span className="w-[62px] shrink-0 pt-1.5 text-right text-[11px] text-muted-foreground">
+      {combinator === "and" ? "and" : "or"}
+    </span>
+  );
+}
+
 function GroupEditor({
   group,
   defs,
@@ -213,81 +264,62 @@ function GroupEditor({
 }) {
   const patchChild = (id: string, patch: (n: FilterNode) => FilterNode) =>
     onChange(updateNode(group, id, patch));
+  const setCombinator = (next: Combinator) => onChange({ ...group, combinator: next });
 
   return (
     <div
       className={cn(
-        "flex flex-col gap-1.5",
+        "flex min-w-0 flex-col gap-1.5",
         depth > 0 && "rounded-md border border-border/70 bg-surface-soft p-2"
       )}
     >
-      <div className="flex items-center gap-2">
-        <ToggleGroup
-          type="single"
-          value={group.combinator}
-          onValueChange={(v) => v && onChange({ ...group, combinator: v as Combinator })}
-          aria-label="Match all or any"
-        >
-          <ToggleGroupItem value="and" className="h-6 px-2 text-[11px]">
-            AND
-          </ToggleGroupItem>
-          <ToggleGroupItem value="or" className="h-6 px-2 text-[11px]">
-            OR
-          </ToggleGroupItem>
-        </ToggleGroup>
-        <span className="text-[11px] text-muted-foreground">
-          {group.combinator === "and" ? "match every condition" : "match any condition"}
-        </span>
-        {onRemove ? (
+      {depth > 0 && onRemove ? (
+        <div className="flex items-center justify-end">
           <Button
             variant="ghost"
             size="icon"
             aria-label="Remove group"
             onClick={onRemove}
-            className="ml-auto size-6 text-muted-foreground"
+            className="size-6 text-muted-foreground"
           >
             <XIcon />
           </Button>
-        ) : null}
-      </div>
-
-      {group.children.length > 0 ? (
-        <div
-          className={cn(
-            "flex flex-col gap-1.5",
-            depth === 0 && "border-l border-border/70 pl-2"
-          )}
-        >
-          {group.children.map((child) =>
-            child.kind === "rule" ? (
-              <RuleRow
-                key={child.id}
-                rule={child}
-                defs={defs}
-                onPatch={(patch) =>
-                  patchChild(child.id, (n) => ({ ...(n as FilterRule), ...patch }))
-                }
-                onRemove={() => onChange(removeNode(group, child.id))}
-              />
-            ) : (
-              <GroupEditor
-                key={child.id}
-                group={child}
-                defs={defs}
-                depth={depth + 1}
-                onChange={(next) => patchChild(child.id, () => next)}
-                onRemove={() => onChange(removeNode(group, child.id))}
-              />
-            )
-          )}
         </div>
-      ) : (
-        <p className="px-1 text-[11px] text-muted-foreground">
+      ) : null}
+
+      {group.children.length === 0 ? (
+        <p className="pl-[68px] text-[11px] text-muted-foreground">
           No conditions — every task matches.
         </p>
+      ) : (
+        group.children.map((child, i) => (
+          <div key={child.id} className="flex min-w-0 items-start gap-1.5">
+            <Connector index={i} combinator={group.combinator} onChange={setCombinator} />
+            <div className="min-w-0 flex-1">
+              {child.kind === "rule" ? (
+                <RuleRow
+                  rule={child}
+                  defs={defs}
+                  onPatch={(patch) =>
+                    patchChild(child.id, (n) => ({ ...(n as FilterRule), ...patch }))
+                  }
+                  onRemove={() => onChange(removeNode(group, child.id))}
+                />
+              ) : (
+                <GroupEditor
+                  group={child}
+                  defs={defs}
+                  depth={depth + 1}
+                  onChange={(next) => patchChild(child.id, () => next)}
+                  onRemove={() => onChange(removeNode(group, child.id))}
+                />
+              )}
+            </div>
+          </div>
+        ))
       )}
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 pl-[68px]">
         <Button
           variant="ghost"
           size="sm"
@@ -302,9 +334,7 @@ function GroupEditor({
             size="sm"
             className="h-6 px-2 text-[11px]"
             onClick={() =>
-              onChange(
-                addChild(group, group.id, makeGroup("or", [makeRule("priority", defs)]))
-              )
+              onChange(addChild(group, group.id, makeGroup("or", [makeRule("priority", defs)])))
             }
           >
             + Group
@@ -363,11 +393,14 @@ export function FilterBuilder({
         </ToggleGroup>
       </div>
 
-      <ScrollArea className="min-h-0 flex-1">
-        <div className="px-3 py-2.5">
-          <GroupEditor group={root} defs={defs} depth={0} onChange={onChange} />
-        </div>
-      </ScrollArea>
+      {/* Plain overflow scroller, not nqui ScrollArea: its viewport is an
+          absolutely-positioned `size-full`, which needs a definite parent
+          height. Inside a max-height popover the height is auto, so the
+          viewport collapsed and the group's add-buttons rendered *outside*
+          the panel. max-height on a normal block just works. */}
+      <div className="min-h-0 flex-1 overflow-y-auto px-3 py-2.5">
+        <GroupEditor group={root} defs={defs} depth={0} onChange={onChange} />
+      </div>
 
       <div className="flex items-center justify-between gap-2 border-t border-border px-3 py-2">
         <span className="text-[11px] text-muted-foreground">
