@@ -62,6 +62,16 @@
 /* App-level: full-bleed marketing layout */
 html {
   scroll-behavior: smooth;
+  /* Reserve the scrollbar gutter permanently.
+   *
+   * Radix overlays (Select, Popover, Dialog) lock scrolling by setting
+   * `overflow: hidden` on <body> while open. Without a reserved gutter the
+   * page scrollbar disappears on open and reappears on close, so the whole
+   * layout jumps ~15px sideways every time a Select is clicked. */
+  /* `scrollbar-gutter` only applies to scroll containers, and <html> defaults
+   * to overflow:visible — so the gutter needs both declarations to hold. */
+  overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
 body {

@@ -198,54 +198,40 @@ function RuleRow({
 }
 
 /**
- * Connector cell to the left of every row.
+ * Group bracket: a rail spanning the group's rows with one and/or chip on it.
  *
- * Row 0 reads "Where"; row 1 carries the editable combinator; rows 2+ repeat it
- * as static text. This is the Notion / Airtable / Linear shape: the combinator
- * is a *connector between* rows, not a header over them, so a group reads as a
- * sentence ("Where status is Done / and / (priority is P0 or due is before …)")
- * and a nested group's connector shows how the group joins its siblings.
+ * The combinator belongs to the *group*, not to any single row, so it is drawn
+ * once on the bracket rather than repeated between every pair of rows. A tick
+ * runs from the rail to each row, so the bracket reads as "these conditions,
+ * combined this way" — and nesting is legible because a nested group carries
+ * its own rail inside its parent's.
  *
- * It also removes a control that used to lie: with a single child there is no
- * connector at all, because AND and OR are indistinguishable for one condition.
+ * With fewer than two children there is no rail and no chip: AND and OR are
+ * indistinguishable for a single condition, so offering the control would be
+ * offering a choice that does nothing.
  */
-function Connector({
-  index,
+function CombinatorChip({
   combinator,
   onChange,
 }: {
-  index: number;
   combinator: Combinator;
   onChange: (next: Combinator) => void;
 }) {
-  if (index === 0) {
-    return (
-      <span className="w-[62px] shrink-0 pt-1.5 text-right text-[11px] text-muted-foreground">
-        Where
-      </span>
-    );
-  }
-  if (index === 1) {
-    return (
-      <Select value={combinator} onValueChange={(v) => onChange(v as Combinator)}>
-        <SelectTrigger
-          size="sm"
-          aria-label="Combine conditions with and / or"
-          className="h-7 w-[62px] shrink-0 text-xs"
-        >
-          {combinator === "and" ? "and" : "or"}
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="and" className="text-xs">and</SelectItem>
-          <SelectItem value="or" className="text-xs">or</SelectItem>
-        </SelectContent>
-      </Select>
-    );
-  }
   return (
-    <span className="w-[62px] shrink-0 pt-1.5 text-right text-[11px] text-muted-foreground">
-      {combinator === "and" ? "and" : "or"}
-    </span>
+    <Select value={combinator} onValueChange={(v) => onChange(v as Combinator)}>
+      <SelectTrigger
+        size="sm"
+        aria-label="Combine these conditions with and / or"
+        // nqui's SelectTrigger ships min-w-[120px]; min-w-0 lets it size down.
+        className="h-6 w-[58px] min-w-0 justify-center rounded-full bg-background px-1.5 text-[11px]"
+      >
+        {combinator === "and" ? "and" : "or"}
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="and" className="text-xs">and</SelectItem>
+        <SelectItem value="or" className="text-xs">or</SelectItem>
+      </SelectContent>
+    </Select>
   );
 }
 
@@ -264,7 +250,7 @@ function GroupEditor({
 }) {
   const patchChild = (id: string, patch: (n: FilterNode) => FilterNode) =>
     onChange(updateNode(group, id, patch));
-  const setCombinator = (next: Combinator) => onChange({ ...group, combinator: next });
+  const braced = group.children.length > 1;
 
   return (
     <div
@@ -288,38 +274,62 @@ function GroupEditor({
       ) : null}
 
       {group.children.length === 0 ? (
-        <p className="pl-[68px] text-[11px] text-muted-foreground">
+        <p className="pl-[72px] text-[11px] text-muted-foreground">
           No conditions — every task matches.
         </p>
       ) : (
-        group.children.map((child, i) => (
-          <div key={child.id} className="flex min-w-0 items-start gap-1.5">
-            <Connector index={i} combinator={group.combinator} onChange={setCombinator} />
-            <div className="min-w-0 flex-1">
-              {child.kind === "rule" ? (
-                <RuleRow
-                  rule={child}
-                  defs={defs}
-                  onPatch={(patch) =>
-                    patchChild(child.id, (n) => ({ ...(n as FilterRule), ...patch }))
-                  }
-                  onRemove={() => onChange(removeNode(group, child.id))}
+        <div className={cn("relative flex flex-col gap-1.5", braced && "pl-[72px]")}>
+          {braced ? (
+            <>
+              {/* the bracket rail, inset to the first/last row centres */}
+              <div
+                aria-hidden
+                className="absolute top-3.5 bottom-3.5 left-[64px] w-px rounded-full bg-border"
+              />
+              {/* one chip for the whole group, centred on the rail */}
+              <div className="absolute top-1/2 left-0 -translate-y-1/2">
+                <CombinatorChip
+                  combinator={group.combinator}
+                  onChange={(next) => onChange({ ...group, combinator: next })}
                 />
-              ) : (
-                <GroupEditor
-                  group={child}
-                  defs={defs}
-                  depth={depth + 1}
-                  onChange={(next) => patchChild(child.id, () => next)}
-                  onRemove={() => onChange(removeNode(group, child.id))}
+              </div>
+            </>
+          ) : null}
+
+          {group.children.map((child) => (
+            <div key={child.id} className="relative flex min-w-0 items-center">
+              {braced ? (
+                <span
+                  aria-hidden
+                  className="absolute top-1/2 -left-[8px] w-2 border-t border-border"
                 />
-              )}
+              ) : null}
+              <div className="min-w-0 flex-1">
+                {child.kind === "rule" ? (
+                  <RuleRow
+                    rule={child}
+                    defs={defs}
+                    onPatch={(patch) =>
+                      patchChild(child.id, (n) => ({ ...(n as FilterRule), ...patch }))
+                    }
+                    onRemove={() => onChange(removeNode(group, child.id))}
+                  />
+                ) : (
+                  <GroupEditor
+                    group={child}
+                    defs={defs}
+                    depth={depth + 1}
+                    onChange={(next) => patchChild(child.id, () => next)}
+                    onRemove={() => onChange(removeNode(group, child.id))}
+                  />
+                )}
+              </div>
             </div>
-          </div>
-        ))
+          ))}
+        </div>
       )}
 
-      <div className="flex items-center gap-1 pl-[68px]">
+      <div className={cn("flex items-center gap-1", group.children.length > 1 && "pl-[72px]")}>
         <Button
           variant="ghost"
           size="sm"
