@@ -22,6 +22,7 @@ import { WorkBreakdownBlock } from "@/components/blocks/blocks-grid"
 import { Tray } from "@/components/showcase/tray"
 import { SpreadsheetPage } from "@/nqgrid/demos/spreadsheet/spreadsheet-page"
 import { ProjectsPage } from "@/nqgrid/demos/projects/projects-page"
+import { PlaygroundTableSettingsProvider } from "@/nqgrid/playground-table-settings"
 
 type SurfaceId = "wbs" | "projects" | "spreadsheet"
 
@@ -112,19 +113,36 @@ export function GridLabPage() {
       >
         {surface === "wbs" ? (
           <Tray className="min-h-0 flex-1">
-            <Tray.Stage variant="table" className="min-h-[28rem] overflow-auto p-4">
+            {/* Definite height, not just min-height: this page's chain is
+                auto-sized (min-h-dvh root → flex-1 descendants), so a
+                percentage height cannot resolve and the stage's fill-child
+                (`[&>*]:h-full`) would collapse to its header. Same shape the
+                `gantt` stage variant uses. */}
+            <Tray.Stage
+              variant="table"
+              className="h-[28rem] min-h-[28rem] flex-none overflow-auto p-4"
+            >
               <WorkBreakdownBlock />
             </Tray.Stage>
           </Tray>
         ) : null}
+        {/* Both demos read PlaygroundTableSettings context and throw without
+            the provider. The wrapper needs a definite height (this page's chain
+            is auto-sized, so flex-1 alone collapses the grid) *and* must be a
+            flex column — both demo roots are `flex-1`, which only resolves
+            against a flex parent. Mirrors components/story/grid-chapter. */}
         {surface === "projects" ? (
-          <div className="min-h-0 flex-1 overflow-auto">
-            <ProjectsPage />
+          <div className="flex h-[70vh] min-h-[520px] flex-col overflow-hidden">
+            <PlaygroundTableSettingsProvider>
+              <ProjectsPage />
+            </PlaygroundTableSettingsProvider>
           </div>
         ) : null}
         {surface === "spreadsheet" ? (
-          <div className="min-h-0 flex-1 overflow-hidden">
-            <SpreadsheetPage />
+          <div className="flex h-[70vh] min-h-[520px] flex-col overflow-hidden">
+            <PlaygroundTableSettingsProvider>
+              <SpreadsheetPage />
+            </PlaygroundTableSettingsProvider>
           </div>
         ) : null}
       </div>
