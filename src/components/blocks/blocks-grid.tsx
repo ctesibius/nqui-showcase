@@ -17,15 +17,6 @@ import { format } from "date-fns";
 import {
   Button,
   Checkbox,
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -58,6 +49,17 @@ import {
 import { getDragHandleAria } from "@nqlib/nqgrid";
 import { AvatarStack } from "../story/avatar-stack";
 import { useWorkBreakdownDropChrome } from "./blocks-grid-drop-chrome";
+import {
+  buildFieldDefs,
+  countRules,
+  emptyRoot,
+  nodeMatches,
+  quickViewFromTree,
+  treeActive,
+  treeFromQuickView,
+  type FilterGroup,
+} from "./blocks-grid-filter";
+import { FilterBuilder } from "./blocks-grid-filter-ui";
 import portfolio from "./blocks-portfolio-data.json";
 
 /*
@@ -602,143 +604,18 @@ const DEFAULT_COLUMN_ORDER: DataColId[] = [
   "status", "assignees", "priority", "est", "start", "due", "progress", "note",
 ];
 
-/** Faceted filters for the work-breakdown toolbar — empty sets mean “any”. */
-type WorkFilters = {
-  statuses: Set<TaskStatus>;
-  priorities: Set<0 | 1 | 2>;
-  assignees: Set<string>;
-  /** Incomplete work past due (demo “today” = 2026-08-06). */
-  overdueOnly: boolean;
-  unassignedOnly: boolean;
-};
-
-type FilterPreset = "all" | "open" | "blocked" | "overdue" | "unassigned" | "custom";
-
 const FILTER_TODAY = "2026-08-06";
 
-function filtersActive(f: WorkFilters): boolean {
-  return (
-    f.statuses.size > 0 ||
-    f.priorities.size > 0 ||
-    f.assignees.size > 0 ||
-    f.overdueOnly ||
-    f.unassignedOnly
-  );
-}
-
-function filterChipCount(f: WorkFilters): number {
-  return (
-    f.statuses.size +
-    f.priorities.size +
-    f.assignees.size +
-    (f.overdueOnly ? 1 : 0) +
-    (f.unassignedOnly ? 1 : 0)
-  );
-}
-
-function presetFromFilters(f: WorkFilters): FilterPreset {
-  if (!filtersActive(f)) return "all";
-  if (
-    f.overdueOnly &&
-    !f.unassignedOnly &&
-    f.statuses.size === 0 &&
-    f.priorities.size === 0 &&
-    f.assignees.size === 0
-  ) {
-    return "overdue";
-  }
-  if (
-    f.unassignedOnly &&
-    !f.overdueOnly &&
-    f.statuses.size === 0 &&
-    f.priorities.size === 0 &&
-    f.assignees.size === 0
-  ) {
-    return "unassigned";
-  }
-  if (
-    !f.overdueOnly &&
-    !f.unassignedOnly &&
-    f.priorities.size === 0 &&
-    f.assignees.size === 0 &&
-    f.statuses.size === 1 &&
-    f.statuses.has("blocked")
-  ) {
-    return "blocked";
-  }
-  if (
-    !f.overdueOnly &&
-    !f.unassignedOnly &&
-    f.priorities.size === 0 &&
-    f.assignees.size === 0 &&
-    f.statuses.size === 3 &&
-    f.statuses.has("active") &&
-    f.statuses.has("todo") &&
-    f.statuses.has("blocked")
-  ) {
-    return "open";
-  }
-  return "custom";
-}
-
-function freshFilters(patch: Partial<WorkFilters> = {}): WorkFilters {
-  return {
-    statuses: new Set(patch.statuses ?? []),
-    priorities: new Set(patch.priorities ?? []),
-    assignees: new Set(patch.assignees ?? []),
-    overdueOnly: patch.overdueOnly ?? false,
-    unassignedOnly: patch.unassignedOnly ?? false,
-  };
-}
-
-function filtersFromPreset(preset: FilterPreset): WorkFilters {
-  switch (preset) {
-    case "open":
-      return freshFilters({ statuses: new Set(["active", "todo", "blocked"]) });
-    case "blocked":
-      return freshFilters({ statuses: new Set(["blocked"]) });
-    case "overdue":
-      return freshFilters({ overdueOnly: true });
-    case "unassigned":
-      return freshFilters({ unassignedOnly: true });
-    default:
-      return freshFilters();
-  }
-}
-
-function toggleInSet<T>(set: Set<T>, value: T, on: boolean): Set<T> {
-  const next = new Set(set);
-  if (on) next.add(value);
-  else next.delete(value);
-  return next;
-}
-
-function itemMatchesFilters(
-  item: { status: TaskStatus; assignees: string[]; due: string },
-  priority: 0 | 1 | 2 | undefined,
-  f: WorkFilters,
-): boolean {
-  if (f.statuses.size > 0 && !f.statuses.has(item.status)) return false;
-  if (f.priorities.size > 0 && (priority === undefined || !f.priorities.has(priority))) return false;
-  if (f.assignees.size > 0 && !item.assignees.some((a) => f.assignees.has(a))) return false;
-  if (f.unassignedOnly && item.assignees.length > 0) return false;
-  if (f.overdueOnly) {
-    if (item.status === "done") return false;
-    if (item.due >= FILTER_TODAY) return false;
-  }
-  return true;
-}
-
-/** Ids of tasks/subs that pass the facets (phases inferred at render time). */
-function matchingWorkIds(rows: WorkRow[], f: WorkFilters): Set<string> | null {
-  if (!filtersActive(f)) return null;
+/** Ids of tasks/subs that pass the filter tree (phases inferred at render). */
+function matchingWorkIds(rows: WorkRow[], tree: FilterGroup): Set<string> | null {
+  if (!treeActive(tree)) return null;
   const ids = new Set<string>();
   for (const r of rows) {
     if (r.kind !== "task") continue;
-    const self = itemMatchesFilters(r, r.priority, f);
-    if (self) ids.add(r.id);
-    for (const s of r.subs ?? []) {
-      if (itemMatchesFilters(s, r.priority, f)) ids.add(s.id);
+    // Subtasks inherit their parent's priority, as the old facet filter did.
+    if (nodeMatches(tree, r, r.priority)) ids.add(r.id);
+    for (const sub of r.subs ?? []) {
+      if (nodeMatches(tree, sub, r.priority)) ids.add(sub.id);
     }
   }
   return ids;
@@ -1051,7 +928,7 @@ export function WorkBreakdownBlock() {
   const [rows, setRows] = useState<WorkRow[]>(WORK_ROWS);
   const [columnOrder, setColumnOrder] = useState<DataColId[]>(DEFAULT_COLUMN_ORDER);
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [filters, setFilters] = useState<WorkFilters>(() => freshFilters());
+  const [filterTree, setFilterTree] = useState<FilterGroup>(() => emptyRoot());
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
   const anchorRef = useRef<string | null>(null);
   const [widths, setWidths] = useState<Record<string, number>>(() => ({
@@ -1076,13 +953,20 @@ export function WorkBreakdownBlock() {
     () => view.filter((v) => v.kind !== "phase").map((v) => v.row.id),
     [view],
   );
-  const matchedIds = useMemo(() => matchingWorkIds(rows, filters), [rows, filters]);
+  const fieldDefs = useMemo(
+    () => buildFieldDefs(STATUSES, PRIORITIES, DATA.people),
+    [],
+  );
+  const matchedIds = useMemo(() => matchingWorkIds(rows, filterTree), [rows, filterTree]);
   const filterOn = matchedIds != null;
   const visibleTaskCount = filterOn
     ? selectableIds.filter((id) => matchedIds.has(id)).length
     : selectableIds.length;
-  const activeFilterCount = filterChipCount(filters);
-  const filterPreset = presetFromFilters(filters);
+  const activeFilterCount = countRules(filterTree);
+  const quickView = useMemo(
+    () => quickViewFromTree(filterTree, FILTER_TODAY),
+    [filterTree],
+  );
 
   const rowVisible = (v: WbsRow): boolean => {
     if (v.kind === "task" && collapsed.has(v.phaseId)) return false;
@@ -1356,8 +1240,8 @@ export function WorkBreakdownBlock() {
               tasks
             </span>
           )}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          <Popover>
+            <PopoverTrigger asChild>
               <Button
                 type="button"
                 size="sm"
@@ -1376,121 +1260,20 @@ export function WorkBreakdownBlock() {
                   </span>
                 ) : null}
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Quick views</DropdownMenuLabel>
-              <DropdownMenuRadioGroup
-                value={filterPreset}
-                onValueChange={(v) => {
-                  if (
-                    v === "all" ||
-                    v === "open" ||
-                    v === "blocked" ||
-                    v === "overdue" ||
-                    v === "unassigned"
-                  ) {
-                    setFilters(filtersFromPreset(v));
-                  }
-                }}
-              >
-                <DropdownMenuRadioItem value="all" className="text-xs">
-                  All tasks
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="open" className="text-xs">
-                  Open work
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="blocked" className="text-xs">
-                  Blocked only
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="overdue" className="text-xs">
-                  Overdue
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="unassigned" className="text-xs">
-                  Unassigned
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel>Status</DropdownMenuLabel>
-              {STATUSES.map((s) => (
-                <DropdownMenuCheckboxItem
-                  key={s.id}
-                  className="text-xs"
-                  checked={filters.statuses.has(s.id)}
-                  onCheckedChange={(on) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      overdueOnly: false,
-                      unassignedOnly: false,
-                      statuses: toggleInSet(prev.statuses, s.id, on),
-                    }))
-                  }
-                  onSelect={(e) => e.preventDefault()}
-                >
-                  <span className="flex items-center gap-1.5">
-                    <span className={cn("size-1.5 rounded-full", STATUS_STYLE[s.id].dot)} aria-hidden />
-                    {s.label}
-                  </span>
-                </DropdownMenuCheckboxItem>
-              ))}
-
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel>Priority</DropdownMenuLabel>
-              {PRIORITIES.map((p) => (
-                <DropdownMenuCheckboxItem
-                  key={p.id}
-                  className="text-xs"
-                  checked={filters.priorities.has(p.id)}
-                  onCheckedChange={(on) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      overdueOnly: false,
-                      unassignedOnly: false,
-                      priorities: toggleInSet(prev.priorities, p.id, on),
-                    }))
-                  }
-                  onSelect={(e) => e.preventDefault()}
-                >
-                  <span className={cn("font-mono text-[10px] font-medium", PRIORITY_STYLE[p.id])}>
-                    {p.label}
-                  </span>
-                </DropdownMenuCheckboxItem>
-              ))}
-
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel>Assignee</DropdownMenuLabel>
-              {DATA.people.map((p) => (
-                <DropdownMenuCheckboxItem
-                  key={p.id}
-                  className="text-xs"
-                  checked={filters.assignees.has(p.id)}
-                  onCheckedChange={(on) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      overdueOnly: false,
-                      unassignedOnly: false,
-                      assignees: toggleInSet(prev.assignees, p.id, on),
-                    }))
-                  }
-                  onSelect={(e) => e.preventDefault()}
-                >
-                  {p.name}
-                </DropdownMenuCheckboxItem>
-              ))}
-
-              {filterOn ? (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    className="text-xs"
-                    onSelect={() => setFilters(filtersFromPreset("all"))}
-                  >
-                    Clear filters
-                  </DropdownMenuItem>
-                </>
-              ) : null}
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-[440px] p-0">
+              <FilterBuilder
+                root={filterTree}
+                defs={fieldDefs}
+                quickView={quickView}
+                matchCount={visibleTaskCount}
+                totalCount={selectableIds.length}
+                onQuickView={(v) => setFilterTree(treeFromQuickView(v, FILTER_TODAY, fieldDefs))}
+                onChange={setFilterTree}
+                onClear={() => setFilterTree(emptyRoot())}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
