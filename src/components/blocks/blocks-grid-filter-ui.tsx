@@ -278,7 +278,7 @@ function GroupEditor({
           No conditions — every task matches.
         </p>
       ) : (
-        <div className={cn("relative flex flex-col gap-1.5", braced && "pl-[72px]")}>
+        <div className="relative flex flex-col gap-1.5 pl-[72px]">
           {braced ? (
             <>
               {/* the bracket rail, inset to the first/last row centres */}
@@ -329,7 +329,11 @@ function GroupEditor({
         </div>
       )}
 
-      <div className={cn("flex items-center gap-1", group.children.length > 1 && "pl-[72px]")}>
+      {/* Constant indent at every child count. The rail appears once a group
+          has two children; if this row tracked that, the add buttons would jump
+          ~72px sideways the moment you added the second condition — the button
+          slides out from under the cursor mid-click. Reserve the gutter always. */}
+      <div className="flex items-center gap-1 pl-[72px]">
         <Button
           variant="ghost"
           size="sm"
