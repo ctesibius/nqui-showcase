@@ -142,8 +142,8 @@ function ChartCard({
           entry.id.includes("workload-dashboard") && "charts-stage--dashboard",
         )}
       >
-        <LazyMount fallback={<Skeleton className="size-full rounded-md" />}>
-          <Suspense fallback={<Skeleton className="size-full rounded-md" />}>
+        <LazyMount fallback={<Skeleton className="size-full rounded-none" />}>
+          <Suspense fallback={<Skeleton className="size-full rounded-none" />}>
             <div className="size-full min-h-0">
               <ChartPreview
                 entry={entry}

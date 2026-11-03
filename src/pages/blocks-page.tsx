@@ -92,7 +92,7 @@ export function BlocksPage() {
             onValueChange={(v) => setLib(v as Lib | "all")}
             className="w-fit max-w-full"
           >
-            <LiquidGlassBar className="max-w-full" contentClassName="p-0.5">
+            <LiquidGlassBar className="max-w-full" contentClassName="[--glass-pad:2px]">
               <TabsList
                 aria-label="Filter blocks by library"
                 className={contrastSlidingTabsListClass(
@@ -142,13 +142,13 @@ export function BlocksPage() {
 
                 <Tray.Stage variant={stageVariant(stage)}>
                   {heavy ? (
-                    <LazyMount fallback={<Skeleton className="size-full rounded-md" />}>
+                    <LazyMount fallback={<Skeleton className="size-full rounded-none" />}>
                       <div className="size-full min-h-0">
                         <b.Render />
                       </div>
                     </LazyMount>
                   ) : (
-                    <Suspense fallback={<Skeleton className="size-full rounded-md" />}>
+                    <Suspense fallback={<Skeleton className="size-full rounded-none" />}>
                       <b.Render />
                     </Suspense>
                   )}

@@ -3218,7 +3218,7 @@ export default function ComponentShowcase() {
             description="Scroll the content below to see the fade mask and frosted glass reflection effect. This uses the new stickyHeader prop on Card component."
             stageClassName="p-0 overflow-hidden"
           >
-            <Card stickyHeader className="h-[500px] border-0 shadow-none rounded-md">
+            <Card stickyHeader className="h-[500px] border-0 shadow-none rounded-none">
               <CardHeader>
                 <CardTitle>Frosted Glass Header with Scroll</CardTitle>
                 <CardDescription>

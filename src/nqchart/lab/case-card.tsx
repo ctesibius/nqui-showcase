@@ -133,7 +133,7 @@ export function LabCaseCard({
             {labCase.render(probe)}
           </div>
         ) : (
-          <LazyMount fallback={<Skeleton className="size-full rounded-md" />}>
+          <LazyMount fallback={<Skeleton className="size-full rounded-none" />}>
             <div ref={attachRoot} className="size-full min-h-0">
               {labCase.render(probe)}
             </div>

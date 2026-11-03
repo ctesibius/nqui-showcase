@@ -11,7 +11,8 @@ import { cn } from "@/lib/utils"
  * Showcase hybrid elevation (app chrome only — not nqui Card):
  *   page (A) → muted tray (B) → background stage (A) + hairline
  *
- * Nested radius: outer lg + p-1 rim → inner md. No glow / overlay shadow.
+ * Nested radius: outer lg + p-1 (4px) rim → inner sm (= radius − 4px), so the rim is
+ * concentric. No glow / overlay shadow.
  */
 
 const trayRoot =
@@ -33,7 +34,7 @@ export const trayMeta = "px-2 pb-[0.35rem] pt-2"
 export const trayTags = "flex flex-wrap gap-1 px-2 pb-2 pt-0"
 
 const stageBase =
-  "relative min-w-0 rounded-md border border-border bg-background"
+  "relative min-w-0 rounded-sm border border-border bg-background"
 
 /** Full-bleed jobs: stage child (LazyMount / Suspense) fills the frame. */
 const stageFillChild = "[&>*]:min-h-0 [&>*]:h-full"
