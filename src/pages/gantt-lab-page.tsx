@@ -10,7 +10,7 @@
  * with a literal `false` at build time, so Rollup drops this module and
  * everything it pulls in. Verify with `pnpm build` — no gantt-lab chunk.
  */
-import { useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Link } from "react-router-dom"
 import {
   Badge,
@@ -34,19 +34,46 @@ import {
   GANTT_GROUP_ROWS,
   type GanttBarDesign,
 } from "@/nqgantt/bar-design"
+import {
+  buildGanttStressTasks,
+  type GanttStressSize,
+} from "@/nqgantt/demos/gantt-stress-tasks"
 import { TASKS, type Task } from "@/lib/mock/ops"
 import { addDays, formatLocalISO, localToday } from "@/lib/pm/calendar"
+import {
+  scoreTotal,
+  useLabPerfMeter,
+  type ScoreLine,
+} from "@/lib/lab-perf-meter"
 
-type FixtureId = "full" | "dense" | "single" | "empty"
+type FixtureId = "full" | "dense" | "single" | "empty" | "stress-500" | "stress-2000" | "stress-5000"
 /** Mirrors the package's unions; neither is re-exported from its entrypoint. */
 type Range = "daily" | "weekly" | "monthly" | "quarterly"
 type GanttDensity = "compact" | "default" | "comfortable"
 
-const FIXTURES: { id: FixtureId; label: string; hint: string }[] = [
+const FIXTURES: { id: FixtureId; label: string; hint: string; stress?: GanttStressSize }[] = [
   { id: "full", label: "Full", hint: "The shared work-management set" },
   { id: "dense", label: "Dense", hint: "Every task on one week — overlap and collision" },
   { id: "single", label: "Single", hint: "One bar: the loneliest layout case" },
   { id: "empty", label: "Empty", hint: "No rows at all — the state nobody designs" },
+  {
+    id: "stress-500",
+    label: "500",
+    hint: "Stress 500 leaves · WBS depth 3 — row virtualization warm-up",
+    stress: 500,
+  },
+  {
+    id: "stress-2000",
+    label: "2k",
+    hint: "Stress 2k leaves — sign-off size for the gantt scorecard",
+    stress: 2000,
+  },
+  {
+    id: "stress-5000",
+    label: "5k",
+    hint: "Stress 5k leaves — beyond the e2e budget, for soak",
+    stress: 5000,
+  },
 ]
 
 const RANGES: { id: Range; label: string }[] = [
@@ -69,8 +96,21 @@ function densify(tasks: Task[]): Task[] {
   }))
 }
 
-function useFixture(id: FixtureId): Task[] {
+function useFixture(id: FixtureId, matrix: boolean): Task[] {
   return useMemo(() => {
+    // Style matrix mounts many charts — keep the small fixture.
+    if (matrix) {
+      switch (id) {
+        case "dense":
+          return densify(TASKS)
+        case "single":
+          return TASKS.slice(0, 1)
+        case "empty":
+          return []
+        default:
+          return TASKS
+      }
+    }
     switch (id) {
       case "dense":
         return densify(TASKS)
@@ -78,10 +118,16 @@ function useFixture(id: FixtureId): Task[] {
         return TASKS.slice(0, 1)
       case "empty":
         return []
+      case "stress-500":
+        return buildGanttStressTasks(500)
+      case "stress-2000":
+        return buildGanttStressTasks(2000)
+      case "stress-5000":
+        return buildGanttStressTasks(5000)
       default:
         return TASKS
     }
-  }, [id])
+  }, [id, matrix])
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -91,6 +137,150 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
         {label}
       </Label>
       {children}
+    </div>
+  )
+}
+
+function ganttScoreLines(
+  sample: ReturnType<typeof useLabPerfMeter>["sample"],
+  stress: boolean,
+): ScoreLine[] {
+  if (!stress) {
+    return [
+      {
+        label: "Pick Stress 2k to score",
+        points: 0,
+        max: 10,
+        detail: "Scorecard targets Stress 2k after scroll settles",
+      },
+    ]
+  }
+  const nodes = sample.ganttNodes
+  const long = sample.maxLongTaskMs
+  const ready = nodes > 0
+  const hardNodesFail = ready && nodes > 6_000
+  const hardLongFail = ready && long > 800
+  const scrollFail =
+    ready &&
+    (sample.mountedSidebarRows === 0 ||
+      sample.mountedTimelineRows === 0 ||
+      sample.mountedSidebarRows >= 400)
+
+  return [
+    {
+      label: "Hard: DOM ≤ 6k",
+      points: 0,
+      max: 0,
+      hard: hardNodesFail,
+      detail: ready ? `${nodes} nodes` : "waiting for .gantt",
+    },
+    {
+      label: "Hard: longtask ≤ 800 ms",
+      points: 0,
+      max: 0,
+      hard: hardLongFail,
+      detail: `${long} ms`,
+    },
+    {
+      label: "Hard: windowed rows",
+      points: 0,
+      max: 0,
+      hard: scrollFail,
+      detail: `sidebar ${sample.mountedSidebarRows} · timeline ${sample.mountedTimelineRows}`,
+    },
+    {
+      label: "DOM ≤ 2.5k",
+      points: ready && !hardNodesFail && nodes <= 2_500 ? 2 : 0,
+      max: 2,
+      detail: `${nodes} nodes`,
+    },
+    {
+      label: "longtask ≤ 200 ms",
+      points: ready && !hardLongFail && long <= 200 ? 2 : 0,
+      max: 2,
+      detail: `${long} ms`,
+    },
+    {
+      label: "alignment (manual)",
+      points: 2,
+      max: 2,
+      detail: "award if tops match ±1 px after collapse",
+    },
+    {
+      label: "Day pan (manual)",
+      points: 2,
+      max: 2,
+      detail: "award if Day range pan stays ≤ 50 ms longtask",
+    },
+    {
+      label: "deps window (manual)",
+      points: 2,
+      max: 2,
+      detail: "award if dep lines only cover mounted rows",
+    },
+  ]
+}
+
+function PerfScorecard({
+  lines,
+  sample,
+  onReset,
+  onRefresh,
+}: {
+  lines: ScoreLine[]
+  sample: ReturnType<typeof useLabPerfMeter>["sample"]
+  onReset: () => void
+  onRefresh: () => void
+}) {
+  const { score, max, hardFail } = scoreTotal(lines)
+  return (
+    <div className="flex flex-col gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2 font-mono text-[10px]">
+      <div className="flex items-center gap-2">
+        <span className="tracking-[0.14em] text-muted-foreground uppercase">Score</span>
+        <span
+          className={cn(
+            "text-sm font-semibold tabular-nums",
+            hardFail ? "text-destructive" : score >= 8 ? "text-foreground" : "text-amber-600",
+          )}
+        >
+          {hardFail ? "0" : score}/{max}
+          {hardFail ? " (hard fail)" : ""}
+        </span>
+        <span className="text-muted-foreground">
+          nodes {sample.ganttNodes} · sb {sample.mountedSidebarRows} · tl{" "}
+          {sample.mountedTimelineRows} · long {sample.maxLongTaskMs} ms
+        </span>
+        <Button type="button" size="sm" variant="ghost" className="ml-auto h-6 px-2 text-[10px]" onClick={onRefresh}>
+          Sample
+        </Button>
+        <Button type="button" size="sm" variant="ghost" className="h-6 px-2 text-[10px]" onClick={onReset}>
+          Reset LT
+        </Button>
+      </div>
+      <ul className="grid gap-0.5 sm:grid-cols-2">
+        {lines.map((line) => (
+          <li key={line.label} className="flex gap-2 text-muted-foreground">
+            <span
+              className={cn(
+                "w-8 shrink-0 tabular-nums",
+                line.hard
+                  ? "text-destructive"
+                  : line.max === 0 || line.points === line.max
+                    ? "text-foreground"
+                    : "",
+              )}
+            >
+              {line.max === 0 ? (line.hard ? "fail" : "ok") : `${line.points}/${line.max}`}
+            </span>
+            <span>
+              {line.label}
+              {line.detail ? (
+                <span className="text-muted-foreground/70"> — {line.detail}</span>
+              ) : null}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
@@ -195,14 +385,23 @@ export function GanttLabPage() {
   const [pmp, setPmp] = useState(false)
   const [matrix, setMatrix] = useState(false)
   const [bare, setBare] = useState(false)
-  const tasks = useFixture(fixture)
+  const tasks = useFixture(fixture, matrix)
   const benchEnabled = useGanttLabEnabled()
   const benchRef = useRef<HTMLDivElement>(null)
+  const { sample, refresh, resetLongTasks } = useLabPerfMeter(!matrix, benchRef)
 
   // Off = the package alone; on = the package under our override layer.
   useShowcaseGanttTheme(!bare)
 
   const activeFixture = FIXTURES.find((f) => f.id === fixture)!
+  const scoring = fixture === "stress-2000" && !matrix
+  const lines = ganttScoreLines(sample, scoring)
+
+  useEffect(() => {
+    if (!scoring) return
+    const t = window.setTimeout(refresh, 1_500)
+    return () => window.clearTimeout(t)
+  }, [scoring, fixture, bare, refresh])
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
@@ -235,6 +434,17 @@ export function GanttLabPage() {
         </div>
         <GanttDesignMenu design={design} onDesignChange={setDesign} />
       </header>
+
+      {!matrix ? (
+        <div className="shrink-0 border-b border-border px-6 py-2">
+          <PerfScorecard
+            lines={lines}
+            sample={sample}
+            onRefresh={refresh}
+            onReset={resetLongTasks}
+          />
+        </div>
+      ) : null}
 
       <div className="flex shrink-0 flex-wrap items-end gap-x-6 gap-y-3 border-b border-border px-6 py-3">
         <Field label="Dataset">

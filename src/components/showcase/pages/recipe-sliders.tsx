@@ -79,6 +79,65 @@ function Example({
   )
 }
 
+// ─── ST-068 sign-off checklist ───────────────────────────────────────────────
+
+const ST068_CHECKS = [
+  { id: "range", label: "Range thumbs", hint: "Surfaces · Range — two thumbs drag independently" },
+  { id: "log", label: "Log scale", hint: "Inspector / zoom examples with scale=\"log\"" },
+  { id: "segments", label: "Segments variant", hint: "Maps · discrete steps" },
+  { id: "ruler", label: "Ruler variant", hint: "Photo / stress · units on the rail" },
+  { id: "readonly", label: "Read-only", hint: "States · score stays keyboard-inert" },
+  { id: "disabled", label: "Disabled", hint: "States · muted rail, no pointer" },
+  { id: "keyboard", label: "Keyboard step", hint: "Focus a thumb · Arrow keys change value" },
+  {
+    id: "chrome",
+    label: "Concentric chrome",
+    hint: "Thumb radius, flat hover, solid pressed (ST-068 control fix) + spot-check one tray / glass bar",
+  },
+] as const
+
+function SignOffChecklist() {
+  const [checked, setChecked] = React.useState<Record<string, boolean>>({})
+  const score = ST068_CHECKS.reduce((n, c) => n + (checked[c.id] ? 1 : 0), 0)
+  return (
+    <section id="signoff" className="flex scroll-mt-6 flex-col gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-base font-semibold">ST-068 sign-off</h2>
+          <p className="text-muted-foreground max-w-2xl text-sm">
+            Eight interaction checks for the slider work already on nqui <code className="text-foreground">dev</code>.
+            Score <strong className="text-foreground">8/8</strong> before promoting showcase off{" "}
+            <code className="text-foreground">dev</code>. Does not block the gantt / pivot numeric labs.
+          </p>
+        </div>
+        <p
+          className={`font-mono text-sm font-semibold tabular-nums ${score === 8 ? "text-foreground" : "text-muted-foreground"}`}
+        >
+          {score}/8
+        </p>
+      </div>
+      <ul className="grid gap-2 sm:grid-cols-2">
+        {ST068_CHECKS.map((item) => (
+          <li key={item.id}>
+            <label className="bg-muted/50 flex cursor-pointer items-start gap-3 rounded-lg border border-border/60 p-3 text-sm">
+              <input
+                type="checkbox"
+                className="mt-0.5 size-3.5 accent-foreground"
+                checked={Boolean(checked[item.id])}
+                onChange={(e) => setChecked((prev) => ({ ...prev, [item.id]: e.target.checked }))}
+              />
+              <span className="flex min-w-0 flex-col gap-0.5">
+                <span className="font-medium">{item.label}</span>
+                <span className="text-muted-foreground text-xs">{item.hint}</span>
+              </span>
+            </label>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
 // ─── Which slider ────────────────────────────────────────────────────────────
 
 const VARIANT_ROWS: Array<{ data: string; use: string; example: string; section: string }> = [
@@ -693,6 +752,7 @@ function StressSection() {
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 const TOC = [
+  ["signoff", "ST-068 sign-off"],
   ["which", "Which slider"],
   ["surfaces", "Surfaces"],
   ["settings", "Settings"],
@@ -727,6 +787,7 @@ export default function RecipeSliders() {
           ))}
         </nav>
       </div>
+      <SignOffChecklist />
       <ChooserSection />
       <SurfacesSection />
       <SettingsSection />

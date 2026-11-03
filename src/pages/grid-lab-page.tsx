@@ -22,9 +22,10 @@ import { WorkBreakdownBlock } from "@/components/blocks/blocks-grid"
 import { Tray } from "@/components/showcase/tray"
 import { SpreadsheetPage } from "@/nqgrid/demos/spreadsheet/spreadsheet-page"
 import { ProjectsPage } from "@/nqgrid/demos/projects/projects-page"
+import { PivotLabPanel } from "@/nqgrid/demos/pivot/pivot-lab-panel"
 import { PlaygroundTableSettingsProvider } from "@/nqgrid/playground-table-settings"
 
-type SurfaceId = "wbs" | "projects" | "spreadsheet"
+type SurfaceId = "wbs" | "projects" | "spreadsheet" | "pivot"
 
 const SURFACES: { id: SurfaceId; label: string; hint: string }[] = [
   {
@@ -41,6 +42,11 @@ const SURFACES: { id: SurfaceId; label: string; hint: string }[] = [
     id: "spreadsheet",
     label: "Spreadsheet",
     hint: "Sheets workbook — formula bar, freeze, pivot; engine stress surface",
+  },
+  {
+    id: "pivot",
+    label: "Pivot",
+    hint: "@nqlib/nqgrid/pivot stress — 1k / 10k / 29k rows, virtualize A/B scorecard",
   },
 ]
 
@@ -145,6 +151,7 @@ export function GridLabPage() {
             </PlaygroundTableSettingsProvider>
           </div>
         ) : null}
+        {surface === "pivot" ? <PivotLabPanel /> : null}
       </div>
     </div>
   )

@@ -46,6 +46,9 @@
       "@nqlib/nqgrid/advanced": ["../nqgrid/src/advanced/index.ts"],
       "@nqlib/nqgrid/configurator": ["../nqgrid/src/configurator/index.ts"],
       "@nqlib/nqgrid/fixtures": ["../nqgrid/src/fixtures/index.ts"],
+      "@nqlib/nqgrid/core": ["../nqgrid/src/core/index.ts"],
+      "@nqlib/nqgrid/pivot": ["../nqgrid/src/pivot/index.ts"],
+      "@nqlib/nqgrid/render-static": ["../nqgrid/src/render-static/index.ts"],
       /*
        * DEV-ONLY: type-resolve @nqlib/nqgantt against sibling source when iterating
        * with `pnpm dev:local`. Remove or gate when deploy tracks published only.
