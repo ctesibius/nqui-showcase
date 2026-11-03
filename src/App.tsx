@@ -21,6 +21,7 @@ const RecipeElevation = lazy(() => import("./components/showcase/pages/recipe-el
 const AppearanceSettings = lazy(
   () => import("./components/showcase/pages/appearance-settings"),
 )
+const RecipeSliders = lazy(() => import("./components/showcase/pages/recipe-sliders"));
 const ThemeStudio = lazy(() => import("./components/showcase/pages/theme-studio"))
 const DesignSystemPage = lazy(() => import("./components/showcase/pages/design-system"));
 const CommandLab = lazy(() => import("./components/showcase/pages/command-lab"));
@@ -86,6 +87,7 @@ function App() {
             <Route path="/command" element={<CommandLab />} />
           </Route>
           {/* Compact recipes → /blocks (SettingsBlock etc.). */}
+            <Route path="/recipes/sliders" element={<RecipeSliders />} />
           <Route path="/recipes/settings" element={<Navigate to="/blocks" replace />} />
           <Route path="/recipes/tracker" element={<Navigate to="/blocks" replace />} />
           <Route element={<DocsShell />}>

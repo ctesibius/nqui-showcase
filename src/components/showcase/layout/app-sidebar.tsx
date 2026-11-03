@@ -32,6 +32,7 @@ const navIcons: Record<string, typeof HomeIcon> = {
   [NQUI_HUB_PATH]: Book01Icon,
   "/patterns": LayoutIcon,
   "/recipes/elevation": LayoutIcon,
+  "/recipes/sliders": LayoutIcon,
   "/catalog": FileIcon,
   "/settings/appearance": PaintBoardIcon,
   "/design-system": SettingsIcon,

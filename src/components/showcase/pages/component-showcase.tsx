@@ -1720,21 +1720,25 @@ export default function ComponentShowcase() {
 
           <CatalogSpecimen
             title="Slider"
-            description="Range slider with Switch-inspired white capsule thumb. Supports sm/default/lg."
-            stageClassName="space-y-4"
+            description="4px rail, Switch thumb, sm/default/lg row heights. Variants: field, segments, ruler. Full examples on /recipes/sliders."
+            stageClassName="space-y-5"
           >
             <div className="space-y-2">
               <Label className="text-sm font-semibold">Sizes</Label>
-              <div className="space-y-3">
-                <Slider size="sm" defaultValue={[40]} max={100} step={1} />
-                <Slider size="default" defaultValue={[55]} max={100} step={1} />
-                <Slider size="lg" defaultValue={[70]} max={100} step={1} />
+              <div className="space-y-1">
+                <Slider size="sm" defaultValue={[40]} max={100} step={1} aria-label="Small" />
+                <Slider size="default" defaultValue={[55]} max={100} step={1} aria-label="Default" />
+                <Slider size="lg" defaultValue={[70]} max={100} step={1} aria-label="Large" />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">Range</Label>
-              <Slider size="default" defaultValue={[25, 75]} max={100} step={1} />
-            </div>
+            <Slider label="Range" showValue defaultValue={[25, 75]} max={100} step={1} />
+            <Slider label="Balance · origin" showValue min={-50} max={50} origin={0} defaultValue={[-15]} />
+            <Slider label="Zoom · log + marks" showValue scale="log" min={25} max={400} step={5} defaultValue={[100]} formatValue={(v) => `${v}%`} marks={[{ value: 100, label: "100%" }]} />
+            <Slider variant="field" label="Field" defaultValue={[64]} formatValue={(v) => `${v}%`} />
+            <Slider variant="segments" label="Segments" showValue min={1} max={7} defaultValue={[4]} />
+            <Slider variant="ruler" label="Ruler" min={-2} max={2} step={0.1} origin={0} defaultValue={[0.7]} formatValue={(v) => `${v > 0 ? "+" : ""}${v.toFixed(1)} EV`} />
+            <Slider label="Read-only" showValue readOnly defaultValue={[82]} />
+            <Slider label="Disabled" showValue disabled defaultValue={[40]} />
           </CatalogSpecimen>
 
           <CatalogSpecimen
