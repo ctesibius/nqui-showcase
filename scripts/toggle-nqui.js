@@ -24,7 +24,7 @@ const pkgPath = join(root, "package.json")
 const installedDir = join(root, "node_modules", "@nqlib", "nqui")
 
 // --- CUSTOMIZE ---
-const PUBLISHED_VERSION = "^0.8.1"
+const PUBLISHED_VERSION = "^0.9.0"
 // --- END CUSTOMIZE ---
 
 const nquiDir = resolve(process.env.NQUI_DIR ?? join(root, "..", "nqui"))

@@ -43,25 +43,6 @@ function localNqgridAliases(): Alias[] {
   ]
 }
 
-/**
- * Pivot / core / render-static ship on nqgrid `dev` ahead of a published bump.
- * Alias them whenever the sibling files exist so `/grid-lab` Pivot works without
- * forcing USE_LOCAL_NQGRID (which would also rewire the 0.2.0 engine demos).
- */
-function localNqgridPivotAliases(): Alias[] {
-  const base = process.env.NQGRID_DIR ?? path.resolve(__dirname, "../nqgrid")
-  const aliases: Alias[] = []
-  for (const name of ["core", "pivot", "render-static"] as const) {
-    const file = path.join(base, "src", name, "index.ts")
-    if (!existsSync(file)) continue
-    aliases.push({ find: new RegExp(`^@nqlib\\/nqgrid\\/${name}$`), replacement: file })
-  }
-  if (aliases.length) {
-    console.info(`[nqui-showcase] @nqlib/nqgrid/{core,pivot,render-static} → ${path.join(base, "src")}`)
-  }
-  return aliases
-}
-
 function localNqganttAliases(): Alias[] {
   if (process.env.USE_LOCAL_NQGANTT !== "true") return []
   const workspaceRoot = process.env.NQGANTT_DIR ?? path.resolve(__dirname, "../nqgantt/packages")
@@ -168,7 +149,6 @@ export default defineConfig(async ({ mode }) => ({
   resolve: {
     alias: [
       ...localNqgridAliases(),
-      ...localNqgridPivotAliases(),
       ...localNqganttAliases(),
       ...nqganttStylesAlias(),
       ...localNqchartAliases(),
