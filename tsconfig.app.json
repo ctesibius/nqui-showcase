@@ -32,58 +32,7 @@
        */
       "react": ["./node_modules/@types/react"],
       "react/jsx-runtime": ["./node_modules/@types/react/jsx-runtime"],
-      "react-dom": ["./node_modules/@types/react-dom"],
-      /*
-       * DEV-ONLY: type-resolve @nqlib/nqgrid against the sibling ../nqgrid/src so
-       * the editor/typecheck match the engine API that `pnpm dev:local` runs with.
-       * Runtime still uses published @nqlib/nqgrid@^0.2.0 unless USE_LOCAL_NQGRID.
-       */
-      "@nqlib/nqgrid": ["../nqgrid/src/index.ts"],
-      "@nqlib/nqgrid/engine": ["../nqgrid/src/engine/index.ts"],
-      "@nqlib/nqgrid/grid": ["../nqgrid/src/grid/index.ts"],
-      "@nqlib/nqgrid/sheet": ["../nqgrid/src/sheet/index.ts"],
-      "@nqlib/nqgrid/spreadsheet": ["../nqgrid/src/spreadsheet/index.ts"],
-      "@nqlib/nqgrid/advanced": ["../nqgrid/src/advanced/index.ts"],
-      "@nqlib/nqgrid/configurator": ["../nqgrid/src/configurator/index.ts"],
-      "@nqlib/nqgrid/fixtures": ["../nqgrid/src/fixtures/index.ts"],
-      "@nqlib/nqgrid/core": ["../nqgrid/src/core/index.ts"],
-      "@nqlib/nqgrid/pivot": ["../nqgrid/src/pivot/index.ts"],
-      "@nqlib/nqgrid/render-static": ["../nqgrid/src/render-static/index.ts"],
-      /*
-       * DEV-ONLY: type-resolve @nqlib/nqgantt against sibling source when iterating
-       * with `pnpm dev:local`. Remove or gate when deploy tracks published only.
-       * @nqlib/nqgantt-engine is mapped alongside it — nqgantt/src imports the
-       * engine as a bare specifier, so without this tsc would typecheck local
-       * nqgantt source against the PUBLISHED (possibly older) engine's .d.ts
-       * instead of the matching local engine version being tested pre-publish.
-       */
-      "@nqlib/nqgantt": ["../nqgantt/packages/nqgantt/src/index.ts"],
-      "@nqlib/nqgantt/ui": ["../nqgantt/packages/nqgantt/src/ui.ts"],
-      "@nqlib/nqgantt/engine": ["../nqgantt/packages/nqgantt/src/engine.ts"],
-      "@nqlib/nqgantt/mock": ["../nqgantt/packages/nqgantt/src/mock.ts"],
-      "@nqlib/nqgantt/item-gantt-adapter": ["../nqgantt/packages/nqgantt/src/item-gantt-adapter.ts"],
-      "@nqlib/nqgantt-engine": ["../nqgantt/packages/nqgantt-engine/src/index.ts"],
-      /*
-       * DEV-ONLY: type-resolve @nqlib/nqchart against sibling becocharts declarations
-       * so new funnel APIs (`connection="pipe"`) typecheck before the next npm publish.
-       * Runtime: `pnpm nqchart:build` + `USE_LOCAL_NQCHART=true` (vite → dist).
-       */
-      "@nqlib/nqchart": ["../becocharts/dist/types/lib/public.d.ts"],
-      "@nqlib/nqchart/funnel-chart": ["../becocharts/dist/types/registry/charts/funnel-chart.d.ts"],
-      "@nqlib/nqchart/bar-chart": ["../becocharts/dist/types/registry/charts/bar-chart.d.ts"],
-      "@nqlib/nqchart/area-chart": ["../becocharts/dist/types/registry/charts/area-chart.d.ts"],
-      "@nqlib/nqchart/line-chart": ["../becocharts/dist/types/registry/charts/line-chart.d.ts"],
-      "@nqlib/nqchart/composed-chart": ["../becocharts/dist/types/registry/charts/composed-chart.d.ts"],
-      "@nqlib/nqchart/pie-chart": ["../becocharts/dist/types/registry/charts/pie-chart.d.ts"],
-      "@nqlib/nqchart/radar-chart": ["../becocharts/dist/types/registry/charts/radar-chart.d.ts"],
-      "@nqlib/nqchart/radial-chart": ["../becocharts/dist/types/registry/charts/radial-chart.d.ts"],
-      "@nqlib/nqchart/scatter-chart": ["../becocharts/dist/types/registry/charts/scatter-chart.d.ts"],
-      "@nqlib/nqchart/sparkline-chart": ["../becocharts/dist/types/registry/charts/sparkline-chart.d.ts"],
-      "@nqlib/nqchart/treemap-chart": ["../becocharts/dist/types/registry/charts/treemap-chart.d.ts"],
-      "@nqlib/nqchart/waterfall-chart": ["../becocharts/dist/types/registry/charts/waterfall-chart.d.ts"],
-      "@nqlib/nqchart/heatmap-chart": ["../becocharts/dist/types/registry/charts/heatmap-chart.d.ts"],
-      "@nqlib/nqchart/calendar-chart": ["../becocharts/dist/types/registry/charts/calendar-chart.d.ts"],
-      "@nqlib/nqchart/recipes": ["../becocharts/dist/types/registry/lib/chart-recipes.d.ts"]
+      "react-dom": ["./node_modules/@types/react-dom"]
     },
 
     /* Linting */
