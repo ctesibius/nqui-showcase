@@ -7,7 +7,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@nqlib/nqui";
+import { ActionPickerSub } from "@/components/showcase/actions-menu";
 import { ORDER_DIMENSIONS } from "./mock-data";
+
+const GROUP_BY_OPTIONS = ORDER_DIMENSIONS.map((d) => ({
+  value: d.key,
+  label: d.label,
+}));
 
 /** Actions the engine can really perform, wired from the page. */
 export interface MenuBarActions {
@@ -19,7 +25,8 @@ export interface MenuBarActions {
   onFreezeFirstColumn: () => void;
   onUnfreezeAll: () => void;
   freezeActive: boolean;
-  onGroupBy: (dimensionKey: string) => void;
+  onGroupBy: (dimensionKey: string | null) => void;
+  groupByKey: string | null;
   onOpenPivot: () => void;
   canCopy: boolean;
   onUndo: () => void;
@@ -84,6 +91,7 @@ export function MenuBar({
   onUnfreezeAll,
   freezeActive,
   onGroupBy,
+  groupByKey,
   onOpenPivot,
   canCopy,
   onUndo,
@@ -161,12 +169,14 @@ export function MenuBar({
       <DropdownMenu>
         <MenuTrigger label="Data" />
         <DropdownMenuContent align="start" className="w-56">
-          <DropdownMenuLabel>Group by</DropdownMenuLabel>
-          {ORDER_DIMENSIONS.map((dim) => (
-            <DropdownMenuItem key={dim.key} onClick={() => onGroupBy(dim.key)}>
-              {dim.label}
-            </DropdownMenuItem>
-          ))}
+          <ActionPickerSub
+            label="Group by"
+            value={groupByKey ?? "none"}
+            options={GROUP_BY_OPTIONS}
+            placeholder="e.g. Sales"
+            sentinel={{ value: "none", label: "None" }}
+            onValueChange={(next) => onGroupBy(next === "none" ? null : next)}
+          />
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onOpenPivot}>Pivot table</DropdownMenuItem>
         </DropdownMenuContent>

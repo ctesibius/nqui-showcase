@@ -144,7 +144,8 @@ function renderBodyCellContent(rowOriginal: OrderRow, key: keyof OrderRow, forma
       ? formatCellDisplay(rawValue as number, format.numberFormat, cellText(rowOriginal, key))
       : cellText(rowOriginal, key);
   const className = cn(numeric && alignClass == null && gridNumericClass, alignClass, styleClass);
-  return className ? <span className={className}>{text}</span> : text;
+  // Block + full width: text alignment has no effect on an inline span.
+  return className ? <span className={cn("block w-full", className)}>{text}</span> : text;
 }
 
 /** Stable callbacks/refs shared by every body cell (identity-stable across renders). */
@@ -434,7 +435,7 @@ function GridViewImpl({
               );
             }
             const text = cellText(row, col.key);
-            return col.numeric ? <span className={gridNumericClass}>{text}</span> : text;
+            return col.numeric ? <span className={cn("block w-full", gridNumericClass)}>{text}</span> : text;
           },
         }),
       ),
@@ -858,6 +859,8 @@ function GridViewImpl({
       const colDef = ORDER_COLUMNS.find((x) => x.key === key);
       if (!colDef) return;
       const value = coerceCellValue(rawValue, colDef.numeric);
+      // Not a number → keep the previous value rather than writing 0.
+      if (value === null) return;
       let changed = false;
       const next = data.map((row) => {
         if (row.id !== rowId) return row;
@@ -1620,6 +1623,13 @@ function GridViewImpl({
             aria-rowcount={displayRows.length}
             aria-colcount={dataColumns.length}
             tabIndex={0}
+            // Cells preventDefault on mousedown (drag-select), which also blocks focus.
+            // Focus the grid so arrow keys work after a click; editors keep theirs.
+            onMouseDownCapture={(e) => {
+              if (!(e.target as Element).closest("input, textarea, select, button, [contenteditable='true']")) {
+                e.currentTarget.focus({ preventScroll: true });
+              }
+            }}
             onKeyDown={handleKeyDown}
             className="outline-none"
           >

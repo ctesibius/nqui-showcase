@@ -203,9 +203,9 @@ export function SpreadsheetPage() {
     setSelectionNumbers(numbers);
   }, []);
 
-  const handleGroupBy = useCallback((dimensionKey: string) => {
-    setGroupByKey((prev) => (prev === dimensionKey ? null : dimensionKey));
-    setActiveSheet("summary");
+  const handleGroupBy = useCallback((dimensionKey: string | null) => {
+    setGroupByKey(dimensionKey);
+    if (dimensionKey != null) setActiveSheet("summary");
   }, []);
 
   const handleCopy = useCallback(() => {
@@ -336,6 +336,7 @@ export function SpreadsheetPage() {
         onUnfreezeAll={handleUnfreezeAll}
         freezeActive={freezeActive}
         onGroupBy={handleGroupBy}
+        groupByKey={groupByKey}
         onOpenPivot={() => setActiveSheet("pivot")}
         canCopy={!showEmpty}
         onUndo={undo}
@@ -412,6 +413,7 @@ export function SpreadsheetPage() {
           />
         ) : activeSheet === "pivot" ? (
           <PivotView
+            data={data}
             canvasMode={sheetCanvasMode}
             columnResizeEnabled={sheetResize.columnResize}
             rowResizeEnabled={sheetResize.rowResize}
@@ -423,6 +425,7 @@ export function SpreadsheetPage() {
           />
         ) : (
           <SummaryView
+            data={data}
             canvasMode={sheetCanvasMode}
             columnResizeEnabled={sheetResize.columnResize}
             rowResizeEnabled={sheetResize.rowResize}
@@ -437,7 +440,7 @@ export function SpreadsheetPage() {
 
       <StatusBar
         selectedNumbers={selectionNumbers}
-        rowCount={isOrders ? filteredRows.length : SALES_ORDERS.length}
+        rowCount={isOrders ? filteredRows.length : data.length}
         filterActive={search.trim().length > 0}
         onCopy={handleCopy}
         canCopy={isOrders && copyAvailable}

@@ -171,7 +171,7 @@ export function PivotLabPanel() {
     // The panel grows with its controls and the page scrolls; the table row gets
     // its own definite height. A fixed 70vh panel left the table whatever the
     // controls, scorecard and slicers didn't use — 80px or less on laptops.
-    <div ref={stageRef} className="flex flex-col gap-3 p-4">
+    <div ref={stageRef} className="flex flex-col gap-3">
       <div className="flex shrink-0 flex-wrap items-end gap-x-6 gap-y-3">
         <Field label="Records">
           <ToggleGroup
