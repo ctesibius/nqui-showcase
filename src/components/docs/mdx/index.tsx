@@ -19,6 +19,7 @@ import {
   SkillsBlock,
 } from "./nqchart-blocks";
 import { GanttExample } from "./gantt-example";
+import { GridExample } from "./grid-example";
 import { CatalogLink, NquiExample } from "./nqui-example";
 
 /**
@@ -121,6 +122,7 @@ export const mdxComponents: MDXComponents = {
   ComponentPreview,
   ComponentSource,
   GanttExample,
+  GridExample,
   NquiExample,
   CatalogLink,
   ComponentProps,

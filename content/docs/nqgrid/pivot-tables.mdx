@@ -1,0 +1,50 @@
+---
+title: "Pivot tables"
+description: "Excel-style pivot tables from a JSON spec: rows, columns, values and totals, computed headlessly and rendered with PivotTable."
+---
+
+**Intention:** A pivot turns a flat list of records into a summary you can read — revenue by region and category, per quarter — without writing a single `reduce`.
+
+<GridExample name="pivot-basics" />
+
+## The shape
+
+A pivot is a **spec** (plain JSON) applied to **rows** (your records):
+
+```tsx
+import { PivotTable, usePivotGrid } from "@nqlib/nqgrid/pivot";
+
+const spec = {
+  version: 1,
+  rows: [{ field: "region" }, { field: "category" }],
+  columns: { field: "orderDate:quarter" },
+  measures: [{ id: "revenue", field: "revenue", format: { style: "currency", currency: "USD", compact: true } }],
+  totals: { rowTotal: true },
+};
+
+export function RevenuePivot({ orders }) {
+  const pivot = usePivotGrid(spec, orders);
+  return <PivotTable model={pivot.model} onToggleGroup={pivot.toggleGroup} />;
+}
+```
+
+- **Rows** and **columns** are dimensions — fields whose values become headers.
+- **Measures** are what gets aggregated (`sum` by default; also `avg`, `min`, `max`, `count`, `distinctCount`, weighted average and ratios).
+- **Totals**: group rows carry subtotals, and the grand total sits at the bottom. `rowTotal` adds a total column.
+
+## Dates without extra columns
+
+`orderDate:quarter` is a **derived date field**: nqgrid groups the raw `orderDate` by quarter for you. Year, month, week, day, `yearMonth` and `yearQuarter` work the same way. In the example the field catalogue sets a **November fiscal year**, so Q1 is Nov–Jan — the same convention as Excel's fiscal grouping.
+
+## Where the state lives
+
+Everything the user changes — expanded groups, filters, layout — is written back into the spec. That makes a pivot **serializable**: save the spec, reload it, or send it to a server and render the same pivot to HTML or XLSX with `@nqlib/nqgrid/render-static` and the `nqgrid-export` CLI.
+
+`@nqlib/nqgrid/core` is the framework-free half (no React, no DOM): `buildPivotModel(spec, rows)` runs in a browser, a Tauri webview or Node.
+
+## Next
+
+- [Slicers and Top N](/docs/nqgrid/pivot-filters)
+- [Field list](/docs/nqgrid/pivot-field-list)
+- [Show values as](/docs/nqgrid/pivot-show-values-as)
+- [Calculated measures and drill-through](/docs/nqgrid/pivot-calculated)

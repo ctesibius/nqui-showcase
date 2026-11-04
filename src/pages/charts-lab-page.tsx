@@ -152,6 +152,7 @@ export function ChartsLabPage() {
             </Link>
           }
           links={[
+            { to: "/charts/0.4", label: "NQChart 0.4" },
             { to: "/charts", label: "Gallery" },
             { to: "/blocks", label: "Blocks" },
             { to: "/docs/nqchart", label: "Docs" },

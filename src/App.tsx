@@ -11,6 +11,9 @@ const ChartsPage = lazy(() => import("./pages/charts-page").then((m) => ({ defau
 const ChartsLabPage = lazy(() =>
   import("./pages/charts-lab-page").then((m) => ({ default: m.ChartsLabPage })),
 );
+const Nqchart040Page = lazy(() =>
+  import("./pages/nqchart-040-page").then((m) => ({ default: m.Nqchart040Page })),
+);
 const DocsLayout = lazy(() => import("./layouts/docs-layout").then((m) => ({ default: m.DocsLayout })));
 const DocsPage = lazy(() => import("./pages/docs-page").then((m) => ({ default: m.DocsPage })));
 
@@ -18,6 +21,7 @@ const RecipesHub = lazy(() => import("./components/showcase/pages/recipes-hub"))
 const ComponentShowcase = lazy(() => import("./components/showcase/pages/component-showcase"));
 const PatternsPage = lazy(() => import("./components/showcase/pages/patterns"));
 const RecipeElevation = lazy(() => import("./components/showcase/pages/recipe-elevation"));
+const RecipeSliders = lazy(() => import("./components/showcase/pages/recipe-sliders"));
 const AppearanceSettings = lazy(
   () => import("./components/showcase/pages/appearance-settings"),
 )
@@ -66,6 +70,7 @@ function App() {
           <Route path="/charts" element={<ChartsPage />} />
           {/* BI feature lab — release acceptance beside the gallery. */}
           <Route path="/charts/lab" element={<ChartsLabPage />} />
+          <Route path="/charts/0.4" element={<Nqchart040Page />} />
           {/* The scroll-story was replaced by the blocks gallery. */}
           <Route path="/story" element={<Navigate to="/blocks" replace />} />
           {/* The live console was retired — send its old paths home. */}
@@ -82,6 +87,7 @@ function App() {
             <Route path="/studio" element={<ThemeStudio />} />
             <Route path="/patterns" element={<PatternsPage />} />
             <Route path="/recipes/elevation" element={<RecipeElevation />} />
+            <Route path="/recipes/sliders" element={<RecipeSliders />} />
             <Route path="/design-system" element={<DesignSystemPage />} />
             <Route path="/command" element={<CommandLab />} />
           </Route>

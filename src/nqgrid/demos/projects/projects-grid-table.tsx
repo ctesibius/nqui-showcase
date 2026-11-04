@@ -280,6 +280,13 @@ export function ProjectsGridTable({
           tabIndex={0}
           className="outline-none"
           aria-label="Project tasks grid"
+          // Cells preventDefault on mousedown (drag-select), which also blocks focus.
+          // Focus the grid so arrow keys work after a click; editors keep theirs.
+          onMouseDownCapture={(e) => {
+            if (!(e.target as Element).closest("input, textarea, select, button, [contenteditable='true']")) {
+              e.currentTarget.focus({ preventScroll: true });
+            }
+          }}
           onKeyDown={onGridKeyDown}
         >
           <table className={gridTableClass} style={{ width: "100%", minWidth: table.getTotalSize() }}>

@@ -1,4 +1,14 @@
 {
   "title": "nqgrid",
-  "pages": ["index", "installation", "changelog", "concepts"]
+  "pages": [
+    "index",
+    "installation",
+    "changelog",
+    "concepts",
+    "pivot-tables",
+    "pivot-filters",
+    "pivot-field-list",
+    "pivot-show-values-as",
+    "pivot-calculated"
+  ]
 }

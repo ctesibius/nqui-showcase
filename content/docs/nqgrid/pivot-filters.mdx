@@ -1,0 +1,39 @@
+---
+title: "Slicers and Top N"
+description: "Filter pivot records with slicers, rank rows by a measure, and keep only the top items per group without losing the totals."
+---
+
+**Intention:** Narrow the pivot to what matters — one region, one channel, the two best product lines — while every total stays honest.
+
+<GridExample name="pivot-filters" />
+
+## Slicers
+
+A slicer is a button list over one field's values. Selecting items **filters the records before aggregation**, exactly like an Excel slicer, so subtotals and the grand total only count what passes.
+
+```tsx
+import { PivotSlicer, pivotSlicerProps } from "@nqlib/nqgrid/pivot";
+
+<PivotSlicer {...pivotSlicerProps(pivot, "region")} title="Region" columns={4} />
+```
+
+- Declare slicer fields in the spec with `facets: ["region", "channel"]`. They do not need to be rows or columns.
+- Click selects one item; Cmd/Ctrl- or Shift-click adds to the selection. Items with no data under the other slicers grey out.
+- `pivot.clearFilters()` resets every slicer; the filters live in `spec.filters`, so they save with the layout.
+
+## Sort by value
+
+`sortBy: { measure: "revenue" }` on a row dimension orders siblings by that measure (descending by default) instead of alphabetically. Categories and lines in the example are ranked by revenue.
+
+## Top N with "Other"
+
+```ts
+{ field: "line", topN: { measure: "revenue", count: 2, other: true, otherLabel: "Other lines" } }
+```
+
+Top N keeps the best `count` items **within each parent group**. Without `other`, the dropped items vanish from every total — which is what Excel does, and usually not what a reader expects. With `other: true` they fold into one row, so the category total is unchanged.
+
+## Related
+
+- [Pivot tables](/docs/nqgrid/pivot-tables)
+- [Field list](/docs/nqgrid/pivot-field-list)

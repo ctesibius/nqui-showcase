@@ -83,6 +83,9 @@ const grid = (name: keyof typeof import("./blocks-grid")) =>
 const issues = (name: keyof typeof import("./blocks-issues")) =>
   lazy(() => import("./blocks-issues").then((m) => ({ default: m[name] as ComponentType })));
 
+const pivot = (name: keyof typeof import("./blocks-pivot")) =>
+  lazy(() => import("./blocks-pivot").then((m) => ({ default: m[name] as ComponentType })));
+
 const timeline = (name: keyof typeof import("./blocks-timeline")) =>
   lazy(() => import("./blocks-timeline").then((m) => ({ default: m[name] as ComponentType })));
 
@@ -107,6 +110,16 @@ export const BLOCKS: Block[] = [
     bom: ["KanbanBoard", "ScrollArea", "SortableList", "ToggleGroup", "Avatar", "NQBarChart", "@/lib/pm"],
     stage: "report",
     Render: issues("IssuesLabBlock"),
+  },
+  {
+    id: "bookings-review",
+    name: "Bookings review",
+    blurb:
+      "FY26 new ARR by region and country per fiscal quarter — slicers, a calculated vs-plan measure, header bars, and double-click drill-through to the deals.",
+    lib: "nqgrid",
+    bom: ["usePivotGrid", "PivotTable", "PivotSlicer", "PivotDrillThroughPanel", "calculate", "headerCharts", "kpis"],
+    stage: "report",
+    Render: pivot("BookingsReviewBlock"),
   },
   {
     id: "timeline-lab",
@@ -137,6 +150,26 @@ export const BLOCKS: Block[] = [
     stage: "table",
     wide: true,
     Render: grid("WorkBreakdownBlock"),
+  },
+  {
+    id: "support-sla",
+    name: "Support SLA desk",
+    blurb: "Tickets, first reply, resolution, SLA share and CSAT by team or channel — avg aggregates, not sums.",
+    lib: "nqgrid",
+    bom: ["usePivotGrid", "PivotTable", "aggregate: avg", "heat", "ToggleGroup"],
+    stage: "table",
+    wide: true,
+    Render: pivot("SupportSlaBlock"),
+  },
+  {
+    id: "pipeline",
+    name: "Open pipeline",
+    blurb: "Weighted pipeline by rep and stage, with Top 2 per region and a stage-mix view.",
+    lib: "nqgrid",
+    bom: ["usePivotGrid", "PivotTable", "topN", "showAs: percentOfRowTotal", "ToggleGroup", "Switch"],
+    stage: "table",
+    wide: true,
+    Render: pivot("PipelineBlock"),
   },
   {
     id: "category-pivot",

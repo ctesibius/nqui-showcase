@@ -122,6 +122,7 @@ import {
   TooltipContent,
   TooltipProvider,
   Combobox,
+  ComboboxAnchor,
   ComboboxInput,
   ComboboxBadgeTrigger,
   ComboboxList,
@@ -132,6 +133,8 @@ import {
   ComboboxEmpty,
   ComboboxContent,
   ComboboxGroup,
+  ComboboxTrigger,
+  ComboboxValue,
   // Layout
   Accordion,
   AccordionItem,
@@ -226,6 +229,25 @@ import {
   RevokeKeyAlertDialog,
   TaskInspectorSheet,
 } from "../overlay-demos"
+import {
+  ActionPickerSub,
+  ActionsMenu,
+  ActionsMenuFilter,
+} from "../actions-menu"
+import { inputFieldShellBase } from "../lib/input-field-shell"
+import { TEAM } from "@/lib/pm/team"
+
+const PROJECT_ACTION_STATUSES = [
+  { value: "backlog", label: "Backlog" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "review", label: "In Review" },
+  { value: "done", label: "Done" },
+] as const
+
+const PROJECT_ACTION_ASSIGNEES = TEAM.map((p) => ({
+  value: p.id,
+  label: p.name,
+}))
 
 type Person = { id: string; name: string; avatarUrl?: string }
 
@@ -366,6 +388,20 @@ const COMBOBOX_FRAMEWORKS = [
   { value: "actix", label: "Actix" },
   { value: "axum", label: "Axum" },
   { value: "htmx", label: "HTMX" },
+] as const
+
+/** Pin-on-open progression demo — mid-list preselection makes the lift obvious. */
+const COMBOBOX_PIN_PARTS = [
+  "Alpha",
+  "Bravo",
+  "Charlie",
+  "Delta",
+  "Echo",
+  "Foxtrot",
+  "Golf",
+  "Hotel",
+  "India",
+  "Juliet",
 ] as const
 
 const COMBOBOX_SHORTCUTS = [
@@ -1116,7 +1152,15 @@ export default function ComponentShowcase() {
     "angular",
     "astro",
   ])
+  const [comboboxNoSearch, setComboboxNoSearch] = React.useState("In Progress")
+  const [comboboxPinOn, setComboboxPinOn] = React.useState("echo")
+  const [comboboxPinOff, setComboboxPinOff] = React.useState("echo")
+  const [creatableFruits, setCreatableFruits] = React.useState(["Apple", "Banana", "Cherry"])
+  const [creatableFruit, setCreatableFruit] = React.useState("")
   const [commandPaletteDemoOpen, setCommandPaletteDemoOpen] = React.useState(false)
+  const [projectActionStatus, setProjectActionStatus] = React.useState("in_progress")
+  const [projectActionAssignee, setProjectActionAssignee] = React.useState("ava")
+  const [projectActionShowCompleted, setProjectActionShowCompleted] = React.useState(true)
 
   // Refs for TOC container scoping
   const tocContentRef1 = React.useRef<HTMLDivElement>(null)
@@ -1720,21 +1764,25 @@ export default function ComponentShowcase() {
 
           <CatalogSpecimen
             title="Slider"
-            description="Range slider with Switch-inspired white capsule thumb. Supports sm/default/lg."
-            stageClassName="space-y-4"
+            description="4px rail, Switch thumb, sm/default/lg row heights. Variants: field, segments, ruler. Full examples on /recipes/sliders."
+            stageClassName="space-y-5"
           >
             <div className="space-y-2">
               <Label className="text-sm font-semibold">Sizes</Label>
-              <div className="space-y-3">
-                <Slider size="sm" defaultValue={[40]} max={100} step={1} />
-                <Slider size="default" defaultValue={[55]} max={100} step={1} />
-                <Slider size="lg" defaultValue={[70]} max={100} step={1} />
+              <div className="space-y-1">
+                <Slider size="sm" defaultValue={[40]} max={100} step={1} aria-label="Small" />
+                <Slider size="default" defaultValue={[55]} max={100} step={1} aria-label="Default" />
+                <Slider size="lg" defaultValue={[70]} max={100} step={1} aria-label="Large" />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">Range</Label>
-              <Slider size="default" defaultValue={[25, 75]} max={100} step={1} />
-            </div>
+            <Slider label="Range" showValue defaultValue={[25, 75]} max={100} step={1} />
+            <Slider label="Balance · origin" showValue min={-50} max={50} origin={0} defaultValue={[-15]} />
+            <Slider label="Zoom · log + marks" showValue scale="log" min={25} max={400} step={5} defaultValue={[100]} formatValue={(v) => `${v}%`} marks={[{ value: 100, label: "100%" }]} />
+            <Slider variant="field" label="Field" defaultValue={[64]} formatValue={(v) => `${v}%`} />
+            <Slider variant="segments" label="Segments" showValue min={1} max={7} defaultValue={[4]} />
+            <Slider variant="ruler" label="Ruler" min={-2} max={2} step={0.1} origin={0} defaultValue={[0.7]} formatValue={(v) => `${v > 0 ? "+" : ""}${v.toFixed(1)} EV`} />
+            <Slider label="Read-only" showValue readOnly defaultValue={[82]} />
+            <Slider label="Disabled" showValue disabled defaultValue={[40]} />
           </CatalogSpecimen>
 
           <CatalogSpecimen
@@ -2413,6 +2461,65 @@ export default function ComponentShowcase() {
 
             <div className="space-y-2">
               <p className="text-xs font-medium text-muted-foreground">
+                Project actions — filter, drilldown Combobox (inline + pin on open)
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <ActionsMenu>
+                  <ActionsMenuFilter placeholder="e.g. Save" />
+                  <div data-menu-section>
+                    <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Organize
+                    </DropdownMenuLabel>
+                    <ActionPickerSub
+                      label="Move to status"
+                      value={projectActionStatus}
+                      onValueChange={setProjectActionStatus}
+                      options={PROJECT_ACTION_STATUSES}
+                      placeholder="e.g. Review"
+                      sentinel={{ value: "any", label: "Any status" }}
+                    />
+                    <ActionPickerSub
+                      label="Assign to"
+                      value={projectActionAssignee}
+                      onValueChange={setProjectActionAssignee}
+                      options={PROJECT_ACTION_ASSIGNEES}
+                      placeholder="e.g. Ava"
+                      sentinel={{ value: "unassigned", label: "Unassigned" }}
+                    />
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    data-menu-label="Show completed"
+                    checked={projectActionShowCompleted}
+                    onCheckedChange={(checked) =>
+                      setProjectActionShowCompleted(checked === true)
+                    }
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    Show completed
+                  </DropdownMenuCheckboxItem>
+                </ActionsMenu>
+                <p className="text-xs text-muted-foreground">
+                  Status:{" "}
+                  <span className="text-foreground">
+                    {PROJECT_ACTION_STATUSES.find((s) => s.value === projectActionStatus)?.label ??
+                      (projectActionStatus === "any" ? "Any status" : projectActionStatus)}
+                  </span>
+                  {" · "}
+                  Assignee:{" "}
+                  <span className="text-foreground">
+                    {PROJECT_ACTION_ASSIGNEES.find((a) => a.value === projectActionAssignee)
+                      ?.label ??
+                      (projectActionAssignee === "unassigned"
+                        ? "Unassigned"
+                        : projectActionAssignee)}
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground">
                 Navigation Menu—site nav, mega menus, link panels
               </p>
               <NavigationMenu>
@@ -2804,9 +2911,223 @@ export default function ComponentShowcase() {
 
           <CatalogSpecimen
             title="Combobox"
-            description="Type to filter. Long lists use nqui ScrollArea (compare scrollbar chrome with Select above). Single, multi-select, and icon items supported."
+            description="Host UX patterns: drill-in submenu, pick-only (no search), multi-select with panel search, and pinSelected progression. Long lists use nqui ScrollArea."
             stageClassName="space-y-6 max-w-lg"
           >
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground">
+                Drill-in — Actions submenu with inline Combobox (panel search + pinned sentinel)
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <ActionsMenu>
+                  <ActionsMenuFilter placeholder="e.g. Move" />
+                  <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+                    Checkout redesign
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <ActionPickerSub
+                    label="Move to status"
+                    value={projectActionStatus}
+                    onValueChange={setProjectActionStatus}
+                    options={PROJECT_ACTION_STATUSES}
+                    placeholder="e.g. Review"
+                    sentinel={{ value: "any", label: "Any status" }}
+                  />
+                  <ActionPickerSub
+                    label="Assign to"
+                    value={projectActionAssignee}
+                    onValueChange={setProjectActionAssignee}
+                    options={PROJECT_ACTION_ASSIGNEES}
+                    placeholder="e.g. Ava"
+                    sentinel={{ value: "unassigned", label: "Unassigned" }}
+                  />
+                </ActionsMenu>
+                <p className="text-xs text-muted-foreground">
+                  Status:{" "}
+                  <span className="text-foreground">
+                    {PROJECT_ACTION_STATUSES.find((s) => s.value === projectActionStatus)
+                      ?.label ??
+                      (projectActionStatus === "any" ? "Any status" : projectActionStatus)}
+                  </span>
+                  {" · "}
+                  Assignee:{" "}
+                  <span className="text-foreground">
+                    {PROJECT_ACTION_ASSIGNEES.find((a) => a.value === projectActionAssignee)
+                      ?.label ??
+                      (projectActionAssignee === "unassigned"
+                        ? "Unassigned"
+                        : projectActionAssignee)}
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground">
+                Search not available — value + chevron, short list, no filter field
+              </p>
+              <Combobox
+                value={comboboxNoSearch}
+                onValueChange={(next) =>
+                  setComboboxNoSearch(
+                    typeof next === "string" ? next : (next[0] ?? ""),
+                  )
+                }
+              >
+                <ComboboxAnchor
+                  role="group"
+                  aria-label="Status"
+                  className={cn(
+                    inputFieldShellBase,
+                    "flex max-w-xs min-h-8 items-stretch gap-0 px-2.5 py-1.5 shadow-sm",
+                  )}
+                >
+                  <ComboboxValue
+                    className="flex min-h-8 min-w-0 flex-1 items-center truncate text-xs leading-normal"
+                    placeholder="Pick status…"
+                  />
+                  <ComboboxTrigger className="ml-2 size-8 shrink-0 self-center rounded-md border-0 bg-transparent text-foreground hover:bg-muted/70" />
+                </ComboboxAnchor>
+                <ComboboxContent>
+                  <ComboboxList>
+                    {PROJECT_ACTION_STATUSES.map((s) => (
+                      <ComboboxItem key={s.value} value={s.label}>
+                        {s.label}
+                      </ComboboxItem>
+                    ))}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
+            </div>
+
+            <div className="space-y-2 max-w-xs">
+              <p className="text-xs font-medium text-muted-foreground">
+                Multi-select ({COMBOBOX_FRAMEWORKS.length} frameworks) — badge trigger, panel search, showSelected chips
+              </p>
+              <Combobox
+                multiple
+                items={COMBOBOX_FRAMEWORKS.map((f) => f.value)}
+                value={comboboxMultiValue}
+                onValueChange={(next) =>
+                  setComboboxMultiValue(Array.isArray(next) ? next : [next])
+                }
+                searchPlaceholder="Search framework…"
+              >
+                <ComboboxBadgeTrigger placeholder="Select framework" maxShownItems={2} />
+                <ComboboxContent showPanelSearch showSelected>
+                  <ComboboxList
+                    renderItem={(item) => {
+                      const value = String(item)
+                      const fw = COMBOBOX_FRAMEWORKS.find((f) => f.value === value)
+                      return (
+                        <ComboboxItem key={value} value={value}>
+                          <span className="truncate">{fw?.label ?? value}</span>
+                        </ComboboxItem>
+                      )
+                    }}
+                  >
+                    <ComboboxEmpty>No framework found.</ComboboxEmpty>
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground">
+                Prioritize progression — same mid-list selection (Echo); compare pinSelected
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="flex min-w-0 flex-col gap-1.5">
+                  <p className="text-[0.65rem] text-muted-foreground">pinSelected (default)</p>
+                  <Combobox
+                    value={comboboxPinOn}
+                    onValueChange={(next) =>
+                      setComboboxPinOn(
+                        typeof next === "string" ? next : (next[0] ?? ""),
+                      )
+                    }
+                  >
+                    <ComboboxInput placeholder="Filter parts…" />
+                    <ComboboxContent>
+                      <ComboboxList>
+                        <ComboboxEmpty>No parts.</ComboboxEmpty>
+                        <ComboboxItem value="any" pinned="start">
+                          Any part
+                        </ComboboxItem>
+                        {COMBOBOX_PIN_PARTS.map((part) => (
+                          <ComboboxItem key={part} value={part.toLowerCase()}>
+                            {part}
+                          </ComboboxItem>
+                        ))}
+                      </ComboboxList>
+                    </ComboboxContent>
+                  </Combobox>
+                  <p className="text-[0.65rem] text-muted-foreground">
+                    Open: Echo rises under “Any part”.
+                  </p>
+                </div>
+                <div className="flex min-w-0 flex-col gap-1.5">
+                  <p className="text-[0.65rem] text-muted-foreground">pinSelected=false</p>
+                  <Combobox
+                    pinSelected={false}
+                    value={comboboxPinOff}
+                    onValueChange={(next) =>
+                      setComboboxPinOff(
+                        typeof next === "string" ? next : (next[0] ?? ""),
+                      )
+                    }
+                  >
+                    <ComboboxInput placeholder="Filter parts…" />
+                    <ComboboxContent>
+                      <ComboboxList>
+                        <ComboboxEmpty>No parts.</ComboboxEmpty>
+                        {COMBOBOX_PIN_PARTS.map((part) => (
+                          <ComboboxItem key={part} value={part.toLowerCase()}>
+                            {part}
+                          </ComboboxItem>
+                        ))}
+                      </ComboboxList>
+                    </ComboboxContent>
+                  </Combobox>
+                  <p className="text-[0.65rem] text-muted-foreground">
+                    Open: authored order — Echo stays mid-list.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2 max-w-xs">
+              <p className="text-xs font-medium text-muted-foreground">
+                Create — a search that is not in the list gets a + row
+              </p>
+              <Combobox
+                items={creatableFruits}
+                value={creatableFruit}
+                onValueChange={(next) =>
+                  setCreatableFruit(typeof next === "string" ? next : (next[0] ?? ""))
+                }
+                onCreate={(name) =>
+                  setCreatableFruits((prev) =>
+                    prev.some((item) => item.toLowerCase() === name.toLowerCase())
+                      ? prev
+                      : [...prev, name]
+                  )
+                }
+              >
+                <ComboboxInput placeholder="Search or create a fruit…" />
+                <ComboboxContent>
+                  <ComboboxList
+                    renderItem={(item) => (
+                      <ComboboxItem key={String(item)} value={String(item)}>
+                        {String(item)}
+                      </ComboboxItem>
+                    )}
+                  >
+                    <ComboboxEmpty>No matches.</ComboboxEmpty>
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
+            </div>
             <div className="space-y-2">
               <p className="text-xs font-medium text-muted-foreground">
                 Single ({COMBOBOX_FRUITS.length} fruits) — ScrollArea list
@@ -2822,37 +3143,6 @@ export default function ComponentShowcase() {
                     )}
                   >
                     <ComboboxEmpty>No results found.</ComboboxEmpty>
-                  </ComboboxList>
-                </ComboboxContent>
-              </Combobox>
-            </div>
-            <div className="space-y-2 max-w-xs">
-              <p className="text-xs font-medium text-muted-foreground">
-                Multi-select ({COMBOBOX_FRAMEWORKS.length} frameworks) — ScrollArea + panel search
-              </p>
-              <Combobox
-                multiple
-                items={COMBOBOX_FRAMEWORKS.map((f) => f.value)}
-                value={comboboxMultiValue}
-                onValueChange={(next) =>
-                  setComboboxMultiValue(Array.isArray(next) ? next : [next])
-                }
-                searchPlaceholder="Search framework…"
-              >
-                <ComboboxBadgeTrigger placeholder="Select framework" maxShownItems={2} />
-                <ComboboxContent showPanelSearch>
-                  <ComboboxList
-                    renderItem={(item) => {
-                      const value = String(item)
-                      const fw = COMBOBOX_FRAMEWORKS.find((f) => f.value === value)
-                      return (
-                        <ComboboxItem key={value} value={value}>
-                          <span className="truncate">{fw?.label ?? value}</span>
-                        </ComboboxItem>
-                      )
-                    }}
-                  >
-                    <ComboboxEmpty>No framework found.</ComboboxEmpty>
                   </ComboboxList>
                 </ComboboxContent>
               </Combobox>
@@ -3214,7 +3504,7 @@ export default function ComponentShowcase() {
             description="Scroll the content below to see the fade mask and frosted glass reflection effect. This uses the new stickyHeader prop on Card component."
             stageClassName="p-0 overflow-hidden"
           >
-            <Card stickyHeader className="h-[500px] border-0 shadow-none rounded-md">
+            <Card stickyHeader className="h-[500px] border-0 shadow-none rounded-none">
               <CardHeader>
                 <CardTitle>Frosted Glass Header with Scroll</CardTitle>
                 <CardDescription>

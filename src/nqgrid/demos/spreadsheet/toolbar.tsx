@@ -3,19 +3,24 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   Input,
   ToggleGroup,
   ToggleGroupItem,
-  cn,
 } from "@nqlib/nqui";
+import { useState } from "react";
+import { InlineActionPicker } from "@/components/showcase/actions-menu";
 import { ORDER_DIMENSIONS } from "./mock-data";
 import type { FrozenPane } from "./spreadsheet-page";
 import type { SheetCanvasMode } from "./infinite-sheet-canvas";
 import { DEFAULT_SHEET_RESIZE } from "./sheet-resize-preferences";
 import type { CellFormat, CellNumberFormat, TextStyleKey } from "./format";
+
+const GROUP_BY_OPTIONS = ORDER_DIMENSIONS.map((d) => ({
+  value: d.key,
+  label: d.label,
+}));
 
 export interface ToolbarProps {
   search: string;
@@ -25,7 +30,7 @@ export interface ToolbarProps {
   onFreezeTopRow: () => void;
   onFreezeFirstColumn: () => void;
   onUnfreezeAll: () => void;
-  onGroupBy: (dimensionKey: string) => void;
+  onGroupBy: (dimensionKey: string | null) => void;
   groupByKey: string | null;
   pivotActive: boolean;
   onTogglePivot: () => void;
@@ -94,6 +99,7 @@ export function Toolbar({
   activeFormat,
   formattingDisabled = false,
 }: ToolbarProps) {
+  const [groupMenuOpen, setGroupMenuOpen] = useState(false);
   // Active-cell text styles → ToggleGroup multiple value.
   const textStyleValue = [
     activeFormat?.bold ? "bold" : null,
@@ -260,7 +266,7 @@ export function Toolbar({
         </span>
       ) : null}
 
-      <DropdownMenu>
+      <DropdownMenu open={groupMenuOpen} onOpenChange={setGroupMenuOpen}>
         <DropdownMenuTrigger asChild>
           <Button
             type="button"
@@ -271,17 +277,17 @@ export function Toolbar({
             {groupLabel}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-48">
-          <DropdownMenuLabel>Group rows by</DropdownMenuLabel>
-          {ORDER_DIMENSIONS.map((dim) => (
-            <DropdownMenuItem
-              key={dim.key}
-              onClick={() => onGroupBy(dim.key)}
-              className={cn(groupByKey === dim.key && "font-medium")}
-            >
-              {dim.label}
-            </DropdownMenuItem>
-          ))}
+        <DropdownMenuContent align="start" className="w-56 p-0">
+          <InlineActionPicker
+            value={groupByKey ?? "none"}
+            options={GROUP_BY_OPTIONS}
+            placeholder="e.g. Sales"
+            sentinel={{ value: "none", label: "None" }}
+            onValueChange={(next) => {
+              onGroupBy(next === "none" ? null : next);
+              setGroupMenuOpen(false);
+            }}
+          />
         </DropdownMenuContent>
       </DropdownMenu>
 

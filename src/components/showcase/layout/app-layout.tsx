@@ -46,6 +46,10 @@ const routeToBreadcrumbs: Record<string, { label: string; path: string }[]> = {
     { label: "Recipes", path: NQUI_HUB_PATH },
     { label: "Elevation philosophy", path: "/recipes/elevation" },
   ],
+  "/recipes/sliders": [
+    { label: "Recipes", path: NQUI_HUB_PATH },
+    { label: "Slider lab", path: "/recipes/sliders" },
+  ],
   "/catalog": [{ label: "Component catalog", path: "/catalog" }],
   "/design-system": [{ label: "Design system", path: "/design-system" }],
   "/studio": [{ label: "Theme Studio", path: "/studio" }],
@@ -229,6 +233,20 @@ function CommandPaletteContent() {
               </CommandItemContent>
             </CommandItem>
           ))}
+        </CommandGroup>
+        <CommandSeparator />
+        <CommandGroup heading="Labs">
+          <CommandItem
+            value="Command lab ST-064 search slots"
+            onSelect={() => goTo("/command")}
+          >
+            <CommandItemContent>
+              <CommandItemTitle>Command lab</CommandItemTitle>
+              <CommandItemDescription>
+                Menu density, search slots, ScrollArea thumb
+              </CommandItemDescription>
+            </CommandItemContent>
+          </CommandItem>
         </CommandGroup>
         {location.pathname === "/catalog" ? (
           <>

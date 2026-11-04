@@ -31,6 +31,12 @@ export const recipeEntries: RecipeEntry[] = [
     description: "The 2+1 surface hybrid rule — rendered with live nqui tokens. Cap inline nesting at 2, let spacing do the rest.",
     teaches: "Surface tokens, anti-nested-card pattern, when to use continuous vs alternating vs hybrid.",
   },
+  {
+    title: "Slider lab",
+    path: "/recipes/sliders",
+    description: "Every Slider variant in a realistic context — settings, inspectors, filters, media, maps, scheduling, finance.",
+    teaches: "Which variant fits which data: default, field, segments, ruler; log scale, origin, marks, typed values.",
+  },
 ]
 
 export const referenceEntries: ShowcaseRoute[] = [
@@ -97,6 +103,7 @@ const routeLabels: Record<string, string> = {
   [NQUI_HUB_PATH]: "Recipes",
   "/patterns": "Commerce dashboard",
   "/recipes/elevation": "Elevation philosophy",
+  "/recipes/sliders": "Slider lab",
   "/catalog": "Component catalog",
   "/studio": "Theme Studio",
   "/settings/appearance": "Appearance",

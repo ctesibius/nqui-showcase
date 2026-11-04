@@ -1,7 +1,7 @@
 /**
  * Work management surface — table, list, board, and timeline views over one task set.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon, Search01Icon } from "@hugeicons/core-free-icons";
@@ -27,6 +27,7 @@ import {
   ToggleGroupItem,
   ScrollArea,
 } from "@nqlib/nqui";
+import { ActionsMenu, ActionPickerSub } from "@/components/showcase/actions-menu";
 import { groupRowsByColumn, type ColumnSchema } from "@nqlib/nqgrid/engine";
 import {
   DEFAULT_COLUMN_MODELS,
@@ -36,7 +37,16 @@ import {
   type PmColumnModel,
 } from "./pm-column-model";
 import { addDays, formatLocalISO, localToday } from "@/lib/pm/calendar";
-import { DEFAULT_STATUS_OPTIONS, TITLE_FIELD, TASKS, pmRegistry, taskValue, type Task } from "./pm-schema";
+import {
+  DEFAULT_STATUS_OPTIONS,
+  TITLE_FIELD,
+  TASKS,
+  TEAM,
+  pmRegistry,
+  taskValue,
+  type Task,
+} from "./pm-schema";
+import { setTaskValue } from "@/lib/mock/ops";
 import type { ColumnTypeCatalogEntry } from "./column-model-catalog";
 import { ProjectsAddFieldMenu } from "./projects-column-editor";
 import { ProjectsColumnSheet, saveColumnModel } from "./projects-column-sheet";
@@ -51,6 +61,24 @@ const VIEW_MODES: ViewMode[] = ["table", "list", "board", "timeline"];
 function parseViewMode(raw: string | null): ViewMode {
   if (raw && VIEW_MODES.includes(raw as ViewMode)) return raw as ViewMode;
   return "table";
+}
+
+/**
+ * Fold a change to the visible (filtered) tasks back into the full list.
+ * Views only see `filteredTasks`, so an edit, reorder or delete arrives as the
+ * new visible list; writing it straight to state would drop every hidden task.
+ * Visible slots are refilled in the new order, hidden tasks keep their place,
+ * and tasks new to the list are appended.
+ */
+function mergeVisibleTasks(all: Task[], visibleIds: ReadonlySet<string>, nextVisible: Task[]): Task[] {
+  const out: Task[] = [];
+  let k = 0;
+  for (const task of all) {
+    if (!visibleIds.has(task.id)) out.push(task);
+    else if (k < nextVisible.length) out.push(nextVisible[k++]!);
+  }
+  for (; k < nextVisible.length; k++) out.push(nextVisible[k]!);
+  return out;
 }
 
 function taskSummary(tasks: Task[]) {
@@ -99,7 +127,14 @@ export function ProjectsPage() {
     });
   }, [tasks, query, statusFilter]);
 
-  const summary = useMemo(() => taskSummary(tasks), [tasks]);
+  // Count what the filters show, so the summary reacts to search / status.
+  const summary = useMemo(() => taskSummary(filteredTasks), [filteredTasks]);
+
+  const visibleIds = useMemo(() => new Set(filteredTasks.map((t) => t.id)), [filteredTasks]);
+  const onVisibleTasksChange = useCallback(
+    (next: Task[]) => setTasks((prev) => mergeVisibleTasks(prev, visibleIds, next)),
+    [visibleIds],
+  );
 
   const secondaryFields = useMemo(
     () => schema.filter((c) => c.id !== TITLE_FIELD && c.id !== "status"),
@@ -215,13 +250,13 @@ export function ProjectsPage() {
         {view === "table" ? (
           <ProjectsGridTable
             tasks={filteredTasks}
-            onTasksChange={setTasks}
+            onTasksChange={onVisibleTasksChange}
             columnModels={columnModels}
             onColumnModelsChange={setColumnModels}
             onConfigureColumn={setConfigureId}
           />
         ) : view === "timeline" ? (
-          <RoadmapGantt className="min-h-0 flex-1" tasks={tasks} onTasksChange={setTasks} />
+          <RoadmapGantt className="min-h-0 flex-1" tasks={filteredTasks} onTasksChange={onVisibleTasksChange} />
         ) : (
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-card">
             {view === "list" ? (
@@ -235,6 +270,13 @@ export function ProjectsPage() {
                   schema={schema}
                   boardColumn={boardColumn}
                   boardSchema={boardSchema}
+                  onPatchTask={(taskId, columnId, raw) => {
+                    setTasks((prev) =>
+                      prev.map((t) =>
+                        t.id === taskId ? setTaskValue(t, columnId, raw) : t,
+                      ),
+                    );
+                  }}
                 />
               </div>
             ) : (
@@ -341,11 +383,13 @@ function BoardView({
   schema,
   boardColumn,
   boardSchema,
+  onPatchTask,
 }: {
   tasks: Task[];
   schema: readonly ColumnSchema[];
   boardColumn: PmColumnModel;
   boardSchema: ColumnSchema;
+  onPatchTask: (taskId: string, columnId: string, raw: unknown) => void;
 }) {
   const selectType = pmRegistry.require("select");
   const { groups } = useMemo(
@@ -354,6 +398,14 @@ function BoardView({
   );
 
   const cardFields = schema.filter((c) => c.id !== TITLE_FIELD && c.id !== boardColumn.id && c.id !== "status");
+  const statusOptions = useMemo(
+    () => DEFAULT_STATUS_OPTIONS.map((o) => ({ value: String(o.id), label: o.label })),
+    [],
+  );
+  const assigneeOptions = useMemo(
+    () => TEAM.map((p) => ({ value: p.id, label: p.name })),
+    [],
+  );
 
   return (
     <ScrollArea orientation="horizontal" fadeMask={false} className="h-full w-full">
@@ -370,8 +422,37 @@ function BoardView({
           <div className="flex flex-col gap-2">
             {group.rows.map((task) => (
               <Card key={task.id} className="gap-0 border-border/60 py-0 shadow-none">
-                <CardHeader className="gap-1 px-3 pt-3 pb-2">
-                  <CardTitle className="text-sm leading-snug font-medium">{task.title}</CardTitle>
+                <CardHeader className="flex-row items-start gap-2 space-y-0 px-3 pt-3 pb-2">
+                  <CardTitle className="min-w-0 flex-1 text-sm leading-snug font-medium">
+                    {task.title}
+                  </CardTitle>
+                  <ActionsMenu className="h-7 shrink-0 px-2" contentClassName="w-52">
+                    <ActionPickerSub
+                      label="Move to status"
+                      value={task.status}
+                      options={statusOptions}
+                      placeholder="e.g. Review"
+                      onValueChange={(next) => {
+                        if (next === "any") return;
+                        onPatchTask(task.id, "status", next);
+                      }}
+                      sentinel={{ value: "any", label: "Any status" }}
+                    />
+                    <ActionPickerSub
+                      label="Assign to"
+                      value={task.assignee || "unassigned"}
+                      options={assigneeOptions}
+                      placeholder="e.g. Ava"
+                      onValueChange={(next) => {
+                        onPatchTask(
+                          task.id,
+                          "assignee",
+                          next === "unassigned" ? "" : next,
+                        );
+                      }}
+                      sentinel={{ value: "unassigned", label: "Unassigned" }}
+                    />
+                  </ActionsMenu>
                 </CardHeader>
                 {cardFields.length > 0 ? (
                   <CardContent className="flex flex-wrap items-center gap-1.5 px-3 pb-3">
