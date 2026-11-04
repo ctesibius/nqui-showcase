@@ -61,6 +61,131 @@ const fruits = ["Apple", "Banana", "Cherry", "Date", "Elderberry"]
 </Combobox>
 ```
 
+## Selected rows on open
+
+Opening the panel moves the current selection to the top. This is the default (`pinSelected`, default `true`) for static `ComboboxItem` children and for the `items` array (`ComboboxList` render prop or `renderItem`).
+
+- Read `value` (`string` or `string[]`) when the panel opens.
+- Selected rows render first, in their original relative order. The other rows follow, in their original relative order.
+- That order stays fixed for as long as the panel is open. A multi-select click does not move the row under the pointer.
+- The next open builds the order again from the current value.
+- An empty value keeps the order you wrote.
+
+`ComboboxEmpty` stays first inside `ComboboxList`. A `ComboboxSeparator` stays between the same neighboring runs. Inside `ComboboxGroup`, selected rows pin to the top of that group only — a row does not leave its group.
+
+`pinSelected={false}` keeps the list in the order you wrote.
+
+`pinned="start"` on a `ComboboxItem` keeps that row above the selected rows. Use it for a sentinel such as "All" or "Every part". Callers do not sort the list themselves.
+
+A search still hides rows that do not match. Matching rows keep this order, so a selected match stays above the other matches.
+
+### Single select
+
+`pinned="start"` holds "All fruits" above the selected Banana. Apple and Cherry keep their relative order under it. The rows stay in this order until the panel closes.
+
+```tsx
+<Combobox value="banana" onValueChange={setValue}>
+  <ComboboxInput placeholder="Pick a fruit…" />
+  <ComboboxContent>
+    <ComboboxList>
+      <ComboboxEmpty>No results.</ComboboxEmpty>
+      <ComboboxItem value="all" pinned="start">All fruits</ComboboxItem>
+      <ComboboxItem value="apple">Apple</ComboboxItem>
+      <ComboboxItem value="banana">Banana</ComboboxItem>
+      <ComboboxItem value="cherry">Cherry</ComboboxItem>
+    </ComboboxList>
+  </ComboboxContent>
+</Combobox>
+```
+
+### Multiple
+
+Apple and Cherry are selected, so they lead in that original order. Toggling Date while the panel is open leaves this order in place. Close the panel and open it again to pin the new selection.
+
+```tsx
+<Combobox multiple value={["cherry", "apple"]} onValueChange={setValue}>
+  <ComboboxBadgeTrigger placeholder="Fruits" />
+  <ComboboxContent showPanelSearch>
+    <ComboboxList>
+      <ComboboxEmpty>No results.</ComboboxEmpty>
+      <ComboboxItem value="apple">Apple</ComboboxItem>
+      <ComboboxItem value="banana">Banana</ComboboxItem>
+      <ComboboxItem value="cherry">Cherry</ComboboxItem>
+      <ComboboxItem value="date">Date</ComboboxItem>
+    </ComboboxList>
+  </ComboboxContent>
+</Combobox>
+```
+
+### Selected chips above the search
+
+`showSelected` on `ComboboxContent` is the other option. The current values render as removable chips above the search field, in value order. The list stays in the order you wrote, including while a search is filtering it. An empty value renders no strip.
+
+`pinSelected` still moves rows when `showSelected` is off. Turning `showSelected` on leaves the list alone even if `pinSelected` is left at its default.
+
+```tsx
+<Combobox multiple value={["cherry", "apple"]} onValueChange={setValue}>
+  <ComboboxBadgeTrigger placeholder="Fruits" maxShownItems={2} />
+  <ComboboxContent showPanelSearch showSelected>
+    <ComboboxList>
+      <ComboboxEmpty>No results.</ComboboxEmpty>
+      <ComboboxItem value="apple">Apple</ComboboxItem>
+      <ComboboxItem value="banana">Banana</ComboboxItem>
+      <ComboboxItem value="cherry">Cherry</ComboboxItem>
+      <ComboboxItem value="date">Date</ComboboxItem>
+    </ComboboxList>
+  </ComboboxContent>
+</Combobox>
+```
+
+### Create a missing search
+
+`onCreate` is optional. When the trimmed search is not already an option (value or label, case-insensitive), the panel shows a **+ Create** row under the search. Choosing it calls `onCreate` with that text and selects it. Add the value to `items` in `onCreate` so the next open lists it. An exact match, an empty search, or a missing `onCreate` shows no row. A partial match still lists those rows and keeps the create row for the text that is not an option.
+
+```tsx
+<Combobox
+  items={fruits}
+  value={value}
+  onValueChange={setValue}
+  onCreate={(name) => setFruits((prev) => (prev.includes(name) ? prev : [...prev, name]))}
+>
+  <ComboboxInput placeholder="Search or create…" />
+  <ComboboxContent>
+    <ComboboxList>
+      <ComboboxEmpty>No results.</ComboboxEmpty>
+      {(item) => (
+        <ComboboxItem key={item} value={item}>
+          {item}
+        </ComboboxItem>
+      )}
+    </ComboboxList>
+  </ComboboxContent>
+</Combobox>
+```
+
+## Inside a menu submenu
+
+A second Popover inside `DropdownMenuSubContent` steals focus and closes the submenu. Pass `inline` on `ComboboxContent` so the same Command panel (search, pin on open, empty state) mounts in place. The submenu owns positioning. Keep the Combobox `open` while the submenu is open so `pinSelected` still snapshots.
+
+```tsx
+<DropdownMenuSub>
+  <DropdownMenuSubTrigger>Move to status</DropdownMenuSubTrigger>
+  <DropdownMenuSubContent className="w-56 p-0">
+    <Combobox open value={status} onValueChange={setStatus} searchPlaceholder="e.g. Review">
+      <ComboboxContent inline showPanelSearch>
+        <ComboboxList>
+          <ComboboxEmpty>No status.</ComboboxEmpty>
+          <ComboboxItem value="any" pinned="start">Any status</ComboboxItem>
+          <ComboboxItem value="backlog">Backlog</ComboboxItem>
+          <ComboboxItem value="in_progress">In Progress</ComboboxItem>
+        </ComboboxList>
+      </ComboboxContent>
+    </Combobox>
+  </DropdownMenuSubContent>
+</DropdownMenuSub>
+```
+
+Panel search keydowns stop at the input so the parent menu typeahead does not eat characters.
 ## Static list (no `items` filter)
 
 You can still render `ComboboxItem` children manually when you control filtering yourself.
@@ -184,7 +309,7 @@ nqui **ComboboxItem** and **CommandItem** (≥ 0.6.1) use `aria-selected:bg-acce
 ## Implementation
 
 - **Source:** `packages/nqui/src/components/ui/combobox.tsx`
-- **Public API:** exported from `@nqlib/nqui` (same as `CoreCombobox*` aliases in the barrel if you need the unprefixed base re-exports)
+- **Public API:** exported from `@nqlib/nqui` (single implementation; no separate `CoreCombobox*` aliases)
 - **Styling:** Input group uses injected CSS once per page (`nqui-combobox-styles-v1`) for trigger depth/shadow; component is `"use client"`.
 - **Docs location:** In-repo `packages/nqui/docs/components/`; in apps, `node_modules/@nqlib/nqui/docs/components/` (docs ship with the npm package). Skill: **nqui-components** (`.cursor/skills/nqui-components/SKILL.md`).
 

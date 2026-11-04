@@ -234,6 +234,20 @@ function CommandPaletteContent() {
             </CommandItem>
           ))}
         </CommandGroup>
+        <CommandSeparator />
+        <CommandGroup heading="Labs">
+          <CommandItem
+            value="Command lab ST-064 search slots"
+            onSelect={() => goTo("/command")}
+          >
+            <CommandItemContent>
+              <CommandItemTitle>Command lab</CommandItemTitle>
+              <CommandItemDescription>
+                Menu density, search slots, ScrollArea thumb
+              </CommandItemDescription>
+            </CommandItemContent>
+          </CommandItem>
+        </CommandGroup>
         {location.pathname === "/catalog" ? (
           <>
             <CommandSeparator />
