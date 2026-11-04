@@ -1,0 +1,42 @@
+---
+title: "Calculated measures and drill-through"
+description: "Add formula measures that compute correctly at every total, and drill from any pivot cell to the records behind it."
+---
+
+**Intention:** Ask questions the raw fields don't answer — *how far off plan are we?* — and when a number looks wrong, see the rows that made it.
+
+<GridExample name="pivot-calculated" />
+
+## Calculated measures
+
+```ts
+{
+  id: "vsPlan",
+  calculate: "revenue / plan - 1",
+  label: "vs plan",
+  format: { style: "percent", decimals: 1, signDisplay: "exceptZero" },
+}
+```
+
+A calculated measure is an expression over **other measure ids**, evaluated on the aggregated values of each cell. That is the property that matters: the region total is `sum(revenue) / sum(plan) - 1`, not the average of its categories' percentages, which would be wrong whenever categories differ in size. It matches Excel's *calculated field*.
+
+- Operators `+ - * /` and parentheses; functions such as `if`, `abs`, `min`, `max`, `round`; `[measure with spaces]` in brackets.
+- Division by zero and missing inputs give a blank cell, not `Infinity`.
+- `PivotCalculatedMeasureForm` is a ready-made editor that validates the expression as the user types.
+
+## Drill-through
+
+```tsx
+<PivotTable
+  model={pivot.model}
+  onDrillThrough={(target) => setResult(pivot.drillThrough(target, { limit: 200 }))}
+/>
+{result ? <PivotDrillThroughPanel result={result} onClose={() => setResult(null)} /> : null}
+```
+
+Double-clicking a value cell asks for the **source records** behind it — the same records that were aggregated, after the current filters. It is Excel's double-click *Show Details*, without creating a new sheet. `limit` caps the rows returned; `result.total` always counts every match.
+
+## Related
+
+- [Show values as](/docs/nqgrid/pivot-show-values-as)
+- [Pivot tables](/docs/nqgrid/pivot-tables)

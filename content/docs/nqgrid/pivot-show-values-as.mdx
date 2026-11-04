@@ -1,0 +1,42 @@
+---
+title: "Show values as"
+description: "Express a pivot measure as a share, a difference or a running total — Excel's Show Values As — and color it with a heat map."
+---
+
+**Intention:** The same revenue numbers answer different questions. *How much?* is the value. *What share?* is a percentage. *Growing?* is a difference from the previous period.
+
+<GridExample name="pivot-show-as" />
+
+## Modes
+
+Set `showAs` on a measure, or call `pivot.setMeasureShowAs(measureId, showAs, base)`:
+
+| `showAs` | Reads as |
+|---|---|
+| `value` | The aggregate itself |
+| `percentOfColumnTotal` | Share of its column (each quarter sums to 100%) |
+| `percentOfRowTotal` | Share of its row |
+| `percentOfParentRow` | Share of the parent group (a category within its region) |
+| `percentOfGrandTotal` | Share of everything |
+| `differenceFrom` / `percentDifferenceFrom` | Change against a base item or the previous / next one |
+| `runningTotal` / `percentRunningTotal` | Accumulated along a field |
+| `rankAscending` / `rankDescending` | Position among siblings |
+
+The last six need a **base** — the field they run along, and for differences which item to compare with:
+
+```ts
+pivot.setMeasureShowAs("revenue", "percentDifferenceFrom", { field: "orderDate:quarter", position: "previous" });
+```
+
+## Totals stay meaningful
+
+The aggregation never changes, only how it is expressed. A percentage of the column total is computed from the aggregated column, never by adding up rounded percentages, so a group's share is exactly the sum of its children's shares.
+
+## Heat map
+
+`spec.heat = { measure: "revenue", scope: "column" }` colors cells in levels. `scope` picks which cells share a color scale: `all`, each `column`, each `row`, or sibling rows within a `group`. Colors come from the `--nqg-heat-0 … --nqg-heat-8` CSS variables, so they follow your theme.
+
+## Related
+
+- [Pivot tables](/docs/nqgrid/pivot-tables)
+- [Calculated measures and drill-through](/docs/nqgrid/pivot-calculated)

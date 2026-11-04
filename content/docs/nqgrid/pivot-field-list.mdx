@@ -1,0 +1,38 @@
+---
+title: "Field list"
+description: "Let users build the pivot themselves: an Excel-style field list with drag-and-drop between Filters, Columns, Rows and Values."
+---
+
+**Intention:** Hand the layout to the user. The field list is Excel's PivotTable Fields pane — the same four areas, the same drag-and-drop.
+
+<GridExample name="pivot-field-list" />
+
+## Wiring it up
+
+```tsx
+import { PivotFieldList, pivotFieldListProps, usePivotGrid, usePivotLayoutDraft } from "@nqlib/nqgrid/pivot";
+
+const pivot = usePivotGrid(spec, rows);
+const layout = usePivotLayoutDraft(pivot); // optional "Defer layout update"
+
+<PivotFieldList {...pivotFieldListProps(pivot, layout)} title="Fields" />
+```
+
+`pivotFieldListProps` connects the list to the pivot state, so every move updates the spec and the table re-renders.
+
+## What users can do
+
+- **Drag** a field between Filters, Columns, Rows and Values, or tick it in the list to add it to a sensible default area.
+- **Reorder** within an area to change nesting (Region over Category, or the other way round).
+- **Group dates**: a date field dropped into Rows or Columns offers *Group by* — year, quarter, month, week or day.
+- **Change the aggregate** of a value (Sum, Average, Count, Distinct count…) from its chip.
+- **Keyboard**: focus a chip, press Space to pick it up, move with the arrow keys, Space to drop, Escape to cancel.
+
+## The field catalogue
+
+`spec.fields` names and types each field — labels, which areas a field may go to, the default aggregate and number format. Fields without an entry are inferred from the data.
+
+## Related
+
+- [Pivot tables](/docs/nqgrid/pivot-tables)
+- [Slicers and Top N](/docs/nqgrid/pivot-filters)

@@ -61,6 +61,9 @@
    only sees the published version's classes, so a class new in the linked
    source would get no CSS. A missing path is ignored, so deploys are unaffected. */
 @source "../../nqgantt/packages/nqgantt/src/**/*.{ts,tsx}";
+/* Same for local nqgrid source: the pivot renderer (`@nqlib/nqgrid/pivot`) is
+   aliased to ../nqgrid/src whenever it exists (see vite.config.ts). */
+@source "../../nqgrid/src/**/*.{ts,tsx}";
 @source "../node_modules/@nqlib/nqchart/dist/**/*.{js,mjs,cjs}";
 @source "./registry/**/*.{js,ts,jsx,tsx}";
 /* App-level: full-bleed marketing layout */
