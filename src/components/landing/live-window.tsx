@@ -5,16 +5,9 @@ import {
   AvatarImage,
   Badge,
   Button,
-  Input,
   Label,
   Progress,
   Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
   ToggleGroup,
   ToggleGroupItem,
 } from "@nqlib/nqui";
@@ -33,15 +26,16 @@ import { PEOPLE } from "../story/avatar-stack";
 
 /*
  * Crumbs name the package a scene ACTUALLY renders — this is a library
- * showcase, so a scene may never claim a package it doesn't import. The sheet
- * and schedule scenes are nqui compositions (Table / ToggleGroup + Badge), not
- * the nqgrid or nqgantt engines: those are too heavy for a landing, and they
- * get their own real blocks on /blocks.
+ * showcase, so a scene may never claim a package it doesn't import. The pivot
+ * scene is the real nqgrid engine, lazy-loaded the first time it shows (like
+ * the chart). The schedule scene is an nqui composition (ToggleGroup + Badge),
+ * not the nqgantt engine: that one is too heavy for a landing and gets its own
+ * real block on /blocks.
  */
 const SCENES = [
   { id: "components", crumb: "nqui / deploy panel", label: "Components" },
   { id: "charts", crumb: "nqchart / area", label: "Charts" },
-  { id: "grid", crumb: "nqui / table", label: "Table" },
+  { id: "grid", crumb: "nqgrid / pivot", label: "Pivot" },
   { id: "plan", crumb: "nqui / bars", label: "Schedule" },
 ] as const;
 
@@ -49,6 +43,7 @@ const HOLD = 4200;
 const STEP = 36.8; // rail tab (32px) + gap (0.3rem)
 
 const MiniChart = lazy(() => import("./mini-chart").then((m) => ({ default: m.MiniChart })));
+const MiniPivot = lazy(() => import("./mini-pivot").then((m) => ({ default: m.MiniPivot })));
 
 function RailIcon({ id }: { id: (typeof SCENES)[number]["id"] }) {
   const p = {
@@ -167,51 +162,28 @@ function ChartsScene({ mounted }: { mounted: boolean }) {
   );
 }
 
-/* ── Scene 3 — a real nqui Table + Input, in a spreadsheet idiom ───────────── */
-const ROWS = [
-  ["Auth refactor", "48", "Merged"],
-  ["Billing sync", "31", "Review"],
-  ["A11y audit", "22", "Draft"],
-];
-
-function GridScene() {
+/* ── Scene 3 — nqgrid: a live pivot over 1,400 deals ──────────────────────── */
+function GridScene({ mounted }: { mounted: boolean }) {
   return (
-    <div className="flex h-full flex-col gap-3">
-      <div className="flex items-center gap-2">
-        <span className="rounded-md border bg-muted/40 px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground">
-          fx
-        </span>
-        <Input readOnly value="=SUM(B2:B4)" className="h-7 font-mono text-xs" />
+    <div className="flex h-full min-h-0 flex-col gap-2">
+      <div className="flex shrink-0 items-baseline justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+            New ARR · region × fiscal quarter
+          </p>
+          <p className="mt-0.5 text-lg font-semibold tabular-nums">1,400 deals</p>
+        </div>
+        <Badge variant="outline" className="shrink-0">
+          Pivot
+        </Badge>
       </div>
-      <div className="min-h-0 flex-1 overflow-hidden rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="h-8">Task</TableHead>
-              <TableHead className="h-8 text-right">Effort</TableHead>
-              <TableHead className="h-8 text-right">Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {ROWS.map(([t, e, s], n) => (
-              <TableRow key={t}>
-                <TableCell className="py-1.5 text-xs font-medium">{t}</TableCell>
-                <TableCell
-                  className={`py-1.5 text-right text-xs tabular-nums ${
-                    n === 0 ? "bg-primary/10 font-medium text-primary" : ""
-                  }`}
-                >
-                  {e}
-                </TableCell>
-                <TableCell className="py-1.5 text-right text-xs text-muted-foreground">{s}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <div className="min-h-0 flex-1 overflow-auto rounded-md border bg-card">
+        {mounted ? (
+          <Suspense fallback={null}>
+            <MiniPivot />
+          </Suspense>
+        ) : null}
       </div>
-      <p className="shrink-0 font-mono text-[10px] text-muted-foreground">
-        nqui Table · spreadsheet is on /blocks
-      </p>
     </div>
   );
 }
@@ -337,7 +309,7 @@ export function LiveWindow({ reducedMotion }: { reducedMotion: boolean }) {
             <ChartsScene mounted={seen.has(1)} />
           </section>
           <section className={`fl-scene${idx === 2 ? " is-on" : ""}`} aria-hidden={idx !== 2}>
-            <GridScene />
+            <GridScene mounted={seen.has(2)} />
           </section>
           <section className={`fl-scene${idx === 3 ? " is-on" : ""}`} aria-hidden={idx !== 3}>
             <PlanScene />
