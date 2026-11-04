@@ -33,7 +33,7 @@ export const WBS_COLUMN_DEF: GanttSidebarColumnDef = {
   columnType: "custom",
   dataKey: "wbsCode",
   label: "WBS",
-  minWidth: 64,
+  minWidth: 80,
   valueType: "string",
   editable: false,
   sortable: true,

@@ -311,6 +311,7 @@ function BareGantt({
         showCriticalPath={critical}
         autoSchedule={autoSchedule}
         showWbs={showWbs}
+        showAssignees={false}
         colorBy="status"
         density={density}
         defaultRange={range}
@@ -363,6 +364,7 @@ function LabGantt({
         autoSchedule={autoSchedule}
         showPmpPanel={pmp}
         showWbs={showWbs}
+        showAssignees={false}
         colorBy="status"
         density={density}
         defaultRange={range}
@@ -380,7 +382,7 @@ export function GanttLabPage() {
   const [density, setDensity] = useState<GanttDensity>("compact")
   const [grouped, setGrouped] = useState(true)
   const [critical, setCritical] = useState(false)
-  const [autoSchedule, setAutoSchedule] = useState(true)
+  const [autoSchedule, setAutoSchedule] = useState(false)
   const [showWbs, setShowWbs] = useState(true)
   const [pmp, setPmp] = useState(false)
   const [matrix, setMatrix] = useState(false)
@@ -404,7 +406,10 @@ export function GanttLabPage() {
   }, [scoring, fixture, bare, refresh])
 
   return (
-    <div className="flex min-h-dvh flex-col bg-background">
+    // Definite height (h-dvh), not min-h-dvh: a min-height shell lets the
+    // gantt scroller grow with its row spacer, which makes clientHeight ≈
+    // scrollHeight and disables row virtualization. Same trap as /grid-lab.
+    <div className="flex h-dvh flex-col overflow-hidden bg-background">
       <header className="flex shrink-0 flex-wrap items-end justify-between gap-4 border-b border-border px-6 py-4">
         <div>
           <div className="flex items-center gap-2">
@@ -595,7 +600,7 @@ export function GanttLabPage() {
           )}
         </div>
       ) : (
-        <div ref={benchRef} className="flex min-h-0 flex-1 flex-col p-6">
+        <div ref={benchRef} className="flex min-h-0 flex-1 flex-col overflow-hidden p-6">
           {bare ? (
             <BareGantt
               tasks={tasks}

@@ -25,9 +25,24 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   cn,
 } from "@nqlib/nqui";
-import { TASKS, TEAM, TEAM_BY_ID, setTaskValue, type Task } from "../../lib/mock/ops";
+import {
+  ActionPickerSub,
+  ActionsMenu,
+  ActionsMenuFilter,
+} from "@/components/showcase/actions-menu";
+import {
+  DEFAULT_STATUS_OPTIONS,
+  TASKS,
+  TEAM,
+  TEAM_BY_ID,
+  setTaskValue,
+  type Task,
+} from "../../lib/mock/ops";
 import { applyWbsDisplay, intervalToRangeRaw, tasksToGanttRootData, type TasksToGanttOptions } from "./tasks-to-gantt";
 import { retreeHostGroups, withParentIds } from "./gantt-tree-groups";
 import {
@@ -282,6 +297,7 @@ export function RoadmapGantt({
 
   const [past, setPast] = useState<HistorySlice[]>([]);
   const [future, setFuture] = useState<HistorySlice[]>([]);
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
 
   // Host formula columns — expression lives in mock/project settings (Configure edits).
   const [formulaSettings, setFormulaSettings] = useState<FormulaColumnSetting[]>(
@@ -651,6 +667,27 @@ export function RoadmapGantt({
     [groupBy, setGroupBy],
   );
 
+  const activeTask = useMemo(
+    () => tasks.find((t) => t.id === activeTaskId) ?? null,
+    [tasks, activeTaskId],
+  );
+
+  const statusPickerOptions = useMemo(
+    () => DEFAULT_STATUS_OPTIONS.map((o) => ({ value: o.id, label: o.label })),
+    [],
+  );
+  const assigneePickerOptions = useMemo(
+    () => TEAM.map((p) => ({ value: p.id, label: p.name })),
+    [],
+  );
+
+  const onLevelResources = useCallback(() => {
+    if (!commitTasks) return;
+    pushHistory();
+    const leveled = levelResources(ganttData.features);
+    commitTasks(featuresToTasks(tasks, leveled));
+  }, [commitTasks, ganttData.features, tasks, pushHistory]);
+
   const toolbarActions = useMemo(
     () => (
       <>
@@ -714,6 +751,81 @@ export function RoadmapGantt({
             />
           </>
         ) : null}
+        <ActionsMenu>
+          <ActionsMenuFilter placeholder="e.g. Move" />
+          {!activeTask ? (
+            <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+              Select a task first
+            </DropdownMenuLabel>
+          ) : (
+            <DropdownMenuLabel className="truncate text-xs font-normal text-muted-foreground">
+              {activeTask.title}
+            </DropdownMenuLabel>
+          )}
+          <DropdownMenuSeparator />
+          {showInsights ? (
+            <DropdownMenuItem
+              data-menu-label="Level resources"
+              className="text-xs"
+              onClick={onLevelResources}
+            >
+              Level resources
+            </DropdownMenuItem>
+          ) : null}
+          <DropdownMenuItem
+            data-menu-label="Mark 100%"
+            className="text-xs"
+            disabled={!activeTask || !commitTasks}
+            onClick={() => {
+              if (!activeTask || !commitTasks) return;
+              pushHistory();
+              commitTasks(
+                tasks.map((t) =>
+                  t.id === activeTask.id ? setTaskValue(t, "progress", 100) : t,
+                ),
+              );
+            }}
+          >
+            Mark 100%
+          </DropdownMenuItem>
+          <ActionPickerSub
+            label="Move to status"
+            disabled={!activeTask || !commitTasks}
+            value={activeTask?.status ?? "backlog"}
+            options={statusPickerOptions}
+            placeholder="e.g. Review"
+            sentinel={{ value: "any", label: "Any status" }}
+            onValueChange={(next) => {
+              if (!activeTask || !commitTasks || next === "any") return;
+              pushHistory();
+              commitTasks(
+                tasks.map((t) =>
+                  t.id === activeTask.id ? setTaskValue(t, "status", next) : t,
+                ),
+              );
+            }}
+          />
+          <ActionPickerSub
+            label="Assign to"
+            disabled={!activeTask || !commitTasks}
+            value={activeTask?.assignee ?? "ava"}
+            options={assigneePickerOptions}
+            placeholder="e.g. Ava"
+            sentinel={{ value: "unassigned", label: "Unassigned" }}
+            onValueChange={(next) => {
+              if (!activeTask || !commitTasks) return;
+              pushHistory();
+              const assignee = next === "unassigned" ? "" : next;
+              commitTasks(
+                tasks.map((t) =>
+                  t.id === activeTask.id
+                    ? setTaskValue(t, "assignee", assignee)
+                    : t,
+                ),
+              );
+            }}
+          />
+        </ActionsMenu>
       </>
     ),
     [
@@ -729,15 +841,16 @@ export function RoadmapGantt({
       patchColumn,
       patchFormula,
       deleteColumn,
+      activeTask,
+      showInsights,
+      onLevelResources,
+      commitTasks,
+      pushHistory,
+      tasks,
+      statusPickerOptions,
+      assigneePickerOptions,
     ],
   );
-
-  const onLevelResources = useCallback(() => {
-    if (!commitTasks) return;
-    pushHistory();
-    const leveled = levelResources(ganttData.features);
-    commitTasks(featuresToTasks(tasks, leveled));
-  }, [commitTasks, ganttData.features, tasks, pushHistory]);
 
   const bulkActions = useMemo<GanttBulkAction[]>(
     () => [
@@ -761,10 +874,44 @@ export function RoadmapGantt({
   );
 
   const onFeatureClick = useCallback((feature: GanttFeature) => {
-    void feature;
+    setActiveTaskId(feature.id);
+  }, []);
+
+  const onSelectItem = useCallback((id: string) => {
+    setActiveTaskId(id);
   }, []);
 
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // nqgantt's onFeatureClick only fires on bar double-click (edit affordance).
+  // Actions need a single-click target — bar hit or sidebar row — so the
+  // Move/Assign drilldowns are enabled after a normal select.
+  useEffect(() => {
+    const root = containerRef.current;
+    if (!root) return;
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (
+        target.closest(
+          "input, textarea, [role='menu'], [role='listbox'], [data-radix-popper-content-wrapper]",
+        )
+      ) {
+        return;
+      }
+      const hit =
+        target.closest("[data-gantt-bar-hit]") ??
+        target.closest("[data-gantt-sidebar-row]");
+      if (!hit) return;
+      const id =
+        hit.getAttribute("data-focus-id") ??
+        hit.closest("[data-focus-id]")?.getAttribute("data-focus-id") ??
+        null;
+      if (id) setActiveTaskId(id);
+    };
+    root.addEventListener("pointerdown", onPointerDown);
+    return () => root.removeEventListener("pointerdown", onPointerDown);
+  }, []);
 
   /** Schedule written back by leveling-with-availability or an MSPDI import. */
   const onPmpFeaturesChange = useCallback(
@@ -831,6 +978,7 @@ export function RoadmapGantt({
         onLevelResources={showInsights ? onLevelResources : undefined}
         onFeatureMove={onFeatureMove}
         onFeatureClick={onFeatureClick}
+        onSelectItem={onSelectItem}
         onDependenciesChange={onDependenciesChange}
         toolbarTrailingActions={toolbarActions}
       />
