@@ -20,7 +20,7 @@ export type CatalogEntry = {
 };
 
 export const CATALOG_SOURCE = "becocharts" as const;
-export const CATALOG_COUNT = 97 as const;
+export const CATALOG_COUNT = 103 as const;
 
 export const NQCHART_CATALOG: CatalogEntry[] = [
   {
@@ -708,6 +708,33 @@ export const NQCHART_CATALOG: CatalogEntry[] = [
     "component": "radial-chart"
   },
   {
+    "id": "ex-reference-domain-auto-line-chart",
+    "name": "Reference Domain Auto Line",
+    "exportName": "NQExampleReferenceDomainAutoLineChart",
+    "adapterFile": "ex-reference-domain-auto-line-chart.tsx",
+    "family": "line",
+    "category": "example",
+    "component": "line-chart"
+  },
+  {
+    "id": "ex-reference-domain-pinned-line-chart",
+    "name": "Reference Domain Pinned Line",
+    "exportName": "NQExampleReferenceDomainPinnedLineChart",
+    "adapterFile": "ex-reference-domain-pinned-line-chart.tsx",
+    "family": "line",
+    "category": "example",
+    "component": "line-chart"
+  },
+  {
+    "id": "ex-reference-range-chart",
+    "name": "Reference Range",
+    "exportName": "NQExampleReferenceRangeChart",
+    "adapterFile": "ex-reference-range-chart.tsx",
+    "family": "line",
+    "category": "example",
+    "component": "line-chart"
+  },
+  {
     "id": "ex-rose-radial-chart",
     "name": "Rose Radial",
     "exportName": "NQExampleRoseRadialChart",
@@ -733,6 +760,33 @@ export const NQCHART_CATALOG: CatalogEntry[] = [
     "family": "radial",
     "category": "example",
     "component": "radial-chart"
+  },
+  {
+    "id": "ex-signed-bar-chart",
+    "name": "Signed Bar",
+    "exportName": "NQExampleSignedBarChart",
+    "adapterFile": "ex-signed-bar-chart.tsx",
+    "family": "bar",
+    "category": "example",
+    "component": "composed-chart"
+  },
+  {
+    "id": "ex-signed-horizontal-bar-chart",
+    "name": "Signed Horizontal Bar",
+    "exportName": "NQExampleSignedHorizontalBarChart",
+    "adapterFile": "ex-signed-horizontal-bar-chart.tsx",
+    "family": "bar",
+    "category": "example",
+    "component": "bar-chart"
+  },
+  {
+    "id": "ex-signed-stack-bar-chart",
+    "name": "Signed Stack Bar",
+    "exportName": "NQExampleSignedStackBarChart",
+    "adapterFile": "ex-signed-stack-bar-chart.tsx",
+    "family": "bar",
+    "category": "example",
+    "component": "composed-chart"
   },
   {
     "id": "ex-solid-area-variant-area-chart",

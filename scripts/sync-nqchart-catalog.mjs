@@ -45,7 +45,7 @@ const GLOBAL_CONTROL_PREFIXES = ["ex-bg-", "ex-tooltip-"];
 const FAMILY_RULES = [
   [/area/, "area"],
   [/bar|histogram|bullet|monospace|hover-trace|grid-bar|isometric|mark-click/, "bar"],
-  [/line/, "line"],
+  [/line|reference-range/, "line"],
   [/composed|pareto|boxplot|box-plot/, "composed"],
   [/pie/, "pie"],
   [/radar/, "radar"],
