@@ -57,6 +57,10 @@
 @source "../components/**/*.{js,ts,jsx,tsx,mdx}";
 @source "../node_modules/@nqlib/nqui/dist/**/*.js";
 @source "../node_modules/@nqlib/nqgantt/dist/**/*.js";
+/* Local nqgantt source (pnpm dev:local / USE_LOCAL_NQGANTT): the dist scan above
+   only sees the published version's classes, so a class new in the linked
+   source would get no CSS. A missing path is ignored, so deploys are unaffected. */
+@source "../../nqgantt/packages/nqgantt/src/**/*.{ts,tsx}";
 @source "../node_modules/@nqlib/nqchart/dist/**/*.{js,mjs,cjs}";
 @source "./registry/**/*.{js,ts,jsx,tsx}";
 /* App-level: full-bleed marketing layout */
