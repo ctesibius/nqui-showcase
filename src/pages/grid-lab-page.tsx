@@ -16,7 +16,6 @@ import {
   Label,
   ToggleGroup,
   ToggleGroupItem,
-  cn,
 } from "@nqlib/nqui"
 import { WorkBreakdownBlock } from "@/components/blocks/blocks-grid"
 import { Tray } from "@/components/showcase/tray"
@@ -111,14 +110,12 @@ export function GridLabPage() {
         </Field>
       </div>
 
-      <div
-        className={cn(
-          "flex min-h-0 flex-1 flex-col",
-          surface === "wbs" ? "p-6" : "overflow-hidden",
-        )}
-      >
+      {/* One frame for every surface: the same 24px gutter as the header, so
+          no surface bleeds to the window edge or carries its own padding. */}
+      <div className="flex min-h-0 flex-1 flex-col px-6 py-4">
         {surface === "wbs" ? (
-          <Tray className="min-h-0 flex-1">
+          // Sized to the stage: a flex-1 tray left ~230px of empty muted band.
+          <Tray className="min-h-0">
             {/* Definite height, not just min-height: this page's chain is
                 auto-sized (min-h-dvh root → flex-1 descendants), so a
                 percentage height cannot resolve and the stage's fill-child

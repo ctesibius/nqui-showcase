@@ -1,7 +1,7 @@
 /**
  * Work management surface — table, list, board, and timeline views over one task set.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon, Search01Icon } from "@hugeicons/core-free-icons";
@@ -130,11 +130,10 @@ export function ProjectsPage() {
   // Count what the filters show, so the summary reacts to search / status.
   const summary = useMemo(() => taskSummary(filteredTasks), [filteredTasks]);
 
-  const visibleIdsRef = useRef<ReadonlySet<string>>(new Set());
-  visibleIdsRef.current = useMemo(() => new Set(filteredTasks.map((t) => t.id)), [filteredTasks]);
+  const visibleIds = useMemo(() => new Set(filteredTasks.map((t) => t.id)), [filteredTasks]);
   const onVisibleTasksChange = useCallback(
-    (next: Task[]) => setTasks((prev) => mergeVisibleTasks(prev, visibleIdsRef.current, next)),
-    [],
+    (next: Task[]) => setTasks((prev) => mergeVisibleTasks(prev, visibleIds, next)),
+    [visibleIds],
   );
 
   const secondaryFields = useMemo(
