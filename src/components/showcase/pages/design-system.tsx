@@ -20,30 +20,19 @@ export default function DesignSystem() {
         <p className="text-muted-foreground mt-1">
           Foundational tokens: color, typography, radius, spacing, layout.
         </p>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Every value below is live.{" "}
+          <Button
+            type="button"
+            variant="link"
+            onClick={openStudio}
+            className="h-auto px-0 align-baseline text-base text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
+          >
+            Open Theme Studio
+          </Button>{" "}
+          to retune look, accent, radius and paper, then export them as CSS.
+        </p>
       </div>
-
-      <section id="play" className="space-y-4">
-        <h2 className="text-2xl font-semibold">Theme Studio</h2>
-        <Card>
-          <CardHeader>
-            <CardTitle>Floating design panel</CardTitle>
-            <CardDescription>
-              Theme Studio floats over every route — tune look, accent, and paper while
-              you browse catalog or blocks, then export{" "}
-              <code className="text-xs">colors.css</code>. Settings → Appearance stays a
-              thin preferences specimen.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            <Button type="button" onClick={openStudio}>
-              Open Theme Studio
-            </Button>
-            <Button variant="outline" asChild>
-              <Link to="/studio">Studio hub</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </section>
 
       {/* Color */}
       <section id="color" className="space-y-4">
@@ -57,11 +46,9 @@ export default function DesignSystem() {
           <div>
             <h3 className="text-lg font-semibold">Tray · stage · card</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Hybrid chrome uses two tones only.{" "}
-              <code className="text-xs text-foreground">bg-card</code> is the
-              product float surface — not the third gallery layer. Catalog and{" "}
-              <code className="text-xs text-foreground">/blocks</code> use recipe
-              1.
+              Specimens sit on two tones: a muted tray around a background
+              stage. <code className="text-xs text-foreground">bg-card</code> is
+              reserved for product surfaces that float above the page.
             </p>
           </div>
 
@@ -72,19 +59,19 @@ export default function DesignSystem() {
                 {
                   role: "Tray",
                   token: "bg-muted",
-                  note: "Typical rim (Surface B)",
+                  note: "Outer rim around a specimen",
                   className: "bg-muted",
                 },
                 {
                   role: "Stage",
                   token: "bg-background",
-                  note: "Inner stage (Surface A)",
+                  note: "Where the component sits",
                   className: "bg-background",
                 },
                 {
                   role: "Card",
                   token: "bg-card",
-                  note: "Product float — not A/B",
+                  note: "Product surfaces that float",
                   className: "bg-card",
                 },
               ].map(({ role, token, note, className }) => (
@@ -100,65 +87,6 @@ export default function DesignSystem() {
                   </div>
                   <p className="text-xs text-muted-foreground">{note}</p>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Recipe comparison — identical stub content in each nest */}
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-foreground">
-              Elevation recipes
-            </h4>
-            <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
-              {(
-                [
-                  {
-                    id: "hybrid",
-                    label: "1 · Hybrid (canonical)",
-                    tray: "bg-muted",
-                    stage: "bg-background",
-                    note: "Philosophy match — muted tray, background stage. Shared Tray in catalog / blocks / charts / docs.",
-                  },
-                  {
-                    id: "broke",
-                    label: "2 · Broke it",
-                    tray: "bg-muted",
-                    stage: "bg-card",
-                    note: "Muted tray + card stage. Card is the product float — wrong role as gallery stage.",
-                  },
-                  {
-                    id: "alt",
-                    label: "3 · Alt proposal",
-                    tray: "bg-card",
-                    stage: "bg-background",
-                    note: "Card tray, background stage. Stage matches page chrome; tray is a lighter rim (inverted recess).",
-                  },
-                ] as const
-              ).map(({ id, label, tray, stage, note }) => (
-                <figure key={id} className="min-w-0 space-y-1.5">
-                  <figcaption className="space-y-0.5">
-                    <p className="text-sm font-medium text-foreground">{label}</p>
-                    <p className="font-mono text-[0.625rem] text-muted-foreground">
-                      {tray} → {stage}
-                    </p>
-                  </figcaption>
-                  <div className={`rounded-lg p-1 ${tray}`}>
-                    <div
-                      className={`rounded-md border border-border p-3 ${stage}`}
-                    >
-                      <p className="text-sm font-medium text-foreground">
-                        Specimen stub
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Same content in every recipe — compare surfaces only.
-                      </p>
-                      <div className="mt-3 h-8 rounded-sm border border-dashed border-border/80" />
-                    </div>
-                  </div>
-                  <p className="text-xs leading-snug text-muted-foreground">
-                    {note}
-                  </p>
-                </figure>
               ))}
             </div>
           </div>

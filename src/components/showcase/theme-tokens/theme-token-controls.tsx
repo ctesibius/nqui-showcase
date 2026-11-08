@@ -23,14 +23,16 @@ function AccentSwatch({
   swatch: string;
 }) {
   return (
-    <button
+    <Button
       type="button"
+      variant="outline"
+      size="icon"
       title={label}
       aria-label={label}
       aria-pressed={active}
       onClick={onSelect}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-full border transition-[box-shadow,transform] duration-[var(--duration-quick)]",
+        "min-w-0 shrink-0 rounded-full p-0 transition-[box-shadow,transform] duration-[var(--duration-quick)]",
         compact ? "size-6" : "size-8",
         active
           ? "border-foreground ring-2 ring-foreground/25 ring-offset-2 ring-offset-background"
@@ -84,9 +86,10 @@ export function ThemeTokenControls({ variant = "full" }: { variant?: Variant }) 
                   ? accentHue === null
                   : accentHue === preset.hue;
               return (
-                <button
+                <Button
                   key={preset.id}
                   type="button"
+                  variant="outline"
                   aria-pressed={active}
                   title={preset.blurb}
                   onClick={() => {
@@ -94,7 +97,7 @@ export function ThemeTokenControls({ variant = "full" }: { variant?: Variant }) 
                     else setAccentHue(preset.hue, preset.shade);
                   }}
                   className={cn(
-                    "flex min-w-[5.5rem] flex-col gap-1.5 rounded-lg border px-2.5 py-2 text-left transition-colors",
+                    "h-auto min-w-[5.5rem] flex-col items-start gap-1.5 rounded-lg px-2.5 py-2 text-left font-normal",
                     active
                       ? "border-foreground bg-accent/40"
                       : "border-border bg-background hover:bg-muted/50",
@@ -109,7 +112,7 @@ export function ThemeTokenControls({ variant = "full" }: { variant?: Variant }) 
                   <span className="text-xs leading-snug text-muted-foreground">
                     {preset.blurb}
                   </span>
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -159,16 +162,17 @@ export function ThemeTokenControls({ variant = "full" }: { variant?: Variant }) 
           aria-label="Radius preset"
         >
           {RADIUS_PRESETS.map((preset) => (
-            <button
+            <Button
               key={preset.id}
               type="button"
+              variant="outline"
               aria-pressed={radiusPreset === preset.id}
               onClick={() => setRadiusPreset(preset.id)}
               className={cn(
-                "border text-xs font-medium transition-colors",
+                "text-xs font-medium",
                 compact
-                  ? "flex size-7 items-center justify-center rounded-md p-0 font-semibold uppercase group-data-[collapsible=icon]:size-6"
-                  : "rounded-md px-3 py-1.5",
+                  ? "size-7 min-w-0 p-0 font-semibold uppercase group-data-[collapsible=icon]:size-6"
+                  : "h-auto px-3 py-1.5",
                 radiusPreset === preset.id
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -181,7 +185,7 @@ export function ThemeTokenControls({ variant = "full" }: { variant?: Variant }) 
                   ? "D"
                   : preset.id.slice(0, 1).toUpperCase()
                 : preset.label}
-            </button>
+            </Button>
           ))}
         </div>
       </div>

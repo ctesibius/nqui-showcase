@@ -1,13 +1,10 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
 import {
-  Badge,
   Button,
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
-  Input,
   Separator,
   Slider,
   ToggleGroup,
@@ -25,75 +22,6 @@ import {
 import { HARMONY_MODES, type HarmonyMode } from "@/lib/appearance/harmony"
 import { MonoColorWheel } from "./mono-color-wheel"
 import { SurfaceLadderStrip } from "./surface-ladder-strip"
-import { StudioExportActions } from "./studio-export-actions"
-
-type Variant = "page" | "sheet" | "studio" | "settings"
-
-function AppearanceSpecimen() {
-  return (
-    <div className="rounded-lg border border-border bg-card p-3 shadow-(--shadow-elevated)">
-      <p className="mb-3 font-mono text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-        Preview
-      </p>
-      <div className="flex flex-wrap items-center gap-2">
-        <Button size="sm">Primary</Button>
-        <Button size="sm" variant="outline">
-          Outline
-        </Button>
-        <Button size="sm" variant="secondary">
-          Secondary
-        </Button>
-        <Badge>Badge</Badge>
-        <Badge variant="secondary">Muted</Badge>
-        <Input className="max-w-[10rem]" placeholder="Input" defaultValue="Appearance" />
-        <div className="rounded-md border border-border bg-muted px-2 py-1 text-xs text-muted-foreground">
-          Muted tint
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function AppearanceActions({ compact }: { compact?: boolean }) {
-  const { isDirty, apply, reset, copyCss } = useThemeTokens()
-  const [copied, setCopied] = useState(false)
-
-  const onCopy = async () => {
-    try {
-      await copyCss()
-      setCopied(true)
-      window.setTimeout(() => setCopied(false), 1600)
-    } catch {
-      /* clipboard blocked */
-    }
-  }
-
-  return (
-    <div
-      className={cn(
-        "flex flex-wrap items-center gap-2",
-        compact ? "justify-end" : "justify-between",
-      )}
-    >
-      {!compact ? (
-        <p className="text-xs text-muted-foreground">
-          {isDirty ? "Unsaved draft — live preview on." : "Saved for this browser."}
-        </p>
-      ) : null}
-      <div className="flex flex-wrap gap-2">
-        <Button type="button" variant="ghost" size="sm" onClick={reset}>
-          Reset
-        </Button>
-        <Button type="button" variant="outline" size="sm" onClick={onCopy}>
-          {copied ? "Copied" : "Copy CSS"}
-        </Button>
-        <Button type="button" size="sm" disabled={!isDirty} onClick={apply}>
-          Apply
-        </Button>
-      </div>
-    </div>
-  )
-}
 
 function WheelTheoryControls({
   harmonyMode,
@@ -154,16 +82,11 @@ function WheelTheoryControls({
 }
 
 /**
- * Shared Appearance configurator —
- * page / sheet / studio (full) and settings (Look · Accent · Radius specimen).
+ * The Theme Studio configurator — Look, Accent (wheel + theory), Radius and
+ * Paper. Rendered only inside the floating panel (`ThemeStudioHost`), which is
+ * the showcase's single theming surface.
  */
-export function AppearanceControls({
-  variant = "page",
-  showPageLink,
-}: {
-  variant?: Variant
-  showPageLink?: boolean
-}) {
+export function AppearanceControls() {
   const {
     draft,
     themeMode,
@@ -176,49 +99,15 @@ export function AppearanceControls({
     setLadderStrength,
     enableCustomize,
     contrastOk,
-    isDirty,
-    apply,
-    reset,
   } = useThemeTokens()
 
   const [harmonyMode, setHarmonyMode] = useState<HarmonyMode>("mono")
   const [harmonyPivot, setHarmonyPivot] = useState(0)
 
-  const sheet = variant === "sheet"
-  const studio = variant === "studio"
-  const settings = variant === "settings"
-  const full = !settings
   const customizing = draft.paper !== null
-  const wheelSize = sheet || settings ? "sm" : "default"
 
   return (
-    <div className={cn("flex flex-col", sheet || settings ? "gap-5" : "gap-8")}>
-      {showPageLink ? (
-        <p className="text-xs text-muted-foreground">
-          Full design workspace:{" "}
-          <Link
-            to="/studio"
-            className="font-medium text-foreground underline-offset-4 hover:underline"
-          >
-            Theme Studio
-          </Link>
-        </p>
-      ) : null}
-
-      {settings ? (
-        <p className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-          Preferences specimen — Look, accent, and corners. For paper ladder, export, and
-          AI prompt, open{" "}
-          <Link
-            to="/studio"
-            className="font-medium text-foreground underline-offset-4 hover:underline"
-          >
-            Theme Studio
-          </Link>
-          .
-        </p>
-      ) : null}
-
+    <div className="flex flex-col gap-8">
       <section className="space-y-3">
         <div>
           <p className="text-sm font-medium">Look</p>
@@ -231,13 +120,14 @@ export function AppearanceControls({
           {LOOK_PRESETS.map((preset) => {
             const active = draft.look === preset.id
             return (
-              <button
+              <Button
                 key={preset.id}
                 type="button"
+                variant="outline"
                 aria-pressed={active}
                 onClick={() => setLook(preset.id as LookId)}
                 className={cn(
-                  "rounded-lg border p-3 text-left transition-colors duration-[var(--duration-quick)]",
+                  "h-auto flex-col items-start gap-0 whitespace-normal rounded-lg p-3 text-left font-normal",
                   active
                     ? "border-foreground bg-accent/40"
                     : "border-border bg-background hover:bg-muted/50",
@@ -255,7 +145,7 @@ export function AppearanceControls({
                   <span className="w-1/3" style={{ background: "var(--card)" }} />
                   <span className="w-1/3" style={{ background: "var(--muted)" }} />
                 </span>
-              </button>
+              </Button>
             )
           })}
         </div>
@@ -268,7 +158,7 @@ export function AppearanceControls({
             Brand primary for filled CTAs and selected states. Hover stays on
             muted/accent. Try Ink (nqui default), Slate, or Teal — then refine
             on the wheel
-            {full ? " / theory." : "."}
+            {" / theory."}
           </p>
         </div>
         <div
@@ -282,9 +172,10 @@ export function AppearanceControls({
                 ? draft.accentHue === null
                 : draft.accentHue === preset.hue
             return (
-              <button
+              <Button
                 key={preset.id}
                 type="button"
+                variant="outline"
                 aria-pressed={active}
                 title={preset.blurb}
                 onClick={() => {
@@ -292,7 +183,7 @@ export function AppearanceControls({
                   else setAccentHue(preset.hue, preset.shade)
                 }}
                 className={cn(
-                  "flex min-w-[5.5rem] flex-col gap-1.5 rounded-lg border px-2.5 py-2 text-left transition-colors",
+                  "h-auto min-w-[5.5rem] flex-col items-start gap-1.5 rounded-lg px-2.5 py-2 text-left font-normal",
                   active
                     ? "border-foreground bg-accent/40"
                     : "border-border bg-background hover:bg-muted/50",
@@ -307,26 +198,24 @@ export function AppearanceControls({
                 <span className="text-xs leading-snug text-muted-foreground">
                   {preset.blurb}
                 </span>
-              </button>
+              </Button>
             )
           })}
         </div>
-        {full ? (
-          <WheelTheoryControls
+        <WheelTheoryControls
             harmonyMode={harmonyMode}
             setHarmonyMode={setHarmonyMode}
             harmonyPivot={harmonyPivot}
             setHarmonyPivot={setHarmonyPivot}
           />
-        ) : null}
         <MonoColorWheel
           profile="brand"
           hue={draft.accentHue}
           shade={draft.accentShade}
-          harmonyMode={settings ? "mono" : harmonyMode}
-          harmonyPivot={settings ? 0 : harmonyPivot}
+          harmonyMode={harmonyMode}
+          harmonyPivot={harmonyPivot}
           shadeBias={draft.shadeBias}
-          size={wheelSize}
+          size="default"
           onSelect={(cell) => setAccentHue(cell.hue, cell.shade)}
         />
         <div className="w-full max-w-md space-y-3">
@@ -347,7 +236,6 @@ export function AppearanceControls({
                 : `Same hue · ${draft.accentShade < 1.5 ? "darker" : draft.accentShade > 2.5 ? "lighter" : "mid"} (${draft.accentShade.toFixed(2)})`}
             </FieldDescription>
           </Field>
-          {full ? (
             <Field>
               <FieldLabel htmlFor="shade-bias">Shade range</FieldLabel>
               <Slider
@@ -365,7 +253,6 @@ export function AppearanceControls({
                   : ""}
               </FieldDescription>
             </Field>
-          ) : null}
         </div>
       </section>
 
@@ -378,13 +265,14 @@ export function AppearanceControls({
         </div>
         <div className="flex flex-wrap gap-2" role="group" aria-label="Radius preset">
           {RADIUS_PRESETS.map((preset) => (
-            <button
+            <Button
               key={preset.id}
               type="button"
+              variant="outline"
               aria-pressed={draft.radiusPreset === preset.id}
               onClick={() => setRadiusPreset(preset.id as RadiusPresetId)}
               className={cn(
-                "rounded-md border px-3 py-1.5 text-xs font-medium transition-colors",
+                "h-auto px-3 py-1.5 text-xs font-medium",
                 draft.radiusPreset === preset.id
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -392,13 +280,12 @@ export function AppearanceControls({
               style={{ borderRadius: radiusPreviewCorner(preset.id) }}
             >
               {preset.label}
-            </button>
+            </Button>
           ))}
         </div>
       </section>
 
-      {full ? (
-        <>
+      <>
           <Separator />
 
           <section className="space-y-3">
@@ -468,7 +355,7 @@ export function AppearanceControls({
                   harmonyMode={harmonyMode}
                   harmonyPivot={harmonyPivot}
                   shadeBias={draft.shadeBias}
-                  size={wheelSize}
+                  size="default"
                   onSelect={(cell) =>
                     setPaper({
                       h: cell.hue,
@@ -548,43 +435,7 @@ export function AppearanceControls({
               </div>
             ) : null}
           </section>
-        </>
-      ) : null}
-
-      {!studio && !settings ? <AppearanceSpecimen /> : null}
-
-      {settings ? (
-        <div className="sticky bottom-0 z-[var(--z-sticky-content)] border-t border-border bg-background/95 py-3 backdrop-blur-sm">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs text-muted-foreground">
-              {isDirty ? "Unsaved draft — live preview on." : "Saved for this browser."}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="ghost" size="sm" onClick={reset}>
-                Reset
-              </Button>
-              <Button type="button" size="sm" disabled={!isDirty} onClick={apply}>
-                Apply
-              </Button>
-              <Button type="button" variant="outline" size="sm" asChild>
-                <Link to="/studio">Open Studio</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {sheet ? (
-        <div className="sticky bottom-0 -mx-1 border-t border-border bg-background/95 px-1 py-3 backdrop-blur-sm">
-          <StudioExportActions compact />
-        </div>
-      ) : null}
-
-      {variant === "page" ? (
-        <div className="sticky bottom-0 z-[var(--z-sticky-content)] border-t border-border bg-background/95 py-3 backdrop-blur-sm">
-          <AppearanceActions />
-        </div>
-      ) : null}
+      </>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { cn } from "@nqlib/nqui";
+import { Tabs, TabsList, TabsTrigger } from "@nqlib/nqui";
 
 export type SheetId = "orders" | "pivot" | "summary";
 
@@ -13,35 +13,21 @@ export interface SheetTabsProps {
   onChange: (id: SheetId) => void;
 }
 
-/** Excel-style bottom tab strip — switches the visible sheet view. */
+/** Excel-style bottom tab strip — switches the visible sheet view (nqui Tabs, no panels). */
 export function SheetTabs({ active, onChange }: SheetTabsProps) {
   return (
-    <div
-      role="tablist"
-      aria-label="Sheets"
-      className="flex shrink-0 items-center gap-0.5 border-t border-border px-2 py-1"
+    <Tabs
+      value={active}
+      onValueChange={(v) => onChange(v as SheetId)}
+      className="shrink-0 border-t border-border px-2 py-1"
     >
-      {SHEETS.map((sheet) => {
-        const isActive = sheet.id === active;
-        return (
-          <button
-            key={sheet.id}
-            type="button"
-            role="tab"
-            aria-selected={isActive}
-            onClick={() => onChange(sheet.id)}
-            className={cn(
-              "rounded-md px-3 py-1 text-xs font-medium transition-colors",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              isActive
-                ? "bg-accent text-foreground"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
+      <TabsList aria-label="Sheets">
+        {SHEETS.map((sheet) => (
+          <TabsTrigger key={sheet.id} value={sheet.id} className="text-xs">
             {sheet.label}
-          </button>
-        );
-      })}
-    </div>
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
   );
 }

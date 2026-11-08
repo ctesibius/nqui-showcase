@@ -6,7 +6,7 @@
  */
 import { useMemo } from "react";
 import { renderCell, type ColumnSchema } from "@nqlib/nqgrid/engine";
-import { cn } from "@nqlib/nqui";
+import { ScrollArea, cn } from "@nqlib/nqui";
 import {
   PM_SCHEMA,
   pmRegistry,
@@ -85,7 +85,8 @@ export function SharedModelDemo({
               same pipeline the grid runs. Drag a bar; the timeline cell follows.
             </p>
           </div>
-          <div className="min-h-0 flex-1 overflow-auto">
+          <ScrollArea orientation="both" fadeMask={false} className="min-h-0 flex-1">
+            {/* eslint-disable-next-line no-restricted-syntax -- sticky header pinned by the surrounding ScrollArea; nqui Table wraps the table in its own overflow-x scroll box, which captures sticky positioning */}
             <table className="w-full border-collapse text-xs">
               <thead className="sticky top-0 z-10 bg-background/95 backdrop-blur">
                 <tr className="border-b border-border text-left text-[10px] uppercase tracking-wide text-muted-foreground">
@@ -111,7 +112,7 @@ export function SharedModelDemo({
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollArea>
         </aside>
 
         <RoadmapGantt

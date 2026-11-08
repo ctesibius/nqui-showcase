@@ -1,7 +1,8 @@
 import { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Badge, NquiLogo, cn } from "@nqlib/nqui";
-import { ShowcaseTopBar, devTopBarLinks } from "../components/showcase-top-bar";
+import { ShowcaseTopBar } from "../components/showcase-top-bar";
+import { siteLinks } from "../components/site-links";
 import { LAB_CASES, LAB_GROUPS } from "../nqchart/lab/cases";
 import { LabCaseCard } from "../nqchart/lab/case-card";
 import { LabEventPanel } from "../nqchart/lab/event-panel";
@@ -151,19 +152,13 @@ export function ChartsLabPage() {
               </span>
             </Link>
           }
-          links={[
-            { to: "/charts/0.4", label: "NQChart 0.4" },
-            { to: "/charts", label: "Gallery" },
-            { to: "/blocks", label: "Blocks" },
-            { to: "/docs/nqchart", label: "Docs" },
-            ...devTopBarLinks,
-          ]}
+          links={siteLinks}
         />
 
         <div className="mt-14 flex flex-wrap items-end justify-between gap-4 md:mt-20">
           <div className="max-w-[56ch]">
             <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground/80">
-              BI acceptance · {CURRENT_RELEASE}
+              {import.meta.env.DEV ? `BI acceptance · ${CURRENT_RELEASE}` : "Interaction lab"}
             </p>
             <h1 className="mt-3 text-4xl font-semibold leading-[1.07] tracking-[-0.028em] md:text-5xl">
               Feature lab
@@ -186,6 +181,7 @@ export function ChartsLabPage() {
                 <span className="text-muted-foreground"> · {pendingCount} pending</span>
               ) : null}
             </p>
+            {import.meta.env.DEV || family || only ? (
             <p
               className={cn(
                 "rounded-md border px-2.5 py-1 font-mono text-xs",
@@ -202,10 +198,11 @@ export function ChartsLabPage() {
                   ? `lab green — @nqlib/nqchart@${CURRENT_RELEASE}`
                   : `release gate closed — ${failed ? `${failed} failing` : `${pendingCount} unproven`}`}
             </p>
+            ) : null}
           </div>
         </div>
 
-        {newIds.length > 0 ? (
+        {import.meta.env.DEV && newIds.length > 0 ? (
           <section className="mt-8 rounded-lg border border-border bg-muted/40 p-4">
             <h2 className="text-sm font-medium">What&apos;s new in {CURRENT_RELEASE}</h2>
             <ul className="mt-3 flex flex-wrap gap-1.5">

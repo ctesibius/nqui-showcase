@@ -13,7 +13,7 @@ pnpm add @nqlib/nqchart echarts motion
 
 Current line: **0.3.2**. Independent of `@nqlib/nqui`.
 
-Optional: try the same flow on the live lab at [**/charts/lab**](/charts/lab). The gallery at [**/charts**](/charts) only proves drawing.
+Try the same flow on the live [**/charts/lab**](/charts/lab); [**/charts**](/charts) shows every chart family by the question it answers.
 
 ## First path (15 minutes)
 

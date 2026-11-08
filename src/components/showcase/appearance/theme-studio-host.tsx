@@ -1,47 +1,21 @@
 import { HugeiconsIcon } from "@hugeicons/react"
-import { Cancel01Icon, PaintBoardIcon } from "@hugeicons/core-free-icons"
+import { Cancel01Icon } from "@hugeicons/core-free-icons"
 import { Button, ScrollArea, cn } from "@nqlib/nqui"
 import { AppearanceControls } from "@/components/showcase/appearance/appearance-controls"
 import { StudioExportActions } from "@/components/showcase/appearance/studio-export-actions"
 import { ThemeModeSwitch } from "@/components/showcase/theme-tokens/theme-token-sheet"
 import { useThemeStudio } from "@/context/theme-studio-context"
-import { useThemeTokens } from "@/context/primary-accent-context"
 
 /**
- * Single app-wide floating Theme Studio panel.
+ * Single app-wide floating Theme Studio panel — the showcase's only theming
+ * surface. Opened from the palette button in every top bar (ThemeControls).
  * Non-modal: page stays interactive so you can configure and observe live.
  */
 export function ThemeStudioHost() {
-  const { open, setOpen, toggleStudio } = useThemeStudio()
-  const { isDirty } = useThemeTokens()
+  const { open, setOpen } = useThemeStudio()
 
   return (
     <>
-      {/* Always-available floating trigger (works on every route). */}
-      <Button
-        type="button"
-        size="icon"
-        variant="secondary"
-        className={cn(
-          "fixed bottom-4 right-4 z-[var(--z-modal)] size-11 rounded-full border border-border shadow-(--shadow-elevated)",
-          "md:bottom-6 md:right-6",
-          open && "pointer-events-none opacity-0",
-        )}
-        aria-label="Open Theme Studio"
-        title="Theme Studio"
-        onClick={toggleStudio}
-      >
-        <span className="relative">
-          <HugeiconsIcon icon={PaintBoardIcon} className="size-5" strokeWidth={2} />
-          {isDirty ? (
-            <span
-              className="absolute -right-0.5 -top-0.5 size-1.5 rounded-full bg-primary"
-              aria-hidden
-            />
-          ) : null}
-        </span>
-      </Button>
-
       {open ? (
         <aside
           id="theme-studio-panel"
@@ -86,7 +60,7 @@ export function ThemeStudioHost() {
           </header>
 
           <ScrollArea fadeMask={false} className="min-h-0 flex-1 px-3 py-4">
-            <AppearanceControls variant="studio" />
+            <AppearanceControls />
           </ScrollArea>
 
           <footer className="shrink-0 border-t border-border bg-card/95 px-3 py-3 backdrop-blur-sm">

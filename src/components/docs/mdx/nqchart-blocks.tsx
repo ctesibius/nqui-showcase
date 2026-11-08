@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { ScrollArea, cn } from "@nqlib/nqui";
+import { ScrollArea, cn, Table, TableBody, TableRow, TableCell } from "@nqlib/nqui";
 import { DocsCodeBlock } from "./docs-code-block";
 
 export { ComponentPreview } from "./component-preview";
@@ -85,11 +85,11 @@ export function ApiTable({ children }: { children?: ReactNode }) {
     <ScrollArea
       orientation="horizontal"
       fadeMask={false}
-      className="my-3 w-full max-w-full rounded-lg border border-border"
+      className="my-3 w-full max-w-full rounded-lg border border-border [&_[data-slot=table-container]]:overflow-visible"
     >
-      <table className="w-max min-w-full border-collapse text-xs">
-        <tbody>{children}</tbody>
-      </table>
+      <Table className="w-max min-w-full border-collapse text-xs">
+        <TableBody>{children}</TableBody>
+      </Table>
     </ScrollArea>
   );
 }
@@ -108,23 +108,23 @@ export function ApiRow({
   children?: ReactNode;
 }) {
   return (
-    <tr className="border-b border-border last:border-0">
-      <td className="w-[7.5rem] shrink-0 whitespace-nowrap px-2.5 py-1.5 align-baseline font-mono text-[0.75rem] leading-snug text-foreground">
+    <TableRow className="border-b border-border last:border-0 hover:bg-transparent">
+      <TableCell className="w-[7.5rem] shrink-0 whitespace-nowrap px-2.5 py-1.5 align-baseline font-mono text-[0.75rem] leading-snug text-foreground">
         {name}
         {required ? <span className="ml-1 text-destructive">*</span> : null}
-      </td>
-      <td className="min-w-[12rem] max-w-[36rem] px-2.5 py-1.5 align-baseline font-mono text-[0.75rem] leading-snug break-words text-muted-foreground">
+      </TableCell>
+      <TableCell className="whitespace-normal min-w-[12rem] max-w-[36rem] px-2.5 py-1.5 align-baseline font-mono text-[0.75rem] leading-snug break-words text-muted-foreground">
         {type}
         {defaultValue != null && defaultValue !== "" ? (
           <span className="mt-0.5 block font-sans text-[0.6875rem] text-muted-foreground/80">
             default {defaultValue}
           </span>
         ) : null}
-      </td>
-      <td className="min-w-[10rem] px-2.5 py-1.5 align-baseline text-xs leading-snug text-muted-foreground [&_p]:m-0 [&_p]:leading-snug [&_p]:text-xs">
+      </TableCell>
+      <TableCell className="whitespace-normal min-w-[10rem] px-2.5 py-1.5 align-baseline text-xs leading-snug text-muted-foreground [&_p]:m-0 [&_p]:leading-snug [&_p]:text-xs">
         {children}
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 }
 

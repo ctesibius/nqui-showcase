@@ -79,6 +79,7 @@ export function RichStatusCell({
   }
 
   return (
+    // eslint-disable-next-line no-restricted-syntax -- per-status pill colours style the <select> itself; nqui NativeSelect puts className on its wrapper, and a Radix Select per virtualized grid cell is too heavy
     <select
       value={key}
       onChange={(e) => onValueChange(e.target.value)}

@@ -122,10 +122,24 @@ function isChartRootElement(el: ReactElement): boolean {
   );
 }
 
-/** Prop-driven background SSOT (sparkline root, UiLineChartShell, etc.). */
-function hasBackgroundVariantProp(el: ReactElement): boolean {
+/**
+ * Prop-driven background SSOT (sparkline root, UiLineChartShell, etc.).
+ * Legend shells omit the prop, but still read it when the gallery sets one.
+ */
+function hasBackgroundVariantProp(el: ReactElement, family?: string): boolean {
   const props = el.props as Record<string, unknown> | null;
-  return !!props && typeof props === "object" && "backgroundVariant" in props;
+  if (props && typeof props === "object" && "backgroundVariant" in props) return true;
+  if (family && !BACKGROUND_FAMILIES.has(family)) return false;
+  return acceptsBackgroundVariant(el.type);
+}
+
+function acceptsBackgroundVariant(type: unknown): boolean {
+  if (typeof type !== "function") return false;
+  try {
+    return /\bbackgroundVariant\b/.test(Function.prototype.toString.call(type));
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -138,7 +152,7 @@ function supportsComposedBackground(
 ): boolean {
   if (!isChartRootElement(el)) return false;
   // Prop-driven roots render their own background — don't also compose a child.
-  if (hasBackgroundVariantProp(el)) return false;
+  if (hasBackgroundVariantProp(el, family)) return false;
   if (family) return BACKGROUND_FAMILIES.has(family);
   const name = componentName(el.type);
   if (/^NQ(Area|Line|Bar|Composed|Sparkline|Scatter|Waterfall)Chart$/.test(name)) {
@@ -272,7 +286,7 @@ function patchElement(
   if (isChartRootElement(el) && opts.hoverFocus !== undefined) {
     nextProps.hoverFocus = opts.hoverFocus;
   }
-  const propDriven = hasBackgroundVariantProp(el);
+  const propDriven = hasBackgroundVariantProp(el, opts.family);
 
   if (propDriven) {
     nextProps.backgroundVariant =

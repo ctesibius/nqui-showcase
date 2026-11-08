@@ -39,7 +39,7 @@ function TableScroll({ children, className }: { children: ReactNode; className?:
     <ScrollArea
       orientation="both"
       fadeMask={false}
-      className={cn("min-h-0 min-w-0 flex-1 rounded-lg border border-border bg-card", className)}
+      className={cn("h-80 min-h-0 min-w-0 rounded-lg border border-border bg-card", className)}
     >
       {children}
     </ScrollArea>
@@ -127,7 +127,7 @@ export function BookingsReviewBlock() {
   const heatOn = pivot.spec.heat != null;
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 p-4">
+    <div className="blk-pivot flex h-full min-h-0 flex-col gap-3 p-4">
       <BlockHeader
         title="FY26 bookings review"
         meta={`New ARR from ${BOOKINGS.length.toLocaleString()} closed-won deals · fiscal year starts February · double-click a value for its deals`}
@@ -154,14 +154,13 @@ export function BookingsReviewBlock() {
 
       <KpiStrip kpis={pivot.model.kpis} />
 
-      <div className="flex min-h-0 flex-1 gap-3 max-[860px]:flex-col">
-        <div className="flex w-56 shrink-0 flex-col gap-2 overflow-y-auto max-[860px]:w-full max-[860px]:flex-row max-[860px]:flex-wrap">
-          <PivotSlicer {...pivotSlicerProps(pivot, "segment")} title="Segment" className="shadow-none max-[860px]:flex-1" />
-          <PivotSlicer {...pivotSlicerProps(pivot, "channel")} title="Channel" columns={2} className="shadow-none max-[860px]:flex-1" />
-          <PivotSlicer {...pivotSlicerProps(pivot, "product")} title="Product" className="shadow-none max-[860px]:flex-1" />
-        </div>
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
-          <TableScroll>
+      <div className="flex shrink-0 flex-wrap gap-x-6 gap-y-3">
+        <PivotSlicer {...pivotSlicerProps(pivot, "segment")} title="Segment" />
+        <PivotSlicer {...pivotSlicerProps(pivot, "channel")} title="Channel" />
+        <PivotSlicer {...pivotSlicerProps(pivot, "product")} title="Product" />
+      </div>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
+          <TableScroll className="min-h-80 flex-1">
             <PivotTable
               model={pivot.model}
               onToggleGroup={pivot.toggleGroup}
@@ -189,7 +188,6 @@ export function BookingsReviewBlock() {
               className="shrink-0"
             />
           ) : null}
-        </div>
       </div>
     </div>
   );
@@ -231,7 +229,7 @@ export function SupportSlaBlock() {
   const by = pivot.spec.rows[0]?.field === "channel" ? "channel" : "team";
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 p-4">
+    <div className="blk-pivot flex h-full min-h-0 flex-col gap-3 p-4">
       <BlockHeader title="Support SLA desk" meta={`${TICKETS.length.toLocaleString()} tickets · last 12 weeks · heat = average resolution time`}>
         <ToggleGroup
           type="single"
@@ -303,7 +301,7 @@ export function PipelineBlock() {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 p-4">
+    <div className="blk-pivot flex h-full min-h-0 flex-col gap-3 p-4">
       <BlockHeader title="Open pipeline" meta={`${PIPELINE.length} opportunities · weighted = amount × stage probability`}>
         <ToggleGroup type="single" size="sm" value={view} onValueChange={(v) => v && apply(v as PipelineView)}>
           <ToggleGroupItem value="weighted" className="text-xs">

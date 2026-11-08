@@ -22,6 +22,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
   cn,
+  Label,
 } from "@nqlib/nqui";
 import {
   ALL_NQGRID_FEATURE_IDS,
@@ -329,7 +330,7 @@ export function PlaygroundTableSettingsMenu() {
                       key={f.id}
                       className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2.5 dark:bg-muted/10"
                     >
-                      <label className="flex cursor-pointer items-start gap-3">
+                      <Label className="flex cursor-pointer items-start gap-3 font-normal leading-normal">
                         <Checkbox
                           checked={checked}
                           onCheckedChange={(v) => setPlannerFeature(f.id, !!v)}
@@ -349,7 +350,7 @@ export function PlaygroundTableSettingsMenu() {
                             </ul>
                           ) : null}
                         </span>
-                      </label>
+                      </Label>
                     </li>
                   );
                 })}

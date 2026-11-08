@@ -181,7 +181,6 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  NquiLogo,
   Pagination,
   PaginationAdaptive,
   PaginationContent,
@@ -375,10 +374,6 @@ export default function Showcase2() {
         <header className="mb-10 space-y-5 border-b pb-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 space-y-2">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <NquiLogo className="size-5 shrink-0" />
-                <span className="text-xs font-medium uppercase tracking-wide">Internal preview</span>
-              </div>
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem>
@@ -725,13 +720,15 @@ export default function Showcase2() {
                           <SortableItem key={item} value={item} asChild>
                             <div className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2">
                               <SortableItemHandle asChild>
-                                <button
+                                <Button
                                   type="button"
-                                  className="cursor-grab text-muted-foreground active:cursor-grabbing"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 min-w-0 cursor-grab px-1 text-muted-foreground active:cursor-grabbing"
                                   aria-label="Reorder"
                                 >
                                   ::
-                                </button>
+                                </Button>
                               </SortableItemHandle>
                               <span className="text-sm">{item}</span>
                             </div>

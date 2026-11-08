@@ -1,0 +1,36 @@
+{
+  /*
+   * Local-link typecheck: same as tsconfig.app.json, but @nqlib/nqchart,
+   * @nqlib/nqgantt and @nqlib/nqgantt-engine resolve to the sibling builds
+   * (../becocharts/dist, ../nqgantt/packages/*\/dist) instead of node_modules.
+   * Use it to verify unreleased library work before publishing:
+   *
+   *   pnpm typecheck:local
+   *
+   * Build the siblings first (pnpm nqchart:build && pnpm -C ../becocharts
+   * build:types; pnpm -C ../nqgantt build:lib). The deploy build never uses this.
+   */
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.local.tsbuildinfo",
+    "paths": {
+      "@/*": ["./src/*"],
+      "collections/*": ["./.source/*"],
+      "react": ["./node_modules/@types/react"],
+      "react/jsx-runtime": ["./node_modules/@types/react/jsx-runtime"],
+      "react-dom": ["./node_modules/@types/react-dom"],
+      "@nqlib/nqchart": ["../becocharts/dist/types/lib/public.d.ts"],
+      "@nqlib/nqchart/recipes": ["../becocharts/dist/types/registry/lib/chart-recipes.d.ts"],
+      "@nqlib/nqchart/headless": ["../becocharts/dist/types/registry/headless/index.d.ts"],
+      "@nqlib/nqchart/*": ["../becocharts/dist/types/registry/charts/*.d.ts"],
+      "@nqlib/nqgantt": ["../nqgantt/packages/nqgantt/dist/index.d.ts"],
+      "@nqlib/nqgantt/ui": ["../nqgantt/packages/nqgantt/dist/ui.d.ts"],
+      "@nqlib/nqgantt/mock": ["../nqgantt/packages/nqgantt/dist/mock.d.ts"],
+      "@nqlib/nqgantt/item-gantt-adapter": ["../nqgantt/packages/nqgantt/dist/item-gantt-adapter.d.ts"],
+      "@nqlib/nqgantt-engine": ["../nqgantt/packages/nqgantt-engine/dist/index.d.ts"]
+    }
+  },
+  "include": ["src"],
+  /* blocks-intensity is checked here: tile-column-chart exists in local nqchart. */
+  "exclude": ["src/nqgantt/lib"]
+}

@@ -72,21 +72,21 @@ function TokenRow({
         <span className="text-xs font-medium">{spec.label}</span>
         <p className="mt-0.5 truncate text-[11px] text-muted-foreground">{spec.hint}</p>
       </div>
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="sm"
         onClick={onReset}
         disabled={!tuned}
         title={tuned ? `Reset ${spec.label.toLowerCase()}` : undefined}
         className={cn(
-          "rounded-sm px-1 font-mono text-[11px] tabular-nums transition-colors",
-          tuned
-            ? "text-foreground hover:bg-foreground/10"
-            : "cursor-default text-muted-foreground",
+          "h-5 min-w-0 px-1 font-mono text-[11px] font-normal tabular-nums disabled:opacity-100",
+          tuned ? "text-foreground" : "text-muted-foreground",
         )}
       >
         {value}
         {spec.unit ?? ""}
-      </button>
+      </Button>
       <Slider
         className="col-span-2"
         size="sm"

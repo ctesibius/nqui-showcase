@@ -4,7 +4,7 @@
 
 <NquiExample name="forms-field" />
 
-Open full variants: [Form Components](/catalog#form-components)
+Open full variants: [Forms](/catalog#form-components)
 
 ## How
 
@@ -54,6 +54,23 @@ Style **both** the field and the control:
   <FieldDescription>Enter a valid email address.</FieldDescription>
 </Field>
 ```
+
+### Sliders
+
+`Slider` covers a range of jobs through props, not separate components. Pick by what the value is:
+
+| Value | Use |
+|-------|-----|
+| A number with a label | `label` + `showValue` (+ `formatValue`) |
+| A typed exact value in a form or inspector | `variant="field"` (double-click or Enter to type; `parseValue`) |
+| 5–12 discrete steps | `variant="segments"` |
+| A measured quantity with units | `variant="ruler"` (+ `tickIntervals`) |
+| A ratio (zoom, gain) | `scale="log"` + `marks` |
+| Above / below a centre | `origin={0}` |
+| A colour or gradient | `trackBackground` + `showRange={false}` |
+| Visible but locked | `readOnly` |
+
+Try every option in the [Slider lab](/recipes/sliders).
 
 ### Long forms
 

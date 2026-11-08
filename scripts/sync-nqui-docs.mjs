@@ -17,6 +17,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
+import { liftIntention } from "./lib/docs-intro.mjs";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -110,17 +111,9 @@ function toMdx(raw, slug) {
   }
   body = rewriteWikilinks(body);
 
-  const intention = body
-    .split("\n")
-    .map((l) => l.trim())
-    .find((l) => l.startsWith("**Intention:**"))
-    ?.replace(/^\*\*Intention:\*\*\s*/, "")
-    ?.replace(/\*\*/g, "");
-
-  const description =
-    slug === "index"
-      ? "Component kit, composition guide, and adoption playbook for @nqlib/nqui."
-      : (intention ?? `nqui — ${title}`).slice(0, 160).trim();
+  const intro = liftIntention(body, `nqui — ${title}`);
+  body = intro.body;
+  const description = slug === "index" ? "Component kit, composition guide, and adoption playbook for @nqlib/nqui." : intro.description;
 
   return `---
 title: ${yamlQuote(title)}
@@ -144,6 +137,9 @@ for (const name of mdFiles) {
   count += 1;
 }
 
+// `---Label---` entries become labelled groups in the docs rail; pages before
+// the first one fall under "Start".
+const guide = (from, to) => GUIDE_PAGES.slice(GUIDE_PAGES.indexOf(from), GUIDE_PAGES.indexOf(to) + 1);
 const meta = {
   title: "nqui",
   pages: [
@@ -151,7 +147,13 @@ const meta = {
     "installation",
     "changelog",
     "concepts",
-    ...GUIDE_PAGES,
+    ...guide("getting-started", "philosophy"),
+    "---Working the UI---",
+    ...guide("actions-and-selection", "icons-and-styling"),
+    "---Practice---",
+    ...guide("practice-in-catalog", "adoption-playbook"),
+    "---Reference---",
+    ...guide("glossary", "cheatsheet"),
     "components",
     "cli",
     "css",

@@ -224,30 +224,30 @@ export function BoardFiltersDrawer() {
           </DrawerHeader>
           <div className="grid gap-4 px-4 pb-2">
             <div className="grid gap-3">
-              <label className="flex items-center gap-2 text-sm">
+              <Label className="gap-2 font-normal">
                 <Checkbox
                   id={`${id}-open`}
                   checked={openLane}
                   onCheckedChange={(value) => setOpenLane(value === true)}
                 />
                 <span>Open</span>
-              </label>
-              <label className="flex items-center gap-2 text-sm">
+              </Label>
+              <Label className="gap-2 font-normal">
                 <Checkbox
                   id={`${id}-blocked`}
                   checked={blocked}
                   onCheckedChange={(value) => setBlocked(value === true)}
                 />
                 <span>Blocked</span>
-              </label>
-              <label className="flex items-center gap-2 text-sm">
+              </Label>
+              <Label className="gap-2 font-normal">
                 <Checkbox
                   id={`${id}-mine`}
                   checked={mine}
                   onCheckedChange={(value) => setMine(value === true)}
                 />
                 <span>Assigned to me</span>
-              </label>
+              </Label>
             </div>
             <div className="flex items-center justify-between gap-3">
               <Label htmlFor={`${id}-critical`} className="text-sm font-medium">
@@ -292,16 +292,17 @@ export function TaskInspectorSheet() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <button
+        <Button
           type="button"
-          className="flex w-full items-center justify-between gap-3 rounded-md text-left outline-none transition-colors hover:bg-interactive focus-visible:ring-2 focus-visible:ring-ring"
+          variant="ghost"
+          className="h-auto w-full justify-between gap-3 px-0 text-left font-normal"
         >
           <div className="min-w-0">
             <p className="font-mono text-xs text-muted-foreground">ST-048</p>
             <p className="truncate text-sm font-medium">Lint coverage gate</p>
           </div>
           <Badge variant="secondary">In review</Badge>
-        </button>
+        </Button>
       </SheetTrigger>
       <SheetContent side="right" className="sm:max-w-md">
         <SheetHeader>

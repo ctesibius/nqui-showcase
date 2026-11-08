@@ -4,7 +4,7 @@
 
 <NquiExample name="feedback-states" />
 
-Open full variants: [Display Components](/catalog#display-components)
+Open full variants: [Display & feedback](/catalog#display-components)
 
 ## How
 

@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
+import { Button } from "@nqlib/nqui";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { STORY_EASE } from "./scroll-hooks";
 
@@ -51,15 +52,17 @@ export function FlipCard({
         </div>
       </motion.div>
 
-      <button
+      <Button
         type="button"
+        variant="outline"
+        size="sm"
         onClick={() => setFlipped((f) => !f)}
         aria-pressed={!flipped}
         aria-label={flipped ? `Show ${name} drawing` : `Show ${name} live`}
-        className="absolute -top-3 right-3 z-10 rounded-full border bg-background px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground transition-colors duration-100 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="absolute -top-3 right-3 z-10 h-5 rounded-full bg-background px-2.5 font-mono text-[10px] font-normal uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground"
       >
         {flipped ? "Drawing" : "Live"}
-      </button>
+      </Button>
     </div>
   );
 }

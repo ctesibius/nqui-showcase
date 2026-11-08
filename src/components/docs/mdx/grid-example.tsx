@@ -37,14 +37,7 @@ export function GridExample({
   return (
     <div className={cn("my-5", className)}>
       <Tray as="div">
-        <Tray.Caption className="items-center">
-          <span className="line-clamp-1 font-mono text-xs text-muted-foreground">
-            {title ?? entry.title}
-          </span>
-          <span className="text-[0.6875rem] uppercase tracking-wider text-muted-foreground">
-            live
-          </span>
-        </Tray.Caption>
+        <Tray.Heading as="p" title={title ?? entry.title} meta="@nqlib/nqgrid" />
         <Tray.Stage variant="flush" className={entry.height}>
           <Suspense fallback={<Skeleton className="h-full w-full" />}>
             <Example />

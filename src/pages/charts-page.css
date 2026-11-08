@@ -10,7 +10,7 @@
 }
 
 /*
- * Frosted tooltip preview — same glass recipe as .story-nav-pill:
+ * Frosted tooltip preview — same glass recipe as LiquidGlassBar:
  * thin fill + strong blur/saturate so chart color shows through as tinted glass.
  * Overrides the library default (bg-background/70 + blur-sm) which reads as a slab.
  */
@@ -38,4 +38,10 @@ html[data-nq-tooltip="hidden"] .nq-echarts-tooltip {
 
 .nq-echarts-tooltip {
   pointer-events: none !important;
+}
+
+/* Featured groups of 2 or 4: two columns when there's room, so no row is
+   left with an orphan card or an empty slot. */
+.blk-shelf.charts-shelf--pairs {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, max(310px, calc(50% - 0.5rem))), 1fr));
 }

@@ -9,6 +9,7 @@
  */
 import { useMemo, useState } from "react";
 import {
+  ScrollArea,
   Badge,
   Button,
   Input,
@@ -126,7 +127,12 @@ export function GanttAddColumnButton({
         // run off the bottom of the viewport whenever the toolbar sits low.
         className="flex w-80 flex-col p-0 max-h-[min(30rem,var(--radix-popover-content-available-height))]"
       >
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        {/* An auto-height popover gives the viewport no definite height, so the
+            cap is the popover's max-height less the 45px footer and borders. */}
+        <ScrollArea
+          className="min-h-0"
+          viewportStyle={{ maxHeight: "calc(min(30rem, var(--radix-popover-content-available-height)) - 47px)" }}
+        >
           <div className="space-y-3 p-3">
             <div className="space-y-1.5">
               <Label className="text-xs">Name</Label>
@@ -150,17 +156,17 @@ export function GanttAddColumnButton({
                     </p>
                     <div className="mb-1.5 flex flex-wrap gap-1">
                       {entries.map(e => (
-                        <button
+                        <Button
                           key={e.id}
                           type="button"
+                          variant="outline"
+                          size="sm"
                           disabled={!e.available}
+                          aria-pressed={draft.typeId === e.id}
                           onClick={() => setDraft(emptyDraft(e.id))}
                           className={cn(
-                            "rounded-md border px-2 py-1 text-xs transition-colors",
-                            draft.typeId === e.id
-                              ? "border-primary bg-primary/10 text-foreground"
-                              : "border-border hover:bg-accent",
-                            !e.available && "cursor-not-allowed opacity-50",
+                            "font-normal",
+                            draft.typeId === e.id && "border-primary bg-primary/10 text-foreground",
                           )}
                         >
                           {e.label}
@@ -169,7 +175,7 @@ export function GanttAddColumnButton({
                               soon
                             </Badge>
                           ) : null}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </div>
@@ -307,7 +313,7 @@ export function GanttAddColumnButton({
               </>
             ) : null}
           </div>
-        </div>
+        </ScrollArea>
 
         <div className="flex shrink-0 items-center gap-2 border-t p-2">
           <Button size="sm" className="h-7 flex-1 text-xs" disabled={!valid} onClick={create}>
@@ -397,8 +403,10 @@ function OptionsEditor({
           <span aria-hidden className="cursor-grab px-0.5 text-xs text-muted-foreground">
             ⠿
           </span>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             aria-label={`Color for ${opt.label}`}
             onClick={() =>
               patchAt(i, {
@@ -408,7 +416,7 @@ function OptionsEditor({
                   ],
               })
             }
-            className="h-4 w-4 shrink-0 rounded-full ring-1 ring-border"
+            className="size-4 min-w-0 shrink-0 rounded-full p-0 ring-1 ring-border hover:opacity-80"
             style={{ backgroundColor: opt.color }}
           />
           <Input

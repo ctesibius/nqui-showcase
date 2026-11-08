@@ -48,7 +48,10 @@ export function useGanttFocusWork(
     }
 
     const attempt = () => {
-      const gantt = root.querySelector(".gantt")
+      // nqgantt scrolls inside nqui's ScrollArea: the viewport is the
+      // scrollport, `.gantt` the grid inside it (bare `.gantt` on older builds).
+      const grid = root.querySelector(".gantt")
+      const gantt = grid?.closest("[data-radix-scroll-area-viewport]") ?? grid
       const sidebar = root.querySelector('[data-roadmap-ui="gantt-sidebar"]')
       if (!(gantt instanceof HTMLElement) || !(sidebar instanceof HTMLElement)) return
       if (gantt.scrollWidth <= gantt.clientWidth) return

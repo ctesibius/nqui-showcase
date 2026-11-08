@@ -64,7 +64,7 @@ export function InviteRow() {
 2. Find **Button** and **Field** — note `variant` / `size`, not raw color classes.
 3. Open a recipe on [**/nqui**](/nqui) and copy a pattern, not a one-off `div` stack.
 
-Deep links: [Buttons & Actions](/catalog#buttons-actions) · [Form Components](/catalog#form-components)
+Deep links: [Actions](/catalog#buttons-actions) · [Forms](/catalog#form-components)
 
 See [[actions-and-selection]], [[forms-and-fields]], [[practice-in-catalog]].
 

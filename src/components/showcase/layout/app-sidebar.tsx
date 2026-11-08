@@ -6,7 +6,6 @@ import {
   HomeIcon,
   LayoutIcon,
   Moon01Icon,
-  PaintBoardIcon,
   SettingsIcon,
   Sun01Icon,
 } from "@hugeicons/core-free-icons"
@@ -34,7 +33,6 @@ const navIcons: Record<string, typeof HomeIcon> = {
   "/recipes/elevation": LayoutIcon,
   "/recipes/sliders": LayoutIcon,
   "/catalog": FileIcon,
-  "/settings/appearance": PaintBoardIcon,
   "/design-system": SettingsIcon,
 }
 
@@ -64,8 +62,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <NquiLogo className="size-6" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Nqui</span>
-                  <span className="truncate text-xs">Component Library</span>
+                  <span className="truncate font-semibold">nqui</span>
+                  <span className="truncate text-xs">Component library</span>
                 </div>
               </Link>
             </SidebarMenuButton>

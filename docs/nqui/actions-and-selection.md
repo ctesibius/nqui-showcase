@@ -4,7 +4,7 @@
 
 <NquiExample name="actions-selection" />
 
-Open full variants: [Buttons & Actions](/catalog#buttons-actions) · [Form Components](/catalog#form-components)
+Open full variants: [Actions](/catalog#buttons-actions) · [Forms](/catalog#form-components)
 
 ## How
 

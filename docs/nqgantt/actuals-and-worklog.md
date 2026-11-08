@@ -50,7 +50,7 @@ That is a reasonable guess and it is precisely the assumption a timesheet exists
 
 ## See it for yourself
 
-In the Gantt lab's **PMP panel**, log a few hours against a task. Watch **AC** move from 0 to hours × rate, and watch **CPI** change with it. Nothing was typed into a cost field.
+In `GanttDemo`'s **PMP panel** (`@nqlib/nqgantt/ui`), log a few hours against a task. Watch **AC** move from 0 to hours × rate, and watch **CPI** change with it. Nothing was typed into a cost field.
 
 ## When not to
 

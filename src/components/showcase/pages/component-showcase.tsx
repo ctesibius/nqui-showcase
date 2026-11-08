@@ -2,6 +2,16 @@ import * as React from "react"
 import type { DateRange } from "react-day-picker"
 import { Link } from "react-router-dom"
 import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
   // Buttons & Actions
   Button,
   ButtonGroup,
@@ -14,6 +24,7 @@ import {
   Input,
   InputGroup,
   InputGroupAddon,
+  InputGroupButton,
   InputGroupText,
   InputGroupInput,
   Textarea,
@@ -127,12 +138,8 @@ import {
   ComboboxBadgeTrigger,
   ComboboxList,
   ComboboxItem,
-  ComboboxItemContent,
-  ComboboxItemTitle,
-  ComboboxItemDescription,
   ComboboxEmpty,
   ComboboxContent,
-  ComboboxGroup,
   ComboboxTrigger,
   ComboboxValue,
   // Layout
@@ -161,7 +168,6 @@ import {
   Tracker,
   ColorPicker,
   ColorSlider,
-  NquiLogo,
 } from "@nqlib/nqui"
 // Moved out of the main barrel (0.7.0) — import from subpath source modules.
 import {
@@ -215,14 +221,20 @@ import {
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import {
-  catalogDemoWell,
-  catalogGridLedger,
-  catalogGridMatrix,
-  catalogHeading,
-  catalogSection,
-  catalogShell,
-} from "../catalog-layout"
-import { CatalogSpecimen } from "../catalog-specimen"
+  CatalogRow,
+  CatalogSection,
+  CatalogSpecimen,
+  CatalogStack,
+} from "../catalog-specimen"
+import {
+  CatalogIndex,
+  CatalogIndexContext,
+  CatalogQueryContext,
+  useCatalogEntries,
+} from "../catalog-index"
+import { GalleryPage } from "../../gallery/gallery-shell"
+import { RailGroup, RailHeader, RailLinks, RailSearch } from "../../gallery/rail"
+import { useScrollSpy } from "../../gallery/gallery-scroll"
 import {
   BoardFiltersDrawer,
   InviteReviewerDialog,
@@ -390,20 +402,6 @@ const COMBOBOX_FRAMEWORKS = [
   { value: "htmx", label: "HTMX" },
 ] as const
 
-/** Pin-on-open progression demo — mid-list preselection makes the lift obvious. */
-const COMBOBOX_PIN_PARTS = [
-  "Alpha",
-  "Bravo",
-  "Charlie",
-  "Delta",
-  "Echo",
-  "Foxtrot",
-  "Golf",
-  "Hotel",
-  "India",
-  "Juliet",
-] as const
-
 const COMBOBOX_SHORTCUTS = [
   { value: "inbox", label: "Inbox", icon: MailIcon },
   { value: "files", label: "Files", icon: FileIcon },
@@ -498,89 +496,6 @@ const CATALOG_PLANS = [
     value: "agency",
     title: "Agency",
     description: "Client workspaces, white-label portals, and pooled seat billing.",
-  },
-] as const
-
-const CATALOG_REGIONS = [
-  {
-    value: "us-west",
-    title: "US West",
-    description: "Oregon · lowest latency for West Coast and Pacific users.",
-  },
-  {
-    value: "us-west-2",
-    title: "US West 2",
-    description: "California · alternate path when Oregon is congested.",
-  },
-  {
-    value: "us-east",
-    title: "US East",
-    description: "Virginia · default for East Coast and Atlantic traffic.",
-  },
-  {
-    value: "us-east-2",
-    title: "US East 2",
-    description: "Ohio · failover region for East Coast workloads.",
-  },
-  {
-    value: "us-central",
-    title: "US Central",
-    description: "Iowa · balanced latency across the continental US.",
-  },
-  {
-    value: "ca-central",
-    title: "Canada Central",
-    description: "Montreal · data residency for Canadian customers.",
-  },
-  {
-    value: "eu-central",
-    title: "EU Central",
-    description: "Frankfurt · GDPR-aligned processing in the EU.",
-  },
-  {
-    value: "eu-west",
-    title: "EU West",
-    description: "Ireland · good fit for UK and Western Europe.",
-  },
-  {
-    value: "eu-north",
-    title: "EU North",
-    description: "Stockholm · low latency for Nordic traffic.",
-  },
-  {
-    value: "eu-south",
-    title: "EU South",
-    description: "Milan · coverage for Southern Europe and MENA edge.",
-  },
-  {
-    value: "ap-southeast",
-    title: "Asia Pacific",
-    description: "Singapore · coverage for SEA and Australia-bound traffic.",
-  },
-  {
-    value: "ap-southeast-2",
-    title: "Asia Pacific 2",
-    description: "Sydney · Australian residency and Oceania routes.",
-  },
-  {
-    value: "ap-northeast",
-    title: "Asia Northeast",
-    description: "Tokyo · optimized for Japan and Korea routes.",
-  },
-  {
-    value: "ap-south",
-    title: "Asia South",
-    description: "Mumbai · primary region for India and nearby markets.",
-  },
-  {
-    value: "sa-east",
-    title: "South America East",
-    description: "São Paulo · primary region for LATAM traffic.",
-  },
-  {
-    value: "me-central",
-    title: "Middle East",
-    description: "UAE · regional residency for Gulf customers.",
   },
 ] as const
 
@@ -803,10 +718,11 @@ const StakeholderCell = React.forwardRef<
     className?: string
   } & React.ComponentPropsWithoutRef<"button">
 >(({ selected, className, ...props }, ref) => (
-  <button
+  <Button
     ref={ref}
     type="button"
-    className={`flex h-7 min-w-[120px] items-center justify-center gap-1 rounded-md border border-input bg-background px-2 py-1.5 text-left transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:border-ring ${className ?? ""}`}
+    variant="outline"
+    className={cn("min-w-[120px] gap-1 bg-background px-2 font-normal", className)}
     {...props}
   >
       {selected.length === 0 ? (
@@ -854,7 +770,7 @@ const StakeholderCell = React.forwardRef<
           </div>
         </TooltipProvider>
       )}
-    </button>
+    </Button>
 ))
 StakeholderCell.displayName = "StakeholderCell"
 
@@ -892,17 +808,19 @@ function StakeholderSelectorContent({
                 </AvatarFallback>
               </Avatar>
               {p.name}
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={(e) => {
                   e.stopPropagation()
                   onRemove(p)
                 }}
-                className="rounded hover:bg-muted p-0.5 -mr-0.5"
+                className="-mr-0.5 size-4 min-w-0 rounded p-0.5"
                 aria-label={`Remove ${p.name}`}
               >
                 <HugeiconsIcon icon={Cancel01Icon} size={12} className="size-3" />
-              </button>
+              </Button>
             </Badge>
           ))}
         </div>
@@ -912,9 +830,9 @@ function StakeholderSelectorContent({
           <ScrollArea fadeMask={false} className="h-[120px]">
             <div className="space-y-1 pr-2">
               {options.map((p) => (
-                <label
+                <Label
                   key={p.id}
-                  className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-muted/60"
+                  className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 font-normal hover:bg-muted/60"
                 >
                   <Checkbox
                     checked={selected.some((s) => s.id === p.id)}
@@ -926,7 +844,7 @@ function StakeholderSelectorContent({
                     </AvatarFallback>
                   </Avatar>
                   {p.name}
-                </label>
+                </Label>
               ))}
             </div>
           </ScrollArea>
@@ -1004,15 +922,9 @@ function StackedAvatarShowcase({
   return content
 }
 
-/**
- * Monthly budget — value + decimal in one flex row so digits stay visually contiguous; steppers at
- * the far right only (focus-reveal). Right-aligned amount reads like currency (was: input flex-1
- * with .00 in a trailing addon → huge gap).
- */
+/** Monthly budget — single editable amount + $ prefix; step buttons via InputGroupAddon. */
 function InputGroupBudgetField() {
   const [value, setValue] = React.useState("")
-  const wrapRef = React.useRef<HTMLDivElement>(null)
-  const [focusedWithin, setFocusedWithin] = React.useState(false)
 
   const num = () => {
     const n = parseFloat(value)
@@ -1020,75 +932,46 @@ function InputGroupBudgetField() {
   }
   const bump = (delta: number) => {
     const next = Math.max(0, Math.round((num() + delta) * 100) / 100)
-    setValue(next === 0 ? "" : String(next))
-  }
-
-  const onBlurCapture = (e: React.FocusEvent) => {
-    const next = e.relatedTarget as Node | null
-    if (next && wrapRef.current?.contains(next)) return
-    setFocusedWithin(false)
+    setValue(next === 0 ? "" : next.toFixed(2))
   }
 
   return (
-    <Field>
-      <FieldLabel>Monthly budget</FieldLabel>
-      <div
-        ref={wrapRef}
-        className="w-full"
-        onFocusCapture={() => setFocusedWithin(true)}
-        onBlurCapture={onBlurCapture}
-      >
-        <InputGroup className="min-w-0 gap-0">
-          <InputGroupAddon align="inline-start" className="shrink-0 pl-2 pr-0">
-            <InputGroupText>$</InputGroupText>
-          </InputGroupAddon>
-          <div className="flex min-h-0 min-w-0 flex-1 items-center gap-0">
-            <InputGroupInput
-              placeholder="0"
-              type="number"
-              min={0}
-              step={100}
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              className="min-w-0 flex-1 px-2 py-1.5 text-right tabular-nums"
-            />
-            <span className="text-muted-foreground shrink-0 pr-1.5 text-sm leading-none tabular-nums">
-              .00
-            </span>
-          </div>
-          <div
-            aria-hidden={!focusedWithin}
-            className={cn(
-              "flex shrink-0 flex-col self-stretch overflow-hidden border-l transition-[max-width,opacity] duration-200 ease-out motion-reduce:transition-none",
-              focusedWithin
-                ? "border-input max-w-6 opacity-100"
-                : "pointer-events-none max-w-0 border-transparent opacity-0"
-            )}
+    <InputGroup>
+        <InputGroupAddon align="inline-start">
+          <InputGroupText>$</InputGroupText>
+        </InputGroupAddon>
+        <InputGroupInput
+          aria-label="Monthly budget"
+          type="number"
+          inputMode="decimal"
+          min={0}
+          step={100}
+          placeholder="0.00"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          className="tabular-nums"
+        />
+        <InputGroupAddon align="inline-end" className="gap-0.5">
+          <InputGroupButton
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            aria-label="Increase budget"
+            onClick={() => bump(100)}
           >
-            <div className="flex h-7 w-6 flex-col bg-background">
-              <button
-                type="button"
-                tabIndex={focusedWithin ? undefined : -1}
-                aria-label="Increase budget"
-                className="text-muted-foreground hover:bg-accent hover:text-foreground flex min-h-0 flex-1 items-center justify-center border-0 border-b border-input text-sm transition-colors disabled:opacity-50"
-                onClick={() => bump(100)}
-              >
-                <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2} className="size-3" />
-              </button>
-              <button
-                type="button"
-                tabIndex={focusedWithin ? undefined : -1}
-                aria-label="Decrease budget"
-                className="text-muted-foreground hover:bg-accent hover:text-foreground -mt-px flex min-h-0 flex-1 items-center justify-center border-0 border-t border-input text-sm transition-colors disabled:opacity-50"
-                onClick={() => bump(-100)}
-              >
-                <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} className="size-3" />
-              </button>
-            </div>
-          </div>
-        </InputGroup>
-      </div>
-    </Field>
+            <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2} />
+          </InputGroupButton>
+          <InputGroupButton
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            aria-label="Decrease budget"
+            onClick={() => bump(-100)}
+          >
+            <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} />
+          </InputGroupButton>
+        </InputGroupAddon>
+      </InputGroup>
   )
 }
 
@@ -1104,41 +987,255 @@ function CatalogPaginationSpecimen() {
   )
 }
 
-export default function ComponentShowcase() {
+const SIDEBAR_SPECIMEN_ITEMS = [
+  { id: "inbox", label: "Inbox", icon: MailIcon, badge: 12 },
+  { id: "home", label: "Overview", icon: HomeIcon },
+  { id: "docs", label: "Documents", icon: FileIcon, badge: 3 },
+  { id: "settings", label: "Settings", icon: SettingsIcon },
+] as const
+
+/** A real nqui Sidebar, kept in flow so it sits inside a specimen stage. */
+function CatalogSidebarSpecimen() {
+  const [active, setActive] = React.useState<string>("inbox")
+  const current = SIDEBAR_SPECIMEN_ITEMS.find((i) => i.id === active)!
+  return (
+    <SidebarProvider
+      className="min-h-0 h-64 overflow-hidden rounded-md"
+      style={{ "--sidebar-width": "11rem" } as React.CSSProperties}
+    >
+      <Sidebar collapsible="none" className="border-r border-sidebar-border">
+        <SidebarHeader className="px-3 py-2.5 text-sm font-semibold">Northwind</SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+            <SidebarMenu>
+              {SIDEBAR_SPECIMEN_ITEMS.map((item) => (
+                <SidebarMenuItem key={item.id}>
+                  <SidebarMenuButton
+                    isActive={item.id === active}
+                    onClick={() => setActive(item.id)}
+                  >
+                    <HugeiconsIcon icon={item.icon} strokeWidth={2} />
+                    <span>{item.label}</span>
+                  </SidebarMenuButton>
+                  {"badge" in item ? <SidebarMenuBadge>{item.badge}</SidebarMenuBadge> : null}
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+        </SidebarContent>
+      </Sidebar>
+      <div className="flex min-w-0 flex-1 flex-col gap-1 p-4">
+        <p className="text-sm font-medium">{current.label}</p>
+      </div>
+    </SidebarProvider>
+  )
+}
+
+const TRACKER_UPTIME = Array.from({ length: 30 }, (_, i) => {
+  const day = `Day ${i + 1}`
+  if (i === 7) return { color: "bg-yellow-600 dark:bg-yellow-500", tooltip: `${day} · degraded` }
+  if (i === 18) return { color: "bg-red-600 dark:bg-red-500", tooltip: `${day} · outage` }
+  if (i === 24 || i === 25) return { tooltip: `${day} · no data` }
+  return { color: "bg-emerald-600 dark:bg-emerald-500", tooltip: `${day} · operational` }
+})
+
+const TRACKER_STATUS = [
+  { color: "bg-emerald-600 dark:bg-emerald-500", tooltip: "Active" },
+  { color: "bg-emerald-600 dark:bg-emerald-500", tooltip: "Active" },
+  { color: "bg-yellow-600 dark:bg-yellow-500", tooltip: "Warning" },
+  { color: "bg-red-600 dark:bg-red-500", tooltip: "Error" },
+  { color: "bg-emerald-600 dark:bg-emerald-500", tooltip: "Active" },
+  { tooltip: "No data" },
+  { color: "bg-emerald-600 dark:bg-emerald-500", tooltip: "Active" },
+  { color: "bg-blue-600 dark:bg-blue-500", tooltip: "Info" },
+]
+
+const CALENDAR_MODES = [
+  { value: "single", label: "Single" },
+  { value: "range", label: "Range" },
+  { value: "multiple", label: "Multiple" },
+  { value: "months", label: "Two months" },
+] as const
+type CalendarMode = (typeof CALENDAR_MODES)[number]["value"]
+
+/** Calendar — one tray, the selection mode behind a switch. */
+function CatalogCalendarSpecimen() {
+  const [mode, setMode] = React.useState<CalendarMode>("single")
+  const [single, setSingle] = React.useState<Date>()
+  const [range, setRange] = React.useState<DateRange | undefined>()
+  const [multiple, setMultiple] = React.useState<Date[]>([])
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <ToggleGroup
+        type="single"
+        size="sm"
+        value={mode}
+        onValueChange={(v) => v && setMode(v as CalendarMode)}
+        aria-label="Calendar mode"
+      >
+        {CALENDAR_MODES.map((m) => (
+          <ToggleGroupItem key={m.value} value={m.value}>
+            {m.label}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
+      {mode === "single" ? (
+        <Calendar mode="single" selected={single} onSelect={setSingle} className="rounded-md border" />
+      ) : mode === "range" ? (
+        <Calendar mode="range" selected={range} onSelect={setRange} className="rounded-md border" />
+      ) : mode === "multiple" ? (
+        <Calendar
+          mode="multiple"
+          selected={multiple}
+          onSelect={setMultiple}
+          required
+          className="rounded-md border"
+        />
+      ) : (
+        <Calendar
+          mode="range"
+          selected={range}
+          onSelect={setRange}
+          numberOfMonths={2}
+          className="rounded-md border"
+        />
+      )}
+    </div>
+  )
+}
+
+const TOC_VARIANTS = [
+  { value: "normal", label: "Normal" },
+  { value: "clerk", label: "Clerk" },
+  { value: "circuit", label: "Circuit" },
+  { value: "manual", label: "Manual" },
+] as const
+type TocVariant = (typeof TOC_VARIANTS)[number]["value"]
+
+const TOC_ARTICLE = [
+  { level: 2, id: "toc-demo-start", title: "Getting started", body: "Install the package, import the styles once and wrap the app in its providers." },
+  { level: 3, id: "toc-demo-install", title: "Installation", body: "One package, peer dependencies listed in the guide. No build plugin." },
+  { level: 3, id: "toc-demo-configure", title: "Configuration", body: "Tokens live in CSS variables, so a theme is a stylesheet, not a provider prop." },
+  { level: 4, id: "toc-demo-basic", title: "Basic options", body: "Accent, radius and density cover most products without touching a component." },
+  { level: 4, id: "toc-demo-advanced", title: "Advanced options", body: "Override a slot with className; tailwind-merge keeps the last class." },
+  { level: 2, id: "toc-demo-usage", title: "Usage", body: "Compose screens from Field, Card and ScrollArea before reaching for custom CSS." },
+  { level: 3, id: "toc-demo-patterns", title: "Patterns", body: "Recipes show the product-shaped compositions: settings, inspectors, boards." },
+  { level: 2, id: "toc-demo-faq", title: "FAQ", body: "Server rendering, bundle size and icon sets each have a short answer in the docs." },
+] as const
+
+const TOC_MANUAL_ITEMS = [
+  {
+    id: "toc-demo-start",
+    label: "Getting started",
+    level: 1,
+    children: [
+      { id: "toc-demo-install", label: "Installation", level: 2 },
+      { id: "toc-demo-configure", label: "Configuration", level: 2 },
+    ],
+  },
+  {
+    id: "toc-demo-usage",
+    label: "Usage",
+    level: 1,
+    children: [{ id: "toc-demo-patterns", label: "Patterns", level: 2 }],
+  },
+  { id: "toc-demo-faq", label: "FAQ", level: 1 },
+]
+
+const tocHeadingClass = {
+  2: "text-base font-semibold",
+  3: "text-sm font-semibold",
+  4: "text-sm font-medium",
+} as const
+
+/** Table of contents — one article, the TOC variant behind a switch. */
+function CatalogTocSpecimen() {
+  const [variant, setVariant] = React.useState<TocVariant>("normal")
+  const contentRef = React.useRef<HTMLDivElement>(null)
+  return (
+    <div className="flex flex-col gap-4">
+      <ToggleGroup
+        type="single"
+        size="sm"
+        value={variant}
+        onValueChange={(v) => v && setVariant(v as TocVariant)}
+        aria-label="Table of contents variant"
+        className="self-start"
+      >
+        {TOC_VARIANTS.map((v) => (
+          <ToggleGroupItem key={v.value} value={v.value}>
+            {v.label}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
+      <div className="flex flex-col gap-4 @2xl:flex-row">
+        <div className="min-w-0 flex-1" ref={contentRef}>
+          <ScrollArea className="h-72 rounded-lg border">
+            <div className="space-y-3 p-5">
+              {TOC_ARTICLE.map((s) => {
+                const Heading = `h${s.level}` as "h2" | "h3" | "h4"
+                return (
+                  <React.Fragment key={s.id}>
+                    <Heading id={s.id} className={cn("pt-2", tocHeadingClass[s.level])}>
+                      {s.title}
+                    </Heading>
+                    <p className="text-sm text-muted-foreground">{s.body}</p>
+                  </React.Fragment>
+                )
+              })}
+            </div>
+          </ScrollArea>
+        </div>
+        <div className="w-full @2xl:w-60">
+          {variant === "manual" ? (
+            <TableOfContents
+              key="manual"
+              items={TOC_MANUAL_ITEMS}
+              container={contentRef as React.RefObject<HTMLElement>}
+              enableScrollSpy
+              variant="normal"
+              title="On this page"
+              className="h-72 rounded-lg"
+            />
+          ) : (
+            <TableOfContents
+              key={variant}
+              autoDetect
+              headingSelector="h2, h3, h4"
+              container={contentRef as React.RefObject<HTMLElement>}
+              enableScrollSpy
+              variant={variant}
+              title="On this page"
+              className="h-72 rounded-lg"
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const CatalogSpecimens = React.memo(function CatalogSpecimens() {
   const [open, setOpen] = React.useState(false)
-  const [radioValue, setRadioValue] = React.useState("option1")
   const [radioAnimated, setRadioAnimated] = React.useState("option1")
-  const [radioSliding, setRadioSliding] = React.useState("left")
+  const [radioSliding, setRadioSliding] = React.useState("week")
+  const [radioIcons, setRadioIcons] = React.useState("home")
   const [segmentedScale, setSegmentedScale] = React.useState("linear")
-  const [segmentedSize, setSegmentedSize] = React.useState("medium")
   const [segmentedAlign, setSegmentedAlign] = React.useState("left")
   const [buttonGroupAlign, setButtonGroupAlign] = React.useState<"left" | "center" | "right">("left")
   const [formatActive, setFormatActive] = React.useState<string[]>([])
-  const [checkboxItems, setCheckboxItems] = React.useState({
-    item1: true,
-    item2: false,
-    item3: false,
-  })
-  const [checkboxSquare, setCheckboxSquare] = React.useState(false)
+  const [menuNotifications, setMenuNotifications] = React.useState(true)
+  const [menuDensity, setMenuDensity] = React.useState("comfortable")
+  const [checkboxSquare, setCheckboxSquare] = React.useState(true)
   const [checkboxRound, setCheckboxRound] = React.useState(false)
-  const [checkboxHitRows, setCheckboxHitRows] = React.useState({ alpha: false, beta: false })
   const [ratingHalf, setRatingHalf] = React.useState(3.5)
-  const [calendarSingle, setCalendarSingle] = React.useState<Date>()
-  const [calendarRange, setCalendarRange] = React.useState<DateRange | undefined>()
-  const [calendarMultiple, setCalendarMultiple] = React.useState<Date[]>([])
 
-  const [popoverOpen, setPopoverOpen] = React.useState(false)
   const [popoverAnchorOpen, setPopoverAnchorOpen] = React.useState(false)
-  const [stakeholdersRegular, setStakeholdersRegular] = React.useState<Person[]>(() => [
-    STAKEHOLDER_PEOPLE[0],
-  ])
   const [stakeholdersAnchor, setStakeholdersAnchor] = React.useState<Person[]>(() => [
     STAKEHOLDER_PEOPLE[0],
+    STAKEHOLDER_PEOPLE[1],
   ])
-  const [avatarPeople, setAvatarPeople] = React.useState<Person[]>(() =>
-    STAKEHOLDER_PEOPLE.slice(0, 2),
-  )
-  const [avatarPopoverOpen, setAvatarPopoverOpen] = React.useState(false)
   const [avatarLimitedPeople, setAvatarLimitedPeople] = React.useState<Person[]>(
     () => AVATAR_LIMITED_OPTIONS,
   )
@@ -1149,12 +1246,8 @@ export default function ComponentShowcase() {
     "react",
     "qwik",
     "solidjs",
-    "angular",
-    "astro",
   ])
   const [comboboxNoSearch, setComboboxNoSearch] = React.useState("In Progress")
-  const [comboboxPinOn, setComboboxPinOn] = React.useState("echo")
-  const [comboboxPinOff, setComboboxPinOff] = React.useState("echo")
   const [creatableFruits, setCreatableFruits] = React.useState(["Apple", "Banana", "Cherry"])
   const [creatableFruit, setCreatableFruit] = React.useState("")
   const [commandPaletteDemoOpen, setCommandPaletteDemoOpen] = React.useState(false)
@@ -1162,1404 +1255,865 @@ export default function ComponentShowcase() {
   const [projectActionAssignee, setProjectActionAssignee] = React.useState("ava")
   const [projectActionShowCompleted, setProjectActionShowCompleted] = React.useState(true)
 
-  // Refs for TOC container scoping
-  const tocContentRef1 = React.useRef<HTMLDivElement>(null)
-  const tocContentRef2 = React.useRef<HTMLDivElement>(null)
-  const tocContentRef3 = React.useRef<HTMLDivElement>(null)
-
   return (
-    <div className={catalogShell}>
+    <div className="flex flex-col gap-14">
       <Toaster />
 
-      {/* Header Section */}
-      <div className="space-y-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Component catalog</h1>
-          <p className="text-muted-foreground">
-            Variants and props for @nqlib/nqui. Start with composition on{" "}
-            <Link to="/blocks" className="font-medium underline-offset-4 hover:underline">
-              /blocks
-            </Link>
-            , or jump with{" "}
-            <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs">
-              ⌘K
-            </kbd>
-            .
-          </p>
-        </div>
-      </div>
+      {/* ── Actions ─────────────────────────────────────────────── */}
+      <CatalogSection id="buttons-actions" title="Actions">
+        <CatalogSpecimen
+          title="Button"
+          imports="Button"
+          docs="actions-and-selection"
+          size="l"
+          keywords="variant size icon disabled link aschild"
+        >
+          <CatalogRow tag="Variants">
+            <Button variant="default">Default</Button>
+            <Button variant="secondary">Secondary</Button>
+            <Button variant="outline">Outline</Button>
+            <Button variant="ghost">Ghost</Button>
+            <Button variant="destructive">Destructive</Button>
+            <Button variant="link">Link</Button>
+          </CatalogRow>
+          <CatalogRow tag="Semantic">
+            <Button variant="success">Success</Button>
+            <Button variant="warning">Warning</Button>
+            <Button variant="info">Info</Button>
+          </CatalogRow>
+          <CatalogRow tag="Sizes">
+            <Button size="sm">Small</Button>
+            <Button size="default">Default</Button>
+            <Button size="lg">Large</Button>
+            <Button size="icon" aria-label="Home">
+              <HugeiconsIcon icon={HomeIcon} strokeWidth={2} />
+            </Button>
+          </CatalogRow>
+          <CatalogRow tag="States">
+            <Button disabled>Disabled</Button>
+            <Button variant="outline" disabled>
+              Disabled
+            </Button>
+            <Button variant="outline" asChild>
+              <a href="#buttons-actions">As link</a>
+            </Button>
+          </CatalogRow>
+        </CatalogSpecimen>
 
-      {/* Buttons & Actions Section */}
-      <section className={catalogSection}>
-        <h2 id="buttons-actions" className={catalogHeading}>Buttons & Actions</h2>
-        <div className={catalogGridLedger}>
-          <CatalogSpecimen
-            title="Button Variants"
-            description="Default, outline, ghost, destructive — the four you reach for first. Semantic and extra variants are below."
-            className="md:col-span-2"
-            stageClassName="space-y-3"
-          >
-            <div className="flex flex-wrap gap-2">
-              <Button variant="default">Default</Button>
-              <Button variant="outline">Outline</Button>
-              <Button variant="ghost">Ghost</Button>
-              <Button variant="destructive">Destructive</Button>
-            </div>
-            <Collapsible>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="px-0 text-muted-foreground">
-                  Semantic and extra variants
+        <CatalogSpecimen
+          title="Button group"
+          imports="ButtonGroup, ButtonGroupSeparator, ButtonGroupText"
+          docs="actions-and-selection"
+          keywords="segmented split"
+        >
+          <CatalogRow tag="Actions">
+            <ButtonGroup>
+              <Button variant="outline">Left</Button>
+              <Button variant="outline">Middle</Button>
+              <Button variant="outline">Right</Button>
+            </ButtonGroup>
+          </CatalogRow>
+          <CatalogRow tag="Selected">
+            <ButtonGroup>
+              {(["left", "center", "right"] as const).map((v) => (
+                <Button
+                  key={v}
+                  type="button"
+                  variant={buttonGroupAlign === v ? "secondary" : "outline"}
+                  aria-current={buttonGroupAlign === v ? true : undefined}
+                  onClick={() => setButtonGroupAlign(v)}
+                  className="capitalize"
+                >
+                  {v}
                 </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-3 pt-2">
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="secondary">Secondary</Button>
-                  <Button variant="success">Success</Button>
-                  <Button variant="warning">Warning</Button>
-                  <Button variant="info">Info</Button>
-                  <Button variant="link">Link</Button>
-                </div>
-                <div className="flex flex-wrap items-center gap-2 border-t border-border/60 pt-3">
-                  <span className="text-xs font-medium text-muted-foreground">Disabled</span>
-                  <Button variant="default" disabled>
-                    Primary
-                  </Button>
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  asChild: <Button asChild><a href="#">Render as link</a></Button>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Button Sizes"
-            description="All 4 button sizes"
-            stageClassName="space-y-3"
-          >
-            <div className="flex flex-wrap items-center gap-2">
-              <Button size="sm">Small</Button>
-              <Button size="default">Default</Button>
-              <Button size="lg">Large</Button>
-              <Button size="icon">
+              ))}
+            </ButtonGroup>
+          </CatalogRow>
+          <CatalogRow tag="Mixed">
+            <ButtonGroup>
+              <Button variant="outline" aria-label="Home">
                 <HugeiconsIcon icon={HomeIcon} strokeWidth={2} />
               </Button>
-            </div>
-          </CatalogSpecimen>
+              <ButtonGroupSeparator />
+              <ButtonGroupText>Text</ButtonGroupText>
+              <ButtonGroupSeparator />
+              <Button variant="outline" aria-label="Settings">
+                <HugeiconsIcon icon={SettingsIcon} strokeWidth={2} />
+              </Button>
+            </ButtonGroup>
+          </CatalogRow>
+        </CatalogSpecimen>
 
-          <CatalogSpecimen
-            title="Button Group"
-            description={
-              <div className="space-y-1">
-                <span className="block">
-                  Layout only: shared pill border and separators between siblings. It does <strong className="font-medium">not</strong>{" "}
-                  track selection—clicks do nothing unless you add state.
-                </span>
-                <span className="block text-muted-foreground">
-                  For built-in on/off or single/multi select, use <strong className="font-medium text-foreground">ToggleGroup</strong> below.
-                  For plain <strong className="font-medium text-foreground">Button</strong>s in a group, wire <code className="text-xs">useState</code>,{" "}
-                  <code className="text-xs">variant</code>, and <code className="text-xs">aria-current</code> on the active control.
-                </span>
-              </div>
-            }
-            stageClassName="space-y-6"
-          >
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Static — independent actions (no selection state)</Label>
-              <div className="flex flex-wrap items-center gap-3">
-                <ButtonGroup>
-                  <Button variant="outline">Left</Button>
-                  <Button variant="outline">Middle</Button>
-                  <Button variant="outline">Right</Button>
-                </ButtonGroup>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">
-                Exclusive selection — <code className="text-xs">useState</code> + <code className="text-xs">aria-current</code> +{" "}
-                <code className="text-xs">variant</code> (try clicking)
-              </Label>
-              <ButtonGroup>
-                <Button
-                  type="button"
-                  variant={buttonGroupAlign === "left" ? "secondary" : "outline"}
-                  aria-current={buttonGroupAlign === "left" ? true : undefined}
-                  onClick={() => setButtonGroupAlign("left")}
-                >
-                  Left
-                </Button>
-                <Button
-                  type="button"
-                  variant={buttonGroupAlign === "center" ? "secondary" : "outline"}
-                  aria-current={buttonGroupAlign === "center" ? true : undefined}
-                  onClick={() => setButtonGroupAlign("center")}
-                >
-                  Center
-                </Button>
-                <Button
-                  type="button"
-                  variant={buttonGroupAlign === "right" ? "secondary" : "outline"}
-                  aria-current={buttonGroupAlign === "right" ? true : undefined}
-                  onClick={() => setButtonGroupAlign("right")}
-                >
-                  Right
-                </Button>
-              </ButtonGroup>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Mixed — icons + label strip (static)</Label>
-              <div className="flex flex-wrap items-center gap-3">
-                <ButtonGroup>
-                  <Button variant="outline">
-                    <HugeiconsIcon icon={HomeIcon} strokeWidth={2} />
-                  </Button>
-                  <ButtonGroupSeparator />
-                  <ButtonGroupText>Text</ButtonGroupText>
-                  <ButtonGroupSeparator />
-                  <Button variant="outline">
-                    <HugeiconsIcon icon={SettingsIcon} strokeWidth={2} />
-                  </Button>
-                </ButtonGroup>
-              </div>
-            </div>
-          </CatalogSpecimen>
+        <CatalogSpecimen
+          title="Toggle"
+          imports="Toggle, ToggleGroup, ToggleGroupItem"
+          docs="actions-and-selection"
+          keywords="togglegroup segmented toolbar pressed"
+        >
+          <CatalogRow tag="Toolbar">
+            <ToggleGroup type="multiple" value={formatActive} onValueChange={setFormatActive}>
+              <ToggleGroupItem value="bold" aria-label="Bold">
+                <HugeiconsIcon icon={TextBoldIcon} className="size-4" />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="italic" aria-label="Italic">
+                <HugeiconsIcon icon={TextItalicIcon} className="size-4" />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="underline" aria-label="Underline">
+                <HugeiconsIcon icon={TextUnderlineIcon} className="size-4" />
+              </ToggleGroupItem>
+            </ToggleGroup>
+            <ToggleGroup type="single" value={segmentedAlign} onValueChange={setSegmentedAlign}>
+              <ToggleGroupItem value="left" aria-label="Align left">
+                <HugeiconsIcon icon={TextAlignLeft01Icon} className="size-4" />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="center" aria-label="Align center">
+                <HugeiconsIcon icon={TextAlignCenterIcon} className="size-4" />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="right" aria-label="Align right">
+                <HugeiconsIcon icon={TextAlignRight01Icon} className="size-4" />
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </CatalogRow>
+          <CatalogRow tag="Segmented">
+            <ToggleGroup type="single" size="sm" value={segmentedScale} onValueChange={setSegmentedScale}>
+              <ToggleGroupItem value="linear">Linear</ToggleGroupItem>
+              <ToggleGroupItem value="log">Log</ToggleGroupItem>
+            </ToggleGroup>
+          </CatalogRow>
+          <CatalogRow tag="Toggle">
+            <Toggle aria-label="Toggle">Toggle</Toggle>
+            <Toggle defaultPressed aria-label="Pressed">
+              Pressed
+            </Toggle>
+            <Toggle disabled aria-label="Disabled">
+              Disabled
+            </Toggle>
+          </CatalogRow>
+        </CatalogSpecimen>
+      </CatalogSection>
 
-          <CatalogSpecimen
-            title="Toggle & ToggleGroup"
-            description="In context: format toolbar, chart settings. Off = subtle border. On = secondary/primary fill (flat under Look: next)."
-            stageClassName="space-y-6"
-          >
-            {/* Document editor toolbar */}
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Document editor — format toolbar</Label>
-              <div className={catalogDemoWell}>
-                <div className="flex flex-wrap items-center gap-1">
-                  <ToggleGroup type="multiple" value={formatActive} onValueChange={setFormatActive}>
-                    <ToggleGroupItem value="bold" aria-label="Bold">
-                      <HugeiconsIcon icon={TextBoldIcon} className="size-4" />
-                    </ToggleGroupItem>
-                    <ToggleGroupItem value="italic" aria-label="Italic">
-                      <HugeiconsIcon icon={TextItalicIcon} className="size-4" />
-                    </ToggleGroupItem>
-                    <ToggleGroupItem value="underline" aria-label="Underline">
-                      <HugeiconsIcon icon={TextUnderlineIcon} className="size-4" />
-                    </ToggleGroupItem>
-                  </ToggleGroup>
-                  <Separator orientation="vertical" className="mx-2 h-5" />
-                  <ToggleGroup type="single" value={segmentedAlign} onValueChange={setSegmentedAlign}>
-                    <ToggleGroupItem value="left" aria-label="Align left">
-                      <HugeiconsIcon icon={TextAlignLeft01Icon} className="size-4" />
-                    </ToggleGroupItem>
-                    <ToggleGroupItem value="center" aria-label="Align center">
-                      <HugeiconsIcon icon={TextAlignCenterIcon} className="size-4" />
-                    </ToggleGroupItem>
-                    <ToggleGroupItem value="right" aria-label="Align right">
-                      <HugeiconsIcon icon={TextAlignRight01Icon} className="size-4" />
-                    </ToggleGroupItem>
-                  </ToggleGroup>
-                </div>
-                <div className="mt-3 rounded border border-input/50 bg-background px-3 py-2 text-sm text-muted-foreground">
-                  Select text and use the toolbar to format…
-                </div>
-              </div>
-            </div>
-
-            {/* Chart settings toolbar */}
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Chart settings — scale & size</Label>
-              <div className={catalogDemoWell}>
-                <div className="flex flex-wrap items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">Y-axis:</span>
-                    <ToggleGroup type="single" size="sm" value={segmentedScale} onValueChange={setSegmentedScale}>
-                      <ToggleGroupItem value="linear">Linear</ToggleGroupItem>
-                      <ToggleGroupItem value="log">Log</ToggleGroupItem>
-                    </ToggleGroup>
-                  </div>
-                  <Separator orientation="vertical" className="h-6" />
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">Size:</span>
-                    <ToggleGroup type="single" size="sm" value={segmentedSize} onValueChange={setSegmentedSize}>
-                      <ToggleGroupItem value="small">Small</ToggleGroupItem>
-                      <ToggleGroupItem value="medium">Medium</ToggleGroupItem>
-                      <ToggleGroupItem value="large">Large</ToggleGroupItem>
-                    </ToggleGroup>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Standalone toggle */}
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Standalone toggle (e.g. pin, mute)</Label>
-              <div className="flex flex-wrap gap-2">
-                <Toggle aria-label="Toggle">Toggle</Toggle>
-                <Toggle pressed aria-label="Pressed">Pressed</Toggle>
-                <Toggle disabled aria-label="Disabled">Disabled</Toggle>
-              </div>
-            </div>
-          </CatalogSpecimen>
-        </div>
-      </section>
-
-      {/* Form Components Section */}
-      <section className={catalogSection}>
-        <h2 id="form-components" className={catalogHeading}>Form Components</h2>
-        <div className={catalogGridLedger}>
-          <CatalogSpecimen
-            title="Input"
-            description="Text input variants"
-            stageClassName="space-y-3"
-          >
-            <Input placeholder="Default input" />
-            <Input type="email" placeholder="Email input" />
-            <Input type="password" placeholder="Password input" />
-            <Input type="number" min={0} placeholder="Number (spinners hidden)" />
-            <Input disabled placeholder="Disabled input" />
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Input Group"
-            description="In context: billing, profile, URL. Prefix/suffix addons align with input padding."
-            stageClassName="space-y-4"
-          >
-            {/* Billing / Settings panel */}
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Billing — amount with currency</Label>
-              <div className={catalogDemoWell}>
-                <div className="space-y-3">
-                  <InputGroupBudgetField />
-                </div>
-              </div>
-            </div>
-
-            {/* Profile / Social */}
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Profile — @handle (e.g. Twitter, GitHub)</Label>
-              <div className={catalogDemoWell}>
-                <Field>
-                  <FieldLabel>Username</FieldLabel>
-                  <InputGroup>
-                    <InputGroupAddon align="inline-start">
-                      <InputGroupText>@</InputGroupText>
-                    </InputGroupAddon>
-                    <InputGroupInput placeholder="johndoe" />
-                  </InputGroup>
-                </Field>
-              </div>
-            </div>
-
-            {/* Site URL */}
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Site settings — URL with prefix</Label>
-              <div className={catalogDemoWell}>
-                <Field>
-                  <FieldLabel>Base URL</FieldLabel>
-                  <InputGroup>
-                    <InputGroupAddon align="inline-start">
-                      <InputGroupText>https://</InputGroupText>
-                    </InputGroupAddon>
-                    <InputGroupInput placeholder="example.com" />
-                  </InputGroup>
-                </Field>
-              </div>
-            </div>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Textarea"
-            description="Multi-line text input"
-            stageClassName="space-y-3"
-          >
-            <Textarea placeholder="Enter your message..." />
-            <Textarea disabled placeholder="Disabled textarea" />
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Select"
-            description="Dropdown select with frosted glass effect. Long lists use nqui ScrollArea (same chrome as Combobox)."
-            stageClassName="space-y-3"
-          >
-            <div className="relative py-16 px-16">
-              {/* Colorful circles to test frosted glass reflection */}
-              <div className="absolute top-0 left-0 w-16 h-16 bg-red-500 rounded-full opacity-80 z-[var(--z-background)]" />
-              <div className="absolute top-0 right-0 w-16 h-16 bg-blue-500 rounded-full opacity-80 z-[var(--z-background)]" />
-              <div className="absolute bottom-0 left-0 w-16 h-16 bg-green-500 rounded-full opacity-80 z-[var(--z-background)]" />
-              <div className="absolute bottom-0 right-0 w-16 h-16 bg-yellow-500 rounded-full opacity-80 z-[var(--z-background)]" />
-              <div className="relative z-[var(--z-content)] flex justify-center">
-                <Select defaultValue="option1">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select an option" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 40 }, (_, i) => (
-                      <SelectItem key={i + 1} value={`option${i + 1}`}>
-                        Option {i + 1}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">
-                Long list ({CATALOG_TIMEZONES.length} timezones) — open and scroll to verify ScrollArea
-              </Label>
-              <Select defaultValue="utc">
-                <SelectTrigger className="w-full max-w-sm">
-                  <SelectValue placeholder="Pick a timezone" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATALOG_TIMEZONES.map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">
-                Multi-line ({CATALOG_PLANS.length} plans) — title + description; should scroll
-              </Label>
-              <Select defaultValue="pro">
-                <SelectTrigger className="w-full max-w-sm">
-                  <SelectValue placeholder="Choose a plan" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATALOG_PLANS.map((plan) => (
-                    <SelectItem key={plan.value} value={plan.value}>
-                      <SelectItemContent>
-                        <SelectItemTitle>{plan.title}</SelectItemTitle>
-                        <SelectItemDescription>{plan.description}</SelectItemDescription>
-                      </SelectItemContent>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <Select disabled>
-              <SelectTrigger>
-                <SelectValue placeholder="Disabled select" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="option1">Option 1</SelectItem>
-              </SelectContent>
-            </Select>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Native Select"
-            description="Native HTML select"
-            stageClassName="space-y-3"
-          >
-            <NativeSelect>
-              <NativeSelectOption value="">Select...</NativeSelectOption>
-              <NativeSelectOption value="1">Option 1</NativeSelectOption>
-              <NativeSelectOption value="2">Option 2</NativeSelectOption>
-              <NativeSelectOption value="3">Option 3</NativeSelectOption>
-            </NativeSelect>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Checkbox"
-            description="Enhanced checkbox with animation variants"
-            stageClassName="space-y-6"
-          >
-            {/* Square Variant */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium">Square Variant (Default)</h4>
-              <div className="space-y-2">
-                <Checkbox
-                  variant="square"
-                  checked={checkboxSquare}
-                  onCheckedChange={(checked) => setCheckboxSquare(checked === true)}
-                >
-                  Controlled ({checkboxSquare ? "Checked" : "Unchecked"})
-                </Checkbox>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Round Variant */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium">Round Variant</h4>
-              <div className="flex items-center gap-4">
-                <Checkbox
-                  variant="round"
-                  checked={checkboxRound}
-                  onCheckedChange={(checked) => setCheckboxRound(checked === true)}
-                />
-                <span className="text-sm text-muted-foreground">
-                  Controlled ({checkboxRound ? "Checked" : "Unchecked"})
-                </span>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium">Hit area (table-style padding)</h4>
-              <p className="text-xs text-muted-foreground">
-                <code className="text-xs">hit-area-6</code> on the control — click anywhere in the padded cell to
-                toggle.
-              </p>
-              <table className="w-full max-w-md border border-border text-sm">
-                <thead>
-                  <tr className="border-b border-border bg-background">
-                    <th className="w-14 p-2 text-left font-medium" scope="col">
-                      Select
-                    </th>
-                    <th className="p-2 text-left font-medium" scope="col">
-                      Row
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b border-border">
-                    <td className="p-4">
-                      <Checkbox
-                        className="hit-area-6"
-                        checked={checkboxHitRows.alpha}
-                        onCheckedChange={(c) => setCheckboxHitRows((s) => ({ ...s, alpha: c === true }))}
-                        aria-label="Select row Alpha"
-                      />
-                    </td>
-                    <td className="p-4">Alpha</td>
-                  </tr>
-                  <tr>
-                    <td className="p-4">
-                      <Checkbox
-                        className="hit-area-6"
-                        checked={checkboxHitRows.beta}
-                        onCheckedChange={(c) => setCheckboxHitRows((s) => ({ ...s, beta: c === true }))}
-                        aria-label="Select row Beta"
-                      />
-                    </td>
-                    <td className="p-4">Beta</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Radio Group"
-            description="All RadioGroup variants - 100% raw from @/index"
-            stageClassName="space-y-6"
-          >
-            {/* Animated Variant (Default) */}
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">Animated Variant (Default)</Label>
-              <RadioGroup variant="animated" value={radioAnimated} onValueChange={setRadioAnimated}>
-                <RadioGroupItem value="option1">Option 1</RadioGroupItem>
-                <RadioGroupItem value="option2">Option 2</RadioGroupItem>
-                <RadioGroupItem value="option3">Option 3</RadioGroupItem>
-              </RadioGroup>
-            </div>
-
-            {/* Sliding Variant with Icons */}
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">Sliding Variant (with Icons)</Label>
-              <RadioGroup variant="sliding" value={radioSliding} onValueChange={setRadioSliding}>
-                <RadioGroupItem value="home">
-                  <HugeiconsIcon icon={HomeIcon} className="h-4 w-4" />
-                </RadioGroupItem>
-                <RadioGroupItem value="mail">
-                  <HugeiconsIcon icon={MailIcon} className="h-4 w-4" />
-                </RadioGroupItem>
-                <RadioGroupItem value="settings">
-                  <HugeiconsIcon icon={SettingsIcon} className="h-4 w-4" />
-                </RadioGroupItem>
-              </RadioGroup>
-            </div>
-
-            {/* Sliding Variant with Text */}
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">Sliding Variant (with Text - Tab-like)</Label>
-              <RadioGroup variant="sliding" value={radioValue} onValueChange={setRadioValue}>
-                <RadioGroupItem value="option1">Option 1</RadioGroupItem>
-                <RadioGroupItem value="option2">Option 2</RadioGroupItem>
-                <RadioGroupItem value="option3">Option 3</RadioGroupItem>
-              </RadioGroup>
-            </div>
-
-            {/* Sliding Variant - Full Width Tab Style */}
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">Sliding Variant (Full Width Tabs)</Label>
-              <RadioGroup variant="sliding" value={radioSliding} onValueChange={setRadioSliding} className="w-full">
-                <RadioGroupItem value="left">Left</RadioGroupItem>
-                <RadioGroupItem value="center">Center</RadioGroupItem>
-                <RadioGroupItem value="right">Right</RadioGroupItem>
-              </RadioGroup>
-            </div>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Switch"
-            description={
-              <>
-                Toggle switch — <code className="text-xs">sm</code> is compact;{" "}
-                <code className="text-xs">default</code> matches Button <code className="text-xs">sm</code>;{" "}
-                <code className="text-xs">lg</code> matches Button default (<code className="text-xs">h-7</code>
-                ).
-              </>
-            }
-            stageClassName="space-y-4"
-          >
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">Sizes</Label>
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Switch id="switch-size-sm" size="sm" defaultChecked />
-                  <Label htmlFor="switch-size-sm" className="font-normal">
-                    Small (compact)
-                  </Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch id="switch-size-default" size="default" defaultChecked />
-                  <Label htmlFor="switch-size-default" className="font-normal">
-                    Default (≈ Button sm)
-                  </Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch id="switch-size-lg" size="lg" defaultChecked />
-                  <Label htmlFor="switch-size-lg" className="font-normal">
-                    Large (≈ Button default)
-                  </Label>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">Hit area</Label>
-              <p className="text-xs text-muted-foreground">
-                <code className="text-xs">hit-area-6</code> enlarges the pointer target without changing layout.
-              </p>
-              <div className="flex items-center gap-2 py-2">
-                <Switch id="switch-hit-area" className="hit-area-6" defaultChecked />
-                <Label htmlFor="switch-hit-area" className="font-normal">
-                  With hit-area-6
-                </Label>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">States</Label>
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center space-x-2">
-                  <Switch id="switch1" />
-                  <Label htmlFor="switch1">Enabled</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch id="switch2" defaultChecked />
-                  <Label htmlFor="switch2">Checked</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch id="switch3" disabled />
-                  <Label htmlFor="switch3">Disabled</Label>
-                </div>
-              </div>
-            </div>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Slider"
-            description="4px rail, Switch thumb, sm/default/lg row heights. Variants: field, segments, ruler. Full examples on /recipes/sliders."
-            stageClassName="space-y-5"
-          >
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">Sizes</Label>
-              <div className="space-y-1">
-                <Slider size="sm" defaultValue={[40]} max={100} step={1} aria-label="Small" />
-                <Slider size="default" defaultValue={[55]} max={100} step={1} aria-label="Default" />
-                <Slider size="lg" defaultValue={[70]} max={100} step={1} aria-label="Large" />
-              </div>
-            </div>
-            <Slider label="Range" showValue defaultValue={[25, 75]} max={100} step={1} />
-            <Slider label="Balance · origin" showValue min={-50} max={50} origin={0} defaultValue={[-15]} />
-            <Slider label="Zoom · log + marks" showValue scale="log" min={25} max={400} step={5} defaultValue={[100]} formatValue={(v) => `${v}%`} marks={[{ value: 100, label: "100%" }]} />
-            <Slider variant="field" label="Field" defaultValue={[64]} formatValue={(v) => `${v}%`} />
-            <Slider variant="segments" label="Segments" showValue min={1} max={7} defaultValue={[4]} />
-            <Slider variant="ruler" label="Ruler" min={-2} max={2} step={0.1} origin={0} defaultValue={[0.7]} formatValue={(v) => `${v > 0 ? "+" : ""}${v.toFixed(1)} EV`} />
-            <Slider label="Read-only" showValue readOnly defaultValue={[82]} />
-            <Slider label="Disabled" showValue disabled defaultValue={[40]} />
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Rating"
-            description="Star rating component with Radix accessibility"
-            stageClassName="space-y-6"
-          >
-            {/* Basic Rating */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Basic Rating</Label>
-              <div className="flex items-center gap-2">
-                <Rating defaultValue={3} maxRating={5} />
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Controlled Rating with Half Stars */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">
-                Controlled (Half Stars): {ratingHalf} stars
-              </Label>
-              <div className="flex items-center gap-2">
-                <Rating
-                  value={ratingHalf}
-                  onValueChange={setRatingHalf}
-                  maxRating={5}
-                  allowHalf={true}
-                />
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Disabled Rating */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Disabled</Label>
-              <div className="flex items-center gap-2">
-                <Rating defaultValue={4} disabled />
-              </div>
-            </div>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Input OTP"
-            description="One-time password input"
-            stageClassName="space-y-3"
-          >
+      {/* ── Forms ───────────────────────────────────────────────── */}
+      <CatalogSection id="form-components" title="Forms">
+        <CatalogSpecimen
+          title="Text entry"
+          imports="Input, InputGroup, Textarea, InputOTP"
+          docs="forms-and-fields"
+          keywords="text field email password number prefix suffix addon multiline otp one-time code"
+        >
+          <CatalogRow tag="Input">
+            <Input placeholder="Project name" />
+          </CatalogRow>
+          <CatalogRow tag="Group">
+            <InputGroup>
+              <InputGroupAddon align="inline-start">
+                <InputGroupText>https://</InputGroupText>
+              </InputGroupAddon>
+              <InputGroupInput placeholder="example.com" />
+            </InputGroup>
+          </CatalogRow>
+          <CatalogRow tag="Stepper">
+            <InputGroupBudgetField />
+          </CatalogRow>
+          <CatalogRow tag="Textarea">
+            <Textarea placeholder="Add a note…" rows={2} className="min-h-16" />
+          </CatalogRow>
+          <CatalogRow tag="OTP">
             <InputOTP maxLength={6}>
               <InputOTPGroup>
-                <InputOTPSlot index={0} />
-                <InputOTPSlot index={1} />
-                <InputOTPSlot index={2} />
-                <InputOTPSlot index={3} />
-                <InputOTPSlot index={4} />
-                <InputOTPSlot index={5} />
+                {Array.from({ length: 6 }, (_, i) => (
+                  <InputOTPSlot key={i} index={i} />
+                ))}
               </InputOTPGroup>
             </InputOTP>
-          </CatalogSpecimen>
+          </CatalogRow>
+        </CatalogSpecimen>
 
-          <CatalogSpecimen
-            title="Field Components"
-            description="Form field with labels and errors"
-            stageClassName="space-y-3"
-          >
-            <Field>
-              <FieldLabel>Email</FieldLabel>
-              <Input type="email" placeholder="Enter email" />
-              <FieldDescription>We'll never share your email.</FieldDescription>
-            </Field>
-            <Field>
-              <FieldLabel>Password</FieldLabel>
-              <Input type="password" placeholder="Enter password" />
-              <FieldError>Password is required</FieldError>
-            </Field>
-            <FieldSet>
-              <FieldLegend>Field Set</FieldLegend>
-              <FieldContent>
-                <FieldTitle>Field Title</FieldTitle>
-                <Input placeholder="Input in field set" />
-              </FieldContent>
-            </FieldSet>
-          </CatalogSpecimen>
-        </div>
-      </section>
+        <CatalogSpecimen
+          title="Choices"
+          imports="Checkbox, RadioGroup, Switch"
+          docs="forms-and-fields"
+          keywords="checkbox radio radiogroup switch toggle boolean option"
+        >
+          <CatalogRow tag="Checkbox" className="gap-4 text-sm">
+            <Checkbox
+              variant="square"
+              checked={checkboxSquare}
+              onCheckedChange={(c) => setCheckboxSquare(c === true)}
+            >
+              Square
+            </Checkbox>
+            <Checkbox
+              variant="round"
+              checked={checkboxRound}
+              onCheckedChange={(c) => setCheckboxRound(c === true)}
+            >
+              Round
+            </Checkbox>
+            <Checkbox disabled>Disabled</Checkbox>
+          </CatalogRow>
+          <CatalogRow tag="Radio">
+            <RadioGroup
+              variant="animated"
+              value={radioAnimated}
+              onValueChange={setRadioAnimated}
+              className="grid-cols-3 gap-2"
+            >
+              <RadioGroupItem value="option1">Daily</RadioGroupItem>
+              <RadioGroupItem value="option2">Weekly</RadioGroupItem>
+              <RadioGroupItem value="option3">Monthly</RadioGroupItem>
+            </RadioGroup>
+          </CatalogRow>
+          <CatalogRow tag="Sliding">
+            <RadioGroup variant="sliding" value={radioSliding} onValueChange={setRadioSliding}>
+              <RadioGroupItem value="day">Day</RadioGroupItem>
+              <RadioGroupItem value="week">Week</RadioGroupItem>
+              <RadioGroupItem value="month">Month</RadioGroupItem>
+            </RadioGroup>
+            <RadioGroup variant="sliding" value={radioIcons} onValueChange={setRadioIcons}>
+              <RadioGroupItem value="home" aria-label="Home">
+                <HugeiconsIcon icon={HomeIcon} className="size-4" />
+              </RadioGroupItem>
+              <RadioGroupItem value="mail" aria-label="Mail">
+                <HugeiconsIcon icon={MailIcon} className="size-4" />
+              </RadioGroupItem>
+              <RadioGroupItem value="settings" aria-label="Settings">
+                <HugeiconsIcon icon={SettingsIcon} className="size-4" />
+              </RadioGroupItem>
+            </RadioGroup>
+          </CatalogRow>
+          <CatalogRow tag="Switch" className="gap-4">
+            <Switch size="sm" defaultChecked aria-label="Small switch" />
+            <Switch size="default" defaultChecked aria-label="Default switch" />
+            <Switch size="lg" defaultChecked aria-label="Large switch" />
+            <Switch aria-label="Off switch" />
+            <Switch disabled aria-label="Disabled switch" />
+          </CatalogRow>
+        </CatalogSpecimen>
 
-      {/* Display Components Section */}
-      <section className={catalogSection}>
-        <h2 id="display-components" className={catalogHeading}>Display Components</h2>
-        <div className={catalogGridMatrix}>
-          {/* Design System link */}
-          <CatalogSpecimen
-            title="Design System"
-            description="Color, typography, radius, spacing, layout tokens. See the full reference for building blocks."
-            className="xl:col-span-3"
-          >
-            <div className="flex flex-wrap gap-3">
-              <div className="h-12 w-12 rounded-md bg-primary" title="primary" />
-              <div className="h-12 w-12 rounded-md bg-muted" title="muted" />
-              <div className="h-12 w-12 rounded-md bg-accent" title="accent" />
-              <div className="h-12 w-12 rounded-md border" style={{ backgroundColor: "var(--chart-1)" }} title="chart-1" />
+        <CatalogSpecimen
+          title="Pickers"
+          imports="Select, NativeSelect, Combobox"
+          docs="forms-and-fields"
+          keywords="select dropdown nativeselect combobox autocomplete multi-select search create typeahead"
+        >
+          <CatalogRow tag="Select" className="grid grid-cols-2 gap-2">
+            <Select defaultValue="pro">
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Choose a plan" />
+              </SelectTrigger>
+              <SelectContent>
+                {CATALOG_PLANS.map((plan) => (
+                  <SelectItem key={plan.value} value={plan.value}>
+                    <SelectItemContent>
+                      <SelectItemTitle>{plan.title}</SelectItemTitle>
+                      <SelectItemDescription>{plan.description}</SelectItemDescription>
+                    </SelectItemContent>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select defaultValue="utc">
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Timezone" />
+              </SelectTrigger>
+              <SelectContent>
+                {CATALOG_TIMEZONES.map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CatalogRow>
+          <CatalogRow tag="Native">
+            <NativeSelect className="w-full" aria-label="Priority">
+              <NativeSelectOption value="">Priority…</NativeSelectOption>
+              <NativeSelectOption value="high">High</NativeSelectOption>
+              <NativeSelectOption value="medium">Medium</NativeSelectOption>
+              <NativeSelectOption value="low">Low</NativeSelectOption>
+            </NativeSelect>
+          </CatalogRow>
+          <CatalogRow tag="Combobox">
+            <div className="w-full">
+              <Combobox items={[...COMBOBOX_FRUITS]}>
+                <ComboboxInput placeholder="Search fruit…" />
+                <ComboboxContent>
+                  <ComboboxList
+                    renderItem={(item) => (
+                      <ComboboxItem key={String(item)} value={String(item)}>
+                        {String(item)}
+                      </ComboboxItem>
+                    )}
+                  >
+                    <ComboboxEmpty>No results found.</ComboboxEmpty>
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
             </div>
-            <Button variant="outline" className="mt-4" asChild>
-              <Link to="/design-system">Design System →</Link>
-            </Button>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Badge Variants"
-            description="All 9 badge variants"
-            stageClassName="space-y-3"
-          >
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="default">Default</Badge>
-              <Badge variant="secondary">Secondary</Badge>
-              <Badge variant="destructive">Destructive</Badge>
-              <Badge variant="success">Success</Badge>
-              <Badge variant="warning">Warning</Badge>
-              <Badge variant="info">Info</Badge>
-              <Badge variant="outline">Outline</Badge>
-              <Badge variant="ghost">Ghost</Badge>
-              <Badge variant="link">Link</Badge>
+          </CatalogRow>
+          <CatalogRow tag="Multiple">
+            <div className="w-full">
+              <Combobox
+                multiple
+                items={COMBOBOX_FRAMEWORKS.map((f) => f.value)}
+                value={comboboxMultiValue}
+                onValueChange={(next) => setComboboxMultiValue(Array.isArray(next) ? next : [next])}
+                searchPlaceholder="Search framework…"
+              >
+                <ComboboxBadgeTrigger placeholder="Select framework" maxShownItems={2} />
+                <ComboboxContent showPanelSearch showSelected>
+                  <ComboboxList
+                    renderItem={(item) => {
+                      const value = String(item)
+                      const fw = COMBOBOX_FRAMEWORKS.find((f) => f.value === value)
+                      return (
+                        <ComboboxItem key={value} value={value}>
+                          <span className="truncate">{fw?.label ?? value}</span>
+                        </ComboboxItem>
+                      )
+                    }}
+                  >
+                    <ComboboxEmpty>No framework found.</ComboboxEmpty>
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
             </div>
-          </CatalogSpecimen>
+          </CatalogRow>
+          <CatalogRow tag="Create">
+            <div className="w-full">
+              <Combobox
+                items={creatableFruits}
+                value={creatableFruit}
+                onValueChange={(next) =>
+                  setCreatableFruit(typeof next === "string" ? next : (next[0] ?? ""))
+                }
+                onCreate={(name) =>
+                  setCreatableFruits((prev) =>
+                    prev.some((item) => item.toLowerCase() === name.toLowerCase())
+                      ? prev
+                      : [...prev, name],
+                  )
+                }
+              >
+                <ComboboxInput placeholder="Search or create…" />
+                <ComboboxContent>
+                  <ComboboxList
+                    renderItem={(item) => (
+                      <ComboboxItem key={String(item)} value={String(item)}>
+                        {String(item)}
+                      </ComboboxItem>
+                    )}
+                  >
+                    <ComboboxEmpty>No matches.</ComboboxEmpty>
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
+            </div>
+          </CatalogRow>
+          <CatalogRow tag="No search">
+            <Combobox
+              value={comboboxNoSearch}
+              onValueChange={(next) =>
+                setComboboxNoSearch(typeof next === "string" ? next : (next[0] ?? ""))
+              }
+            >
+              <ComboboxAnchor
+                role="group"
+                aria-label="Status"
+                className={cn(
+                  inputFieldShellBase,
+                  "flex w-full min-h-8 items-stretch gap-0 px-2.5 py-1.5 shadow-sm",
+                )}
+              >
+                <ComboboxValue
+                  className="flex min-h-8 min-w-0 flex-1 items-center truncate text-xs leading-normal"
+                  placeholder="Pick status…"
+                />
+                <ComboboxTrigger className="ml-2 size-8 shrink-0 self-center rounded-md border-0 bg-transparent text-foreground hover:bg-muted/70" />
+              </ComboboxAnchor>
+              <ComboboxContent>
+                <ComboboxList>
+                  {PROJECT_ACTION_STATUSES.map((s) => (
+                    <ComboboxItem key={s.value} value={s.label}>
+                      {s.label}
+                    </ComboboxItem>
+                  ))}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
+          </CatalogRow>
+        </CatalogSpecimen>
 
+        <CatalogSpecimen
+          title="Field"
+          imports="Field, FieldLabel, FieldDescription, FieldError, FieldSet, Label"
+          docs="forms-and-fields"
+          keywords="label help error validation fieldset legend form"
+        >
+          <Field>
+            <FieldLabel>Email</FieldLabel>
+            <Input type="email" placeholder="you@company.com" />
+            <FieldDescription>We'll never share your email.</FieldDescription>
+          </Field>
+          <Field data-invalid>
+            <FieldLabel>Password</FieldLabel>
+            <Input type="password" placeholder="Password" aria-invalid />
+            <FieldError>Password is required</FieldError>
+          </Field>
+          <FieldSet>
+            <FieldLegend>Notifications</FieldLegend>
+            <FieldContent>
+              <FieldTitle>Digest</FieldTitle>
+              <div className="flex items-center gap-2">
+                <Switch id="field-digest" defaultChecked />
+                <Label htmlFor="field-digest" className="font-normal">
+                  Weekly summary
+                </Label>
+              </div>
+            </FieldContent>
+          </FieldSet>
+        </CatalogSpecimen>
+
+        <CatalogSpecimen
+          title="Slider"
+          imports="Slider"
+          docs="forms-and-fields"
+          keywords="range ruler segments origin"
+        >
+          <div className="space-y-1">
+            <Slider size="sm" defaultValue={[40]} max={100} step={1} aria-label="Small" />
+            <Slider size="default" defaultValue={[55]} max={100} step={1} aria-label="Default" />
+            <Slider size="lg" defaultValue={[70]} max={100} step={1} aria-label="Large" />
+          </div>
+          <Slider label="Range" showValue defaultValue={[25, 75]} max={100} step={1} />
+          <Slider variant="segments" label="Segments" showValue min={1} max={7} defaultValue={[4]} />
+          <div className="px-3">
+            <Slider
+              variant="ruler"
+              label="Ruler"
+              min={-2}
+              max={2}
+              step={0.1}
+              origin={0}
+              defaultValue={[0.7]}
+              formatValue={(v) => `${v > 0 ? "+" : ""}${v.toFixed(1)} EV`}
+            />
+          </div>
+          <Button variant="link" size="sm" className="h-auto self-start p-0 text-xs" asChild>
+            <Link to="/recipes/sliders">More sliders</Link>
+          </Button>
+        </CatalogSpecimen>
+
+        <CatalogStack>
           <CatalogSpecimen
-            title="Avatar"
-            description="User avatar with fallback. Stacked avatars for project management cells (assignees, reviewers). Hover overflow to see more."
-            stageClassName="space-y-6"
+            title="Rating"
+            imports="Rating"
+            docs="forms-and-fields"
+            keywords="stars score review"
           >
-            <div>
-              <h4 className="text-sm font-medium mb-2">Basic</h4>
-              <div className="flex items-center gap-4">
-                <Avatar>
-                  <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                  <AvatarFallback>CN</AvatarFallback>
-                </Avatar>
-                <Avatar>
-                  <AvatarFallback>JD</AvatarFallback>
-                </Avatar>
+            <CatalogRow tag="Default">
+              <Rating defaultValue={3} maxRating={5} />
+            </CatalogRow>
+            <CatalogRow tag="Half">
+              <Rating value={ratingHalf} onValueChange={setRatingHalf} maxRating={5} allowHalf />
+              <span className="font-mono text-xs tabular-nums text-muted-foreground">{ratingHalf}</span>
+            </CatalogRow>
+            <CatalogRow tag="Disabled">
+              <Rating defaultValue={4} disabled />
+            </CatalogRow>
+          </CatalogSpecimen>
+          <CatalogSpecimen
+            title="Colour"
+            imports="ColorPicker, ColorSlider"
+            docs="forms-and-fields"
+            keywords="color colour picker oklch hue saturation lightness colorpicker colorslider swatch"
+          >
+            <CatalogRow tag="Picker">
+              <ColorPicker value={colorPickerValue} onChange={setColorPickerValue} variant="popover" />
+            </CatalogRow>
+            <CatalogRow tag="Hue">
+              <ColorSlider sliderType="hue" defaultValue={[240]} min={0} max={360} aria-label="Hue" />
+            </CatalogRow>
+            <CatalogRow tag="Saturation">
+              <ColorSlider
+                sliderType="saturation"
+                defaultValue={[0.5]}
+                min={0}
+                max={1}
+                step={0.01}
+                aria-label="Saturation"
+              />
+            </CatalogRow>
+            <CatalogRow tag="Lightness">
+              <ColorSlider
+                sliderType="lightness"
+                defaultValue={[0.6]}
+                min={0}
+                max={1}
+                step={0.01}
+                aria-label="Lightness"
+              />
+            </CatalogRow>
+          </CatalogSpecimen>
+        </CatalogStack>
+      </CatalogSection>
+
+      {/* ── Display & feedback ──────────────────────────────────── */}
+      <CatalogSection id="display-components" title="Display & feedback">
+        <CatalogSpecimen
+          title="Badge & Kbd"
+          imports="Badge, Kbd"
+          docs="feedback-and-states"
+          size="s"
+          keywords="tag pill status chip keyboard shortcut key"
+        >
+          <div className="flex flex-wrap gap-1.5">
+            <Badge variant="default">Default</Badge>
+            <Badge variant="secondary">Secondary</Badge>
+            <Badge variant="outline">Outline</Badge>
+            <Badge variant="ghost">Ghost</Badge>
+            <Badge variant="success">Success</Badge>
+            <Badge variant="warning">Warning</Badge>
+            <Badge variant="info">Info</Badge>
+            <Badge variant="destructive">Destructive</Badge>
+            <Badge variant="link">Link</Badge>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Kbd>⌘</Kbd>
+              <Kbd>K</Kbd>
+            </span>
+            <span className="flex items-center gap-1">
+              <Kbd>Ctrl</Kbd>
+              <Kbd>Shift</Kbd>
+              <Kbd>P</Kbd>
+            </span>
+            <Kbd>Esc</Kbd>
+          </div>
+        </CatalogSpecimen>
+
+        <CatalogSpecimen
+          title="Avatar"
+          imports="Avatar, AvatarImage, AvatarFallback"
+          docs="feedback-and-states"
+          size="s"
+          keywords="user profile picture stacked assignees initials"
+        >
+          <CatalogRow tag="Single">
+            <Avatar>
+              <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+            <Avatar>
+              <AvatarFallback>JD</AvatarFallback>
+            </Avatar>
+          </CatalogRow>
+          <CatalogRow tag="Stacked">
+            <StackedAvatarShowcase
+              people={[
+                { id: "1", name: "Alice Chen", avatarUrl: "https://github.com/shadcn.png" },
+                { id: "2", name: "Bob Smith" },
+                { id: "3", name: "Carol White" },
+              ]}
+              maxVisible={3}
+            />
+          </CatalogRow>
+          <CatalogRow tag="Overflow">
+            <Popover open={avatarLimitedPopoverOpen} onOpenChange={setAvatarLimitedPopoverOpen}>
+              <PopoverAnchor asChild>
+                <div className="inline-block">
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="h-auto min-w-0 rounded p-0 hover:bg-transparent"
+                      aria-label="Manage assignees"
+                    >
+                      <StackedAvatarShowcase people={avatarLimitedPeople} maxVisible={2} />
+                    </Button>
+                  </PopoverTrigger>
+                </div>
+              </PopoverAnchor>
+              <PopoverContent align="start" side="bottom" className="w-auto p-3">
+                <StakeholderSelectorContent
+                  selected={avatarLimitedPeople}
+                  onToggle={(person, checked) => {
+                    setAvatarLimitedPeople((prev) =>
+                      checked ? [...prev, person] : prev.filter((x) => x.id !== person.id),
+                    )
+                  }}
+                  onRemove={(person) =>
+                    setAvatarLimitedPeople((prev) => prev.filter((x) => x.id !== person.id))
+                  }
+                  closeOnChange={false}
+                  options={AVATAR_LIMITED_OPTIONS}
+                />
+              </PopoverContent>
+            </Popover>
+          </CatalogRow>
+        </CatalogSpecimen>
+
+        <CatalogSpecimen
+          title="Tracker"
+          imports="Tracker"
+          docs="feedback-and-states"
+          size="s"
+          keywords="uptime status blocks history heatmap"
+        >
+          <TooltipProvider>
+            <div className="space-y-1.5">
+              <Tracker data={TRACKER_UPTIME} hoverEffect />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>30 days ago</span>
+                <span>Today</span>
               </div>
             </div>
-            <div>
-              <h4 className="text-sm font-medium mb-2">Stacked (PM cell style)</h4>
-              <StackedAvatarShowcase
-                people={[
-                  { id: "1", name: "Alice Chen", avatarUrl: "https://github.com/shadcn.png" },
-                  { id: "2", name: "Bob Smith" },
-                  { id: "3", name: "Carol White" },
-                ]}
-                maxVisible={3}
-              />
-            </div>
-            <div>
-              <h4 className="text-sm font-medium mb-2">Limited space – hover for more</h4>
-              <p className="text-xs text-muted-foreground mb-2">
-                Many assignees in a narrow cell: show first few + &quot;…&quot;, hover to see full
-                list. Click to add/remove.
-              </p>
-              <Popover
-                open={avatarLimitedPopoverOpen}
-                onOpenChange={setAvatarLimitedPopoverOpen}
-              >
-                <PopoverAnchor asChild>
-                  <div className="inline-block">
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        className="inline-flex cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
-                        aria-label="Manage assignees"
-                      >
-                        <StackedAvatarShowcase
-                          people={avatarLimitedPeople}
-                          maxVisible={2}
-                        />
-                      </button>
-                    </PopoverTrigger>
-                  </div>
-                </PopoverAnchor>
-                <PopoverContent align="start" side="bottom" className="w-auto p-3">
-                  <StakeholderSelectorContent
-                    selected={avatarLimitedPeople}
-                    onToggle={(person, checked) => {
-                      setAvatarLimitedPeople((prev) =>
-                        checked ? [...prev, person] : prev.filter((x) => x.id !== person.id),
-                      )
-                    }}
-                    onRemove={(person) =>
-                      setAvatarLimitedPeople((prev) =>
-                        prev.filter((x) => x.id !== person.id),
-                      )
-                    }
-                    closeOnChange={false}
-                    options={AVATAR_LIMITED_OPTIONS}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div>
-              <h4 className="text-sm font-medium mb-2">Interactive – add/remove (popover)</h4>
-              <p className="text-xs text-muted-foreground mb-2">
-                Click to open popover, add or remove people. Stacked avatars update live.
-              </p>
-              <Popover open={avatarPopoverOpen} onOpenChange={setAvatarPopoverOpen}>
-                <PopoverAnchor asChild>
-                  <div className="inline-block">
-                    <PopoverTrigger asChild>
-                      <StakeholderCell selected={avatarPeople} />
-                    </PopoverTrigger>
-                  </div>
-                </PopoverAnchor>
-                <PopoverContent align="start" side="bottom" className="w-auto p-3">
-                  <StakeholderSelectorContent
-                    selected={avatarPeople}
-                    onToggle={(person, checked) => {
-                      setAvatarPeople((prev) =>
-                        checked ? [...prev, person] : prev.filter((x) => x.id !== person.id),
-                      )
-                    }}
-                    onRemove={(person) =>
-                      setAvatarPeople((prev) => prev.filter((x) => x.id !== person.id))
-                    }
-                    closeOnChange={false}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </CatalogSpecimen>
+            <Tracker data={TRACKER_STATUS} hoverEffect className="h-6" />
+          </TooltipProvider>
+        </CatalogSpecimen>
 
-          <CatalogSpecimen
-            title="Alert"
-            description="Alert messages"
-            stageClassName="space-y-3"
-          >
-            <Alert>
-              <AlertTitle>Default Alert</AlertTitle>
-              <AlertDescription>This is a default alert message.</AlertDescription>
-            </Alert>
-            <Alert variant="destructive">
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>This is a destructive alert message.</AlertDescription>
-            </Alert>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Empty State"
-            description="Empty state component"
-          >
-            <Empty>
+        <CatalogSpecimen
+          title="Loading & empty"
+          imports="Skeleton, Spinner, Progress, Empty"
+          docs="feedback-and-states"
+          size="l"
+          keywords="skeleton spinner progress empty loading placeholder bar zero state"
+        >
+          <div className="grid gap-6 @2xl:grid-cols-2 @2xl:items-center">
+            <div className="space-y-4">
+              <CatalogRow tag="Skeleton">
+                <Skeleton className="size-9 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-3.5 w-4/5" />
+                  <Skeleton className="h-3.5 w-3/5" />
+                </div>
+              </CatalogRow>
+              <CatalogRow tag="Spinner" className="gap-4">
+                <Spinner />
+                <Spinner className="size-6" />
+                <Spinner className="size-8" />
+              </CatalogRow>
+              <CatalogRow tag="Dash" className="flex-col items-stretch gap-2">
+                <Progress value={66} />
+                <Progress value={40} variant="success" showTooltip />
+              </CatalogRow>
+              <CatalogRow tag="Solid" className="flex-col items-stretch gap-2">
+                <Progress value={75} style="solid" label="75%" variant="success" />
+                <Progress value={45} style="solid" showAnimation variant="warning" />
+                <Progress value={20} style="solid" variant="error" />
+              </CatalogRow>
+            </div>
+            <Empty className="border border-dashed">
               <EmptyMedia>
-                <HugeiconsIcon icon={FileIcon} strokeWidth={2} className="size-12 text-muted-foreground" />
+                <HugeiconsIcon icon={FileIcon} strokeWidth={2} className="size-10 text-muted-foreground" />
               </EmptyMedia>
               <EmptyHeader>
-                <EmptyTitle>No items found</EmptyTitle>
-                <EmptyDescription>Get started by creating a new item.</EmptyDescription>
+                <EmptyTitle>No items yet</EmptyTitle>
+                <EmptyDescription>Create one to get started.</EmptyDescription>
               </EmptyHeader>
               <EmptyContent>
-                <Button>Create Item</Button>
+                <Button size="sm">Create item</Button>
               </EmptyContent>
             </Empty>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Skeleton"
-            description="Loading skeleton"
-            stageClassName="space-y-3"
-          >
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-[250px]" />
-              <Skeleton className="h-4 w-[200px]" />
-              <Skeleton className="h-4 w-[150px]" />
-            </div>
-            <Skeleton className="h-12 w-12 rounded-full" />
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Spinner"
-            description="Loading spinner"
-            stageClassName="space-y-3"
-          >
-            <div className="flex items-center gap-4">
-              <Spinner />
-              <Spinner className="size-8" />
-              <Spinner className="size-12" />
-            </div>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Progress"
-            description="Progress bars with dash and solid styles, plus variants"
-            stageClassName="space-y-6"
-          >
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium">Dash Style (Default)</h4>
-              <p className="text-xs text-muted-foreground">Block-based segmented style</p>
-              <Progress value={33} />
-              <Progress value={66} />
-              <Progress value={100} />
-            </div>
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium">Solid Style</h4>
-              <p className="text-xs text-muted-foreground">Smooth continuous bar style</p>
-              <Progress value={33} style="solid" />
-              <Progress value={66} style="solid" />
-              <Progress value={100} style="solid" />
-            </div>
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium">Solid with Label</h4>
-              <p className="text-xs text-muted-foreground">Progress bar with text label</p>
-              <Progress value={75} style="solid" label="75%" variant="success" />
-              <Progress value={50} style="solid" label="50%" variant="warning" />
-              <Progress value={25} style="solid" label="25%" variant="error" />
-            </div>
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium">Solid with Animation</h4>
-              <p className="text-xs text-muted-foreground">Animated progress transitions</p>
-              <Progress value={65} style="solid" showAnimation variant="success" />
-              <Progress value={80} style="solid" showAnimation variant="default" />
-              <Progress value={45} style="solid" showAnimation variant="warning" />
-            </div>
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium">With Tooltip</h4>
-              <p className="text-xs text-muted-foreground">Hover to see percentage</p>
-              <Progress value={75} showTooltip variant="success" />
-              <Progress value={50} style="solid" showTooltip variant="warning" />
-              <Progress value={25} showTooltip variant="error" />
-            </div>
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium">Variants (Dash Style)</h4>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between space-x-3">
-                  <Progress variant="default" value={50} className="flex-1" />
-                  <span className="text-sm font-semibold text-foreground min-w-[80px]">
-                    Default
-                  </span>
-                </div>
-                <div className="flex items-center justify-between space-x-3">
-                  <Progress variant="neutral" value={40} className="flex-1" />
-                  <span className="text-sm font-semibold text-foreground min-w-[80px]">
-                    Neutral
-                  </span>
-                </div>
-                <div className="flex items-center justify-between space-x-3">
-                  <Progress variant="success" value={50} className="flex-1" />
-                  <span className="text-sm font-semibold text-foreground min-w-[80px]">
-                    Success
-                  </span>
-                </div>
-                <div className="flex items-center justify-between space-x-3">
-                  <Progress variant="warning" value={20} className="flex-1" />
-                  <span className="text-sm font-semibold text-foreground min-w-[80px]">
-                    Warning
-                  </span>
-                </div>
-                <div className="flex items-center justify-between space-x-3">
-                  <Progress variant="error" value={10} className="flex-1" />
-                  <span className="text-sm font-semibold text-foreground min-w-[80px]">
-                    Error
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium">Variants (Solid Style)</h4>
-              <div className="space-y-2">
-                <Progress variant="default" value={50} style="solid" />
-                <Progress variant="neutral" value={40} style="solid" />
-                <Progress variant="success" value={50} style="solid" />
-                <Progress variant="warning" value={20} style="solid" />
-                <Progress variant="error" value={10} style="solid" />
-              </div>
-            </div>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Separator"
-            description="Enhanced separator with multiple variants"
-            stageClassName="space-y-6"
-          >
-            {/* Basic Variants */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold">Basic Variants</h4>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground w-24">Default:</span>
-                  <Separator variant="default" className="flex-1" />
-            </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground w-24">Solid:</span>
-                  <Separator variant="solid" className="flex-1" />
-                </div>
-              </div>
-            </div>
-
-            {/* Shadow Variants */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold">Shadow Variants</h4>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground w-24">Shadow Outset:</span>
-                  <Separator variant="shadow-outset" className="flex-1" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground w-24">Shadow Inset:</span>
-                  <Separator variant="shadow-inset" className="flex-1" />
-                </div>
-              </div>
-            </div>
-
-            {/* Line Style Variants */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold">Line Style Variants</h4>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground w-24">Dotted:</span>
-                  <Separator variant="dotted" className="flex-1" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground w-24">Dashed:</span>
-                  <Separator variant="dashed" className="flex-1" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground w-24">Double:</span>
-                  <Separator variant="double" className="flex-1" />
-                </div>
-              </div>
-            </div>
-
-            {/* Effect Variants */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold">Effect Variants</h4>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground w-24">Glow:</span>
-                  <Separator variant="glow" className="flex-1" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground w-24">Gradient:</span>
-                  <Separator variant="gradient" className="flex-1" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground w-24">Fade Strong:</span>
-                  <Separator variant="fade-strong" className="flex-1" />
-                </div>
-              </div>
-            </div>
-
-            {/* Size Variant */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold">Size Variant</h4>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground w-24">Thick:</span>
-                  <Separator variant="thick" className="flex-1" />
-                </div>
-              </div>
-            </div>
-
-            {/* Decorative Variants */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold">Decorative Variants</h4>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <span className="text-xs text-muted-foreground">Arrow Down:</span>
-                  <Separator variant="arrow-down" />
-                </div>
-                <div className="space-y-2">
-                  <span className="text-xs text-muted-foreground">Tab Down:</span>
-                  <Separator variant="tab-down" />
-                </div>
-                <div className="space-y-2">
-                  <span className="text-xs text-muted-foreground">Stopper:</span>
-                  <Separator variant="stopper" />
-                </div>
-                <div className="space-y-2">
-                  <span className="text-xs text-muted-foreground">Dot:</span>
-                  <Separator variant="dot" />
-                </div>
-                <div className="space-y-2">
-                  <span className="text-xs text-muted-foreground">Text Decoration:</span>
-                  <Separator variant="text-decoration" textContent="OR" />
-                </div>
-                <div className="space-y-2">
-                  <span className="text-xs text-muted-foreground">Shiny Corner:</span>
-                  <Separator variant="shiny-corner" />
-                </div>
-                <div className="space-y-2">
-                  <span className="text-xs text-muted-foreground">Shiny Edge:</span>
-                  <Separator variant="shiny-edge" />
-                </div>
-              </div>
-            </div>
-
-            {/* Orientation Examples */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold">Vertical Orientation</h4>
-              <div className="flex items-center gap-4 h-20">
-                <Separator orientation="vertical" variant="default" />
-                <Separator orientation="vertical" variant="shadow-outset" />
-                <Separator orientation="vertical" variant="glow" />
-                <Separator orientation="vertical" variant="shiny-corner" />
-              </div>
-            </div>
-          </CatalogSpecimen>
-
-        </div>
-      </section>
-
-      {/* Navigation & Menus Section */}
-      <section className={catalogSection}>
-        <h2 id="navigation-menus" className={catalogHeading}>Navigation & Menus</h2>
-        <div className={catalogGridLedger}>
-          <CatalogSpecimen
-            title="Breadcrumb"
-            description="Navigation breadcrumb"
-          >
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="#">Home</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="#">Components</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </CatalogSpecimen>
-
-          <div id="tabs" className="scroll-mt-24">
-          <CatalogSpecimen
-            title="Tabs"
-            description={
-              <>
-                Default pill tabs with sliding indicator.{" "}
-                <code className="text-xs">variant=&quot;line&quot;</code> is a sliding underline
-                that sits on a <code className="text-xs">border-b</code> hairline.
-                Use <code className="text-xs">InlineTabsList</code> /{" "}
-                <code className="text-xs">InlineTabsTrigger</code> inside page-level scrollers (0.6.3+).
-              </>
-            }
-            stageClassName="space-y-8"
-          >
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">TabsList children</Label>
-              <p className="text-xs text-muted-foreground">
-                Triggers live inside <code className="text-xs">TabsList</code> as children — labels
-                stay full width (not ellipsized).
-              </p>
-              <Tabs defaultValue="tab1">
-                <TabsList>
-                  <TabsTrigger value="tab1">Tab 1</TabsTrigger>
-                  <TabsTrigger value="tab2">Tab 2</TabsTrigger>
-                  <TabsTrigger value="tab3">Tab 3</TabsTrigger>
-                </TabsList>
-                <TabsContent value="tab1">Content for tab 1</TabsContent>
-                <TabsContent value="tab2">Content for tab 2</TabsContent>
-                <TabsContent value="tab3">Content for tab 3</TabsContent>
-              </Tabs>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">Line (underline)</Label>
-              <p className="text-xs text-muted-foreground">
-                Sliding bar sits on the list edge — <code className="text-xs">border-b</code> hairline
-                should line up, not sit above the indicator.
-              </p>
-              <Tabs defaultValue="tab1" className="gap-0">
-                <TabsList
-                  variant="line"
-                  className="w-full justify-start border-b border-border"
-                >
-                  <TabsTrigger value="tab1">Tab 1</TabsTrigger>
-                  <TabsTrigger value="tab2">Tab 2</TabsTrigger>
-                  <TabsTrigger value="tab3">Tab 3</TabsTrigger>
-                </TabsList>
-                <TabsContent value="tab1" className="pt-3">
-                  Content for tab 1
-                </TabsContent>
-                <TabsContent value="tab2" className="pt-3">
-                  Content for tab 2
-                </TabsContent>
-                <TabsContent value="tab3" className="pt-3">
-                  Content for tab 3
-                </TabsContent>
-              </Tabs>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">Inline tabs (sticky bar)</Label>
-              <p className="text-xs text-muted-foreground">
-                Tab bar stays put; only the panel body scrolls in ScrollArea.
-              </p>
-              <Tabs defaultValue="tab1" className="flex h-40 flex-col gap-0">
-                <InlineTabsList className="shrink-0">
-                  <InlineTabsTrigger value="tab1">Tab 1</InlineTabsTrigger>
-                  <InlineTabsTrigger value="tab2">Tab 2</InlineTabsTrigger>
-                  <InlineTabsTrigger value="tab3">Tab 3</InlineTabsTrigger>
-                </InlineTabsList>
-                <ScrollArea className="min-h-0 w-full flex-1">
-                  <div className={inlineTabsPanelsDemoClass}>
-                    <TabsContent value="tab1">
-                      Content for tab 1
-                      {Array.from({ length: 10 }, (_, i) => (
-                        <div key={i}>Content for tab 1</div>
-                      ))}
-                    </TabsContent>
-                    <TabsContent value="tab2">Content for tab 2</TabsContent>
-                    <TabsContent value="tab3">Content for tab 3</TabsContent>
-                  </div>
-                </ScrollArea>
-              </Tabs>
-            </div>
-          </CatalogSpecimen>
           </div>
+        </CatalogSpecimen>
 
-          <CatalogSpecimen
-            title="Dropdown Menu · Navigation Menu"
-            description="Dropdown Menu: action menu (click trigger → list of actions, closes on select). Navigation Menu: site nav bar (hover/click → content panel, often links or rich blocks)."
-            stageClassName="space-y-6"
-          >
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                Dropdown Menu—actions, settings, account menu
-              </p>
-              <DropdownMenu>
-                <DropdownMenuTrigger>Open Menu</DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Profile</DropdownMenuItem>
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem
-                    checked={checkboxItems.item1}
-                    onCheckedChange={(checked: boolean) =>
-                      setCheckboxItems({ ...checkboxItems, item1: checked })
-                    }
-                  >
-                    Show notifications
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuRadioGroup value={radioValue} onValueChange={setRadioValue}>
-                    <DropdownMenuRadioItem value="option1">Option 1</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="option2">Option 2</DropdownMenuRadioItem>
-                  </DropdownMenuRadioGroup>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>More</DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent>
-                      <DropdownMenuItem>Sub Item 1</DropdownMenuItem>
-                      <DropdownMenuItem>Sub Item 2</DropdownMenuItem>
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                Long list ({CATALOG_MENU_ACTIONS.length} actions) — open and scroll
-              </p>
-              <DropdownMenu>
-                <DropdownMenuTrigger>Open long menu</DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {CATALOG_MENU_ACTIONS.map((action) => (
-                    <DropdownMenuItem key={action}>{action}</DropdownMenuItem>
+        <CatalogSpecimen
+          title="Alert"
+          imports="Alert, AlertTitle, AlertDescription"
+          docs="feedback-and-states"
+          keywords="callout banner notice error warning"
+        >
+          <Alert>
+            <AlertTitle>Update available</AlertTitle>
+            <AlertDescription>Version 0.8 ships tomorrow.</AlertDescription>
+          </Alert>
+          <Alert variant="destructive">
+            <AlertTitle>Payment failed</AlertTitle>
+            <AlertDescription>Check the card on file and retry.</AlertDescription>
+          </Alert>
+        </CatalogSpecimen>
+
+        <CatalogSpecimen
+          title="Item"
+          imports="Item, ItemMedia, ItemContent, ItemActions, Separator"
+          docs="layout-and-surfaces"
+          keywords="list row separator divider media"
+          stageClassName="gap-0"
+        >
+          {[
+            { initials: "JD", name: "John Doe", role: "Software engineer" },
+            { initials: "AC", name: "Alice Chen", role: "Product designer" },
+          ].map((p, i) => (
+            <React.Fragment key={p.initials}>
+              {i > 0 ? <Separator className="my-1" /> : null}
+              <Item size="sm">
+                <ItemMedia>
+                  <Avatar>
+                    <AvatarFallback>{p.initials}</AvatarFallback>
+                  </Avatar>
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>{p.name}</ItemTitle>
+                  <ItemDescription>{p.role}</ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  <Button size="icon" variant="ghost" aria-label={`${p.name} settings`}>
+                    <HugeiconsIcon icon={SettingsIcon} strokeWidth={2} />
+                  </Button>
+                </ItemActions>
+              </Item>
+            </React.Fragment>
+          ))}
+          <Separator variant="text-decoration" textContent="OR" className="my-3" />
+          <Separator variant="dashed" />
+        </CatalogSpecimen>
+      </CatalogSection>
+
+      {/* ── Navigation ──────────────────────────────────────────── */}
+      <CatalogSection id="navigation-menus" title="Navigation">
+        <CatalogSpecimen
+          title="Wayfinding"
+          imports="Breadcrumb, Tabs, InlineTabsList, PaginationAdaptive"
+          docs="layout-and-surfaces"
+          keywords="breadcrumb tabs pagination pager inline tabs underline line"
+        >
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="#navigation-menus">Home</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="#navigation-menus">Components</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <Tabs defaultValue="overview">
+            <TabsList>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="activity">Activity</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Tabs defaultValue="overview" className="gap-0">
+            <TabsList variant="line" className="w-full justify-start border-b border-border">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="activity">Activity</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Tabs defaultValue="tab1" className="flex h-24 flex-col gap-0">
+            <InlineTabsList className="shrink-0">
+              <InlineTabsTrigger value="tab1">Notes</InlineTabsTrigger>
+              <InlineTabsTrigger value="tab2">Files</InlineTabsTrigger>
+              <InlineTabsTrigger value="tab3">History</InlineTabsTrigger>
+            </InlineTabsList>
+            <ScrollArea className="min-h-0 w-full flex-1">
+              <div className={inlineTabsPanelsDemoClass}>
+                <TabsContent value="tab1">
+                  {Array.from({ length: 8 }, (_, i) => (
+                    <div key={i}>Note {i + 1}</div>
                   ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                Project actions — filter, drilldown Combobox (inline + pin on open)
-              </p>
-              <div className="flex flex-wrap items-center gap-3">
-                <ActionsMenu>
-                  <ActionsMenuFilter placeholder="e.g. Save" />
-                  <div data-menu-section>
-                    <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Organize
-                    </DropdownMenuLabel>
-                    <ActionPickerSub
-                      label="Move to status"
-                      value={projectActionStatus}
-                      onValueChange={setProjectActionStatus}
-                      options={PROJECT_ACTION_STATUSES}
-                      placeholder="e.g. Review"
-                      sentinel={{ value: "any", label: "Any status" }}
-                    />
-                    <ActionPickerSub
-                      label="Assign to"
-                      value={projectActionAssignee}
-                      onValueChange={setProjectActionAssignee}
-                      options={PROJECT_ACTION_ASSIGNEES}
-                      placeholder="e.g. Ava"
-                      sentinel={{ value: "unassigned", label: "Unassigned" }}
-                    />
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem
-                    data-menu-label="Show completed"
-                    checked={projectActionShowCompleted}
-                    onCheckedChange={(checked) =>
-                      setProjectActionShowCompleted(checked === true)
-                    }
-                    onSelect={(e) => e.preventDefault()}
-                  >
-                    Show completed
-                  </DropdownMenuCheckboxItem>
-                </ActionsMenu>
-                <p className="text-xs text-muted-foreground">
-                  Status:{" "}
-                  <span className="text-foreground">
-                    {PROJECT_ACTION_STATUSES.find((s) => s.value === projectActionStatus)?.label ??
-                      (projectActionStatus === "any" ? "Any status" : projectActionStatus)}
-                  </span>
-                  {" · "}
-                  Assignee:{" "}
-                  <span className="text-foreground">
-                    {PROJECT_ACTION_ASSIGNEES.find((a) => a.value === projectActionAssignee)
-                      ?.label ??
-                      (projectActionAssignee === "unassigned"
-                        ? "Unassigned"
-                        : projectActionAssignee)}
-                  </span>
-                </p>
+                </TabsContent>
+                <TabsContent value="tab2">No files</TabsContent>
+                <TabsContent value="tab3">Created today</TabsContent>
               </div>
-            </div>
+            </ScrollArea>
+          </Tabs>
+          <CatalogPaginationSpecimen />
+        </CatalogSpecimen>
 
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                Navigation Menu—site nav, mega menus, link panels
-              </p>
-              <NavigationMenu>
-                <NavigationMenuList>
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger>Item One</NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <NavigationMenuLink href="#">Link 1</NavigationMenuLink>
-                      <NavigationMenuLink href="#">Link 2</NavigationMenuLink>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                </NavigationMenuList>
-              </NavigationMenu>
-            </div>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Context Menu"
-            description={
-              <>
-                Right-click context menu — long list ({CATALOG_MENU_ACTIONS.length}) for scroll QA
-              </>
-            }
-          >
-            <ContextMenu>
-              <ContextMenuTrigger className="flex h-[100px] w-full items-center justify-center rounded-md border border-dashed">
-                Right click here
-              </ContextMenuTrigger>
-              <ContextMenuContent className="w-56">
+        <CatalogSpecimen
+          title="Menus"
+          imports="DropdownMenu, ContextMenu, Menubar, NavigationMenu"
+          docs="overlays"
+          keywords="dropdown context right-click menubar navigation menu actions submenu"
+        >
+          <CatalogRow tag="Dropdown">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  Account
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuLabel>My account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Profile</DropdownMenuItem>
+                <DropdownMenuItem>Settings</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem
+                  checked={menuNotifications}
+                  onCheckedChange={(checked: boolean) => setMenuNotifications(checked)}
+                >
+                  Notifications
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuRadioGroup value={menuDensity} onValueChange={setMenuDensity}>
+                  <DropdownMenuRadioItem value="comfortable">Comfortable</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="compact">Compact</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>More</DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuItem>Keyboard shortcuts</DropdownMenuItem>
+                    <DropdownMenuItem>Sign out</DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  Long list
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
                 {CATALOG_MENU_ACTIONS.map((action) => (
-                  <ContextMenuItem key={action}>{action}</ContextMenuItem>
+                  <DropdownMenuItem key={action}>{action}</DropdownMenuItem>
                 ))}
-              </ContextMenuContent>
-            </ContextMenu>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Menubar"
-            description="Application menubar"
-          >
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <ActionsMenu>
+              <ActionsMenuFilter placeholder="e.g. Move" />
+              <div data-menu-section>
+                <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Organize
+                </DropdownMenuLabel>
+                <ActionPickerSub
+                  label="Move to status"
+                  value={projectActionStatus}
+                  onValueChange={setProjectActionStatus}
+                  options={PROJECT_ACTION_STATUSES}
+                  placeholder="e.g. Review"
+                  sentinel={{ value: "any", label: "Any status" }}
+                />
+                <ActionPickerSub
+                  label="Assign to"
+                  value={projectActionAssignee}
+                  onValueChange={setProjectActionAssignee}
+                  options={PROJECT_ACTION_ASSIGNEES}
+                  placeholder="e.g. Ava"
+                  sentinel={{ value: "unassigned", label: "Unassigned" }}
+                />
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuCheckboxItem
+                data-menu-label="Show completed"
+                checked={projectActionShowCompleted}
+                onCheckedChange={(checked) => setProjectActionShowCompleted(checked === true)}
+                onSelect={(e) => e.preventDefault()}
+              >
+                Show completed
+              </DropdownMenuCheckboxItem>
+            </ActionsMenu>
+          </CatalogRow>
+          <CatalogRow tag="Menubar">
             <Menubar>
               <MenubarMenu>
                 <MenubarTrigger>File</MenubarTrigger>
@@ -2576,96 +2130,92 @@ export default function ComponentShowcase() {
                 </MenubarContent>
               </MenubarMenu>
             </Menubar>
-          </CatalogSpecimen>
+          </CatalogRow>
+          <CatalogRow tag="Site nav">
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>Products</NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <NavigationMenuLink href="#navigation-menus">Components</NavigationMenuLink>
+                    <NavigationMenuLink href="#navigation-menus">Charts</NavigationMenuLink>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </CatalogRow>
+          <CatalogRow tag="Context">
+            <ContextMenu>
+              <ContextMenuTrigger className="flex h-14 w-full items-center justify-center rounded-md border border-dashed text-xs text-muted-foreground">
+                Right-click
+              </ContextMenuTrigger>
+              <ContextMenuContent className="w-56">
+                {CATALOG_MENU_ACTIONS.map((action) => (
+                  <ContextMenuItem key={action}>{action}</ContextMenuItem>
+                ))}
+              </ContextMenuContent>
+            </ContextMenu>
+          </CatalogRow>
+        </CatalogSpecimen>
 
-          <CatalogSpecimen
-            title="Pagination"
-            description="Adaptive — click through 40 pages; hover for arrows. Strip pans in place."
-            stageClassName="min-h-0"
-          >
-            <CatalogPaginationSpecimen />
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Command"
-            description="Single-line and multi-line lists long enough to exercise ScrollArea"
-            stageClassName="space-y-4"
-          >
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                Single-line ({COMBOBOX_SHORTCUTS.length} items) — ScrollArea list
-              </p>
-              <Command className="rounded-lg border">
-                <CommandInput placeholder="Type a command or search..." />
-                <CommandList>
-                  <CommandEmpty>No results found.</CommandEmpty>
-                  <CommandGroup heading="Suggestions">
-                    {COMBOBOX_SHORTCUTS.map((item) => (
-                      <CommandItem key={item.value} value={item.label}>
-                        <HugeiconsIcon icon={item.icon} strokeWidth={2} />
-                        {item.label}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </div>
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                Multi-line ({CATALOG_PALETTE_HITS.length} hits) — title, meta, description
-              </p>
-              <Command className="rounded-lg border">
-                <CommandInput placeholder="Search help…" />
-                <CommandList>
-                  <CommandEmpty>No results found.</CommandEmpty>
-                  <CommandGroup heading="Results">
-                    {CATALOG_PALETTE_HITS.map((hit) => (
-                      <CommandItem
-                        key={hit.value}
-                        value={`${hit.title} ${hit.meta} ${hit.description}`}
-                      >
-                        <HugeiconsIcon icon={hit.icon} strokeWidth={2} />
-                        <CommandItemContent>
-                          <CommandItemTitle>{hit.title}</CommandItemTitle>
-                          <CommandItemMeta>{hit.meta}</CommandItemMeta>
-                          <CommandItemDescription>{hit.description}</CommandItemDescription>
-                        </CommandItemContent>
-                        {hit.shortcut ? (
-                          <CommandShortcut>{hit.shortcut}</CommandShortcut>
-                        ) : null}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </div>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Command Palette"
-            description={
-              <>
-                Multi-line search hits in CommandDialog ({CATALOG_PALETTE_HITS.length} rows) — ScrollArea
-              </>
-            }
-            stageClassName="space-y-3"
-          >
-            <p className="text-sm text-muted-foreground">
-              Site chrome uses <Kbd>⌘</Kbd>
-              <Kbd>K</Kbd>. Open this demo for a long multi-line list that should scroll.
-            </p>
+        <CatalogSpecimen
+          title="Command"
+          imports="Command, CommandDialog"
+          from="@nqlib/nqui/command"
+          docs="overlays"
+          size="l"
+          keywords="command palette search cmdk launcher dialog"
+        >
+          <div className="grid gap-3 @2xl:grid-cols-2">
+            <Command className="rounded-lg border">
+              <CommandInput placeholder="Type a command…" />
+              <CommandList className="max-h-44">
+                <CommandEmpty>No results found.</CommandEmpty>
+                <CommandGroup heading="Go to">
+                  {COMBOBOX_SHORTCUTS.map((item) => (
+                    <CommandItem key={item.value} value={item.label}>
+                      <HugeiconsIcon icon={item.icon} strokeWidth={2} />
+                      {item.label}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+            <Command className="rounded-lg border">
+              <CommandInput placeholder="Search help…" />
+              <CommandList className="max-h-44">
+                <CommandEmpty>No results found.</CommandEmpty>
+                <CommandGroup heading="Results">
+                  {CATALOG_PALETTE_HITS.map((hit) => (
+                    <CommandItem key={hit.value} value={`${hit.title} ${hit.meta} ${hit.description}`}>
+                      <HugeiconsIcon icon={hit.icon} strokeWidth={2} />
+                      <CommandItemContent>
+                        <CommandItemTitle>{hit.title}</CommandItemTitle>
+                        <CommandItemMeta>{hit.meta}</CommandItemMeta>
+                        <CommandItemDescription>{hit.description}</CommandItemDescription>
+                      </CommandItemContent>
+                      {hit.shortcut ? <CommandShortcut>{hit.shortcut}</CommandShortcut> : null}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </div>
+          <CatalogRow tag="Palette">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => setCommandPaletteDemoOpen(true)}
             >
-              Open long multi-line palette
+              Open palette
+              <span className="ml-1 flex items-center gap-0.5">
+                <Kbd>⌘</Kbd>
+                <Kbd>K</Kbd>
+              </span>
             </Button>
-            <CommandDialog
-              open={commandPaletteDemoOpen}
-              onOpenChange={setCommandPaletteDemoOpen}
-            >
+          </CatalogRow>
+            <CommandDialog open={commandPaletteDemoOpen} onOpenChange={setCommandPaletteDemoOpen}>
               <Command>
                 <CommandInput placeholder="Search commands…" />
                 <CommandList>
@@ -2683,14 +2233,12 @@ export default function ComponentShowcase() {
                           <CommandItemMeta>{hit.meta}</CommandItemMeta>
                           <CommandItemDescription>{hit.description}</CommandItemDescription>
                         </CommandItemContent>
-                        {hit.shortcut ? (
-                          <CommandShortcut>{hit.shortcut}</CommandShortcut>
-                        ) : null}
+                        {hit.shortcut ? <CommandShortcut>{hit.shortcut}</CommandShortcut> : null}
                       </CommandItem>
                     ))}
                   </CommandGroup>
                   <CommandSeparator />
-                  <CommandGroup heading="Single-line">
+                  <CommandGroup heading="Go to">
                     {COMBOBOX_SHORTCUTS.slice(0, 12).map((item) => (
                       <CommandItem
                         key={item.value}
@@ -2705,75 +2253,51 @@ export default function ComponentShowcase() {
                 </CommandList>
               </Command>
             </CommandDialog>
-          </CatalogSpecimen>
-        </div>
-      </section>
+        </CatalogSpecimen>
 
-      {/* Overlays & Dialogs Section */}
-      <section className={catalogSection}>
-        <h2 id="overlays-dialogs" className={catalogHeading}>Overlays & Dialogs</h2>
-        <div className={catalogGridLedger}>
-          <CatalogSpecimen
-            title="Dialog"
-            description="Short form — invite, rename, create. Click Invite."
-          >
+        <CatalogSpecimen
+          title="Table of contents"
+          imports="TableOfContents"
+          from="@nqlib/nqui/toc"
+          docs="layout-and-surfaces"
+          size="l"
+          keywords="toc outline scroll spy headings clerk circuit manual on this page"
+        >
+          <CatalogTocSpecimen />
+        </CatalogSpecimen>
+      </CatalogSection>
+
+      {/* ── Overlays ────────────────────────────────────────────── */}
+      <CatalogSection id="overlays-dialogs" title="Overlays">
+        <CatalogSpecimen
+          title="Modal surfaces"
+          imports="Dialog, AlertDialog, Drawer, Sheet"
+          docs="overlays"
+          keywords="dialog modal alert confirm alertdialog drawer bottom sheet inspector side panel"
+          stageClassName="gap-3"
+        >
+          <CatalogRow tag="Dialog">
             <InviteReviewerDialog />
-          </CatalogSpecimen>
-          <CatalogSpecimen
-            title="Alert Dialog"
-            description="Destructive confirm only. Click Revoke."
-          >
+          </CatalogRow>
+          <CatalogRow tag="Alert">
             <RevokeKeyAlertDialog />
-          </CatalogSpecimen>
-          <CatalogSpecimen
-            title="Drawer"
-            description="Bottom sheet for mobile filters. Click Filters."
-          >
+          </CatalogRow>
+          <CatalogRow tag="Drawer" className="block">
             <BoardFiltersDrawer />
-          </CatalogSpecimen>
-          <CatalogSpecimen
-            title="Sheet"
-            description="Right inspector for longer edits. Click the issue."
-          >
+          </CatalogRow>
+          <CatalogRow tag="Sheet" className="block">
             <TaskInspectorSheet />
-          </CatalogSpecimen>
+          </CatalogRow>
+        </CatalogSpecimen>
 
+        <CatalogStack>
           <CatalogSpecimen
-            title="Popover Stakeholder Cell (Regular vs Anchor)"
-            description="Regular: closes on each add/remove. Anchor: stays open for multiple changes."
-            stageClassName="space-y-6"
+            title="Floating"
+            imports="Popover, Tooltip, HoverCard"
+            docs="overlays"
+            keywords="popover popoveranchor tooltip hovercard hover card stakeholder assignees"
           >
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                Regular—closes on each change
-              </p>
-              <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <StakeholderCell selected={stakeholdersRegular} />
-                </PopoverTrigger>
-                <PopoverContent align="start" className="w-auto p-3">
-                  <StakeholderSelectorContent
-                    selected={stakeholdersRegular}
-                    onToggle={(person, checked) => {
-                      setStakeholdersRegular((prev) =>
-                        checked ? [...prev, person] : prev.filter((x) => x.id !== person.id),
-                      )
-                      setPopoverOpen(false)
-                    }}
-                    onRemove={(person) => {
-                      setStakeholdersRegular((prev) => prev.filter((x) => x.id !== person.id))
-                      setPopoverOpen(false)
-                    }}
-                    closeOnChange={true}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                Anchor—stays open for multiple changes
-              </p>
+            <CatalogRow tag="Popover">
               <Popover open={popoverAnchorOpen} onOpenChange={setPopoverAnchorOpen}>
                 <PopoverAnchor asChild>
                   <div className="inline-block">
@@ -2797,97 +2321,34 @@ export default function ComponentShowcase() {
                   />
                 </PopoverContent>
               </Popover>
-            </div>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Tooltip · Hover Card"
-            description="Both show on hover. Tooltip: brief labels/hints for icons and buttons. Hover Card: richer previews (user profiles, link previews)."
-            stageClassName="space-y-6"
-          >
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                Tooltip—short label for icons, buttons
-              </p>
-              <div className="flex flex-wrap items-center gap-4">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="outline" size="icon" aria-label="Save">
-                        <HugeiconsIcon icon={FileIcon} className="size-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Save</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="outline" size="icon" aria-label="Settings">
-                        <HugeiconsIcon icon={SettingsIcon} className="size-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Settings</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="outline" size="icon" aria-label="Mail">
-                        <HugeiconsIcon icon={MailIcon} className="size-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Mail</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                Sides—arrow points toward the trigger
-              </p>
+            </CatalogRow>
+            <CatalogRow tag="Tooltip">
               <TooltipProvider>
-                <div className="flex flex-wrap items-center justify-center gap-3 py-8">
-                  <Tooltip>
+                {[
+                  { label: "Save", icon: FileIcon, side: "top" as const },
+                  { label: "Settings", icon: SettingsIcon, side: "bottom" as const },
+                  { label: "Mail", icon: MailIcon, side: "right" as const },
+                ].map((t) => (
+                  <Tooltip key={t.label}>
                     <TooltipTrigger asChild>
-                      <Button variant="outline">Top</Button>
+                      <Button variant="outline" size="icon" aria-label={t.label}>
+                        <HugeiconsIcon icon={t.icon} className="size-4" />
+                      </Button>
                     </TooltipTrigger>
-                    <TooltipContent side="top">Tooltip on top</TooltipContent>
+                    <TooltipContent side={t.side}>{t.label}</TooltipContent>
                   </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="outline">Right</Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Tooltip on right</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="outline">Bottom</Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom">Tooltip on bottom</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="outline">Left</Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="left">Tooltip on left</TooltipContent>
-                  </Tooltip>
-                </div>
+                ))}
               </TooltipProvider>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                Hover Card—rich preview (e.g. user profile)
-              </p>
+            </CatalogRow>
+            <CatalogRow tag="Hover card">
               <HoverCard>
                 <HoverCardTrigger asChild>
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-2 rounded-md px-2 py-1 text-sm font-medium text-primary hover:bg-muted/80"
-                  >
+                  <Button type="button" variant="ghost" className="gap-2 px-2 text-primary">
                     <Avatar className="h-5 w-5">
                       <AvatarFallback className="text-[10px]">JD</AvatarFallback>
                     </Avatar>
                     @johndoe
-                  </button>
+                  </Button>
                 </HoverCardTrigger>
                 <HoverCardContent align="start" className="w-64">
                   <div className="flex gap-3">
@@ -2896,9 +2357,7 @@ export default function ComponentShowcase() {
                     </Avatar>
                     <div className="space-y-1 overflow-hidden">
                       <h4 className="text-sm font-semibold">John Doe</h4>
-                      <p className="text-xs text-muted-foreground">
-                        Software engineer. Building tools for developers.
-                      </p>
+                      <p className="text-xs text-muted-foreground">Software engineer.</p>
                       <Button variant="outline" size="sm" className="mt-2">
                         View profile
                       </Button>
@@ -2906,1179 +2365,376 @@ export default function ComponentShowcase() {
                   </div>
                 </HoverCardContent>
               </HoverCard>
-            </div>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Combobox"
-            description="Host UX patterns: drill-in submenu, pick-only (no search), multi-select with panel search, and pinSelected progression. Long lists use nqui ScrollArea."
-            stageClassName="space-y-6 max-w-lg"
-          >
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                Drill-in — Actions submenu with inline Combobox (panel search + pinned sentinel)
-              </p>
-              <div className="flex flex-wrap items-center gap-3">
-                <ActionsMenu>
-                  <ActionsMenuFilter placeholder="e.g. Move" />
-                  <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-                    Checkout redesign
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <ActionPickerSub
-                    label="Move to status"
-                    value={projectActionStatus}
-                    onValueChange={setProjectActionStatus}
-                    options={PROJECT_ACTION_STATUSES}
-                    placeholder="e.g. Review"
-                    sentinel={{ value: "any", label: "Any status" }}
-                  />
-                  <ActionPickerSub
-                    label="Assign to"
-                    value={projectActionAssignee}
-                    onValueChange={setProjectActionAssignee}
-                    options={PROJECT_ACTION_ASSIGNEES}
-                    placeholder="e.g. Ava"
-                    sentinel={{ value: "unassigned", label: "Unassigned" }}
-                  />
-                </ActionsMenu>
-                <p className="text-xs text-muted-foreground">
-                  Status:{" "}
-                  <span className="text-foreground">
-                    {PROJECT_ACTION_STATUSES.find((s) => s.value === projectActionStatus)
-                      ?.label ??
-                      (projectActionStatus === "any" ? "Any status" : projectActionStatus)}
-                  </span>
-                  {" · "}
-                  Assignee:{" "}
-                  <span className="text-foreground">
-                    {PROJECT_ACTION_ASSIGNEES.find((a) => a.value === projectActionAssignee)
-                      ?.label ??
-                      (projectActionAssignee === "unassigned"
-                        ? "Unassigned"
-                        : projectActionAssignee)}
-                  </span>
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                Search not available — value + chevron, short list, no filter field
-              </p>
-              <Combobox
-                value={comboboxNoSearch}
-                onValueChange={(next) =>
-                  setComboboxNoSearch(
-                    typeof next === "string" ? next : (next[0] ?? ""),
-                  )
-                }
-              >
-                <ComboboxAnchor
-                  role="group"
-                  aria-label="Status"
-                  className={cn(
-                    inputFieldShellBase,
-                    "flex max-w-xs min-h-8 items-stretch gap-0 px-2.5 py-1.5 shadow-sm",
-                  )}
-                >
-                  <ComboboxValue
-                    className="flex min-h-8 min-w-0 flex-1 items-center truncate text-xs leading-normal"
-                    placeholder="Pick status…"
-                  />
-                  <ComboboxTrigger className="ml-2 size-8 shrink-0 self-center rounded-md border-0 bg-transparent text-foreground hover:bg-muted/70" />
-                </ComboboxAnchor>
-                <ComboboxContent>
-                  <ComboboxList>
-                    {PROJECT_ACTION_STATUSES.map((s) => (
-                      <ComboboxItem key={s.value} value={s.label}>
-                        {s.label}
-                      </ComboboxItem>
-                    ))}
-                  </ComboboxList>
-                </ComboboxContent>
-              </Combobox>
-            </div>
-
-            <div className="space-y-2 max-w-xs">
-              <p className="text-xs font-medium text-muted-foreground">
-                Multi-select ({COMBOBOX_FRAMEWORKS.length} frameworks) — badge trigger, panel search, showSelected chips
-              </p>
-              <Combobox
-                multiple
-                items={COMBOBOX_FRAMEWORKS.map((f) => f.value)}
-                value={comboboxMultiValue}
-                onValueChange={(next) =>
-                  setComboboxMultiValue(Array.isArray(next) ? next : [next])
-                }
-                searchPlaceholder="Search framework…"
-              >
-                <ComboboxBadgeTrigger placeholder="Select framework" maxShownItems={2} />
-                <ComboboxContent showPanelSearch showSelected>
-                  <ComboboxList
-                    renderItem={(item) => {
-                      const value = String(item)
-                      const fw = COMBOBOX_FRAMEWORKS.find((f) => f.value === value)
-                      return (
-                        <ComboboxItem key={value} value={value}>
-                          <span className="truncate">{fw?.label ?? value}</span>
-                        </ComboboxItem>
-                      )
-                    }}
-                  >
-                    <ComboboxEmpty>No framework found.</ComboboxEmpty>
-                  </ComboboxList>
-                </ComboboxContent>
-              </Combobox>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                Prioritize progression — same mid-list selection (Echo); compare pinSelected
-              </p>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="flex min-w-0 flex-col gap-1.5">
-                  <p className="text-[0.65rem] text-muted-foreground">pinSelected (default)</p>
-                  <Combobox
-                    value={comboboxPinOn}
-                    onValueChange={(next) =>
-                      setComboboxPinOn(
-                        typeof next === "string" ? next : (next[0] ?? ""),
-                      )
-                    }
-                  >
-                    <ComboboxInput placeholder="Filter parts…" />
-                    <ComboboxContent>
-                      <ComboboxList>
-                        <ComboboxEmpty>No parts.</ComboboxEmpty>
-                        <ComboboxItem value="any" pinned="start">
-                          Any part
-                        </ComboboxItem>
-                        {COMBOBOX_PIN_PARTS.map((part) => (
-                          <ComboboxItem key={part} value={part.toLowerCase()}>
-                            {part}
-                          </ComboboxItem>
-                        ))}
-                      </ComboboxList>
-                    </ComboboxContent>
-                  </Combobox>
-                  <p className="text-[0.65rem] text-muted-foreground">
-                    Open: Echo rises under “Any part”.
-                  </p>
-                </div>
-                <div className="flex min-w-0 flex-col gap-1.5">
-                  <p className="text-[0.65rem] text-muted-foreground">pinSelected=false</p>
-                  <Combobox
-                    pinSelected={false}
-                    value={comboboxPinOff}
-                    onValueChange={(next) =>
-                      setComboboxPinOff(
-                        typeof next === "string" ? next : (next[0] ?? ""),
-                      )
-                    }
-                  >
-                    <ComboboxInput placeholder="Filter parts…" />
-                    <ComboboxContent>
-                      <ComboboxList>
-                        <ComboboxEmpty>No parts.</ComboboxEmpty>
-                        {COMBOBOX_PIN_PARTS.map((part) => (
-                          <ComboboxItem key={part} value={part.toLowerCase()}>
-                            {part}
-                          </ComboboxItem>
-                        ))}
-                      </ComboboxList>
-                    </ComboboxContent>
-                  </Combobox>
-                  <p className="text-[0.65rem] text-muted-foreground">
-                    Open: authored order — Echo stays mid-list.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2 max-w-xs">
-              <p className="text-xs font-medium text-muted-foreground">
-                Create — a search that is not in the list gets a + row
-              </p>
-              <Combobox
-                items={creatableFruits}
-                value={creatableFruit}
-                onValueChange={(next) =>
-                  setCreatableFruit(typeof next === "string" ? next : (next[0] ?? ""))
-                }
-                onCreate={(name) =>
-                  setCreatableFruits((prev) =>
-                    prev.some((item) => item.toLowerCase() === name.toLowerCase())
-                      ? prev
-                      : [...prev, name]
-                  )
-                }
-              >
-                <ComboboxInput placeholder="Search or create a fruit…" />
-                <ComboboxContent>
-                  <ComboboxList
-                    renderItem={(item) => (
-                      <ComboboxItem key={String(item)} value={String(item)}>
-                        {String(item)}
-                      </ComboboxItem>
-                    )}
-                  >
-                    <ComboboxEmpty>No matches.</ComboboxEmpty>
-                  </ComboboxList>
-                </ComboboxContent>
-              </Combobox>
-            </div>
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                Single ({COMBOBOX_FRUITS.length} fruits) — ScrollArea list
-              </p>
-              <Combobox items={[...COMBOBOX_FRUITS]}>
-                <ComboboxInput placeholder="Search fruit…" />
-                <ComboboxContent>
-                  <ComboboxList
-                    renderItem={(item) => (
-                      <ComboboxItem key={String(item)} value={String(item)}>
-                        {String(item)}
-                      </ComboboxItem>
-                    )}
-                  >
-                    <ComboboxEmpty>No results found.</ComboboxEmpty>
-                  </ComboboxList>
-                </ComboboxContent>
-              </Combobox>
-            </div>
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                Icons ({COMBOBOX_SHORTCUTS.length} shortcuts) — ScrollArea static list
-              </p>
-              <Combobox>
-                <ComboboxInput placeholder="Search shortcuts…" />
-                <ComboboxContent>
-                  <ComboboxList>
-                    <ComboboxEmpty>No results found.</ComboboxEmpty>
-                    <ComboboxGroup>
-                      {COMBOBOX_SHORTCUTS.map((item) => (
-                        <ComboboxItem key={item.value} value={item.value}>
-                          <HugeiconsIcon icon={item.icon} strokeWidth={2} className="size-3.5" />
-                          {item.label}
-                        </ComboboxItem>
-                      ))}
-                    </ComboboxGroup>
-                  </ComboboxList>
-                </ComboboxContent>
-              </Combobox>
-            </div>
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                Multi-line ({CATALOG_REGIONS.length} regions) — title + description; should scroll
-              </p>
-              <Combobox items={CATALOG_REGIONS.map((r) => r.value)}>
-                <ComboboxInput placeholder="Search regions…" />
-                <ComboboxContent>
-                  <ComboboxList
-                    renderItem={(item) => {
-                      const value = String(item)
-                      const region = CATALOG_REGIONS.find((r) => r.value === value)
-                      if (!region) return null
-                      return (
-                        <ComboboxItem
-                          key={region.value}
-                          value={region.value}
-                          keywords={[region.title, region.description]}
-                        >
-                          <ComboboxItemContent>
-                            <ComboboxItemTitle>{region.title}</ComboboxItemTitle>
-                            <ComboboxItemDescription>
-                              {region.description}
-                            </ComboboxItemDescription>
-                          </ComboboxItemContent>
-                        </ComboboxItem>
-                      )
-                    }}
-                  >
-                    <ComboboxEmpty>No region found.</ComboboxEmpty>
-                  </ComboboxList>
-                </ComboboxContent>
-              </Combobox>
-            </div>
+            </CatalogRow>
           </CatalogSpecimen>
 
           <CatalogSpecimen
             title="Toast"
-            description="Sonner toast notifications with semantic colors and animations"
-            stageClassName="space-y-2"
+            imports="Toaster"
+            from="@nqlib/nqui/sonner"
+            docs="feedback-and-states"
+            keywords="sonner notification snackbar toast"
           >
-            <Button
-              onClick={() => toast("Event has been created")}
-              variant="outline"
-              className="w-full"
-            >
-              Show Default Toast
-            </Button>
-            <Button
-              onClick={() => toast.success("Successfully saved!")}
-              variant="outline"
-              className="w-full"
-            >
-              Show Success Toast
-            </Button>
-            <Button
-              onClick={() => toast.error("Something went wrong")}
-              variant="outline"
-              className="w-full"
-            >
-              Show Error Toast
-            </Button>
-            <Button
-              onClick={() => toast.warning("Please review your changes")}
-              variant="outline"
-              className="w-full"
-            >
-              Show Warning Toast
-            </Button>
-            <Button
-              onClick={() => toast.info("Here's some information")}
-              variant="outline"
-              className="w-full"
-            >
-              Show Info Toast
-            </Button>
-            <Button
-              onClick={() => {
-                const toastId = toast.loading("Processing your request...");
-                setTimeout(() => {
-                  toast.success("Request completed!", { id: toastId });
-                }, 2000);
-              }}
-              variant="outline"
-              className="w-full"
-            >
-              Show Loading Toast
-            </Button>
-          </CatalogSpecimen>
-        </div>
-      </section>
-
-      {/* Data Visualization Section */}
-      <section className={catalogSection}>
-        <h2 id="data-visualization" className={catalogHeading}>Data Visualization</h2>
-        <div className={catalogGridMatrix}>
-          <CatalogSpecimen
-            title="Tracker"
-            description="GitHub-style contribution blocks with hover and tooltips"
-            stageClassName="space-y-4"
-          >
-            <TooltipProvider>
-              <Tracker
-                data={[
-                  { color: "bg-emerald-600 dark:bg-emerald-500", tooltip: "Active" },
-                  { color: "bg-emerald-600 dark:bg-emerald-500", tooltip: "Active" },
-                  { color: "bg-yellow-600 dark:bg-yellow-500", tooltip: "Warning" },
-                  { color: "bg-red-600 dark:bg-red-500", tooltip: "Error" },
-                  { color: "bg-emerald-600 dark:bg-emerald-500", tooltip: "Active" },
-                  { tooltip: "No data" },
-                  { tooltip: "No data" },
-                  { color: "bg-emerald-600 dark:bg-emerald-500", tooltip: "Active" },
-                  { color: "bg-blue-600 dark:bg-blue-500", tooltip: "Info" },
-                ]}
-                hoverEffect
-              />
-            </TooltipProvider>
-            <p className="text-xs text-muted-foreground">hoverEffect, defaultBackgroundColor for empty blocks</p>
-          </CatalogSpecimen>
-          <CatalogSpecimen
-            title="ColorPicker"
-            description="OKLCH color picker — popover and inline variants"
-            stageClassName="space-y-4"
-          >
-            <ColorPicker
-              value={colorPickerValue}
-              onChange={setColorPickerValue}
-              variant="popover"
-            />
-            <ColorPicker
-              value={colorPickerValue}
-              onChange={setColorPickerValue}
-              variant="inline"
-            />
-          </CatalogSpecimen>
-          <CatalogSpecimen
-            title="ColorSlider"
-            description="Hue, saturation, lightness sliders"
-            stageClassName="space-y-4"
-          >
-            <div className="space-y-2">
-              <Label className="text-xs">Hue</Label>
-              <ColorSlider
-                sliderType="hue"
-                defaultValue={[240]}
-                min={0}
-                max={360}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs">Saturation</Label>
-              <ColorSlider
-                sliderType="saturation"
-                defaultValue={[0.5]}
-                min={0}
-                max={1}
-                step={0.01}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs">Lightness</Label>
-              <ColorSlider
-                sliderType="lightness"
-                defaultValue={[0.6]}
-                min={0}
-                max={1}
-                step={0.01}
-              />
+            <div className="grid grid-cols-3 gap-2">
+              <Button variant="outline" size="sm" onClick={() => toast("Event has been created")}>
+                Default
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => toast.success("Successfully saved")}>
+                Success
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => toast.error("Something went wrong")}>
+                Error
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => toast.warning("Please review your changes")}>
+                Warning
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => toast.info("Here's some information")}>
+                Info
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const toastId = toast.loading("Processing…")
+                  setTimeout(() => toast.success("Request completed", { id: toastId }), 2000)
+                }}
+              >
+                Loading
+              </Button>
             </div>
           </CatalogSpecimen>
-        </div>
-      </section>
+        </CatalogStack>
+      </CatalogSection>
 
-      {/* Brand Section */}
-      <section className={catalogSection}>
-        <h2 id="brand" className={catalogHeading}>Brand</h2>
-        <div className={catalogGridLedger}>
-          <CatalogSpecimen
-            title="Kbd"
-            description="Keyboard key indicators for shortcuts"
-            stageClassName="space-y-3"
-          >
-            <div className="flex flex-wrap items-center gap-2 text-sm">
-              Press <Kbd>⌘</Kbd> + <Kbd>K</Kbd> for command palette
-            </div>
-            <div className="flex flex-wrap items-center gap-2 text-sm">
-              <Kbd>Ctrl</Kbd> + <Kbd>Shift</Kbd> + <Kbd>P</Kbd> for settings
-            </div>
-            <div className="flex flex-wrap items-center gap-2 text-sm">
-              <Kbd>Esc</Kbd> to close
-            </div>
-          </CatalogSpecimen>
-          <CatalogSpecimen
-            title="NquiLogo"
-            description="Theme-aware logo (light vs dark)"
-          >
-            <div className="flex items-center gap-4">
-              <NquiLogo className="size-12" />
-              <NquiLogo className="size-8" />
-              <NquiLogo className="size-16" />
-            </div>
-          </CatalogSpecimen>
-        </div>
-      </section>
-
-      {/* Layout Components Section */}
-      <section className={catalogSection}>
-        <h2 id="layout-components" className={catalogHeading}>Layout Components</h2>
-        <div className={catalogGridLedger}>
-          <CatalogSpecimen
-            title="Accordion"
-            description="Collapsible accordion"
-          >
-            <Accordion type="single" collapsible>
-              <AccordionItem value="item-1">
-                <AccordionTrigger>Is it accessible?</AccordionTrigger>
-                <AccordionContent>
-                  Yes. It adheres to the WAI-ARIA design pattern.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-2">
-                <AccordionTrigger>Is it styled?</AccordionTrigger>
-                <AccordionContent>
-                  Yes. It comes with default styles that match the other components.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Collapsible"
-            description="Collapsible content"
-          >
-            <Collapsible open={open} onOpenChange={setOpen}>
-              <CollapsibleTrigger asChild>
-                <Button variant="outline">Toggle</Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="mt-2 p-4 border rounded-md">
-                <p>This is collapsible content that can be shown or hidden.</p>
-              </CollapsibleContent>
-            </Collapsible>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Resizable"
-            description={
-              <>
-                Drag the handle to resize. Consumers must install{" "}
-                <code className="rounded bg-muted px-1 py-0.5 text-xs">react-resizable-panels</code>.
-              </>
-            }
-          >
-            <ResizablePanelGroup
-              orientation="horizontal"
-              className="h-[200px] min-h-[200px] rounded-lg border"
-            >
-              <ResizablePanel defaultSize={50} className="min-h-0 min-w-0">
-                <div className="flex h-full items-center justify-center bg-muted/40 p-4">
-                  <span className="text-sm font-medium text-muted-foreground">Panel one</span>
-                </div>
-              </ResizablePanel>
-              <ResizableHandle withHandle />
-              <ResizablePanel defaultSize={50} className="min-h-0 min-w-0">
-                <div className="flex h-full items-center justify-center bg-muted/20 p-4">
-                  <span className="text-sm font-medium text-muted-foreground">Panel two</span>
-                </div>
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Sidebar"
-            description="SidebarProvider, Sidebar, SidebarInset, SidebarRail — see the app sidebar on the left"
-          >
-            <div className="min-h-[120px] border-2 border-dashed rounded-lg p-6 flex items-center justify-center">
-              <p className="text-sm text-muted-foreground text-center">
-                The Sidebar uses fixed positioning for app-level layout.
-                <br />
-                The sidebar on the left of this page is the live demo (AppSidebar).
-              </p>
-            </div>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Sortable"
-            description="Drag-and-drop reordering with SortableItemHandle"
-          >
-            <Sortable
-              value={sortableItems}
-              onValueChange={setSortableItems}
-              orientation="vertical"
-            >
-              <SortableContent asChild>
-                <div className="space-y-2">
-                  {sortableItems.map((item) => (
-                    <SortableItem key={item} value={item} asChild>
-                      <div className="flex items-center gap-2 rounded-md border bg-background px-3 py-2">
-                        <SortableItemHandle asChild>
-                          <button type="button" className="cursor-grab active:cursor-grabbing touch-none" aria-label="Drag to reorder">
-                            <span className="text-muted-foreground">⋮⋮</span>
-                          </button>
-                        </SortableItemHandle>
-                        <span className="text-sm">{item}</span>
-                      </div>
-                    </SortableItem>
-                  ))}
-                </div>
-              </SortableContent>
-              <SortableOverlay>
-                {({ value }) => (
-                  <div className="rounded-md border bg-background px-3 py-2 shadow-lg flex items-center gap-2">
-                    <span className="text-muted-foreground">⋮⋮</span>
-                    <span className="text-sm">{value}</span>
-                  </div>
-                )}
-              </SortableOverlay>
-            </Sortable>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Scroll Area"
-            description="Enhanced scroll area"
-          >
-            <ScrollArea className="h-[200px] w-full border rounded-md p-4">
-              <div className="space-y-4">
-                {Array.from({ length: 20 }, (_, i) => (
-                  <div key={i}>Item {i + 1}</div>
-                ))}
-              </div>
-            </ScrollArea>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Frosted Glass Header with Scroll"
-            description="Scroll the content below to see the fade mask and frosted glass reflection effect. This uses the new stickyHeader prop on Card component."
-            stageClassName="p-0 overflow-hidden"
-          >
-            <Card stickyHeader className="h-[500px] border-0 shadow-none rounded-none">
-              <CardHeader>
-                <CardTitle>Frosted Glass Header with Scroll</CardTitle>
-                <CardDescription>
-                  Scroll the content below to see the fade mask and frosted glass reflection effect.
-                  This uses the new stickyHeader prop on Card component.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                    <div className="space-y-2 p-4 rounded-lg bg-red-500/20 border border-red-500/30">
-                      <h3 className="text-lg font-semibold text-red-700 dark:text-red-400">Section 1: Red Section</h3>
-                      <p className="text-muted-foreground">
-                        This red section will blur and reflect through the frosted glass header as you scroll.
-                        Notice the color bleeding through the glass effect.
-                      </p>
-                    </div>
-                    <div className="space-y-2 p-4 rounded-lg bg-blue-500/20 border border-blue-500/30">
-                      <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-400">Section 2: Blue Section</h3>
-                      <p className="text-muted-foreground">
-                        Blue content creates a cool reflection. The frosted glass effect uses backdrop-filter to blur
-                        content behind it, creating depth and visual interest.
-                      </p>
-                    </div>
-                    <div className="space-y-2 p-4 rounded-lg bg-green-500/20 border border-green-500/30">
-                      <h3 className="text-lg font-semibold text-green-700 dark:text-green-400">Section 3: Green Section</h3>
-                      <p className="text-muted-foreground">
-                        Green adds vibrancy. The extended backdrop (200% height) captures nearby elements for a
-                        realistic reflection effect as content scrolls.
-                      </p>
-                    </div>
-                    <div className="space-y-2 p-4 rounded-lg bg-amber-500/20 border border-amber-500/30">
-                      <h3 className="text-lg font-semibold text-amber-700 dark:text-amber-400">Section 4: Amber Section</h3>
-                      <p className="text-muted-foreground">
-                        Amber creates a warm reflection. When content scrolls up toward the header, it first fades
-                        (from the scroll mask), then gets blurred as it passes behind the frosted glass.
-                      </p>
-                    </div>
-                    <div className="space-y-2 p-4 rounded-lg bg-orange-500/20 border border-orange-500/30">
-                      <h3 className="text-lg font-semibold text-orange-700 dark:text-orange-400">Section 5: Orange Section</h3>
-                      <p className="text-muted-foreground">
-                        Orange provides warm tones. The FrostedGlass component extends its backdrop to capture nearby
-                        elements, while backdrop-filter: blur() creates the glass effect.
-                      </p>
-                    </div>
-                    <div className="space-y-2 p-4 rounded-lg bg-rose-500/20 border border-rose-500/30">
-                      <h3 className="text-lg font-semibold text-rose-700 dark:text-rose-400">Section 6: Rose Section</h3>
-                      <p className="text-muted-foreground">
-                        Rose adds softness. Keep scrolling to see how different colors reflect through the glass header.
-                        Each color creates a unique blur effect.
-                      </p>
-                    </div>
-                    <div className="space-y-2 p-4 rounded-lg bg-lime-500/20 border border-lime-500/30">
-                      <h3 className="text-lg font-semibold text-lime-700 dark:text-lime-400">Section 7: Lime Section</h3>
-                      <p className="text-muted-foreground">
-                        Lime provides cool-bright tones. The combination of fade mask and frosted glass provides excellent
-                        visual feedback with colorful reflections.
-                      </p>
-                    </div>
-                    <div className="space-y-2 p-4 rounded-lg bg-yellow-500/20 border border-yellow-500/30">
-                      <h3 className="text-lg font-semibold text-yellow-700 dark:text-yellow-400">Section 8: Yellow Section</h3>
-                      <p className="text-muted-foreground">
-                        Yellow adds brightness. This effect is inspired by Apple's design language, where frosted glass
-                        is used extensively in macOS and iOS interfaces.
-                      </p>
-                    </div>
-                    <div className="space-y-2 p-4 rounded-lg bg-stone-500/20 border border-stone-500/30">
-                      <h3 className="text-lg font-semibold text-stone-700 dark:text-stone-300">Section 9: Stone Section</h3>
-                      <p className="text-muted-foreground">
-                        Stone creates depth. Backdrop-filter is hardware-accelerated and performs well in modern browsers.
-                        The extended backdrop technique ensures nearby elements are properly blurred.
-                      </p>
-                    </div>
-                    <div className="space-y-2 p-4 rounded-lg bg-teal-500/20 border border-teal-500/30">
-                      <h3 className="text-lg font-semibold text-teal-700 dark:text-teal-400">Section 10: Teal Section</h3>
-                      <p className="text-muted-foreground">
-                        Teal completes the spectrum. Scroll back up to see the effect in reverse. The frosted glass header
-                        creates a beautiful, modern interface with colorful reflections.
-                      </p>
-                    </div>
-                </div>
-              </CardContent>
-            </Card>
-          </CatalogSpecimen>
-
-
-          <CatalogSpecimen
-            title="Aspect Ratio"
-            description="Maintain aspect ratio"
-          >
-            <AspectRatio ratio={16 / 9} className="bg-muted rounded-md">
-              <div className="flex items-center justify-center h-full">16:9 Aspect Ratio</div>
-            </AspectRatio>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Carousel"
-            description="Image/content carousel"
-          >
-            <Carousel className="w-full max-w-xs">
-              <CarouselContent>
-                {Array.from({ length: 5 }, (_, i) => (
-                  <CarouselItem key={i}>
-                    <div className="flex items-center justify-center h-[200px] bg-muted rounded-md">
-                      Slide {i + 1}
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
-            </Carousel>
-          </CatalogSpecimen>
-        </div>
-      </section>
-
-      {/* Advanced Components Section */}
-      <section className={catalogSection}>
-        <h2 id="advanced-components" className={catalogHeading}>Advanced Components</h2>
-        <div className={catalogGridLedger}>
-          <CatalogSpecimen
-            title="Calendar - Single"
-            description="Single date selection"
-          >
-            <Calendar
-              mode="single"
-              selected={calendarSingle}
-              onSelect={setCalendarSingle}
-              className="rounded-md border"
-            />
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Calendar - Range"
-            description="Date range. Drag start or end to resize."
-          >
-            <Calendar
-              mode="range"
-              selected={calendarRange}
-              onSelect={setCalendarRange}
-              className="rounded-md border"
-            />
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Calendar - Multiple"
-            description="Multiple date selection"
-          >
-            <Calendar
-              mode="multiple"
-              selected={calendarMultiple}
-              onSelect={setCalendarMultiple}
-              required
-              className="rounded-md border"
-            />
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Calendar - Multi Panel"
-            description="Two months. Drag either endpoint across months."
-          >
-            <Calendar
-              mode="range"
-              selected={calendarRange}
-              onSelect={setCalendarRange}
-              numberOfMonths={2}
-              className="rounded-md border"
-            />
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Item Components"
-            description="Item with media and content"
-          >
-            <Item>
-              <ItemMedia>
-                <Avatar>
-                  <AvatarFallback>JD</AvatarFallback>
-                </Avatar>
-              </ItemMedia>
-              <ItemContent>
-                <ItemTitle>John Doe</ItemTitle>
-                <ItemDescription>Software Engineer</ItemDescription>
-              </ItemContent>
-              <ItemActions>
-                <Button size="sm" variant="ghost">
-                  <HugeiconsIcon icon={SettingsIcon} strokeWidth={2} />
-                </Button>
-              </ItemActions>
-            </Item>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Label"
-            description="Form labels"
-            stageClassName="space-y-3"
-          >
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="Email" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="Password" />
-            </div>
-          </CatalogSpecimen>
-
-          <CatalogSpecimen
-            title="Kbd"
-            description="Keyboard key display"
-          >
-            <div className="flex flex-wrap gap-2">
-              <Kbd>⌘</Kbd>
-              <Kbd>K</Kbd>
-              <div className="flex gap-1">
-                <Kbd>Ctrl</Kbd>
-                <Kbd>+</Kbd>
-                <Kbd>C</Kbd>
-              </div>
-            </div>
-          </CatalogSpecimen>
-        </div>
-      </section>
-
-      {/* Table of Contents Section - Full Width */}
-      <section className={catalogSection}>
-        <div>
-          <h2 id="table-of-contents" className={catalogHeading}>Table of Contents</h2>
-          <p className="text-muted-foreground">
-            Auto-detect headings or use manual items with scroll spy functionality
-          </p>
-        </div>
-        <div className="space-y-6">
-          {/* Auto-Detect Example - Normal Variant */}
-          <CatalogSpecimen
-            title="Auto-Detect (Normal Variant)"
-            description="Fumadocs-style with left border and animated thumb indicator"
-          >
-            <div className="flex gap-6">
-              <div className="flex-1" ref={tocContentRef1}>
-                <ScrollArea className="h-[400px] border rounded-lg">
-                  <div className="p-6 space-y-6">
-                    <h2 id="introduction">Introduction</h2>
-                    <p className="text-muted-foreground">
-                      This is an introduction section that demonstrates auto-detection of headings.
-                      The Table of Contents component will automatically detect all h2 and h3 headings
-                      within this container and create a navigation structure.
-                    </p>
-                    <h3 id="overview">Overview</h3>
-                    <p className="text-muted-foreground">
-                      This is a subsection under introduction. The scroll spy will highlight the active
-                      section as you scroll through the content.
-                    </p>
-                    <h2 id="features">Features</h2>
-                    <p className="text-muted-foreground">
-                      This section shows the features of the component. You can see how the TOC
-                      updates in real-time as you scroll.
-                    </p>
-                    <h3 id="feature-1">Feature 1: Auto-Detection</h3>
-                    <p className="text-muted-foreground">
-                      The component can automatically detect headings from the DOM using a CSS selector.
-                      No manual configuration needed for basic use cases.
-                    </p>
-                    <h3 id="feature-2">Feature 2: Scroll Spy</h3>
-                    <p className="text-muted-foreground">
-                      Advanced scroll spy tracks which sections are visible in the viewport and
-                      highlights them in the TOC. It uses Intersection Observer for accurate detection.
-                    </p>
-                    <h3 id="feature-3">Feature 3: Variants</h3>
-                    <p className="text-muted-foreground">
-                      Three visual variants are available: normal (Fumadocs-style), circuit (simple Clerk-style),
-                      and clerk (enhanced Clerk-style with corner radius and smooth curves). Each has its own unique visual design.
-                    </p>
-                    <h2 id="conclusion">Conclusion</h2>
-                    <p className="text-muted-foreground">
-                      This is the conclusion section. The Table of Contents provides a great way to
-                      navigate long-form content and improve user experience.
-                    </p>
-                  </div>
-                </ScrollArea>
-              </div>
-              <div className="w-80">
-                <TableOfContents
-                  autoDetect
-                  headingSelector="h2, h3"
-                  container={tocContentRef1 as React.RefObject<HTMLElement>}
-                  enableScrollSpy
-                  variant="normal"
-                  title="Contents"
-                  className="h-[400px] rounded-lg"
-                />
-              </div>
-            </div>
-          </CatalogSpecimen>
-
-          {/* Clerk Variant Example - Enhanced with Corner Radius */}
-          <CatalogSpecimen
-            title="Clerk Variant (Enhanced)"
-            description="Enhanced Clerk-style with smooth corner radius, quadratic curves, and improved thumb calculation"
-          >
-            <div className="flex gap-6">
-              <div className="flex-1" ref={tocContentRef2}>
-                <ScrollArea className="h-[400px] border rounded-lg">
-                  <div className="p-6 space-y-6">
-                    <h2 id="getting-started-clerk">Getting Started</h2>
-                    <p className="text-muted-foreground">
-                      Learn how to get started with the Table of Contents component. This example
-                      demonstrates the clerk variant which features smooth corner radius transitions
-                      and quadratic curves for a polished appearance.
-                    </p>
-                    <h3 id="installation-clerk">Installation</h3>
-                    <p className="text-muted-foreground">
-                      Installation instructions go here. The component is part of the nqui library
-                      and can be imported directly.
-                    </p>
-                    <h3 id="configuration-clerk">Configuration</h3>
-                    <p className="text-muted-foreground">
-                      Configuration details for customizing the TOC behavior and appearance.
-                      The clerk variant uses improved offset values and better spacing.
-                    </p>
-                    <h4 id="basic-config-clerk">Basic Configuration</h4>
-                    <p className="text-muted-foreground">
-                      Basic configuration options include heading selector, scroll offset, and
-                      smooth scrolling preferences. The clerk variant enhances these with better
-                      thumb positioning.
-                    </p>
-                    <h4 id="advanced-config-clerk">Advanced Configuration</h4>
-                    <p className="text-muted-foreground">
-                      Advanced options include manual item control, custom scroll spy settings,
-                      and variant selection. The clerk variant features stepped inset handling
-                      for depth changes.
-                    </p>
-                    <h2 id="usage-clerk">Usage</h2>
-                    <p className="text-muted-foreground">
-                      How to use the component in your application. The clerk variant provides
-                      the most polished visual style with smooth corner transitions and enhanced styling.
-                    </p>
-                    <h3 id="features-clerk">Key Features</h3>
-                    <p className="text-muted-foreground">
-                      The clerk variant includes corner radius (4px), quadratic curves for smooth
-                      transitions, improved offset values, and enhanced thumb calculation with
-                      stepped insets.
-                    </p>
-                  </div>
-                </ScrollArea>
-              </div>
-              <div className="w-80">
-                <TableOfContents
-                  autoDetect
-                  headingSelector="h2, h3, h4"
-                  container={tocContentRef2 as React.RefObject<HTMLElement>}
-                  enableScrollSpy
-                  variant="clerk"
-                  title="On this page"
-                  className="h-[400px] rounded-lg"
-                />
-              </div>
-            </div>
-          </CatalogSpecimen>
-
-          {/* Circuit Variant Example - Simple Linear Paths */}
-          <CatalogSpecimen
-            title="Circuit Variant (Simple)"
-            description="Simple Clerk-style with continuous line structure using linear paths"
-          >
-            <div className="flex gap-6">
-              <div className="flex-1" ref={tocContentRef3}>
-                <ScrollArea className="h-[400px] border rounded-lg">
-                  <div className="p-6 space-y-6">
-                    <h2 id="getting-started-circuit">Getting Started</h2>
-                    <p className="text-muted-foreground">
-                      Learn how to get started with the Table of Contents component. This example
-                      demonstrates the circuit variant which uses simple linear SVG paths.
-                    </p>
-                    <h3 id="installation-circuit">Installation</h3>
-                    <p className="text-muted-foreground">
-                      Installation instructions go here. The component is part of the nqui library
-                      and can be imported directly.
-                    </p>
-                    <h3 id="configuration-circuit">Configuration</h3>
-                    <p className="text-muted-foreground">
-                      Configuration details for customizing the TOC behavior and appearance.
-                    </p>
-                    <h4 id="basic-config-circuit">Basic Configuration</h4>
-                    <p className="text-muted-foreground">
-                      Basic configuration options include heading selector, scroll offset, and
-                      smooth scrolling preferences.
-                    </p>
-                    <h4 id="advanced-config-circuit">Advanced Configuration</h4>
-                    <p className="text-muted-foreground">
-                      Advanced options include manual item control, custom scroll spy settings,
-                      and variant selection.
-                    </p>
-                    <h2 id="usage-circuit">Usage</h2>
-                    <p className="text-muted-foreground">
-                      How to use the component in your application. The circuit variant provides
-                      a simpler visual style with straight line connections.
-                    </p>
-                  </div>
-                </ScrollArea>
-              </div>
-              <div className="w-80">
-                <TableOfContents
-                  autoDetect
-                  headingSelector="h2, h3, h4"
-                  container={tocContentRef3 as React.RefObject<HTMLElement>}
-                  enableScrollSpy
-                  variant="circuit"
-                  title="On this page"
-                  className="h-[400px] rounded-lg"
-                />
-              </div>
-            </div>
-          </CatalogSpecimen>
-
-          {/* Manual Items Example */}
-          <CatalogSpecimen
-            title="Manual Items"
-            description="Provide custom TOC structure with full control"
-          >
-            <div className="flex gap-6">
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground mb-4">
-                  Manual TOC items can be provided when you want full control over the structure.
-                  This is useful when headings don't match the desired TOC structure, or when you
-                  need to include items that aren't headings.
-                </p>
-                <div className="space-y-2">
-                  <h4 className="text-sm font-semibold">Example Structure:</h4>
-                  <pre className="text-xs bg-muted p-4 rounded-lg overflow-auto">
-                    {JSON.stringify(
-                      [
-                        { id: "section-1", label: "Section 1", level: 1 },
-                        { id: "section-2", label: "Section 2", level: 1 },
-                        {
-                          id: "section-3",
-                          label: "Section 3",
-                          level: 1,
-                          children: [
-                            { id: "subsection-3-1", label: "Subsection 3.1", level: 2 },
-                            { id: "subsection-3-2", label: "Subsection 3.2", level: 2 },
-                          ],
-                        },
-                      ],
-                      null,
-                      2
-                    )}
-                  </pre>
-                </div>
-              </div>
-              <div className="w-80">
-                <TableOfContents
-                  items={[
-                    { id: "section-1", label: "Section 1", level: 1 },
-                    { id: "section-2", label: "Section 2", level: 1 },
-                    {
-                      id: "section-3",
-                      label: "Section 3",
-                      level: 1,
-                      children: [
-                        { id: "subsection-3-1", label: "Subsection 3.1", level: 2 },
-                        { id: "subsection-3-2", label: "Subsection 3.2", level: 2 },
-                      ],
-                    },
-                    { id: "section-4", label: "Section 4", level: 1 },
-                  ]}
-                  variant="normal"
-                  title="Manual TOC"
-                  className="h-[300px] border rounded-lg"
-                />
-              </div>
-            </div>
-          </CatalogSpecimen>
-
-          {/* Full-Page Detection Example */}
-          <CatalogSpecimen
-            title="Full-Page Detection"
-            description="Detects headings from entire document (no container specified)"
-          >
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                This example shows how TOC can detect headings from the entire page when no container is specified.
-                Useful for documentation pages or blog posts. Notice it detects h2 headings from the entire showcase page.
-              </p>
-              <div className="w-80">
-                <TableOfContents
-                  autoDetect
-                  headingSelector="h2"
-                  // No container prop = searches entire document
-                  enableScrollSpy
-                  variant="normal"
-                  title="Page Contents"
-                  className="h-[300px] border rounded-lg"
-                />
-              </div>
-            </div>
-          </CatalogSpecimen>
-        </div>
-      </section>
-
-      {/* Horizontal Scroll Demo Section */}
-      <section className={catalogSection}>
-        <div>
-          <h2 id="horizontal-scroll" className={catalogHeading}>Horizontal Scroll</h2>
-          <p className="text-muted-foreground">
-            Wide content inside ScrollArea — shrink the browser to test horizontal scrolling with styled scrollbar
-          </p>
-        </div>
+      {/* ── Layout ──────────────────────────────────────────────── */}
+      <CatalogSection id="layout-components" title="Layout">
         <CatalogSpecimen
-          title="Event Registration Form"
-          description={
-            'A wide inline form that overflows on narrow viewports — uses ScrollArea with orientation="horizontal"'
-          }
+          title="Resizable"
+          imports="ResizablePanelGroup, ResizablePanel, ResizableHandle"
+          docs="layout-and-surfaces"
+          keywords="split pane panels drag handle"
         >
+          <ResizablePanelGroup orientation="horizontal" className="h-56 min-h-56 rounded-lg border">
+            <ResizablePanel defaultSize={50} className="min-h-0 min-w-0">
+              <div className="flex h-full items-center justify-center bg-muted/40 p-4">
+                <span className="text-sm font-medium text-muted-foreground">One</span>
+              </div>
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize={50} className="min-h-0 min-w-0">
+              <div className="flex h-full items-center justify-center bg-muted/20 p-4">
+                <span className="text-sm font-medium text-muted-foreground">Two</span>
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </CatalogSpecimen>
+
+        <CatalogSpecimen
+          title="Sidebar"
+          imports="SidebarProvider, Sidebar, SidebarMenu"
+          docs="layout-and-surfaces"
+          keywords="navigation rail app shell menu badge"
+          stageClassName="p-0"
+        >
+          <CatalogSidebarSpecimen />
+        </CatalogSpecimen>
+
+        <CatalogSpecimen
+          title="Scroll"
+          imports="ScrollArea"
+          docs="layout-and-surfaces"
+          keywords="scrollarea scrollbar overflow horizontal vertical wide form"
+        >
+          <ScrollArea className="h-36 w-full rounded-md border">
+            <div className="divide-y divide-border text-sm">
+              {Array.from({ length: 20 }, (_, i) => (
+                <div key={i} className="px-3 py-1.5">
+                  Item {i + 1}
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
           <ScrollArea orientation="horizontal" className="w-full">
-            <div className="flex gap-4 pb-4 min-w-max">
-              <div className="flex flex-col gap-1.5 min-w-[200px]">
-                <Label className="text-sm font-medium">Full Name</Label>
-                <Input placeholder="Jane Doe" />
-              </div>
-              <div className="flex flex-col gap-1.5 min-w-[220px]">
-                <Label className="text-sm font-medium">Email Address</Label>
-                <Input type="email" placeholder="jane@example.com" />
-              </div>
-              <div className="flex flex-col gap-1.5 min-w-[160px]">
-                <Label className="text-sm font-medium">Phone</Label>
-                <Input type="tel" placeholder="+1 (555) 000-0000" />
-              </div>
-              <div className="flex flex-col gap-1.5 min-w-[180px]">
-                <Label className="text-sm font-medium">Company</Label>
-                <Input placeholder="Acme Corp" />
-              </div>
-              <div className="flex flex-col gap-1.5 min-w-[140px]">
-                <Label className="text-sm font-medium">Job Title</Label>
-                <Input placeholder="Engineer" />
-              </div>
-              <div className="flex flex-col gap-1.5 min-w-[150px]">
-                <Label className="text-sm font-medium">Ticket Type</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="general">General</SelectItem>
-                    <SelectItem value="vip">VIP</SelectItem>
-                    <SelectItem value="speaker">Speaker</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-1.5 min-w-[140px]">
-                <Label className="text-sm font-medium">Dietary</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    <SelectItem value="vegetarian">Vegetarian</SelectItem>
-                    <SelectItem value="vegan">Vegan</SelectItem>
-                    <SelectItem value="gluten-free">Gluten-free</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-1.5 min-w-[200px]">
-                <Label className="text-sm font-medium">Special Requests</Label>
-                <Input placeholder="Accessibility, parking..." />
-              </div>
-              <div className="flex items-end min-w-[100px]">
-                <Button className="w-full">Register</Button>
+            <div className="flex min-w-max gap-3 pb-3">
+              {[
+                ["Full name", "Jane Doe", "w-44"],
+                ["Email", "jane@example.com", "w-52"],
+                ["Phone", "+1 (555) 000-0000", "w-40"],
+                ["Company", "Acme Corp", "w-40"],
+                ["Job title", "Engineer", "w-36"],
+              ].map(([label, placeholder, width]) => (
+                <div key={label} className={cn("flex flex-col gap-1.5", width)}>
+                  <Label className="text-xs font-medium">{label}</Label>
+                  <Input placeholder={placeholder} />
+                </div>
+              ))}
+              <div className="flex items-end">
+                <Button>Register</Button>
               </div>
             </div>
           </ScrollArea>
         </CatalogSpecimen>
-      </section>
 
+        <CatalogSpecimen
+          title="Frosted glass"
+          imports="Card stickyHeader"
+          docs="layout-and-surfaces"
+          keywords="card sticky header blur backdrop glass"
+          stageClassName="overflow-hidden p-0"
+        >
+          <Card stickyHeader className="h-72 rounded-none border-0 shadow-none">
+            <CardHeader>
+              <CardTitle>Release notes</CardTitle>
+              <CardDescription>v0.8 · six changes</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {[
+                  ["Red", "bg-red-500/20 border-red-500/30 text-red-700 dark:text-red-400"],
+                  ["Blue", "bg-blue-500/20 border-blue-500/30 text-blue-700 dark:text-blue-400"],
+                  ["Green", "bg-green-500/20 border-green-500/30 text-green-700 dark:text-green-400"],
+                  ["Amber", "bg-amber-500/20 border-amber-500/30 text-amber-700 dark:text-amber-400"],
+                  ["Rose", "bg-rose-500/20 border-rose-500/30 text-rose-700 dark:text-rose-400"],
+                  ["Teal", "bg-teal-500/20 border-teal-500/30 text-teal-700 dark:text-teal-400"],
+                ].map(([name, tone]) => (
+                  <div key={name} className={cn("rounded-lg border px-4 py-5 text-sm font-semibold", tone)}>
+                    {name}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </CatalogSpecimen>
+
+        <CatalogSpecimen
+          title="Media"
+          imports="Carousel, AspectRatio"
+          docs="layout-and-surfaces"
+          size="s"
+          keywords="carousel slider slides aspect ratio aspectratio image"
+        >
+          <Carousel className="w-full">
+            <CarouselContent>
+              {Array.from({ length: 5 }, (_, i) => (
+                <CarouselItem key={i}>
+                  <div className="flex h-24 items-center justify-center rounded-md bg-muted text-sm">
+                    Slide {i + 1}
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
+          <div className="mx-auto w-3/4">
+            <AspectRatio ratio={16 / 9} className="rounded-md bg-muted">
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                16 : 9
+              </div>
+            </AspectRatio>
+          </div>
+        </CatalogSpecimen>
+
+        <CatalogSpecimen
+          title="Disclosure"
+          imports="Accordion, Collapsible"
+          docs="layout-and-surfaces"
+          size="s"
+          keywords="accordion collapsible expand collapse faq"
+        >
+          <Accordion type="single" collapsible>
+            <AccordionItem value="item-1">
+              <AccordionTrigger>Is it accessible?</AccordionTrigger>
+              <AccordionContent>Yes — WAI-ARIA disclosure pattern.</AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-2">
+              <AccordionTrigger>Is it styled?</AccordionTrigger>
+              <AccordionContent>Yes — it uses the shared tokens.</AccordionContent>
+            </AccordionItem>
+          </Accordion>
+          <Collapsible open={open} onOpenChange={setOpen}>
+            <CollapsibleTrigger asChild>
+              <Button variant="outline" size="sm">
+                {open ? "Hide details" : "Show details"}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-2 rounded-md border p-3 text-sm">
+              Three reviewers, due Friday.
+            </CollapsibleContent>
+          </Collapsible>
+        </CatalogSpecimen>
+
+        <CatalogSpecimen
+          title="Sortable"
+          imports="Sortable, SortableItem, SortableItemHandle"
+          from="@nqlib/nqui/sortable"
+          docs="layout-and-surfaces"
+          size="s"
+          keywords="drag drop reorder dnd list"
+        >
+          <Sortable value={sortableItems} onValueChange={setSortableItems} orientation="vertical">
+            <SortableContent asChild>
+              <div className="space-y-1.5">
+                {sortableItems.map((item) => (
+                  <SortableItem key={item} value={item} asChild>
+                    <div className="flex items-center gap-2 rounded-md border bg-background px-2 py-1">
+                      <SortableItemHandle asChild>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 min-w-0 cursor-grab touch-none px-1 active:cursor-grabbing"
+                          aria-label="Drag to reorder"
+                        >
+                          <span className="text-muted-foreground">⋮⋮</span>
+                        </Button>
+                      </SortableItemHandle>
+                      <span className="text-sm">{item}</span>
+                    </div>
+                  </SortableItem>
+                ))}
+              </div>
+            </SortableContent>
+            <SortableOverlay>
+              {({ value }) => (
+                <div className="flex items-center gap-2 rounded-md border bg-background px-2 py-1 shadow-lg">
+                  <span className="text-muted-foreground">⋮⋮</span>
+                  <span className="text-sm">{value}</span>
+                </div>
+              )}
+            </SortableOverlay>
+          </Sortable>
+        </CatalogSpecimen>
+      </CatalogSection>
+
+      {/* ── Dates ───────────────────────────────────────────────── */}
+      <CatalogSection id="dates" title="Dates">
+        <CatalogSpecimen
+          title="Calendar"
+          imports="Calendar"
+          from="@nqlib/nqui/calendar"
+          docs="forms-and-fields"
+          size="l"
+          keywords="date picker range multiple months day"
+        >
+          <CatalogCalendarSpecimen />
+        </CatalogSpecimen>
+      </CatalogSection>
     </div>
+  )
+})
+
+/** Rail order — matches the page. */
+const CATALOG_SECTIONS = [
+  { id: "buttons-actions", title: "Actions" },
+  { id: "form-components", title: "Forms" },
+  { id: "display-components", title: "Display & feedback" },
+  { id: "navigation-menus", title: "Navigation" },
+  { id: "overlays-dialogs", title: "Overlays" },
+  { id: "layout-components", title: "Layout" },
+  { id: "dates", title: "Dates" },
+] as const
+
+export default function ComponentShowcase() {
+  const [index] = React.useState(() => new CatalogIndex())
+  const entries = useCatalogEntries(index)
+  const [query, setQuery] = React.useState("")
+  const deferredQuery = React.useDeferredValue(query)
+
+  const sections = React.useMemo(
+    () =>
+      CATALOG_SECTIONS.map((sec) => {
+        const items = entries.filter((e) => e.sectionId === sec.id)
+        return { ...sec, items }
+      }).filter((sec) => sec.items.length > 0),
+    [entries],
+  )
+  const sectionIds = React.useMemo(() => sections.map((s) => s.id), [sections])
+  const activeSection = useScrollSpy(sectionIds)
+  const activeIds = React.useMemo(
+    () => sections.find((s) => s.id === activeSection)?.items.map((e) => e.id) ?? [],
+    [sections, activeSection],
+  )
+  const activeSpecimen = useScrollSpy(activeIds)
+
+  const searching = deferredQuery.trim() !== ""
+  const total = entries.length
+
+  const rail = (
+    <>
+      <RailHeader pkg="@nqlib/nqui" count={index.seen} unit="specimens" />
+      <RailSearch
+        label="Search components"
+        placeholder="Search components"
+        value={query}
+        onChange={setQuery}
+      />
+      <RailGroup label={searching ? `${total} ${total === 1 ? "match" : "matches"}` : "Sections"}>
+        {sections.length ? (
+          <RailLinks
+            label="Catalog sections"
+            activeId={activeSection}
+            activeChildId={activeSpecimen}
+            items={sections.map((sec) => ({
+              id: sec.id,
+              label: sec.title,
+              count: sec.items.length,
+              children: sec.items.map((e) => ({ id: e.id, label: e.title })),
+            }))}
+          />
+        ) : (
+          <p className="px-2 text-sm text-muted-foreground">Nothing matches.</p>
+        )}
+      </RailGroup>
+    </>
+  )
+
+  return (
+    <GalleryPage
+      section="components"
+      title="Every control, in every state."
+      lede="Variants, sizes and states for @nqlib/nqui — each one live, so you can click, type and drag before you import. For whole screens composed from these, see the blocks."
+      aside={
+        <>
+          Composing a page rather than picking a part?{" "}
+          <Link
+            to="/blocks"
+            className="font-medium text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
+          >
+            Browse the blocks
+          </Link>
+          .
+        </>
+      }
+      rail={rail}
+      railSummary={
+        searching
+          ? `${total} ${total === 1 ? "match" : "matches"} for “${deferredQuery.trim()}”`
+          : (sections.find((s) => s.id === activeSection)?.title ?? "Sections")
+      }
+      railLabel="Browse components"
+      footer={
+        <Button size="sm" variant="outline" asChild>
+          <Link to="/charts">Chart catalog</Link>
+        </Button>
+      }
+    >
+      <CatalogIndexContext.Provider value={index}>
+        <CatalogQueryContext.Provider value={deferredQuery}>
+          {searching && total === 0 ? (
+            <div className="rounded-lg border border-dashed border-border px-6 py-14 text-center">
+              <p className="text-sm font-medium">No components match “{deferredQuery.trim()}”.</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Search by component name or what it does — “date”, “menu”, “toast”.
+              </p>
+              <Button size="sm" variant="outline" className="mt-4" onClick={() => setQuery("")}>
+                Clear search
+              </Button>
+            </div>
+          ) : null}
+          <CatalogSpecimens />
+        </CatalogQueryContext.Provider>
+      </CatalogIndexContext.Provider>
+    </GalleryPage>
   )
 }

@@ -3,7 +3,7 @@ title: Waterfall Chart
 description: Bridges, deltas, and totals stacked as one composable NQChart
 image: /og/waterfall-chart.png
 links:
-  github: https://github.com/ctesibius/nqchart/blob/main/src/registry/charts/waterfall-chart.tsx
+  github: https://github.com/nqlib/nqchart/blob/main/src/registry/charts/waterfall-chart.tsx
   doc: https://echarts.apache.org/en/option.html#series-bar
   api: https://echarts.apache.org/en/option.html#series-bar
 ---
@@ -195,7 +195,7 @@ The root container bridging raw financial rows → cumulative stack-friendly rec
     Extra classes forwarded to `<ChartContainer />`.
   </ApiRow>
   <ApiRow name="barRadius" type="number" default="3">
-    Corner rounding for waterfall rectangles.
+    Corner radius in px for every column. Omit it to follow `--radius-sm`. Start and total columns keep the zero line square; steps that float round both ends. Columns use the same 28% / 8% gaps as bar charts.
   </ApiRow>
   <ApiRow name="backgroundVariant" type="BackgroundVariant">
     Draws `<ChartBackground />` underneath the chart (same pattern as bar and scatter charts).

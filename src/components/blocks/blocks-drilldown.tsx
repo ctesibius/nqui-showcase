@@ -1,4 +1,7 @@
-/** Compact PM drilldowns (assign, filter, add-column, …) registered on `/blocks`. */
+/**
+ * Compact PM drilldowns (assign, filter, add-column, …). `/blocks` shows them as
+ * one `DrilldownsBlock` — same popover-stack pattern, switch the case.
+ */
 import { useState } from "react";
 import {
   Avatar,
@@ -10,6 +13,8 @@ import {
   ItemDescription,
   ItemTitle,
   Switch,
+  ToggleGroup,
+  ToggleGroupItem,
 } from "@nqlib/nqui";
 import { PEOPLE } from "../story/avatar-stack";
 import { Faces } from "./blocks-ui";
@@ -129,7 +134,7 @@ function Face({
   );
 }
 
-export function ShareStackBlock() {
+function ShareStackBlock() {
   const [person, setPerson] = useState<(typeof PEOPLE)[number] | null>(null);
   const [role, setRole] = useState<(typeof ROLES)[number]["id"]>("editor");
   const d = useDrilldown(() => {
@@ -196,7 +201,7 @@ export function ShareStackBlock() {
   );
 }
 
-export function ProjectSettingsStackBlock() {
+function ProjectSettingsStackBlock() {
   const [access, setAccess] = useState<(typeof ACCESS)[number]["id"]>("private");
   const [mentions, setMentions] = useState(true);
   const [digest, setDigest] = useState(false);
@@ -282,7 +287,7 @@ export function ProjectSettingsStackBlock() {
   );
 }
 
-export function AssignStackBlock() {
+function AssignStackBlock() {
   const [person, setPerson] = useState<(typeof PEOPLE)[number] | null>(PEOPLE[0]);
   const [role, setRole] = useState<(typeof ROLES)[number]["id"]>("owner");
   const [nextPerson, setNextPerson] = useState<(typeof PEOPLE)[number] | null>(null);
@@ -338,7 +343,7 @@ export function AssignStackBlock() {
   );
 }
 
-export function MoveStackBlock() {
+function MoveStackBlock() {
   const [kind, setKind] = useState<"Move" | "Copy">("Move");
   const [ws, setWs] = useState<(typeof WORKSPACES)[number] | null>(null);
   const [project, setProject] = useState<(typeof WORKSPACES)[number]["projects"][number] | null>(
@@ -429,7 +434,7 @@ export function MoveStackBlock() {
   );
 }
 
-export function FilterStackBlock() {
+function FilterStackBlock() {
   const [field, setField] = useState<keyof typeof FILTERS | null>(null);
   const [op, setOp] = useState<string | null>(null);
   const d = useDrilldown(() => {
@@ -495,7 +500,7 @@ export function FilterStackBlock() {
   );
 }
 
-export function AddColumnStackBlock() {
+function AddColumnStackBlock() {
   const [kind, setKind] = useState<(typeof COLUMN_TYPES)[number] | null>(null);
   const [option, setOption] = useState<string>(SELECT_OPTIONS[0]);
   const d = useDrilldown(() => {
@@ -563,7 +568,7 @@ export function AddColumnStackBlock() {
   );
 }
 
-export function ViewOptionsStackBlock() {
+function ViewOptionsStackBlock() {
   const [mode, setMode] = useState<(typeof VIEW_ROOT)[number]["id"]>("group");
   const [group, setGroup] = useState<(typeof VIEW_FIELDS)[number]>("Stage");
   const [sort, setSort] = useState<(typeof VIEW_FIELDS)[number]>("Updated");
@@ -619,7 +624,7 @@ export function ViewOptionsStackBlock() {
   );
 }
 
-export function StatusStackBlock() {
+function StatusStackBlock() {
   const [group, setGroup] = useState<(typeof STATUS_GROUPS)[number] | null>(null);
   const [status, setStatus] = useState("In progress");
   const d = useDrilldown(() => setGroup(null));
@@ -670,7 +675,7 @@ export function StatusStackBlock() {
   );
 }
 
-export function ExportStackBlock() {
+function ExportStackBlock() {
   const [format, setFormat] = useState<(typeof EXPORT_FORMATS)[number] | null>(null);
   const d = useDrilldown(() => setFormat(null));
 
@@ -713,5 +718,49 @@ export function ExportStackBlock() {
         </DrilldownPage>
       </DrilldownPopover>
     </DrilldownCard>
+  );
+}
+
+const DRILLDOWNS = [
+  { id: "share", label: "Share", Render: ShareStackBlock },
+  { id: "assign", label: "Assign", Render: AssignStackBlock },
+  { id: "move", label: "Move", Render: MoveStackBlock },
+  { id: "filter", label: "Filter", Render: FilterStackBlock },
+  { id: "column", label: "Add column", Render: AddColumnStackBlock },
+  { id: "view", label: "View", Render: ViewOptionsStackBlock },
+  { id: "status", label: "Status", Render: StatusStackBlock },
+  { id: "export", label: "Export", Render: ExportStackBlock },
+  { id: "settings", label: "Settings", Render: ProjectSettingsStackBlock },
+] as const;
+
+type DrilldownId = (typeof DRILLDOWNS)[number]["id"];
+
+/** Every drilldown on one card — pick the menu, then open it. */
+export function DrilldownsBlock() {
+  const [id, setId] = useState<DrilldownId>("share");
+  const current = DRILLDOWNS.find((d) => d.id === id) ?? DRILLDOWNS[0];
+
+  return (
+    <div className="flex h-full flex-col gap-4">
+      <ToggleGroup
+        type="single"
+        size="sm"
+        variant="outline"
+        value={id}
+        onValueChange={(v) => v && setId(v as DrilldownId)}
+        aria-label="Menu to try"
+        className="flex-wrap justify-start"
+      >
+        {DRILLDOWNS.map((d) => (
+          <ToggleGroupItem key={d.id} value={d.id} className="px-2.5 text-xs">
+            {d.label}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
+      <div className="min-h-0 flex-1">
+        {/* Keyed so each menu starts closed with its own fresh state. */}
+        <current.Render key={current.id} />
+      </div>
+    </div>
   );
 }

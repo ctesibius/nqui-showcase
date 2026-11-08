@@ -39,10 +39,15 @@ Generic AI dashboard tells: gradient text, border-left accent stripes, glassmorp
 
 Keep both. Do not flatten one into the other.
 
-1. **Marketing** (`/`, `/blocks`, `/charts`) — factory-glass: grid wallpaper, one bloom (`.fl-glow`), `LiquidGlassBar`. Satoshi. This is the pitch surface.
-2. **Operate** (`/catalog`, `/nqui`, `/design-system`, recipes) — labeled admin shell (`--sidebar-width: 13rem`, no fake user chip) + hybrid **Tray** for specimens. nqui `Card` for product panels. Satoshi is the library default (`@nqlib/nqui/styles`). Brand accent writes `--primary` only; hover/menu wash stays `--accent` / `--interactive` (muted).
+1. **Marketing** (`/`, `/blocks`, `/charts`, `/catalog`) — factory-glass: grid wallpaper, one bloom (`.fl-glow`), `LiquidGlassBar`. Satoshi. This is the pitch surface.
+2. **Operate** (`/nqui`, `/design-system`, recipes) — labeled admin shell (`--sidebar-width: 13rem`, no fake user chip) + hybrid **Tray** for specimens. nqui `Card` for product panels. Satoshi is the library default (`@nqlib/nqui/styles`). Brand accent writes `--primary` only; hover/menu wash stays `--accent` / `--interactive` (muted).
 
 Frosted glass stays on marketing chrome. Do not put `FrostedGlass` on nqui `Card` sticky headers or treat Tray as an `@nqlib/nqui` export.
+
+### Gallery pages (2026-11-07)
+`/charts` and `/catalog` are one layout: `GalleryPage` in `src/components/gallery/gallery-shell.tsx` — marketing chrome (wallpaper, bloom, site top bar), a short hero, then a sticky **left rail** (package + count, search with `/`, filters or section links with counts and scroll-spy) beside the specimens. Below `lg` the rail moves into a left Sheet behind one floating glass bar. Any future "browse the library" page (nqgrid, nqgantt) uses the same shell instead of a top toolbar.
+
+The docs (`/docs/*`) use the same two pieces — `SiteFrame` (wallpaper, bloom, site nav, footer) and `RailLayout` (sticky left rail, phone Sheet) from `src/components/gallery/` — with `DocsRail` (library switch, search, page tree) and the article's sticky "On this page" column. There is no separate docs chrome any more.
 
 ### Block stage sizing (intent → room)
 Card size follows the **job of the surface**, not the package name:
@@ -59,12 +64,12 @@ Rule of thumb: if the component needs to show a time axis or many columns at onc
 
 ### Shared PM feed (2026-08-08)
 One contract in `src/lib/pm` (`PmIssue` + `PmSchedule` + adapters) powers:
-- **Issues lab** (`report`) — Blocks | Board | List + status-mix chart on Board/List (nqui DnD + nqchart); table density stays on Work breakdown
-- **Timeline lab** (`gantt`) — same FY26 campaign rows via `toGanttOptions`
+- **Campaign issues** (`report`) — Blocks | Board | List + status-mix chart on Board/List (nqui DnD + nqchart); table density stays on Work breakdown
+- **Campaign timeline** (`gantt`) — same FY26 campaign rows via `toGanttOptions`
 
 Q3 checkout tasks are a second fixture (`Q3_TASKS`) for projects/ops — same `PmIssue` type, not a divergent `Task`.
 
 Kanban / list / **blocks** (quarter × status cells) adapters live in `src/lib/pm/adapters/views.ts`. Overlay catalog specimens (invite dialog, revoke alert, filters drawer, issue sheet) live in `src/components/showcase/overlay-demos.tsx`. Compact PM drilldowns (assign, filter, add-column, …) live in `src/components/blocks/blocks-drilldown.tsx`.
 
 ### Timeless report block (2026-07-15)
-The **Sales ledger** (`/blocks` → report) is the multi-package composition: ink-blue monochrome charts + hairline pivot, Companion: Category pivot (`table`). FY26 campaign gantt lives in Timeline lab (Issues lab shares that feed).
+The **Sales ledger** (`/blocks` → report) is the multi-package composition: ink-blue monochrome charts + hairline pivot. The FY26 campaign gantt lives in Campaign timeline (Campaign issues shares that feed).

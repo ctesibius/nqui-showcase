@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
   cn,
+  Button,
 } from "@nqlib/nqui";
 import { Calendar } from "@nqlib/nqui/calendar";
 import { renderCell, type ColumnSchema } from "@nqlib/nqgrid/engine";
@@ -90,10 +91,11 @@ export function EditableCell({
 
   if (!isEditing) {
     return (
-      <button
+      <Button
         type="button"
+        variant="ghost"
         className={cn(
-          "flex w-full min-w-0 items-center text-left outline-none",
+          "h-auto w-full min-w-0 justify-start gap-0 rounded-none px-0 text-left font-normal hover:bg-transparent",
           className,
         )}
         onClick={(e) => {
@@ -113,7 +115,7 @@ export function EditableCell({
         onTouchStart={stopSortableChain}
       >
         <Cell task={task} schema={schema} className="min-w-0 flex-1" />
-      </button>
+      </Button>
     );
   }
 
@@ -326,14 +328,15 @@ function DateCellEditor({
       }}
     >
       <PopoverAnchor asChild>
-        <button
+        <Button
           type="button"
-          className="flex h-7 w-full min-w-0 items-center rounded-md border border-input bg-background px-2 text-left text-xs tabular-nums"
+          variant="outline"
+          className="w-full min-w-0 justify-start bg-background px-2 text-left text-xs font-normal tabular-nums"
           aria-label={`Edit ${label}`}
           {...sortableShield}
         >
           {formatIsoDateLabel(value)}
-        </button>
+        </Button>
       </PopoverAnchor>
       <PopoverContent className="w-auto p-0" align="start" {...sortableShield}>
         <Calendar
@@ -390,14 +393,15 @@ function DateRangeCellEditor({
       }}
     >
       <PopoverAnchor asChild>
-        <button
+        <Button
           type="button"
-          className="flex h-7 w-full min-w-0 items-center rounded-md border border-input bg-background px-2 text-left text-xs tabular-nums"
+          variant="outline"
+          className="w-full min-w-0 justify-start bg-background px-2 text-left text-xs font-normal tabular-nums"
           aria-label={`Edit ${label}`}
           {...sortableShield}
         >
           {formatIsoRangeLabel(value)}
-        </button>
+        </Button>
       </PopoverAnchor>
       <PopoverContent className="w-auto p-0" align="start" {...sortableShield}>
         <Calendar

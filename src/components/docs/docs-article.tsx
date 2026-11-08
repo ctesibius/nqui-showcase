@@ -1,56 +1,30 @@
 import { useRef, type ReactNode } from "react";
 import { cn } from "@nqlib/nqui";
 import { DocsToc } from "./docs-toc";
-import { usePinnedColumnLeft } from "./use-pinned-column-left";
 
 /**
- * Docs article + nqchart-style right TOC (path rail, diamond thumb, fading glow).
- * Parent supplies outer max-width / sidebar; this owns article + TOC columns.
+ * Docs article + the "On this page" column (path rail, diamond thumb, fading
+ * glow). The column is a plain sticky aside: inside the site frame
+ * (`.fl-page` uses `overflow-x: clip`, not hidden) sticky works, so it no
+ * longer needs the viewport-fixed pinning the old docs shell used.
  */
-export function DocsArticle({
-  children,
-  className,
-  wide = false,
-}: {
-  children: ReactNode;
-  className?: string;
-  /** Widen article column when the left docs menu is collapsed (max view). */
-  wide?: boolean;
-}) {
+export function DocsArticle({ children, className }: { children: ReactNode; className?: string }) {
   const articleRef = useRef<HTMLElement>(null);
-  const { anchorRef, box } = usePinnedColumnLeft([wide]);
 
   return (
     <div className={cn("flex w-full items-start gap-10", className)}>
-      <article
-        ref={articleRef}
-        className={cn(
-          // Top padding lives on the article only — shared row padding made sticky
-          // TOC/sidebar travel ~pt-8 before sticking.
-          "flex min-w-0 flex-1 flex-col gap-10 overflow-x-clip pt-8",
-          !wide && "xl:max-w-3xl",
-        )}
-      >
+      <article ref={articleRef} className="flex min-w-0 max-w-3xl flex-1 flex-col gap-10">
         {children}
       </article>
-      {/* In-flow width spacer; panel is viewport-fixed so it never travels/unsticks. */}
-      <div
-        ref={anchorRef}
-        className="hidden w-72 shrink-0 xl:block"
-        aria-hidden
-      />
+      {/* Sticky under the floating site nav, level with the rail (top-20). */}
       <aside
-        className="fixed z-[var(--z-sticky-content)] hidden w-72 xl:block"
-        style={
-          box == null
-            ? { visibility: "hidden" }
-            : { left: box.left, top: box.top, height: box.height }
-        }
+        aria-label="On this page"
+        className="sticky top-20 hidden h-[calc(100dvh-6rem)] w-64 shrink-0 xl:block"
       >
         <DocsToc
           container={articleRef}
           headingSelector="h2, h3, [data-docs-toc]"
-          scrollOffset={48}
+          scrollOffset={96}
           title="On this page"
           className="h-full"
         />

@@ -1,12 +1,15 @@
 /**
- * Timeline lab — the nqgantt block on /blocks.
+ * Campaign timeline — the nqgantt block on /blocks.
  *
- * FY26 campaign mock (lanes, milestones, deps) + live bar re-skin controls
- * + feature toggles for every GanttRoot/host switch users can exercise.
+ * The gantt leads: one plain-language line, then two quiet controls — Options
+ * (every GanttRoot/host switch, in a popover so they don't bury the chart) and
+ * Design (live bar re-skins). Range lives on the gantt's own toolbar.
  * Add `?ganttlab` to the URL for the token bench.
  */
-import { useCallback, useEffect, useRef, useState } from "react"
-import { cn } from "@nqlib/nqui"
+import { useCallback, useRef, useState } from "react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { ArrowDown01Icon, Settings02Icon } from "@hugeicons/core-free-icons"
+import { Button, Popover, PopoverContent, PopoverTrigger, cn } from "@nqlib/nqui"
 import { RoadmapGantt } from "@/nqgantt/demos/roadmap-gantt"
 import { GanttDesignMenu } from "@/nqgantt/demos/gantt-design-menu"
 import { GanttDesignLab, useGanttLabEnabled } from "@/nqgantt/demos/gantt-design-lab"
@@ -25,41 +28,13 @@ import {
   groupCampaignByLane,
 } from "@/lib/pm"
 import { toGanttOptions } from "@/lib/pm/adapters"
-import {
-  GANTT_BAR_DESIGN_DEFAULT,
-  isGanttBarStyleId,
-  isGanttGroupRowsId,
-  type GanttBarDesign,
-} from "@/nqgantt/bar-design"
-
-const STORAGE_KEY = "nqui-showcase:gantt-bar-design"
-
-function readStoredDesign(): GanttBarDesign {
-  if (typeof window === "undefined") return GANTT_BAR_DESIGN_DEFAULT
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return GANTT_BAR_DESIGN_DEFAULT
-    const parsed = JSON.parse(raw) as Partial<GanttBarDesign>
-    return {
-      barStyle: isGanttBarStyleId(parsed.barStyle)
-        ? parsed.barStyle
-        : GANTT_BAR_DESIGN_DEFAULT.barStyle,
-      groupRows: isGanttGroupRowsId(parsed.groupRows)
-        ? parsed.groupRows
-        : GANTT_BAR_DESIGN_DEFAULT.groupRows,
-      tuning:
-        parsed.tuning && typeof parsed.tuning === "object"
-          ? (parsed.tuning as Record<string, number>)
-          : {},
-    }
-  } catch {
-    return GANTT_BAR_DESIGN_DEFAULT
-  }
-}
+import { type GanttBarDesign } from "@/nqgantt/bar-design"
+import { useSharedGanttBarDesign } from "@/nqgantt/bar-design-store"
 
 export function TimelineLabBlock({ className }: { className?: string }) {
   const stageRef = useRef<HTMLDivElement>(null)
-  const [design, setDesign] = useState<GanttBarDesign>(readStoredDesign)
+  // Shared with the repair shop floor: one design for every gantt on /blocks.
+  const [design, setDesign] = useSharedGanttBarDesign()
   const [features, setFeatures] = useState<GanttFeatureToggleState>({
     ...GANTT_FEATURE_TOGGLE_DEFAULTS,
     showWbs: true,
@@ -70,37 +45,33 @@ export function TimelineLabBlock({ className }: { className?: string }) {
   useGanttBarDesign(stageRef, design)
   useGanttFocusWork(stageRef)
 
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(design))
-    } catch {
-      // Private-mode storage denial shouldn't break the demo.
-    }
-  }, [design])
-
-  const onDesignChange = useCallback((next: GanttBarDesign) => setDesign(next), [])
+  const onDesignChange = useCallback((next: GanttBarDesign) => setDesign(next), [setDesign])
 
   return (
     <div className={cn("flex h-full min-h-0 flex-col gap-2", className)}>
       {/* Stage is padding:0 for full-bleed bars — inset chrome so tray edges breathe. */}
       <div className="flex shrink-0 flex-col gap-2 px-3 pt-3">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <p className="text-[11px] text-muted-foreground">
-            FY26 campaign — 12-bar critical spine (same-day FS), float side tasks, Ava peak-load,
-            slipped baselines. Critical is on by default; drag or use <Kbd>←</Kbd> <Kbd>→</Kbd>.
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <p className="min-w-0 flex-1 text-xs text-muted-foreground">
+            Drag a bar — or select it and press <Kbd>←</Kbd> <Kbd>→</Kbd> — and the tasks
+            that depend on it move too. The critical path updates as you go.
           </p>
-          <GanttDesignMenu
-            className="ml-auto"
-            design={design}
-            onDesignChange={onDesignChange}
-          />
+          <div className="flex shrink-0 items-center gap-1.5">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button type="button" size="sm" variant="outline" className="h-7 gap-1.5 px-2 text-xs">
+                  <HugeiconsIcon icon={Settings02Icon} size={14} strokeWidth={1.8} />
+                  Options
+                  <HugeiconsIcon icon={ArrowDown01Icon} size={13} strokeWidth={2} className="opacity-60" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-[min(30rem,calc(100vw-2rem))] p-3">
+                <GanttFeatureToggles bare showRange={false} value={features} onChange={setFeatures} />
+              </PopoverContent>
+            </Popover>
+            <GanttDesignMenu design={design} onDesignChange={onDesignChange} />
+          </div>
         </div>
-
-        <GanttFeatureToggles
-          className="shrink-0"
-          value={features}
-          onChange={setFeatures}
-        />
       </div>
 
       <div

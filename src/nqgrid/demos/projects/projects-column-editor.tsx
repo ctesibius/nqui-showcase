@@ -84,11 +84,11 @@ function SelectOptionsEditor({
         {options.map((opt, index) => (
           <li key={String(opt.id)} className="space-y-1.5 rounded border border-border p-2">
             <div className="flex items-center gap-1.5">
-              <input
+              <Input
                 type="color"
                 value={opt.color ?? "#94a3b8"}
                 onChange={(e) => update(index, { color: e.target.value })}
-                className="size-6 shrink-0 cursor-pointer rounded border border-border"
+                className="size-6 shrink-0 cursor-pointer rounded p-0.5"
                 aria-label={`Color for ${opt.label}`}
               />
               <Input

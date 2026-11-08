@@ -1,14 +1,10 @@
 import { Badge, Button } from "@nqlib/nqui";
-import { ExampleFrame, ExampleHint, ExampleLabel } from "./shared";
+import { ExampleFrame, ExampleLabel } from "./shared";
 
 /** Variants and semantic tokens over hex / dark: sprawl. */
 export default function ExThemingTokens() {
   return (
     <ExampleFrame>
-      <ExampleHint>
-        Prefer variant + semantic tokens. className is for layout, not a second
-        palette.
-      </ExampleHint>
       <div className="space-y-4">
         <div className="space-y-2">
           <ExampleLabel>Button variants</ExampleLabel>

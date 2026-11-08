@@ -273,6 +273,7 @@ export function SummaryView({
             onKeyDown={handleKeyDown}
             className="outline-none"
           >
+            {/* eslint-disable-next-line no-restricted-syntax -- nqgrid spreadsheet engine table (gridTableClass, sticky header, measured column widths); nqui Table's wrapper breaks the engine layout */}
             <table className={gridTableClass} style={{ width: tableWidth }}>
               <colgroup>
                 {SUMMARY_COLUMNS.map((col) => (

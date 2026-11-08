@@ -4,7 +4,7 @@
 
 <NquiExample name="overlays-pick" />
 
-Open full variants: [Overlays & Dialogs](/catalog#overlays-dialogs)
+Open full variants: [Overlays](/catalog#overlays-dialogs)
 
 ## How
 

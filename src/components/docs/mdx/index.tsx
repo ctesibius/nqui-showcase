@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { MDXComponents } from "mdx/types";
-import { ScrollArea, cn } from "@nqlib/nqui";
+import { ScrollArea, cn, Table, TableHead, TableCell, TableRow } from "@nqlib/nqui";
 import { MDXLink } from "./link";
 import { Steps, Step, StepTitle, StepContent, StepDescription } from "./steps";
 import { CodeTabs, Tabs, TabsList, TabsTab, TabsPanel, Tab } from "./tabs";
@@ -52,15 +52,17 @@ export const mdxComponents: MDXComponents = {
   ),
   hr: (props) => <hr className="my-8 border-border" {...props} />,
   table: (props) => (
-    <ScrollArea orientation="both" fadeMask={false} className="my-6 w-full max-w-full">
-      <table className="w-max min-w-full border-collapse text-sm" {...props} />
+    // Wide tables scroll inside the article column; the edge fade is the only
+    // cue that columns continue past the visible width.
+    <ScrollArea orientation="horizontal" className="my-6 w-full max-w-full [&_[data-slot=table-container]]:overflow-visible">
+      <Table className="w-max min-w-full border-collapse text-sm" {...props} />
     </ScrollArea>
   ),
   th: (props) => (
-    <th className="border-b border-border px-3 py-2 text-left font-semibold text-foreground" {...props} />
+    <TableHead className="h-auto whitespace-normal border-b border-border px-3 py-2 text-left font-semibold text-foreground" {...props} />
   ),
-  td: (props) => <td className="border-b border-border px-3 py-2 text-muted-foreground" {...props} />,
-  tr: (props) => <tr className="even:bg-muted/30" {...props} />,
+  td: (props) => <TableCell className="whitespace-normal border-b border-border px-3 py-2 text-muted-foreground" {...props} />,
+  tr: (props) => <TableRow className="border-0 even:bg-muted/30 hover:bg-transparent" {...props} />,
   pre: ({ className, children, ...props }) => (
     <div className="docs-codeblock my-4 w-full max-w-full overflow-hidden rounded-lg border border-border bg-muted">
       <ScrollArea orientation="horizontal" fadeMask={false} className="w-full max-w-full">

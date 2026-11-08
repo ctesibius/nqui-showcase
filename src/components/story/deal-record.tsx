@@ -93,13 +93,15 @@ function SuggestedActions() {
           Suggested · review before send
         </p>
         {pending.length < ACTIONS.length ? (
-          <button
+          <Button
             type="button"
+            variant="link"
+            size="sm"
             onClick={restore}
-            className="rounded text-[11px] text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="h-auto px-0 text-[11px] font-normal text-muted-foreground hover:text-foreground"
           >
             Restore
-          </button>
+          </Button>
         ) : null}
       </div>
 

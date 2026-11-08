@@ -2,7 +2,7 @@
 
 **Intention:** Icons are Hugeicons at product size; components own icon sizing. Styling stays on variants first, layout classes second.
 
-Open related catalog: [Buttons & Actions](/catalog#buttons-actions) · [Navigation & Menus](/catalog#navigation-menus)
+Open related catalog: [Actions](/catalog#buttons-actions) · [Navigation](/catalog#navigation-menus)
 
 ## How
 

@@ -22,17 +22,20 @@ Load **1–3 files** per task via **`.cursor/READ_BUDGET.md`**:
 | Projects / PM board | `src/nqgrid/demos/projects/` |
 | Gantt / timeline | `src/nqgantt/demos/roadmap-gantt.tsx`, `NQGANTT-WORKSPACE.md` |
 | **Gantt PM / PMO guide** | `docs/nqgantt/` (wikilinks SSOT) → live `/docs/nqgantt` via `pnpm docs:sync:nqgantt` |
-| **nqchart BI hub** | `docs/nqchart/` (wikilinks SSOT) → live `/docs/nqchart` via `pnpm docs:sync:nqchart` · lab `/charts/lab` |
+| **nqchart BI hub** | `docs/nqchart/` (wikilinks SSOT) → live `/docs/nqchart` via `pnpm docs:sync:nqchart` · lab `/charts/lab`. The sync re-copies API pages from `../becocharts` — never hand-edit `content/docs/nqchart/` API pages |
 | Charts / analytics dashboard | `src/components/analytics/analytics-dashboard.tsx` + one `src/registry/charts/` file |
 | **nqchart embeds / stuck hover / clipped intro** | `.cursor/skills/nqchart-embed/SKILL.md` → `blocks-charts.tsx` or `blocks-report.tsx` |
 | **Docs TOC diamond / rail vanish** | `.agents/skills/fixed/index.md` → `docs-toc-indicator.tsx` |
-| **Docs library (`/docs`)** | `content/docs/` · `src/pages/docs-page.tsx` · sync: `pnpm docs:sync:nqchart` · `pnpm docs:sync:nqgantt` · `pnpm docs:sync:nqui` |
+| **Docs library (`/docs`)** | `content/docs/` · `src/pages/docs-page.tsx` · rail `src/components/docs/docs-rail.tsx` · sync: `pnpm docs:sync:nqchart` · `pnpm docs:sync:nqgantt` · `pnpm docs:sync:nqui` |
 | **nqui app / composition guide** | `docs/nqui/` (wikilinks SSOT) → live `/docs/nqui` via `pnpm docs:sync:nqui` · catalog `/catalog` |
 | **Remember / prior gotcha** | `memory/INDEX.md` (never bulk-read `memory/`) |
 | Local nqgrid toggle | `NQGRID-WORKSPACE.md`, `pnpm nqgrid:status` |
 | Local nqui toggle | `pnpm nqui:local` / `nqui:status` — builds, links, then `tsc -b` (Vercel typecheck) |
 | Bump `@nqlib/*` / lockfile | `.cursor/rules/pnpm-lockfile.mdc` → `pnpm update <pkg>` + `pnpm lockfile:check` |
 | Engine bug / patch sibling? | `.cursor/NQLIB.md` → ask user |
+| **Dev overlay (redlines, copy element for agent)** | Loupe, dev only: `src/devtools/loupe/README.md` · config `src/devtools/loupe.config.ts` · ⌥⇧M |
+| **Any scroll container** | `.cursor/rules/scroll-area.mdc` — always nqui `ScrollArea` |
+| **Any control or table** | `.cursor/rules/nqui-only.mdc` — nqui components only, never raw HTML |
 
 Refresh nqui skills: `npx @nqlib/nqui init-skills --force`
 
@@ -45,8 +48,8 @@ Refresh nqui skills: `npx @nqlib/nqui init-skills --force`
 
 | Chrome | Routes | Look |
 |--------|--------|------|
-| Marketing | `/`, `/blocks`, `/charts` | factory-glass, `LiquidGlassBar` |
-| Operate | `/catalog`, `/nqui`, `/design-system`, recipes | labeled sidebar + Tray |
+| Marketing | `/`, `/blocks`, `/charts`, `/catalog`, `/docs` | factory-glass, `LiquidGlassBar`; galleries and docs share `SiteFrame` + `RailLayout` (`src/components/gallery/`) |
+| Operate | `/nqui`, `/design-system`, recipes | labeled sidebar + Tray |
 
 | Section | npm package | Live surface |
 |---------|-------------|--------------|
@@ -104,6 +107,25 @@ nqui-showcase/
 - **nqgantt bar SVG/TS chrome** → edit `src/nqgantt/lib/`, port upstream when releasing (`NQGANTT-WORKSPACE.md`)
 - **nqchart source** → `../becocharts/src/registry/`; the showcase consumes `@nqlib/nqchart` from npm (nothing vendored)
 - **Showcase UI only** → `src/components/`, `src/pages/`
+---
+
+## Scrolling — always nqui ScrollArea
+
+Every element that scrolls is `ScrollArea` from `@nqlib/nqui` (or `CoreScrollArea`
+on hot virtualized paths). Native `overflow-auto` / `overflow-scroll` in `src/**/*.tsx`
+fails lint (`no-restricted-syntax`, `eslint.config.js`); the rare exception takes an
+`eslint-disable-next-line` with its reason. Rules and recipes: `.cursor/rules/scroll-area.mdc`.
+
+---
+
+## nqui only
+
+The showcase sells our libraries, so every control is an nqui component: `Button`,
+`Input`, `NativeSelect` / `Select`, `Textarea`, `Label`, `Checkbox`, `Table` … Raw
+`button`, `input`, `select`, `textarea`, `label` and `table` in `src/**/*.tsx` fail lint
+(`no-restricted-syntax`); a rare exception takes an `eslint-disable-next-line` with a
+concrete technical reason. Mapping and exception policy: `.cursor/rules/nqui-only.mdc`.
+
 ---
 
 ## Local vs published packages

@@ -1,4 +1,4 @@
-import { Button } from "@nqlib/nqui";
+import { ScrollArea, Button } from "@nqlib/nqui";
 import type { PivotSpec } from "@nqlib/nqgrid/core";
 import {
   PivotFieldList,
@@ -45,11 +45,13 @@ export default function ExPivotFieldList() {
             aria-label="Pivot from the field list"
           />
         </PivotScroll>
-        <PivotFieldList
-          {...pivotFieldListProps(pivot, layout)}
-          title="Fields"
-          className="min-h-0 flex-1 overflow-y-auto shadow-none"
-        />
+        <ScrollArea className="min-h-0 flex-1">
+          <PivotFieldList
+            {...pivotFieldListProps(pivot, layout)}
+            title="Fields"
+            className="shadow-none"
+          />
+        </ScrollArea>
       </div>
     </ExampleFrame>
   );

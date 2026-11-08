@@ -182,9 +182,9 @@ Operate density for product demos; Experience/Persuade for the marketing landing
 
 **Gallery shelves** (`/catalog`, `/blocks`, `/charts`): specimens sit in Tray; stage size follows job, not package name — `default` (padded UI), `flush`, `chart` (4:3), `table` (scrollable), `gantt` (~36rem), `report` (min ~40rem, scroll). Full-bleed when a time axis or many columns need the whole shelf.
 
-**Responsive:** Re-compose with container queries / fluid sizing rather than cramming at a fixed breakpoint. Docs sidebar breakpoint token: `--breakpoint-sidebar: 940px`.
+**Responsive:** Re-compose with container queries / fluid sizing rather than cramming at a fixed breakpoint. The rail layout (galleries and docs) moves its sidebar into a Sheet below `lg`.
 
-**Frosted glass** (`backdrop-blur` + translucent background) is reserved for **marketing chrome** over shifting layers (`/`, `/blocks`, `/charts` — story nav pill, `LiquidGlassBar`, `.fl-glow`). Operate surfaces (`/catalog`, recipes, `/design-system`) use labeled sidebar + Tray. Do not layer glass on nqui `Card` sticky headers.
+**Frosted glass** (`backdrop-blur` + translucent background) is reserved for **marketing chrome** over shifting layers (`/`, `/blocks`, `/charts` — story nav pill, `LiquidGlassBar`, `.fl-glow`). Gallery pages (`/charts`, `/catalog`) are marketing chrome with a sticky left rail (`GalleryPage`). Operate surfaces (`/nqui`, recipes, `/design-system`) use labeled sidebar + Tray. Do not layer glass on nqui `Card` sticky headers.
 
 **Two chrome systems (intentional).** Marketing stays factory-glass. Catalog/recipes stay an admin shell. Unify each internally; do not flatten one into the other.
 
@@ -240,9 +240,10 @@ Base radius token `--radius: 0.45rem` with ladder `sm` / `md` / `lg` / `xl` via 
 - **Forms:** Prefer nqui `Field` / `FieldGroup`; inline selection uses `ToggleGroup`, not `RadioGroup`.
 
 ### Navigation
-- Catalog sidebar: Home, Recipes, composition demos, Component catalog, Appearance, Design system — labeled `13rem` shell, no fake user footer. Theme Studio is **not** in the primary sidebar (route/label for `/studio` may still exist).
+- Gallery rail (`/charts`, `/catalog`): sticky left column under the site nav — package + count, search (`/` focuses it), single-choice filters as a vertical nqui `ToggleGroup` with faceted counts, or section links with scroll-spy that expand to their specimens. Phone: the same rail in a left `Sheet`.
+- Recipes sidebar: Home, Recipes, composition demos, Component catalog, Appearance, Design system — labeled `13rem` shell, no fake user footer. Theme Studio is **not** in the primary sidebar (route/label for `/studio` may still exist).
 - Marketing: frosted story nav pill over the living window; sticky showcase headers use frosted `bg-background/40` at `h-12`.
-- Docs: left nav at `--breakpoint-sidebar` (~940px).
+- Docs (`/docs/*`): the same site frame and rail layout — the docs rail (library Select, search, the library's pages from meta.json) on the left, the article and a sticky "On this page" column (xl+) on the right. Phone: the rail in a left Sheet.
 
 ### Tray (signature, showcase-only)
 Shared elevation primitive for catalog/blocks/charts/docs previews. Compose `Tray` + `Tray.Caption` + `Tray.Stage`. Do not promote to nqui docs as a shipped library export.

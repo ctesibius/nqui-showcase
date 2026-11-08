@@ -17,6 +17,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
+import { liftIntention } from "./lib/docs-intro.mjs";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -42,6 +43,7 @@ const PM_PAGES = [
   "baselines-and-earned-value",
   "actuals-and-worklog",
   "resource-availability",
+  "production-boards",
   "ms-project-interop",
   // Practice + reference
   "practice-in-gantt-lab",
@@ -62,6 +64,7 @@ const TITLE_BY_SLUG = {
   "baselines-and-earned-value": "Baselines and earned value",
   "actuals-and-worklog": "Actuals and the worklog",
   "resource-availability": "Resource availability",
+  "production-boards": "Production boards",
   "ms-project-interop": "MS Project interop",
   "critical-path": "Critical path",
   "practice-in-gantt-lab": "Practice in Gantt lab",
@@ -110,17 +113,9 @@ function toMdx(raw, slug) {
   }
   body = rewriteWikilinks(body);
 
-  const intention = body
-    .split("\n")
-    .map((l) => l.trim())
-    .find((l) => l.startsWith("**Intention:**"))
-    ?.replace(/^\*\*Intention:\*\*\s*/, "")
-    ?.replace(/\*\*/g, "");
-
-  const description =
-    slug === "index"
-      ? "Schedule engine, Gantt UI, and PM / PMO guide for @nqlib/nqgantt."
-      : (intention ?? `nqgantt — ${title}`).slice(0, 160).trim();
+  const intro = liftIntention(body, `nqgantt — ${title}`);
+  body = intro.body;
+  const description = slug === "index" ? "Schedule engine, Gantt UI, and PM / PMO guide for @nqlib/nqgantt." : intro.description;
 
   return `---
 title: ${yamlQuote(title)}
@@ -144,6 +139,9 @@ for (const name of mdFiles) {
   count += 1;
 }
 
+// `---Label---` entries become labelled groups in the docs rail; pages before
+// the first one fall under "Start".
+const pm = (from, to) => PM_PAGES.slice(PM_PAGES.indexOf(from), PM_PAGES.indexOf(to) + 1);
 const meta = {
   title: "nqgantt",
   pages: [
@@ -151,7 +149,15 @@ const meta = {
     "installation",
     "changelog",
     "concepts",
-    ...PM_PAGES,
+    ...pm("getting-started", "philosophy"),
+    "---Working the plan---",
+    ...pm("bars-and-timeline", "critical-path"),
+    "---Controlling the plan---",
+    ...pm("baselines-and-earned-value", "ms-project-interop"),
+    "---Practice---",
+    ...pm("practice-in-gantt-lab", "pmo-playbook"),
+    "---Reference---",
+    ...pm("glossary", "cheatsheet"),
   ],
 };
 writeFileSync(path.join(destRoot, "meta.json"), `${JSON.stringify(meta, null, 2)}\n`, "utf8");

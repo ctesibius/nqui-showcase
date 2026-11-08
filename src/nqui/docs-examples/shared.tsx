@@ -3,7 +3,8 @@
  * Teaching aids only — keep each example focused on one rule.
  */
 import type { ReactNode } from "react";
-import { cn } from "@nqlib/nqui";
+import { ScrollArea, cn } from "@nqlib/nqui";
+import { scrollAreaFill } from "@/lib/scroll-area-fill";
 
 export function ExampleFrame({
   children,
@@ -13,19 +14,10 @@ export function ExampleFrame({
   className?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "flex h-full min-h-0 flex-col gap-4 overflow-auto p-4 sm:p-5",
-        className,
-      )}
-    >
-      {children}
-    </div>
+    <ScrollArea className={cn("h-full min-h-0", scrollAreaFill, className)}>
+      <div className="flex h-full min-h-0 flex-col gap-4 p-4 sm:p-5">{children}</div>
+    </ScrollArea>
   );
-}
-
-export function ExampleHint({ children }: { children: ReactNode }) {
-  return <p className="text-sm leading-snug text-muted-foreground">{children}</p>;
 }
 
 export function ExampleSplit({

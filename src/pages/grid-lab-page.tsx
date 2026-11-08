@@ -123,7 +123,8 @@ export function GridLabPage() {
                 `gantt` stage variant uses. */}
             <Tray.Stage
               variant="table"
-              className="h-[28rem] min-h-[28rem] flex-none overflow-auto p-4"
+              className="h-[28rem] min-h-[28rem] flex-none"
+              contentClassName="p-4"
             >
               <WorkBreakdownBlock />
             </Tray.Stage>

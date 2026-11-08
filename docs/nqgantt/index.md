@@ -20,7 +20,7 @@ Install with `pnpm add @nqlib/nqgantt @nqlib/nqgantt-engine`. API notes: [Instal
 2. **How** — what you click / drag in the UI.
 3. **When not to** — anti-patterns and flex vs strict choices.
 
-Prefer concrete scenarios over abstract graphs. Practice on the live [**/blocks**](/blocks) timeline — a safe place to break things.
+Prefer concrete scenarios over abstract graphs. Practice on the live [**Campaign timeline**](/blocks#timeline-lab) — a safe place to break things.
 
 ## All pages
 
@@ -36,7 +36,8 @@ Prefer concrete scenarios over abstract graphs. Practice on the live [**/blocks*
 | [[editable-columns]] | The sidebar as a working grid; your own columns |
 | [[baselines-and-earned-value]] | Freezing an approved plan; PV / EV / CPI / SPI |
 | [[actuals-and-worklog]] | Giving actual cost a source you can defend |
-| [[resource-availability]] | Part-time patterns, leave, levelling that holds up |
+| [[resource-availability]] | Part-time patterns, leave, levelling that holds up; reading the load histogram |
+| [[production-boards]] | One row per work order; the same work by technician or machine |
 | [[ms-project-interop]] | Moving a plan in and out as XML |
 | [[practice-in-gantt-lab]] | Demo controls and drills |
 | [[pmo-playbook]] | Adoption, defaults, training, anti-patterns |
@@ -47,7 +48,8 @@ Prefer concrete scenarios over abstract graphs. Practice on the live [**/blocks*
 
 | Surface | Route |
 |---------|-------|
-| Blocks timeline | [/blocks](/blocks) |
+| Campaign timeline | [/blocks#timeline-lab](/blocks#timeline-lab) |
+| Repair shop floor | [/blocks#shop-floor](/blocks#shop-floor) |
 | Installation | [/docs/nqgantt/installation](/docs/nqgantt/installation) |
 | Changelog | [/docs/nqgantt/changelog](/docs/nqgantt/changelog) |
 

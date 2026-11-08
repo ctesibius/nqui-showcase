@@ -10,6 +10,10 @@ import {
   ToggleGroup,
   ToggleGroupItem,
   cn,
+  Checkbox,
+  Input,
+  NativeSelect,
+  NativeSelectOption,
 } from "@nqlib/nqui";
 import {
   MAX_DEPTH,
@@ -41,8 +45,6 @@ function XIcon() {
   );
 }
 
-const nativeSelectClass =
-  "h-7 shrink-0 rounded-md border border-input bg-background px-1.5 text-xs text-foreground outline-none focus-visible:border-ring";
 
 /** In-panel checkboxes — a nested Popover would take the same modal lock as Select. */
 function ValueMultiSelect({
@@ -59,15 +61,14 @@ function ValueMultiSelect({
       {options.map((o) => {
         const on = selected.includes(o.id);
         return (
-          <label key={o.id} className="inline-flex max-w-full items-center gap-1 text-xs">
-            <input
-              type="checkbox"
-              checked={on}
-              onChange={() => onChange(on ? selected.filter((v) => v !== o.id) : [...selected, o.id])}
-              className="size-3.5 shrink-0 accent-primary"
-            />
-            <span className="truncate">{o.label}</span>
-          </label>
+          <Checkbox
+            key={o.id}
+            checked={on}
+            onCheckedChange={() => onChange(on ? selected.filter((v) => v !== o.id) : [...selected, o.id])}
+            gap={1}
+          >
+            <span className="truncate text-xs">{o.label}</span>
+          </Checkbox>
         );
       })}
     </div>
@@ -91,34 +92,36 @@ function RuleRow({
 
   return (
     <div className="flex items-center gap-1.5">
-      <select
+      <NativeSelect
+        size="sm"
         aria-label="Field"
         value={rule.field}
         onChange={(e) => {
           const nextDef = defs.find((d) => d.id === (e.target.value as FilterFieldId)) ?? defs[0];
           onPatch({ field: nextDef.id, op: nextDef.ops[0], values: [], value: "" });
         }}
-        className={cn(nativeSelectClass, "w-[92px]")}
+        className="w-[92px] shrink-0"
       >
         {defs.map((d) => (
-          <option key={d.id} value={d.id}>
+          <NativeSelectOption key={d.id} value={d.id}>
             {d.label}
-          </option>
+          </NativeSelectOption>
         ))}
-      </select>
+      </NativeSelect>
 
-      <select
+      <NativeSelect
+        size="sm"
         aria-label="Operator"
         value={rule.op}
         onChange={(e) => onPatch({ op: e.target.value as FilterOp })}
-        className={cn(nativeSelectClass, "w-[116px]")}
+        className="w-[116px] shrink-0"
       >
         {def.ops.map((op) => (
-          <option key={op} value={op}>
+          <NativeSelectOption key={op} value={op}>
             {OP_LABEL[op]}
-          </option>
+          </NativeSelectOption>
         ))}
-      </select>
+      </NativeSelect>
 
       {showValue ? (
         isMulti && def.options ? (
@@ -128,12 +131,12 @@ function RuleRow({
             onChange={(values) => onPatch({ values })}
           />
         ) : (
-          <input
+          <Input
             type={def.kind === "date" ? "date" : def.kind === "number" ? "number" : "text"}
             value={rule.value}
             onChange={(e) => onPatch({ value: e.target.value })}
             placeholder={def.kind === "text" ? "Type a value…" : undefined}
-            className="h-7 min-w-0 flex-1 rounded-md border border-input bg-background px-2 text-xs outline-none focus-visible:border-ring"
+            className="h-7 min-w-0 flex-1 px-2 text-xs"
           />
         )
       ) : (
@@ -174,15 +177,16 @@ function CombinatorChip({
   onChange: (next: Combinator) => void;
 }) {
   return (
-    <select
+    <NativeSelect
+      size="sm"
       aria-label="Combine these conditions with and / or"
       value={combinator}
       onChange={(e) => onChange(e.target.value as Combinator)}
-      className="h-6 w-[58px] rounded-full border border-input bg-background px-1 text-center text-[11px] outline-none focus-visible:border-ring"
+      className="w-[62px] text-[11px]"
     >
-      <option value="and">and</option>
-      <option value="or">or</option>
-    </select>
+      <NativeSelectOption value="and">and</NativeSelectOption>
+      <NativeSelectOption value="or">or</NativeSelectOption>
+    </NativeSelect>
   );
 }
 
@@ -370,7 +374,10 @@ export function FilterBuilder({
           height. Inside a max-height popover the height is auto, so the
           viewport collapsed and the group's add-buttons rendered *outside*
           the panel. max-height on a normal block just works. */}
-      <div className="min-h-0 flex-1 overflow-y-auto px-3 py-2.5">
+      <div
+        // eslint-disable-next-line no-restricted-syntax -- native scroll: auto-height max-h popover with variable header — a ScrollArea viewport has no definite height to fill here
+        className="min-h-0 flex-1 overflow-y-auto px-3 py-2.5"
+      >
         <GroupEditor group={root} defs={defs} depth={0} onChange={onChange} />
       </div>
 

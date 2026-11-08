@@ -36,9 +36,28 @@ One page. Details live in the linked notes.
 
 Toggle on when the network is real; off while sketching. → [[critical-path]]
 
+## Production and resources
+
+| Want | Set |
+|------|-----|
+| One row per unit, steps as segments | group `layout: "segments"` |
+| Waiting time, not work | feature `kind: "hold"`, `holdReason`, `expectedRelease` |
+| Promised date + slack | group `dueAt` |
+| Flag too much at once | group `capacity` |
+| Custom segment label | `renderBarContent(feature, { widthPx, kind })` |
+| Priority / waiting labels by the name | group `badges: [{ label: "AOG", tone: "destructive" }]` |
+| Load histogram for a person / machine | group `resourceId` |
+| Open as an overview | `defaultCollapsedGroupIds` |
+| Recolour the load scale | `--gantt-load-idle / -ok / -warn / -over` |
+| Part time, shifts | `workloadSchemes` (hours by weekday) |
+| Leave, maintenance | `resourceCalendars[].absences` |
+| Overtime, exact hours on a day | `resolveCapacityHours(resourceId, day)` |
+
+See [[production-boards]] and [[resource-availability]].
+
 ## Practice
 
-Drills → [[practice-in-gantt-lab]] · first session → [[getting-started]] · live [**/blocks**](/blocks)
+Drills → [[practice-in-gantt-lab]] · first session → [[getting-started]] · live [**Campaign timeline**](/blocks#timeline-lab)
 
 ## PMO
 

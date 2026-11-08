@@ -1,8 +1,11 @@
 import { Suspense, lazy } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { useThemeStudio } from "./context/theme-studio-context";
 import { Spinner } from "@nqlib/nqui";
 import { LandingPage } from "./pages/landing-page";
 import { AppLayout } from "./components/showcase/layout/app-layout";
+import { titleForPath, useDocumentTitle } from "./lib/document-title";
 // Route-split everything past the landing: the blocks gallery (nqchart pulls
 // echarts) and the readme's code tooling load on navigation, so the landing
 // stays a featherweight first paint.
@@ -11,10 +14,6 @@ const ChartsPage = lazy(() => import("./pages/charts-page").then((m) => ({ defau
 const ChartsLabPage = lazy(() =>
   import("./pages/charts-lab-page").then((m) => ({ default: m.ChartsLabPage })),
 );
-const Nqchart040Page = lazy(() =>
-  import("./pages/nqchart-040-page").then((m) => ({ default: m.Nqchart040Page })),
-);
-const DocsLayout = lazy(() => import("./layouts/docs-layout").then((m) => ({ default: m.DocsLayout })));
 const DocsPage = lazy(() => import("./pages/docs-page").then((m) => ({ default: m.DocsPage })));
 
 const RecipesHub = lazy(() => import("./components/showcase/pages/recipes-hub"));
@@ -22,12 +21,7 @@ const ComponentShowcase = lazy(() => import("./components/showcase/pages/compone
 const PatternsPage = lazy(() => import("./components/showcase/pages/patterns"));
 const RecipeElevation = lazy(() => import("./components/showcase/pages/recipe-elevation"));
 const RecipeSliders = lazy(() => import("./components/showcase/pages/recipe-sliders"));
-const AppearanceSettings = lazy(
-  () => import("./components/showcase/pages/appearance-settings"),
-)
-const ThemeStudio = lazy(() => import("./components/showcase/pages/theme-studio"))
 const DesignSystemPage = lazy(() => import("./components/showcase/pages/design-system"));
-const CommandLab = lazy(() => import("./components/showcase/pages/command-lab"));
 
 /*
  * Dev-only surfaces. `import.meta.env.DEV` is replaced with a literal at build
@@ -41,14 +35,9 @@ const GanttLabPage = import.meta.env.DEV
 const GridLabPage = import.meta.env.DEV
   ? lazy(() => import("./pages/grid-lab-page").then((m) => ({ default: m.GridLabPage })))
   : null;
-
-function DocsShell() {
-  return (
-    <div className="min-h-dvh bg-background">
-      <DocsLayout />
-    </div>
-  );
-}
+const CommandLab = import.meta.env.DEV
+  ? lazy(() => import("./components/showcase/pages/command-lab"))
+  : null;
 
 function RouteFallback() {
   return (
@@ -58,19 +47,40 @@ function RouteFallback() {
   );
 }
 
+/**
+ * Retired theming pages (/studio, /settings/appearance). Theming lives in one
+ * place — the Theme Studio panel — so old links open it over the design system.
+ */
+function OpenThemeStudio() {
+  const { openStudio } = useThemeStudio();
+  useEffect(() => {
+    openStudio();
+  }, [openStudio]);
+  return <Navigate to="/design-system" replace />;
+}
+
+/** Keeps `document.title` in step with the route; docs pages set their own. */
+function RouteTitle() {
+  const { pathname } = useLocation();
+  useDocumentTitle(titleForPath(pathname));
+  return null;
+}
+
 function App() {
   return (
     <>
+      <RouteTitle />
       <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           {/* The tour: a shelf of live nqlib blocks. */}
           <Route path="/blocks" element={<BlocksPage />} />
-          {/* Full NQChart registry catalog with global preview controls. */}
+          {/* Full nqchart registry catalog with global preview controls. */}
           <Route path="/charts" element={<ChartsPage />} />
-          {/* BI feature lab — release acceptance beside the gallery. */}
+          {/* Same gallery shell as /charts — marketing chrome, left rail. */}
+          <Route path="/catalog" element={<ComponentShowcase />} />
+          {/* Interaction lab — docs send readers here to try each behaviour. */}
           <Route path="/charts/lab" element={<ChartsLabPage />} />
-          <Route path="/charts/0.4" element={<Nqchart040Page />} />
           {/* The scroll-story was replaced by the blocks gallery. */}
           <Route path="/story" element={<Navigate to="/blocks" replace />} />
           {/* The live console was retired — send its old paths home. */}
@@ -82,22 +92,20 @@ function App() {
           <Route path="/showcase/*" element={<Navigate to="/nqui" replace />} />
           <Route element={<AppLayout />}>
             <Route path="/nqui" element={<RecipesHub />} />
-            <Route path="/catalog" element={<ComponentShowcase />} />
-            <Route path="/settings/appearance" element={<AppearanceSettings />} />
-            <Route path="/studio" element={<ThemeStudio />} />
             <Route path="/patterns" element={<PatternsPage />} />
             <Route path="/recipes/elevation" element={<RecipeElevation />} />
             <Route path="/recipes/sliders" element={<RecipeSliders />} />
             <Route path="/design-system" element={<DesignSystemPage />} />
-            <Route path="/command" element={<CommandLab />} />
+            {CommandLab ? <Route path="/command" element={<CommandLab />} /> : null}
           </Route>
+          <Route path="/studio" element={<OpenThemeStudio />} />
+          <Route path="/settings/appearance" element={<OpenThemeStudio />} />
           {/* Compact recipes → /blocks (SettingsBlock etc.). */}
           <Route path="/recipes/settings" element={<Navigate to="/blocks" replace />} />
           <Route path="/recipes/tracker" element={<Navigate to="/blocks" replace />} />
-          <Route element={<DocsShell />}>
-            <Route path="/docs" element={<DocsPage />} />
-            <Route path="/docs/*" element={<DocsPage />} />
-          </Route>
+          {/* Site frame + rail layout, like /charts and /catalog. */}
+          <Route path="/docs" element={<DocsPage />} />
+          <Route path="/docs/*" element={<DocsPage />} />
           {/* Legacy library readme URLs → docs hub */}
           <Route path="/readme" element={<Navigate to="/docs/nqui" replace />} />
           <Route path="/readme/nqchart" element={<Navigate to="/docs/nqchart" replace />} />

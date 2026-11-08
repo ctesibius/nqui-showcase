@@ -95,9 +95,11 @@ export function ProjectsColumnHeader({
 
   return (
     <div className={cn("group/col flex w-full min-w-0 items-center gap-0.5")}>
-      <button
+      <Button
         type="button"
-        className="flex min-w-0 flex-1 items-center gap-1 truncate text-left text-xs font-medium uppercase tracking-wide"
+        variant="ghost"
+        size="sm"
+        className="h-auto min-w-0 flex-1 justify-start gap-1 truncate px-0 text-left text-xs font-medium uppercase tracking-wide hover:bg-transparent"
         onClick={(e) => {
           stopSortableChain(e);
           column.getToggleSortingHandler()?.(e);
@@ -109,7 +111,7 @@ export function ProjectsColumnHeader({
         <span className="truncate">{model.label}</span>
         {sorted === "asc" ? <span className="text-muted-foreground">↑</span> : null}
         {sorted === "desc" ? <span className="text-muted-foreground">↓</span> : null}
-      </button>
+      </Button>
       <ProjectsColumnHeaderMenu
         header={header}
         model={model}

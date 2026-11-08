@@ -565,6 +565,7 @@ export function PivotView({
               onKeyDown={handleKeyDown}
               className="outline-none"
             >
+            {/* eslint-disable-next-line no-restricted-syntax -- nqgrid pivot engine table (gridTableClass, sticky header, measured widths); nqui Table's wrapper breaks the engine layout */}
             <table className={gridTableClass} style={{ width: tableWidth }}>
               <colgroup>
                 {rowHeaders.map((_, index) => (

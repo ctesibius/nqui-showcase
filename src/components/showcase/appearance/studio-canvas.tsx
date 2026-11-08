@@ -8,6 +8,7 @@ import {
   CardTitle,
   Input,
   Separator,
+  Label,
 } from "@nqlib/nqui"
 import { SurfaceLadderStrip } from "./surface-ladder-strip"
 import { useThemeTokens } from "@/context/primary-accent-context"
@@ -46,12 +47,12 @@ export function StudioCanvas() {
         </div>
         <div className="mt-4 flex flex-wrap items-end gap-3">
           <div className="min-w-[12rem] flex-1 space-y-1.5">
-            <label
+            <Label
               htmlFor="studio-input"
               className="text-xs font-medium text-muted-foreground"
             >
               Field
-            </label>
+            </Label>
             <Input id="studio-input" placeholder="Brand name" defaultValue="nqui" />
           </div>
           <Button size="sm">Save</Button>

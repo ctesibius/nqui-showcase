@@ -9,6 +9,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  ScrollArea,
 } from "@nqlib/nqui";
 
 function Chevron({ dir }: { dir: "left" | "right" }) {
@@ -142,7 +143,9 @@ export function DrilldownPage({
         <p className="min-w-0 flex-1 truncate text-center text-sm font-medium">{title}</p>
         <span className="w-7" />
       </header>
-      <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto p-1">{children}</div>
+      <ScrollArea type="always" className="min-h-0 flex-1" fadeMask={false}>
+        <div className="flex min-h-full flex-col gap-0.5 p-1">{children}</div>
+      </ScrollArea>
     </section>
   );
 }
@@ -164,6 +167,7 @@ export function DrilldownRow({
 }) {
   return (
     <Item asChild size="xs" className="hover:bg-interactive">
+      {/* eslint-disable-next-line no-restricted-syntax -- host element for nqui Item asChild: Item supplies the layout, a nqui Button here would layer its own height/padding over Item's */}
       <button type="button" className="w-full text-left" onClick={onSelect}>
         {media ? <ItemMedia className="translate-y-0">{media}</ItemMedia> : null}
         <ItemContent>

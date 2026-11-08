@@ -1,0 +1,101 @@
+---
+title: "Production boards"
+description: "A repair shop, a line, or a portfolio has units of work that each move through the same steps — a work order goes receive → teardown → inspect → assemble → test → ship. One row per step buries the shape."
+---
+
+Live: [Repair shop floor](/blocks#shop-floor) — Orders, Technicians and Machines over the same sixty work orders.
+
+## One row per unit: segments
+
+Set `layout: "segments"` on a group and its tasks draw inside the group's own row instead of as child rows.
+
+| Element | Meaning |
+|---------|---------|
+| **Segment** | One step, start → end. Painted exactly like a task bar, so your bar style (Flat, Studio, …) applies to both |
+| **Lanes** | Overlapping steps stack into extra lanes in the same row — parallel work stays visible, never hidden behind another bar |
+| **Hold** (hatched) | `kind: "hold"` — waiting time, not work: a quote awaiting approval, parts on order. Carries `holdReason` and `expectedRelease` |
+| **Diamond + line** | `dueAt` — the promised date. Turns red when the last step ends after it |
+| **Thin rail on top** | The unit's rolled-up progress |
+| **Slack badge** | Days to spare (`+2 d`) or days late (`−3 d`) in the sidebar |
+| **Red wash** | `capacity` exceeded — more steps running at once than the unit can take |
+
+`badges` on a group puts short labels after its name in the sidebar — the shop floor uses them for priority (**AOG**, **Expedite**) and for the hold a unit is waiting on with its age (**Quote · 9d**, amber once it passes its estimate or a week). Sort AOG to the top yourself; the gantt draws groups in the order you pass.
+
+`renderBarContent(feature, { widthPx, kind })` decides what a segment says: the shop floor shows the technician's initials, then the machine code when there is room (`MR · HTS-1`). Return `undefined` to keep the built-in label, `null` for none.
+
+```tsx
+<GanttRoot
+  data={{ features, dependencies, statuses }}
+  groups={orders.map(o => ({
+    id: o.id,
+    name: `${o.id} · ${o.part}`,
+    layout: "segments",
+    dueAt: o.promised,
+    capacity: 1,
+    features: o.steps,          // holds: { kind: "hold", holdReason, expectedRelease }
+  }))}
+  renderBarContent={(f, { widthPx, kind }) =>
+    kind === "segment" && widthPx >= 28 ? initials(f.assignees?.[0]?.name) : undefined}
+>
+  <GanttRoot.Toolbar />
+  <GanttRoot.Body />
+</GanttRoot>
+```
+
+A composed gantt (your own layout instead of `GanttRoot.Body`) draws the same row with `GanttSegmentRow`; pass `headerRows` and `segmentLaneById` to the row layout so dependencies, offscreen chips and scroll-to-row line up with the segments.
+
+Segments do not drag or resize yet. Expand the group and drag its child rows; the segments follow.
+
+## The same work, by resource
+
+Group the same features by **who does them** (or **what runs them**) and give each group a `resourceId`. The group header becomes that resource's **load histogram**, and the sidebar shows their **peak load**. Pass `defaultCollapsedGroupIds` to open as a load overview; expanding a row lists that resource's work.
+
+```tsx
+groups={technicians.map(t => ({
+  id: t.id,
+  name: `${t.name} · ${t.role}`,
+  resourceId: t.id,              // matches feature.assignees[].id
+  features: workFor(t.id),
+}))}
+defaultCollapsedGroupIds={technicians.map(t => t.id)}
+```
+
+Machines work the same way: make each step's machine an assignee (`allocation: 100`) and group by it.
+
+Give each resource its real capacity — shifts, part time, leave, maintenance, overtime — and every bar is measured against it:
+
+```tsx
+<GanttRoot
+  workloadSchemes={[{ id: "two-shift", title: "Two shifts", hoursByWeekday: { 1: 16, 2: 16, 3: 16, 4: 16, 5: 16 } }]}
+  resourceCalendars={[
+    { assigneeId: "m:HTS-1", schemeId: "two-shift", absences: [] },
+    { assigneeId: "m:NDT-1", absences: [{ from: "2026-11-16", to: "2026-11-17", label: "Maintenance" }] },
+  ]}
+  resolveCapacityHours={(id, day) => (id === "t-mr" && isWeekday(day) && inOvertime(day) ? 10 : undefined)}
+  {...rest}
+/>
+```
+
+The live shop floor does exactly this. Open **Capacity** on the [Repair shop floor](/blocks#shop-floor) to see it as a planner would: start from a preset (this week's plan, a standard week, a holiday closure, an overtime push, a machine shutdown), then edit the shop calendar, closures, weekly patterns and dated rules — set hours or exclude, for one person, one machine or a crew — and watch the histogram move.
+
+| In the sheet | Becomes |
+|--------------|---------|
+| Shop calendar (days, hours) | `calendar` |
+| Closures | `calendar.holidays` |
+| Weekly patterns | `workloadSchemes` + `resourceCalendars[].schemeId` |
+| Exclude, every day | `resourceCalendars[].absences` |
+| Set hours, or exclude on weekdays / weekends only | `resolveCapacityHours` (last matching rule wins) |
+
+Reading the histogram is covered in [Resource availability](/docs/nqgantt/resource-availability).
+
+## When not to
+
+- **Do not use segments for a plan you still edit step by step.** Segments are for watching flow; dragging, linking and editing individual tasks belong in normal rows.
+- **Do not hide waiting as work.** A part on order is a **hold**, not a long "Order parts" bar — otherwise the board says the shop is busy when it is stuck.
+- **Do not read a resource view without capacity data.** Load is planned hours against capacity; without availability ([Resource availability](/docs/nqgantt/resource-availability)) every week looks like a standard week.
+
+## Related
+
+- [Bars and timeline](/docs/nqgantt/bars-and-timeline)
+- [Resource availability](/docs/nqgantt/resource-availability)
+- [Critical path](/docs/nqgantt/critical-path)

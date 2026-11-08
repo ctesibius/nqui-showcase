@@ -10,7 +10,7 @@ import {
   type SortingState,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { Badge, cn } from "@nqlib/nqui";
+import { Badge, cn, Input } from "@nqlib/nqui";
 import { Sortable, SortableContent, SortableItem, SortableOverlay } from "@nqlib/nqui/sortable";
 import {
   computeFill,
@@ -278,7 +278,7 @@ const BodyCell = memo(function BodyCell({
     >
       {isEditing ? null : renderBodyCellContent(rowOriginal, columnId, format)}
       {isEditing ? (
-        <input
+        <Input
           autoFocus
           value={editValue}
           onChange={(e) => handlers.onEditChange(e.target.value)}
@@ -289,8 +289,8 @@ const BodyCell = memo(function BodyCell({
           onKeyDown={(e) => handlers.onEditKeyDown(e, rowIndex, colIndex)}
           aria-label="Edit cell"
           className={cn(
-            "absolute inset-0 z-30 h-full w-full bg-background px-2 text-xs text-foreground",
-            "outline-none ring-2 ring-ring ring-inset",
+            "absolute inset-0 z-30 h-full w-full rounded-none border-0 bg-background px-2 text-xs text-foreground",
+            "ring-2 ring-ring ring-inset focus-visible:ring-2 focus-visible:ring-ring",
           )}
         />
       ) : null}
@@ -1633,6 +1633,7 @@ function GridViewImpl({
             onKeyDown={handleKeyDown}
             className="outline-none"
           >
+            {/* eslint-disable-next-line no-restricted-syntax -- nqgrid spreadsheet engine table (virtualized rows, sticky header, measured widths); nqui Table's wrapper breaks the engine layout */}
             <table className={gridTableClass} style={{ width: tableWidth }}>
               <colgroup>
                 {table.getVisibleLeafColumns().map((col) => (

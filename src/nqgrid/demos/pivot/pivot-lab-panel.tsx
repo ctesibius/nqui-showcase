@@ -271,7 +271,8 @@ export function PivotLabPanel() {
 
       <div className="flex h-[70vh] min-h-[420px] shrink-0 gap-3">
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card">
-          <div className="flex max-h-32 shrink-0 flex-wrap gap-2 overflow-y-auto border-b border-border/70 px-3 py-2">
+          <ScrollArea className="shrink-0 border-b border-border/70" viewportStyle={{ maxHeight: "8rem" }}>
+          <div className="flex flex-wrap gap-2 px-3 py-2">
             <PivotSlicer
               {...pivotSlicerProps(pivot, "region")}
               title="Region"
@@ -283,6 +284,7 @@ export function PivotLabPanel() {
               className="min-w-[14rem] flex-1 shadow-none"
             />
           </div>
+          </ScrollArea>
           <ScrollArea orientation="both" fadeMask={false} className="min-h-0 flex-1">
             <PivotTable
               model={pivot.model}
@@ -294,9 +296,11 @@ export function PivotLabPanel() {
           </ScrollArea>
         </div>
         {showFields ? (
-          <aside className="flex w-72 shrink-0 flex-col overflow-y-auto rounded-xl border border-border bg-card p-2">
-            <PivotFieldList {...pivotFieldListProps(pivot, layout)} className="shadow-none" />
-          </aside>
+          <ScrollArea className="w-72 shrink-0 rounded-xl border border-border bg-card">
+            <aside className="p-2">
+              <PivotFieldList {...pivotFieldListProps(pivot, layout)} className="shadow-none" />
+            </aside>
+          </ScrollArea>
         ) : null}
       </div>
     </div>

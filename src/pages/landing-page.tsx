@@ -1,33 +1,26 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useReducedMotion } from "motion/react";
 import { Button, NquiLogo } from "@nqlib/nqui";
 import { ThemeControls } from "../components/showcase/theme-tokens/theme-token-sheet";
 import { LiquidGlassBar } from "../components/liquid-glass-bar";
 import { LiveWindow } from "../components/landing/live-window";
-import nquiPkg from "../../node_modules/@nqlib/nqui/package.json";
-import nqchartPkg from "../../node_modules/@nqlib/nqchart/package.json";
-import nqgridPkg from "../../node_modules/@nqlib/nqgrid/package.json";
-import nqganttPkg from "../../node_modules/@nqlib/nqgantt/package.json";
+import { NQLIB_LIBRARIES } from "../lib/package-versions";
+import { useCopyText } from "../lib/use-copy-text";
 import "../components/landing/landing.css";
 
 /*
  * nqlib landing — one viewport: pitch on the left, a living library window on
  * the right, where every scene is REAL nqui. Design philosophy borrowed from
  * ../factory-site; the execution is all nqui components + raw nqui tokens.
- * Versions below are the installed package.json versions (not the caret range
- * in this app's package.json), so the landing always matches what ships.
+ * Versions come from `lib/package-versions` (installed package.json, not the
+ * caret range), so the landing always matches what ships.
  * The full shelf of patterns lives at /blocks.
  */
 
 const INSTALL_CMD = "pnpm add @nqlib/nqui";
 
-const PACKAGES = [
-  { name: "nqui", version: nquiPkg.version, blurb: "50+ components, tree-shakeable subpath entries" },
-  { name: "nqchart", version: nqchartPkg.version, blurb: "14 chart types on one composable API" },
-  { name: "nqgrid", version: nqgridPkg.version, blurb: "a real spreadsheet engine — formulas, pivots" },
-  { name: "nqgantt", version: nqganttPkg.version, blurb: "schedule kernel with critical paths & EVM" },
-];
+const PACKAGES = NQLIB_LIBRARIES;
 
 /** Staggered entrance for everything tagged data-fl-reveal, DOM order. */
 function useReveal(reducedMotion: boolean) {
@@ -49,33 +42,10 @@ function useReveal(reducedMotion: boolean) {
 export function LandingPage() {
   const reducedMotion = useReducedMotion() ?? false;
   const rootRef = useReveal(reducedMotion);
-  const [copied, setCopied] = useState(false);
+  const { copied: copiedText, copy } = useCopyText();
+  const copied = copiedText === INSTALL_CMD;
 
-  const copyInstall = async () => {
-    let ok = false;
-    try {
-      await navigator.clipboard.writeText(INSTALL_CMD);
-      ok = true;
-    } catch {
-      // Embedded panes / denied permission: fall back to the selection-based
-      // copy, which only needs the click gesture we already have.
-      const ta = document.createElement("textarea");
-      ta.value = INSTALL_CMD;
-      ta.style.position = "fixed";
-      ta.style.opacity = "0";
-      document.body.appendChild(ta);
-      ta.select();
-      try {
-        ok = document.execCommand("copy");
-      } finally {
-        ta.remove();
-      }
-    }
-    if (ok) {
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    }
-  };
+  const copyInstall = () => copy(INSTALL_CMD);
 
   return (
     <div ref={rootRef} className="fl-page">
@@ -127,14 +97,15 @@ export function LandingPage() {
                 <Button variant="outline" asChild>
                   <Link to="/catalog">Component catalog</Link>
                 </Button>
-                <button
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={copyInstall}
                   aria-live="polite"
-                  className="rounded-md border bg-muted/40 px-2.5 py-1.5 font-mono text-xs text-muted-foreground transition-colors duration-150 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="bg-muted/40 font-mono text-xs font-normal text-muted-foreground hover:text-foreground"
                 >
                   {copied ? "copied" : `$ ${INSTALL_CMD}`}
-                </button>
+                </Button>
               </div>
             </section>
 
@@ -146,14 +117,19 @@ export function LandingPage() {
               <p className="mb-2 font-mono text-xs uppercase tracking-[0.12em] text-muted-foreground">
                 What&rsquo;s inside
               </p>
+              {/* Fixed name column so blurbs wrap under themselves — these
+                  lines are the pitch, so they never truncate. */}
               <ul className="flex flex-col gap-1.5">
                 {PACKAGES.map((p) => (
-                  <li key={p.name} className="flex items-baseline gap-2.5 text-sm">
-                    <span className="shrink-0 font-mono text-xs text-foreground">
+                  <li
+                    key={p.name}
+                    className="grid grid-cols-[6.75rem_minmax(0,1fr)] items-baseline gap-x-2.5 text-sm"
+                  >
+                    <span className="whitespace-nowrap font-mono text-xs text-foreground">
                       {p.name}
                       <span className="text-muted-foreground/70"> {p.version}</span>
                     </span>
-                    <span className="truncate text-muted-foreground">{p.blurb}</span>
+                    <span className="text-sm leading-snug text-muted-foreground">{p.blurb}</span>
                   </li>
                 ))}
               </ul>

@@ -7,7 +7,7 @@
 import { Suspense, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Skeleton, cn } from "@nqlib/nqui";
-import { Tray } from "@/components/showcase/tray";
+import { Tray, trayActionLink } from "@/components/showcase/tray";
 import { lazyNquiExample, resolveNquiExample } from "@/nqui/docs-examples";
 
 export function NquiExample({
@@ -40,22 +40,16 @@ export function NquiExample({
   return (
     <div className={cn("my-5", className)}>
       <Tray as="div">
-        <Tray.Caption className="items-center">
-          <span className="line-clamp-1 font-mono text-xs text-muted-foreground">
-            {title ?? entry.title}
-          </span>
-          <div className="flex items-center gap-3">
-            <Link
-              to={catalogHref}
-              className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-            >
-              Open in catalog
+        <Tray.Heading
+          as="p"
+          title={title ?? entry.title}
+          meta={`@nqlib/nqui · ${entry.imports}`}
+          action={
+            <Link to={catalogHref} className={trayActionLink}>
+              Catalog
             </Link>
-            <span className="text-xs uppercase tracking-wider text-muted-foreground">
-              live
-            </span>
-          </div>
-        </Tray.Caption>
+          }
+        />
         <Tray.Stage variant="flush" className={entry.height}>
           <Suspense fallback={<Skeleton className="h-full w-full" />}>
             <Example />

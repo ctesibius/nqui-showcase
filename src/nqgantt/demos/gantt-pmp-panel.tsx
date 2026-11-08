@@ -17,8 +17,9 @@
  * library exports and holds its own state. Nothing here is logic the library
  * should have shipped.
  */
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
+  ScrollArea,
   Badge,
   Button,
   Input,
@@ -30,6 +31,7 @@ import {
   SelectValue,
   Separator,
   cn,
+  Checkbox,
 } from "@nqlib/nqui";
 import {
   applyActualsToFeatures,
@@ -180,6 +182,8 @@ export function GanttPmpPanel({
     setImported(importMSProjectXML(xml));
   };
 
+  const xmlInputRef = useRef<HTMLInputElement>(null);
+
   const importXml = async (file: File) => {
     setImported(importMSProjectXML(await file.text()));
   };
@@ -225,15 +229,9 @@ export function GanttPmpPanel({
                 ))}
               </SelectContent>
             </Select>
-            <label className="flex cursor-pointer items-center gap-1.5 text-[11px]">
-              <input
-                type="checkbox"
-                checked={useBaseline}
-                onChange={(e) => setUseBaseline(e.target.checked)}
-                className="h-3 w-3"
-              />
-              Measure against it
-            </label>
+            <Checkbox checked={useBaseline} onCheckedChange={(v) => setUseBaseline(v === true)} gap={1.5}>
+              <span className="text-[11px]">Measure against it</span>
+            </Checkbox>
           </div>
         ) : (
           <p className="text-[11px] text-muted-foreground">
@@ -401,19 +399,20 @@ export function GanttPmpPanel({
           <Button size="sm" variant="outline" className="h-7 text-xs" onClick={exportXml}>
             Export .xml
           </Button>
-          <label className="inline-flex h-7 cursor-pointer items-center rounded-md border px-2 text-xs hover:bg-accent">
+          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => xmlInputRef.current?.click()}>
             Import .xml
-            <input
-              type="file"
-              accept=".xml,text/xml,application/xml"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) void importXml(file);
-                e.target.value = "";
-              }}
-            />
-          </label>
+          </Button>
+          <Input
+            ref={xmlInputRef}
+            type="file"
+            accept=".xml,text/xml,application/xml"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) void importXml(file);
+              e.target.value = "";
+            }}
+          />
           {imported && onFeaturesChange ? (
             <Button
               size="sm"
@@ -443,7 +442,8 @@ export function GanttPmpPanel({
               {imported.baseline ? ` · baseline (${imported.baseline.records.size})` : ""}
             </p>
             {imported.warnings.length > 0 ? (
-              <ul className="max-h-24 space-y-0.5 overflow-y-auto rounded-md bg-muted/50 p-1.5">
+              <ScrollArea className="rounded-md bg-muted/50" viewportStyle={{ maxHeight: "6rem" }}>
+              <ul className="space-y-0.5 p-1.5">
                 {imported.warnings.map((w, i) => (
                   <li key={i} className="text-[10px] text-muted-foreground">
                     {w.scope ? <span className="font-medium">{w.scope}: </span> : null}
@@ -451,6 +451,7 @@ export function GanttPmpPanel({
                   </li>
                 ))}
               </ul>
+              </ScrollArea>
             ) : (
               <p className="text-[11px] text-emerald-600 dark:text-emerald-400">
                 Round-tripped with no warnings.

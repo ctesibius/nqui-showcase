@@ -13,6 +13,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Link } from "react-router-dom"
 import {
+  ScrollArea,
   Badge,
   Button,
   Label,
@@ -23,6 +24,7 @@ import {
   cn,
 } from "@nqlib/nqui"
 import { RoadmapGantt } from "@/nqgantt/demos/roadmap-gantt"
+import { ProductionGantt, type ProductionRows } from "@/nqgantt/demos/production-gantt"
 import { GanttDesignMenu } from "@/nqgantt/demos/gantt-design-menu"
 import { GanttDesignLab, useGanttLabEnabled } from "@/nqgantt/demos/gantt-design-lab"
 import { useGanttBarDesign } from "@/nqgantt/demos/use-gantt-bar-design"
@@ -46,12 +48,28 @@ import {
   type ScoreLine,
 } from "@/lib/lab-perf-meter"
 
-type FixtureId = "full" | "dense" | "single" | "empty" | "stress-500" | "stress-2000" | "stress-5000"
+type FixtureId =
+  | "full"
+  | "dense"
+  | "single"
+  | "empty"
+  | "stress-500"
+  | "stress-2000"
+  | "stress-5000"
+  | "production"
+  | "production-500"
 /** Mirrors the package's unions; neither is re-exported from its entrypoint. */
 type Range = "daily" | "weekly" | "monthly" | "quarterly"
 type GanttDensity = "compact" | "default" | "comfortable"
 
-const FIXTURES: { id: FixtureId; label: string; hint: string; stress?: GanttStressSize }[] = [
+const FIXTURES: {
+  id: FixtureId
+  label: string
+  hint: string
+  stress?: GanttStressSize
+  /** Work orders on a segmented-row production board. */
+  orders?: number
+}[] = [
   { id: "full", label: "Full", hint: "The shared work-management set" },
   { id: "dense", label: "Dense", hint: "Every task on one week — overlap and collision" },
   { id: "single", label: "Single", hint: "One bar: the loneliest layout case" },
@@ -73,6 +91,18 @@ const FIXTURES: { id: FixtureId; label: string; hint: string; stress?: GanttStre
     label: "5k",
     hint: "Stress 5k leaves — beyond the e2e budget, for soak",
     stress: 5000,
+  },
+  {
+    id: "production",
+    label: "Production",
+    hint: "40 work orders on segmented rows — steps, holds, due dates, work centers",
+    orders: 40,
+  },
+  {
+    id: "production-500",
+    label: "Prod 500",
+    hint: "500 work orders (≈3.5k steps) on segmented rows — WebKit scroll check",
+    orders: 500,
   },
 ]
 
@@ -144,14 +174,16 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function ganttScoreLines(
   sample: ReturnType<typeof useLabPerfMeter>["sample"],
   stress: boolean,
+  /** Segmented production rows start collapsed — no sidebar task rows by design. */
+  segmented = false,
 ): ScoreLine[] {
   if (!stress) {
     return [
       {
-        label: "Pick Stress 2k to score",
+        label: "Pick Stress 2k or Prod 500 to score",
         points: 0,
         max: 10,
-        detail: "Scorecard targets Stress 2k after scroll settles",
+        detail: "Scorecard targets Stress 2k / Prod 500 after scroll settles",
       },
     ]
   }
@@ -162,7 +194,7 @@ function ganttScoreLines(
   const hardLongFail = ready && long > 800
   const scrollFail =
     ready &&
-    (sample.mountedSidebarRows === 0 ||
+    ((!segmented && sample.mountedSidebarRows === 0) ||
       sample.mountedTimelineRows === 0 ||
       sample.mountedSidebarRows >= 400)
 
@@ -387,6 +419,7 @@ export function GanttLabPage() {
   const [pmp, setPmp] = useState(false)
   const [matrix, setMatrix] = useState(false)
   const [bare, setBare] = useState(false)
+  const [productionRows, setProductionRows] = useState<ProductionRows>("order")
   const tasks = useFixture(fixture, matrix)
   const benchEnabled = useGanttLabEnabled()
   const benchRef = useRef<HTMLDivElement>(null)
@@ -396,8 +429,9 @@ export function GanttLabPage() {
   useShowcaseGanttTheme(!bare)
 
   const activeFixture = FIXTURES.find((f) => f.id === fixture)!
-  const scoring = fixture === "stress-2000" && !matrix
-  const lines = ganttScoreLines(sample, scoring)
+  const production = activeFixture.orders != null && !matrix
+  const scoring = (fixture === "stress-2000" || fixture === "production-500") && !matrix
+  const lines = ganttScoreLines(sample, scoring, production)
 
   useEffect(() => {
     if (!scoring) return
@@ -497,49 +531,70 @@ export function GanttLabPage() {
           </ToggleGroup>
         </Field>
 
+        {production ? (
+          <Field label="Rows">
+            <ToggleGroup
+              type="single"
+              size="sm"
+              value={productionRows}
+              onValueChange={(v) => v && setProductionRows(v as ProductionRows)}
+            >
+              <ToggleGroupItem value="order" className="text-xs">
+                By order
+              </ToggleGroupItem>
+              <ToggleGroupItem value="tech" className="text-xs">
+                Technicians
+              </ToggleGroupItem>
+              <ToggleGroupItem value="machine" className="text-xs">
+                Machines
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </Field>
+        ) : null}
+
         <Separator orientation="vertical" className="h-8" />
 
         <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2 text-xs">
+          <Label className="gap-2 text-xs font-normal">
             <Switch checked={grouped} onCheckedChange={setGrouped} />
             Grouped
-          </label>
-          <label className="flex items-center gap-2 text-xs">
+          </Label>
+          <Label className="gap-2 text-xs font-normal">
             <Switch checked={critical} onCheckedChange={setCritical} />
             Critical path
-          </label>
-          <label
-            className="flex items-center gap-2 text-xs"
+          </Label>
+          <Label
+            className="gap-2 text-xs font-normal"
             title="Moving a bar shifts successors using each edge’s FS/SS/FF/SF + lag"
           >
             <Switch checked={autoSchedule} onCheckedChange={setAutoSchedule} />
             Auto-schedule
-          </label>
-          <label
-            className="flex items-center gap-2 text-xs"
+          </Label>
+          <Label
+            className="gap-2 text-xs font-normal"
             title="WBS column with outline codes (1, 1.1, 2…) before the task name"
           >
             <Switch checked={showWbs} onCheckedChange={setShowWbs} />
             WBS
-          </label>
-          <label
-            className="flex items-center gap-2 text-xs"
+          </Label>
+          <Label
+            className="gap-2 text-xs font-normal"
             title="Baseline capture, worklog, availability and MS Project import/export"
           >
             <Switch checked={pmp} onCheckedChange={setPmp} />
             PMP panel
-          </label>
-          <label className="flex items-center gap-2 text-xs">
+          </Label>
+          <Label className="gap-2 text-xs font-normal">
             <Switch checked={matrix} onCheckedChange={setMatrix} />
             Style matrix
-          </label>
-          <label
-            className="flex items-center gap-2 text-xs"
+          </Label>
+          <Label
+            className="gap-2 text-xs font-normal"
             title="Drop the showcase theme + hooks and render @nqlib/nqgantt as it ships"
           >
             <Switch checked={bare} onCheckedChange={setBare} />
             Bare package
-          </label>
+          </Label>
         </div>
 
         <Button
@@ -559,7 +614,8 @@ export function GanttLabPage() {
          * Comparing looks one at a time is how inconsistencies survive — this
          * puts them on one screen where a mismatch has nowhere to hide.
          */
-        <div className="grid flex-1 gap-px overflow-auto bg-border p-px [grid-template-columns:repeat(auto-fit,minmax(26rem,1fr))]">
+        <ScrollArea fadeMask={false} className="min-h-0 flex-1 bg-border">
+        <div className="grid gap-px bg-border p-px [grid-template-columns:repeat(auto-fit,minmax(26rem,1fr))]">
           {GANTT_BAR_STYLES.flatMap((style) =>
             GANTT_GROUP_ROWS.map((rows) => (
               <section
@@ -599,9 +655,18 @@ export function GanttLabPage() {
             )),
           )}
         </div>
+        </ScrollArea>
       ) : (
         <div ref={benchRef} className="flex min-h-0 flex-1 flex-col overflow-hidden p-6">
-          {bare ? (
+          {production ? (
+            <ProductionGantt
+              orders={activeFixture.orders!}
+              rows={productionRows}
+              range={range}
+              density={density}
+              critical={critical}
+            />
+          ) : bare ? (
             <BareGantt
               tasks={tasks}
               design={design}

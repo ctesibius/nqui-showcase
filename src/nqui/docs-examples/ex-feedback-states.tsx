@@ -10,7 +10,7 @@ import {
 } from "@nqlib/nqui";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { FolderOpenIcon } from "@hugeicons/core-free-icons";
-import { ExampleFrame, ExampleHint, ExampleLabel, ExampleSplit } from "./shared";
+import { ExampleFrame, ExampleLabel, ExampleSplit } from "./shared";
 
 /** Quiet empty vs shape-matched loading. */
 export default function ExFeedbackStates() {
@@ -18,10 +18,6 @@ export default function ExFeedbackStates() {
 
   return (
     <ExampleFrame>
-      <ExampleHint>
-        Empty stays quiet. Skeleton matches the content shape — not a lone
-        spinner stealing focus.
-      </ExampleHint>
       <div className="flex flex-wrap gap-2">
         <Button size="sm" variant="outline" onClick={() => setLoading((v) => !v)}>
           {loading ? "Show empty" : "Show loading"}

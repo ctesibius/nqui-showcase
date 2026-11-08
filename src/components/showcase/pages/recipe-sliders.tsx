@@ -1,6 +1,7 @@
 import * as React from "react"
 
 import {
+  ScrollArea,
   Button,
   ColorSlider,
   DropdownMenu,
@@ -23,6 +24,13 @@ import {
   Switch,
   ToggleGroup,
   ToggleGroupItem,
+  Checkbox,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
 } from "@nqlib/nqui"
 
 // ─── Formatters (real units, not bare numbers) ───────────────────────────────
@@ -119,18 +127,17 @@ function SignOffChecklist() {
       <ul className="grid gap-2 sm:grid-cols-2">
         {ST068_CHECKS.map((item) => (
           <li key={item.id}>
-            <label className="bg-muted/50 flex cursor-pointer items-start gap-3 rounded-lg border border-border/60 p-3 text-sm">
-              <input
-                type="checkbox"
-                className="mt-0.5 size-3.5 accent-foreground"
+            <Label className="bg-muted/50 flex cursor-pointer items-start gap-3 rounded-lg border border-border/60 p-3 font-normal leading-normal">
+              <Checkbox
+                className="mt-0.5"
                 checked={Boolean(checked[item.id])}
-                onChange={(e) => setChecked((prev) => ({ ...prev, [item.id]: e.target.checked }))}
+                onCheckedChange={(v) => setChecked((prev) => ({ ...prev, [item.id]: v === true }))}
               />
               <span className="flex min-w-0 flex-col gap-0.5">
                 <span className="font-medium">{item.label}</span>
                 <span className="text-muted-foreground text-xs">{item.hint}</span>
               </span>
-            </label>
+            </Label>
           </li>
         ))}
       </ul>
@@ -157,37 +164,37 @@ const MODIFIER_ROWS: Array<{ data: string; use: string; example: string; section
 
 function ChooserTable({ rows, head }: { rows: typeof VARIANT_ROWS; head: [string, string, string] }) {
   return (
-    <div className="overflow-x-auto rounded-lg border">
-      <table className="w-full min-w-[520px] table-fixed text-sm">
+    <ScrollArea orientation="horizontal" fadeMask={false} className={`rounded-lg border [&_[data-slot=table-container]]:overflow-visible`}>
+      <Table className="w-full min-w-[520px] table-fixed text-sm">
         <colgroup>
           <col className="w-[38%]" />
           <col className="w-[30%]" />
           <col className="w-[32%]" />
         </colgroup>
-        <thead className="bg-muted/50 text-muted-foreground text-left text-xs">
-          <tr>
-            <th className="px-4 py-2.5 font-medium">{head[0]}</th>
-            <th className="px-4 py-2.5 font-medium">{head[1]}</th>
-            <th className="px-4 py-2.5 font-medium">{head[2]}</th>
-          </tr>
-        </thead>
-        <tbody>
+        <TableHeader className="bg-muted/50 text-muted-foreground text-left text-xs">
+          <TableRow className="border-0 hover:bg-transparent">
+            <TableHead className="h-auto px-4 py-2.5 font-medium text-muted-foreground">{head[0]}</TableHead>
+            <TableHead className="h-auto px-4 py-2.5 font-medium text-muted-foreground">{head[1]}</TableHead>
+            <TableHead className="h-auto px-4 py-2.5 font-medium text-muted-foreground">{head[2]}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {rows.map((row) => (
-            <tr key={row.use} className="border-t align-top">
-              <td className="px-4 py-2.5">{row.data}</td>
-              <td className="px-4 py-2.5">
+            <TableRow key={row.use} className="border-b-0 border-t align-top hover:bg-transparent">
+              <TableCell className="whitespace-normal px-4 py-2.5">{row.data}</TableCell>
+              <TableCell className="whitespace-normal px-4 py-2.5">
                 <code className="text-foreground text-xs font-semibold">{row.use}</code>
-              </td>
-              <td className="text-muted-foreground px-4 py-2.5">
+              </TableCell>
+              <TableCell className="whitespace-normal text-muted-foreground px-4 py-2.5">
                 <a href={`#${row.section}`} className="hover:text-foreground underline-offset-4 hover:underline">
                   {row.example}
                 </a>
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </TableBody>
+      </Table>
+    </ScrollArea>
   )
 }
 

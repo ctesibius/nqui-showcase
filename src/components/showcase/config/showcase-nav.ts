@@ -46,11 +46,6 @@ export const referenceEntries: ShowcaseRoute[] = [
     description: "All variants and states — use when you need props, not layout advice.",
   },
   {
-    title: "Appearance",
-    path: "/settings/appearance",
-    description: "Look, accent, corners — SaaS preferences specimen.",
-  },
-  {
     title: "Design system",
     path: "/design-system",
     description: "Tokens, radius, spacing, and theme surfaces.",
@@ -79,17 +74,6 @@ export type ShowcaseSection = {
   hash: string
 }
 
-export const showcaseCatalogSections: ShowcaseSection[] = [
-  { title: "Buttons & Actions", path: "/catalog", hash: "buttons-actions" },
-  { title: "Form Components", path: "/catalog", hash: "form-components" },
-  { title: "Display Components", path: "/catalog", hash: "display-components" },
-  { title: "Navigation & Menus", path: "/catalog", hash: "navigation-menus" },
-  { title: "Overlays & Dialogs", path: "/catalog", hash: "overlays-dialogs" },
-  { title: "Data Visualization", path: "/catalog", hash: "data-visualization" },
-  { title: "Layout Components", path: "/catalog", hash: "layout-components" },
-  { title: "Advanced Components", path: "/catalog", hash: "advanced-components" },
-]
-
 export const showcasePatternSections: ShowcaseSection[] = [
   { title: "Overview", path: "/patterns", hash: "overview" },
   { title: "Workspace", path: "/patterns", hash: "workspace" },
@@ -105,8 +89,6 @@ const routeLabels: Record<string, string> = {
   "/recipes/elevation": "Elevation philosophy",
   "/recipes/sliders": "Slider lab",
   "/catalog": "Component catalog",
-  "/studio": "Theme Studio",
-  "/settings/appearance": "Appearance",
   "/design-system": "Design system",
   "/command": "Command lab",
 }
@@ -116,7 +98,6 @@ export function showcaseRouteLabel(pathname: string): string {
 }
 
 export function showcaseSectionsForPath(pathname: string): ShowcaseSection[] {
-  if (pathname === "/catalog") return showcaseCatalogSections
   if (pathname === "/patterns") return showcasePatternSections
   return []
 }

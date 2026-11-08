@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowDown01Icon, Menu01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import {
+  Badge,
   Button,
   DropdownMenu,
   DropdownMenuContent,
@@ -21,29 +22,7 @@ import {
   contrastSlidingTabsListClass,
   contrastSlidingTabsTriggerClass,
 } from "./contrast-sliding-segment";
-
-export type ShowcaseTopBarLink = {
-  to: string;
-  label: string;
-  /** Small pill after the label — for surfaces that aren't part of the product. */
-  badge?: string;
-};
-
-/**
- * Nav entries that only exist while `pnpm dev` is running.
- *
- * `import.meta.env.DEV` is a build-time literal, so in a production bundle this
- * is `[]` and the routes it points at aren't registered either (see `App.tsx`).
- * Spread it into any page's `links` — the tab appears locally and evaporates on
- * deploy, so a dev surface can never leak into the shipped nav.
- */
-export const devTopBarLinks: ReadonlyArray<ShowcaseTopBarLink> =
-  import.meta.env.DEV
-    ? [
-        { to: "/gantt-lab", label: "Gantt lab", badge: "dev" },
-        { to: "/grid-lab", label: "Grid lab", badge: "dev" },
-      ]
-    : [];
+import type { ShowcaseTopBarLink } from "./site-links";
 
 export type ShowcaseTopBarSegment = {
   value: string;
@@ -76,6 +55,12 @@ type ShowcaseTopBarProps = {
    * overflow-x. Below `lg` the chip stays in the header row.
    */
   floatingActions?: boolean;
+  /**
+   * A page control docked at the start of the floating bar (lg+ only). Pass it
+   * only while the page's own copy is scrolled out of view, so the reader sees
+   * one bar — never the page filter and the site nav floating side by side.
+   */
+  dock?: ReactNode;
   className?: string;
 };
 
@@ -94,32 +79,36 @@ export function ShowcaseTopBar({
   sticky = false,
   frosted = false,
   floatingActions = !bordered,
+  dock,
   className,
 }: ShowcaseTopBarProps) {
+  const { pathname } = useLocation();
   const actions = (
     <>
-      {links?.map((link) => (
-        <Button
-          key={link.to}
-          size="sm"
-          variant="ghost"
-          asChild
-          className={cn(
-            "hidden lg:inline-flex",
-            floatingActions &&
-              "px-3 text-foreground hover:bg-[color-mix(in_oklch,var(--accent)_70%,transparent)]",
-          )}
-        >
-          <Link to={link.to}>
-            {link.label}
-            {link.badge ? (
-              <span className="ml-1.5 rounded-full bg-foreground/10 px-1.5 py-px font-mono text-xs leading-[1.5] tracking-wide text-muted-foreground uppercase">
-                {link.badge}
-              </span>
-            ) : null}
-          </Link>
-        </Button>
-      ))}
+      {links?.map((link) => {
+        const active = linkIsActive(pathname, link.to);
+        return (
+          <Button
+            key={link.to}
+            size="sm"
+            variant="ghost"
+            asChild
+            className={cn(
+              // Links keep their width; a docked page control is what shrinks.
+              "hidden shrink-0 lg:inline-flex",
+              floatingActions &&
+                "px-3 hover:bg-[color-mix(in_oklch,var(--accent)_70%,transparent)]",
+              floatingActions && (active ? "text-foreground" : "text-muted-foreground hover:text-foreground"),
+              active && "font-semibold",
+            )}
+          >
+            <Link to={link.to} aria-current={active ? "page" : undefined}>
+              {link.label}
+              {link.badge ? <DevBadge className="ml-1.5">{link.badge}</DevBadge> : null}
+            </Link>
+          </Button>
+        );
+      })}
       {links && links.length > 0 ? (
         <NavLinksMenu links={links} embedded={floatingActions} />
       ) : null}
@@ -180,16 +169,37 @@ export function ShowcaseTopBar({
           /* Fixed only from lg — below that it stays in the header so sticky
              filters (blocks / charts) are not covered on small viewports. */
           floatingActions &&
-            "lg:fixed lg:right-4 lg:top-3 lg:z-[var(--z-sticky-page,40)] lg:pointer-events-auto",
+            "lg:fixed lg:right-4 lg:top-3 lg:z-[var(--z-sticky-page)] lg:pointer-events-auto",
+          /* Never wider than the viewport — a docked page control shrinks and
+             scrolls inside the bar instead of pushing it off the left edge. */
+          floatingActions && "lg:max-w-[calc(100vw-2rem)]",
         )}
       >
         {floatingActions ? (
-          <LiquidGlassBar>{actions}</LiquidGlassBar>
+          <LiquidGlassBar className="max-w-full">
+            {dock ? (
+              <>
+                <div className="fl-dock-in hidden min-w-0 items-center lg:flex">{dock}</div>
+                <span className="mx-1.5 hidden h-4 w-px shrink-0 bg-border lg:block" aria-hidden />
+              </>
+            ) : null}
+            {actions}
+          </LiquidGlassBar>
         ) : (
           actions
         )}
       </div>
     </header>
+  );
+}
+
+
+/** The "dev" marker on local-only routes — nqui Badge, quiet and monospaced. */
+function DevBadge({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <Badge variant="secondary" className={cn("h-4 rounded-full px-1.5 font-mono text-[10px] font-normal uppercase tracking-wide", className)}>
+      {children}
+    </Badge>
   );
 }
 
@@ -238,11 +248,7 @@ function NavLinksMenu({
                   aria-hidden
                 />
                 <span className="flex-1">{link.label}</span>
-                {link.badge ? (
-                  <span className="rounded-md bg-foreground/10 px-1.5 py-px font-mono text-xs uppercase tracking-wide text-muted-foreground">
-                    {link.badge}
-                  </span>
-                ) : null}
+                {link.badge ? <DevBadge>{link.badge}</DevBadge> : null}
               </Link>
             </DropdownMenuItem>
           );
@@ -319,11 +325,15 @@ function SegmentTabs({ segment }: { segment: ShowcaseTopBarSegment }) {
       onValueChange={segment.onValueChange}
       className="w-fit max-w-full min-w-0"
     >
+      <ScrollArea
+        orientation="horizontal"
+        hideScrollbar
+        className="w-fit max-w-full min-w-0 rounded-lg"
+        viewportStyle={{ overscrollBehaviorX: "contain" }}
+      >
       <TabsList
         aria-label={segment["aria-label"] ?? "Section"}
-        className={contrastSlidingTabsListClass(
-          "w-max max-w-full overflow-x-auto overscroll-x-contain touch-pan-x bg-background/80 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-        )}
+        className={contrastSlidingTabsListClass("w-max bg-background/80")}
       >
         {segment.items.map((item) => (
           <TabsTrigger
@@ -335,6 +345,7 @@ function SegmentTabs({ segment }: { segment: ShowcaseTopBarSegment }) {
           </TabsTrigger>
         ))}
       </TabsList>
+      </ScrollArea>
     </Tabs>
   );
 }

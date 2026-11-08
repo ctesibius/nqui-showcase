@@ -1,0 +1,35 @@
+---
+description: Every scroll container is nqui ScrollArea — never native overflow-auto / overflow-scroll.
+globs: "src/**/*.tsx"
+alwaysApply: true
+---
+
+# Scrolling: always nqui ScrollArea
+
+Any element that scrolls is `ScrollArea` from `@nqlib/nqui` — overlay thumbs, the
+same 6px `border/80` bar everywhere. Native `overflow-auto` / `overflow-scroll`
+(any axis) is a lint error (`no-restricted-syntax` in `eslint.config.js`).
+
+```tsx
+import { ScrollArea } from "@nqlib/nqui"
+
+<ScrollArea className="min-h-0 flex-1" orientation="vertical">   // sizing on the root
+  <div className="space-y-2 p-3">{children}</div>                 // padding/layout inside
+</ScrollArea>
+```
+
+- **Sizing on the root** (`h-*`, `min-h-0 flex-1`, border, radius, bg). Padding and
+  flex/gap go on an inner div — Radix wraps children in a `display: table` div.
+- **max-height only?** The viewport is `size-full`, so a max-h root never scrolls.
+  Pass `viewportStyle={{ maxHeight: "10rem" }}` instead.
+- **Axis:** `orientation="vertical" | "horizontal" | "both"`.
+- **fadeMask={false}** for tables, grids, code and anything with sticky headers;
+  keep the default fade for plain lists and panels.
+- **Chip rails** with no visible bar: `orientation="horizontal" hideScrollbar`.
+- **Scroll refs** (virtualizers, scroll-into-view): `viewportRef`, never a ref on
+  the root. Listen for `scroll` on the viewport.
+- **Hot paths** (large virtualized canvases): `CoreScrollArea` + `CoreScrollBar`
+  from `@nqlib/nqui` — no wheel handler, so scrolling stays on the compositor.
+  nqgantt's canvas does this (`gantt-provider.tsx`).
+- **Truly cannot** (a scroller owned by a library, a `<pre>` sample):
+  `// eslint-disable-next-line no-restricted-syntax -- <reason>` on that line.

@@ -20,7 +20,7 @@ export type CatalogEntry = {
 };
 
 export const CATALOG_SOURCE = "becocharts" as const;
-export const CATALOG_COUNT = 103 as const;
+export const CATALOG_COUNT = 119 as const;
 
 export const NQCHART_CATALOG: CatalogEntry[] = [
   {
@@ -132,6 +132,15 @@ export const NQCHART_CATALOG: CatalogEntry[] = [
     "component": "radar-chart"
   },
   {
+    "id": "ex-cohort-retention-chart",
+    "name": "Cohort Retention",
+    "exportName": "NQExampleCohortRetentionChart",
+    "adapterFile": "ex-cohort-retention-chart.tsx",
+    "family": "heatmap",
+    "category": "recipe",
+    "component": "heatmap-chart"
+  },
+  {
     "id": "ex-composed-chart",
     "name": "Composed",
     "exportName": "NQExampleComposedChart",
@@ -139,6 +148,15 @@ export const NQCHART_CATALOG: CatalogEntry[] = [
     "family": "composed",
     "category": "example",
     "component": "composed-chart"
+  },
+  {
+    "id": "ex-cone-funnel-chart",
+    "name": "Cone Funnel",
+    "exportName": "NQExampleConeFunnelChart",
+    "adapterFile": "ex-cone-funnel-chart.tsx",
+    "family": "funnel",
+    "category": "example",
+    "component": "funnel-chart"
   },
   {
     "id": "ex-dashed-stroke-area-chart",
@@ -168,6 +186,15 @@ export const NQCHART_CATALOG: CatalogEntry[] = [
     "component": "area-chart"
   },
   {
+    "id": "ex-dumbbell-chart",
+    "name": "Dumbbell",
+    "exportName": "NQExampleDumbbellChart",
+    "adapterFile": "ex-dumbbell-chart.tsx",
+    "family": "composed",
+    "category": "recipe",
+    "component": "composed-chart"
+  },
+  {
     "id": "ex-expanded-type-area-chart",
     "name": "Expanded Type Area",
     "exportName": "NQExampleExpandedTypeAreaChart",
@@ -175,6 +202,15 @@ export const NQCHART_CATALOG: CatalogEntry[] = [
     "family": "area",
     "category": "example",
     "component": "area-chart"
+  },
+  {
+    "id": "ex-forecast-chart",
+    "name": "Forecast",
+    "exportName": "NQExampleForecastChart",
+    "adapterFile": "ex-forecast-chart.tsx",
+    "family": "composed",
+    "category": "recipe",
+    "component": "composed-chart"
   },
   {
     "id": "ex-funnel-chart",
@@ -409,6 +445,42 @@ export const NQCHART_CATALOG: CatalogEntry[] = [
     "family": "bar",
     "category": "example",
     "component": "bar-chart"
+  },
+  {
+    "id": "ex-isometric-area-chart",
+    "name": "Isometric Area",
+    "exportName": "NQExampleIsometricAreaChart",
+    "adapterFile": "ex-isometric-area-chart.tsx",
+    "family": "area",
+    "category": "example",
+    "component": "area-chart"
+  },
+  {
+    "id": "ex-isometric-grouped-bar-chart",
+    "name": "Isometric Grouped Bar",
+    "exportName": "NQExampleIsometricGroupedBarChart",
+    "adapterFile": "ex-isometric-grouped-bar-chart.tsx",
+    "family": "bar",
+    "category": "example",
+    "component": "bar-chart"
+  },
+  {
+    "id": "ex-isometric-stacked-bar-chart",
+    "name": "Isometric Stacked Bar",
+    "exportName": "NQExampleIsometricStackedBarChart",
+    "adapterFile": "ex-isometric-stacked-bar-chart.tsx",
+    "family": "bar",
+    "category": "example",
+    "component": "bar-chart"
+  },
+  {
+    "id": "ex-kpi-card",
+    "name": "Kpi Card",
+    "exportName": "NQExampleKpiCard",
+    "adapterFile": "ex-kpi-card.tsx",
+    "family": "kpi",
+    "category": "example",
+    "component": "kpi-card"
   },
   {
     "id": "ex-legend-circle-line-chart",
@@ -681,6 +753,15 @@ export const NQCHART_CATALOG: CatalogEntry[] = [
     "component": "pie-chart"
   },
   {
+    "id": "ex-pie-rose-chart",
+    "name": "Pie Rose",
+    "exportName": "NQExamplePieRoseChart",
+    "adapterFile": "ex-pie-rose-chart.tsx",
+    "family": "pie",
+    "category": "example",
+    "component": "pie-chart"
+  },
+  {
     "id": "ex-pipe-funnel-chart",
     "name": "Pipe Funnel",
     "exportName": "NQExamplePipeFunnelChart",
@@ -744,6 +825,24 @@ export const NQCHART_CATALOG: CatalogEntry[] = [
     "component": "radial-chart"
   },
   {
+    "id": "ex-rounded-funnel-chart",
+    "name": "Rounded Funnel",
+    "exportName": "NQExampleRoundedFunnelChart",
+    "adapterFile": "ex-rounded-funnel-chart.tsx",
+    "family": "funnel",
+    "category": "example",
+    "component": "funnel-chart"
+  },
+  {
+    "id": "ex-sankey-chart",
+    "name": "Sankey",
+    "exportName": "NQExampleSankeyChart",
+    "adapterFile": "ex-sankey-chart.tsx",
+    "family": "sankey",
+    "category": "example",
+    "component": "sankey-chart"
+  },
+  {
     "id": "ex-scatter-chart",
     "name": "Scatter",
     "exportName": "NQExampleScatterChart",
@@ -751,6 +850,24 @@ export const NQCHART_CATALOG: CatalogEntry[] = [
     "family": "scatter",
     "category": "example",
     "component": "scatter-chart"
+  },
+  {
+    "id": "ex-seamless-funnel-chart",
+    "name": "Seamless Funnel",
+    "exportName": "NQExampleSeamlessFunnelChart",
+    "adapterFile": "ex-seamless-funnel-chart.tsx",
+    "family": "funnel",
+    "category": "example",
+    "component": "funnel-chart"
+  },
+  {
+    "id": "ex-segmented-funnel-chart",
+    "name": "Segmented Funnel",
+    "exportName": "NQExampleSegmentedFunnelChart",
+    "adapterFile": "ex-segmented-funnel-chart.tsx",
+    "family": "funnel",
+    "category": "example",
+    "component": "funnel-chart"
   },
   {
     "id": "ex-semi-variant-radial-chart",
@@ -787,6 +904,15 @@ export const NQCHART_CATALOG: CatalogEntry[] = [
     "family": "bar",
     "category": "example",
     "component": "composed-chart"
+  },
+  {
+    "id": "ex-small-multiples-chart",
+    "name": "Small Multiples",
+    "exportName": "NQExampleSmallMultiplesChart",
+    "adapterFile": "ex-small-multiples-chart.tsx",
+    "family": "line",
+    "category": "example",
+    "component": "small-multiples"
   },
   {
     "id": "ex-solid-area-variant-area-chart",
@@ -879,6 +1005,15 @@ export const NQCHART_CATALOG: CatalogEntry[] = [
     "component": "bar-chart"
   },
   {
+    "id": "ex-tile-column-chart",
+    "name": "Tile Column",
+    "exportName": "NQExampleTileColumnChart",
+    "adapterFile": "ex-tile-column-chart.tsx",
+    "family": "tile-column",
+    "category": "example",
+    "component": "tile-column-chart"
+  },
+  {
     "id": "ex-treemap-chart",
     "name": "Treemap",
     "exportName": "NQExampleTreemapChart",
@@ -886,6 +1021,15 @@ export const NQCHART_CATALOG: CatalogEntry[] = [
     "family": "treemap",
     "category": "example",
     "component": "treemap-chart"
+  },
+  {
+    "id": "ex-variance-chart",
+    "name": "Variance",
+    "exportName": "NQExampleVarianceChart",
+    "adapterFile": "ex-variance-chart.tsx",
+    "family": "composed",
+    "category": "recipe",
+    "component": "composed-chart"
   },
   {
     "id": "ex-vertical-pipe-funnel-chart",

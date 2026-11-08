@@ -21,7 +21,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@nqlib/nqui";
-import { ExampleFrame, ExampleHint } from "./shared";
+import { ExampleFrame } from "./shared";
 
 /** Pick Dialog vs Sheet vs AlertDialog by job. */
 export default function ExOverlaysPick() {
@@ -31,10 +31,6 @@ export default function ExOverlaysPick() {
 
   return (
     <ExampleFrame>
-      <ExampleHint>
-        Short task → Dialog. Side detail → Sheet. Destructive confirm →
-        AlertDialog. Each needs an accessible title.
-      </ExampleHint>
       <div className="flex flex-wrap gap-2">
         <Button size="sm" onClick={() => setDialogOpen(true)}>
           Open dialog

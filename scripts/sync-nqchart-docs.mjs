@@ -6,6 +6,11 @@
  * 2. Overlay guide MDX from `docs/nqchart/` (nqgantt-style wikilink rewrite).
  * 3. Merge meta.json so the sidebar is hub + guides + primitives.
  *
+ * Step 1 wipes content/docs/nqchart. API pages are owned by becocharts — fix
+ * them there, not here, or the next sync reverts the fix. (2026-11-07: four
+ * showcase-only edits — calendar preview height, the /charts gallery link in
+ * components.mdx, the pie outerRadius default, changelog — still need porting.)
+ *
  * Usage: pnpm docs:sync:nqchart
  * Env:   NQCHART_DIR — override sibling path (default ../becocharts)
  */
@@ -20,6 +25,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
+import { liftIntention } from "./lib/docs-intro.mjs";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -65,7 +71,10 @@ function rewriteLinks(text) {
   return text
     .replace(/(href|to)=(["'])\/docs\/(?!nqchart\/)/g, "$1=$2/docs/nqchart/")
     .replace(/\]\(\/docs\/(?!nqchart\/)/g, "](/docs/nqchart/")
-    .replace(/https:\/\/nqchart\.vercel\.app\/docs\//g, "/docs/nqchart/");
+    .replace(/https:\/\/nqchart\.vercel\.app\/docs\//g, "/docs/nqchart/")
+    // The nqchart site keeps its gallery on its home page; here it is /charts.
+    .replace(/\]\(\/#charts\)/g, "](/charts)")
+    .replace(/(href|to)=(["'])\/#charts\2/g, "$1=$2/charts$2");
 }
 
 function slugTitle(slug) {
@@ -100,17 +109,9 @@ function toMdx(raw, slug) {
   }
   body = rewriteWikilinks(body);
 
-  const intention = body
-    .split("\n")
-    .map((l) => l.trim())
-    .find((l) => l.startsWith("**Intention:**"))
-    ?.replace(/^\*\*Intention:\*\*\s*/, "")
-    ?.replace(/\*\*/g, "");
-
-  const description =
-    slug === "index"
-      ? "Composable ECharts charts for BI dashboards — live lab, interaction, and API reference."
-      : (intention ?? `nqchart — ${title}`).slice(0, 160).trim();
+  const intro = liftIntention(body, `nqchart — ${title}`);
+  body = intro.body;
+  const description = slug === "index" ? "Composable ECharts charts for BI dashboards — live lab, interaction, and API reference." : intro.description;
 
   return `---
 title: ${yamlQuote(title)}
@@ -161,15 +162,25 @@ const copied = existsSync(metaPath)
   ? JSON.parse(readFileSync(metaPath, "utf8"))
   : { pages: [] };
 const reserved = new Set(["index", "installation", "changelog", ...GUIDE_PAGES]);
-const apiPages = (copied.pages ?? []).filter((p) => !reserved.has(p));
+const apiPages = (copied.pages ?? []).filter((p) => !reserved.has(p) && !p.startsWith("---"));
+// `---Label---` entries become labelled groups in the docs rail; pages before
+// the first one fall under "Start". API pages keep the order becocharts gives.
+const isChart = (p) => /-chart$/.test(p) || p === "kpi-card" || p === "small-multiples";
+const isPart = (p) => p.startsWith("ui/");
 const meta = {
   title: "nqchart",
   pages: [
     "index",
     "installation",
     "changelog",
-    ...GUIDE_PAGES,
-    ...apiPages,
+    ...GUIDE_PAGES.filter((p) => p !== "cheatsheet"),
+    "---Charts---",
+    ...apiPages.filter(isChart),
+    "---Chart parts---",
+    ...apiPages.filter(isPart),
+    "---Reference---",
+    "cheatsheet",
+    ...apiPages.filter((p) => !isChart(p) && !isPart(p)),
   ],
 };
 writeFileSync(metaPath, `${JSON.stringify(meta, null, 2)}\n`, "utf8");

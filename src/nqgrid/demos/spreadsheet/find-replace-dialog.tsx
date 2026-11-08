@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   Input,
+  Label,
 } from "@nqlib/nqui";
 import { ORDER_COLUMNS, type OrderRow } from "./mock-data";
 import {
@@ -140,12 +141,12 @@ export function FindReplaceDialog({
 
         <div className="grid gap-3 py-1">
           <div className="grid gap-1.5">
-            <label
+            <Label
               htmlFor={`${matchCaseId}-find`}
               className="text-sm font-medium text-foreground"
             >
               Find
-            </label>
+            </Label>
             <Input
               id={`${matchCaseId}-find`}
               ref={findInputRef}
@@ -157,12 +158,12 @@ export function FindReplaceDialog({
           </div>
 
           <div className="grid gap-1.5">
-            <label
+            <Label
               htmlFor={`${matchCaseId}-replace`}
               className="text-sm font-medium text-foreground"
             >
               Replace with
-            </label>
+            </Label>
             <Input
               id={`${matchCaseId}-replace`}
               value={replacement}
@@ -173,7 +174,7 @@ export function FindReplaceDialog({
           </div>
 
           <div className="grid gap-2">
-            <label className="flex cursor-pointer items-center gap-2">
+            <Label className="flex cursor-pointer items-center gap-2">
               <Checkbox
                 id={matchCaseId}
                 checked={matchCase}
@@ -183,8 +184,8 @@ export function FindReplaceDialog({
                 }}
               />
               <span className="text-sm text-foreground">Match case</span>
-            </label>
-            <label className="flex cursor-pointer items-center gap-2">
+            </Label>
+            <Label className="flex cursor-pointer items-center gap-2">
               <Checkbox
                 id={wholeCellId}
                 checked={wholeCell}
@@ -194,7 +195,7 @@ export function FindReplaceDialog({
                 }}
               />
               <span className="text-sm text-foreground">Match entire cell</span>
-            </label>
+            </Label>
           </div>
 
           <div className="flex items-center justify-between text-xs text-muted-foreground">

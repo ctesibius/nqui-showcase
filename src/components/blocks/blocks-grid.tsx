@@ -28,6 +28,12 @@ import {
   ToggleGroup,
   ToggleGroupItem,
   cn,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
 } from "@nqlib/nqui";
 
 /** Absolute viewport — same slot pattern as playground table shells. */
@@ -374,11 +380,13 @@ function NodeSlot({ row, name }: { row: Row<Initiative>; name: string }) {
             <path d={`M8 ${cy + 9} V${ROW_H}`} stroke={`url(#node-drop-${uid})`} strokeWidth="1" />
           </svg>
         ) : null}
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="icon"
           onClick={row.getToggleExpandedHandler()}
           aria-label={expanded ? `Collapse ${name}` : `Expand ${name}`}
-          className="relative z-[1] flex size-4 items-center justify-center rounded-full border bg-background text-muted-foreground/80 transition-colors hover:border-foreground/30 hover:text-foreground"
+          className="relative z-[1] size-4 min-w-0 rounded-full bg-background text-muted-foreground/80 hover:border-foreground/30 hover:text-foreground [&_svg]:size-[9px]"
         >
           <svg
             viewBox="0 0 12 12"
@@ -391,7 +399,7 @@ function NodeSlot({ row, name }: { row: Row<Initiative>; name: string }) {
           >
             <path d="m4.5 2.5 3.5 3.5-3.5 3.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-        </button>
+        </Button>
       </span>
     );
   }
@@ -448,26 +456,26 @@ export function InitiativesBlock() {
       <ScrollArea
         orientation="both"
         fadeMask={false}
-        className="min-h-0 w-full flex-1"
+        className="min-h-0 w-full flex-1 [&_[data-slot=table-container]]:overflow-visible"
         viewportStyle={TABLE_SCROLL_VIEWPORT}
       >
-        <table className="w-full min-w-[720px] border-collapse text-xs">
-          <thead>
-            <tr className="border-b text-left text-[11px] font-normal text-muted-foreground">
-              <th className="h-8 pl-3 font-normal">Name</th>
-              <th className="h-8 w-20 font-normal">Target</th>
-              <th className="h-8 w-24 font-normal">Health</th>
-              <th className="h-8 w-24 font-normal">Projects</th>
-              <th className="h-8 w-28 font-normal">Active</th>
-              <th className="h-8 w-14 pr-3 text-center font-normal">Activity</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table className="w-full min-w-[720px] border-collapse text-xs">
+          <TableHeader>
+            <TableRow className="border-b text-left text-[11px] font-normal text-muted-foreground hover:bg-transparent">
+              <TableHead className="h-8 px-0 text-muted-foreground pl-3 font-normal">Name</TableHead>
+              <TableHead className="h-8 px-0 text-muted-foreground w-20 font-normal">Target</TableHead>
+              <TableHead className="h-8 px-0 text-muted-foreground w-24 font-normal">Health</TableHead>
+              <TableHead className="h-8 px-0 text-muted-foreground w-24 font-normal">Projects</TableHead>
+              <TableHead className="h-8 px-0 text-muted-foreground w-28 font-normal">Active</TableHead>
+              <TableHead className="h-8 px-0 text-muted-foreground w-14 pr-3 text-center font-normal">Activity</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {table.getRowModel().rows.map((row, index, rows) => {
               const it = row.original;
               return (
-                <tr key={row.id} className="transition-colors hover:bg-muted/50">
-                  <td className="p-0 pl-3">
+                <TableRow key={row.id} className="border-0 hover:bg-muted/50">
+                  <TableCell className="p-0 pl-3">
                     <div className="flex items-center" style={{ height: ROW_H }}>
                       <TreeGuides segs={guideSegments(rows, index)} />
                       <NodeSlot row={row} name={it.name} />
@@ -479,12 +487,12 @@ export function InitiativesBlock() {
                         ) : null}
                       </div>
                     </div>
-                  </td>
-                  <td className="whitespace-nowrap text-muted-foreground">{it.target}</td>
-                  <td>
+                  </TableCell>
+                  <TableCell className="px-0 py-0 text-muted-foreground">{it.target}</TableCell>
+                  <TableCell className="px-0 py-0">
                     <HealthCell health={it.health} />
-                  </td>
-                  <td className="whitespace-nowrap tabular-nums">
+                  </TableCell>
+                  <TableCell className="px-0 py-0 tabular-nums">
                     <span className="inline-flex items-center gap-1.5">
                       <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-muted-foreground/70" aria-hidden>
                         <path d="M8 1.75 14 5v6l-6 3.25L2 11V5l6-3.25Z" strokeLinejoin="round" />
@@ -493,8 +501,8 @@ export function InitiativesBlock() {
                       {it.projects.done}
                       <span className="text-muted-foreground">/ {it.projects.total}</span>
                     </span>
-                  </td>
-                  <td className="whitespace-nowrap tabular-nums">
+                  </TableCell>
+                  <TableCell className="px-0 py-0 tabular-nums">
                     <span className="inline-flex items-center gap-2.5">
                       {ACTIVE_DOTS.map(({ key, dot }) => {
                         const n = it.active[key];
@@ -507,15 +515,15 @@ export function InitiativesBlock() {
                         );
                       })}
                     </span>
-                  </td>
-                  <td className="pr-3 text-center">
+                  </TableCell>
+                  <TableCell className="px-0 py-0 pr-3 text-center">
                     <ActivityCell activity={it.activity} />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               );
             })}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </ScrollArea>
     </div>
   );
@@ -735,14 +743,16 @@ function WbsNodeSlot({
             />
           </svg>
         ) : null}
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="icon"
           onClick={(e) => {
             e.stopPropagation();
             onToggle();
           }}
           aria-label={expanded ? `Collapse ${name}` : `Expand ${name}`}
-          className="relative z-[1] flex size-3.5 items-center justify-center rounded-full border bg-background text-muted-foreground/80 transition-colors hover:border-foreground/30 hover:text-foreground"
+          className="relative z-[1] size-3.5 min-w-0 rounded-full bg-background text-muted-foreground/80 hover:border-foreground/30 hover:text-foreground [&_svg]:size-2"
         >
           <svg
             viewBox="0 0 12 12"
@@ -755,7 +765,7 @@ function WbsNodeSlot({
           >
             <path d="m4.5 2.5 3.5 3.5-3.5 3.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-        </button>
+        </Button>
       </span>
     );
   }
@@ -872,13 +882,15 @@ function DateCell({ value, onChange, label }: { value: string; onChange: (iso: s
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           aria-label={`Edit ${label}`}
-          className="rounded px-1 py-0.5 text-muted-foreground transition-colors tabular-nums hover:bg-muted/60 hover:text-foreground"
+          className="h-auto px-1 py-0.5 text-xs font-normal text-muted-foreground tabular-nums hover:text-foreground"
         >
           {format(date, "MMM dd")}
-        </button>
+        </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
@@ -923,6 +935,15 @@ const WBS_ROW_H = "h-9";
 
 // dnd-kit's sortable context is not compiler-safe; skip memoization like the
 // useReactTable blocks above do implicitly.
+/**
+ * Both Sortables here mount inside the table (one in <thead>, one as a <tbody>
+ * sibling). dnd-kit renders its screen-reader live region where DndContext
+ * mounts, which put a <div> inside <thead>/<table> — invalid markup React warns
+ * about. Portal the live region to <body>; announcements keep working.
+ */
+const TABLE_SORTABLE_A11Y =
+  typeof document === "undefined" ? {} : ({ accessibility: { container: document.body } } as const)
+
 export function WorkBreakdownBlock() {
   "use no memo";
   const [rows, setRows] = useState<WorkRow[]>(WORK_ROWS);
@@ -1226,13 +1247,15 @@ export function WorkBreakdownBlock() {
           {selected.size > 0 ? (
             <>
               <span className="font-medium text-primary tabular-nums">{selected.size} selected</span>
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => setSelected(new Set())}
-                className="rounded-md border px-2 py-0.5 text-muted-foreground transition-colors hover:text-foreground"
+                className="h-5 px-2 font-normal text-muted-foreground hover:text-foreground"
               >
                 Clear
-              </button>
+              </Button>
             </>
           ) : (
             <span className="text-muted-foreground tabular-nums">
@@ -1284,6 +1307,7 @@ export function WorkBreakdownBlock() {
           className="h-full min-h-0 w-full"
           viewportStyle={TABLE_SCROLL_VIEWPORT}
         >
+          {/* eslint-disable-next-line no-restricted-syntax -- WBS: sticky header and pinned columns inside the ScrollArea plus dnd-kit row/column sorting; nqui Table's overflow wrapper captures sticky */}
           <table
             className="border-collapse text-xs"
             style={{ width: totalW, minWidth: "100%", tableLayout: "fixed" }}
@@ -1301,6 +1325,8 @@ export function WorkBreakdownBlock() {
                 onValueChange={(next) => setColumnOrder(next as DataColId[])}
                 orientation="horizontal"
                 flatCursor
+              
+                {...TABLE_SORTABLE_A11Y}
               >
                 <SortableContent asChild>
                 <tr className="text-left text-[11px] text-muted-foreground">
@@ -1353,6 +1379,8 @@ export function WorkBreakdownBlock() {
               getItemValue={(r: WorkRow) => r.id}
               orientation="vertical"
               flatCursor
+            
+              {...TABLE_SORTABLE_A11Y}
             >
               <SortableContent asChild>
               <tbody>
@@ -1455,13 +1483,15 @@ export function WorkBreakdownBlock() {
                               <span className="w-4 shrink-0" aria-hidden />
                             ) : (
                               <SortableItemHandle asChild>
-                                <button
+                                <Button
                                   type="button"
+                                  variant="ghost"
+                                  size="icon"
                                   {...getDragHandleAria({ label: `Reorder ${t.name}` })}
-                                  className="flex size-4 shrink-0 cursor-grab items-center justify-center rounded text-muted-foreground/60 opacity-0 transition-opacity group-hover/row:opacity-100 hover:text-foreground focus-visible:opacity-100 active:cursor-grabbing"
+                                  className="size-4 min-w-0 shrink-0 cursor-grab rounded text-muted-foreground/60 opacity-0 transition-opacity group-hover/row:opacity-100 hover:bg-transparent hover:text-foreground focus-visible:opacity-100 active:cursor-grabbing"
                                 >
                                   <GripIcon />
-                                </button>
+                                </Button>
                               </SortableItemHandle>
                             )}
                             <span className="w-12 shrink-0 font-mono text-[10px] text-muted-foreground tabular-nums">

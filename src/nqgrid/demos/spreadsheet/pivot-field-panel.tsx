@@ -16,6 +16,7 @@ import {
   SelectValue,
   ScrollArea,
   cn,
+  Button,
 } from "@nqlib/nqui";
 import {
   ORDER_DIMENSIONS,
@@ -96,11 +97,13 @@ function Chip({
         isDragging && "opacity-50",
       )}
     >
-      <button
+      <Button
         ref={setNodeRef}
         type="button"
+        variant="ghost"
+        size="sm"
         aria-label={`Drag ${label}`}
-        className="flex cursor-grab items-center gap-1 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
+        className="h-auto cursor-grab gap-1 rounded-full px-0 text-xs font-normal hover:bg-transparent active:cursor-grabbing"
         {...listeners}
         {...attributes}
       >
@@ -108,7 +111,7 @@ function Chip({
           ⠿
         </span>
         <span className="font-medium">{label}</span>
-      </button>
+      </Button>
       {onFilterChange ? (
         <Select value={filterValue ?? "All"} onValueChange={onFilterChange}>
           <SelectTrigger
@@ -129,14 +132,16 @@ function Chip({
         </Select>
       ) : null}
       {onRemove ? (
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           aria-label={`Remove ${label}`}
           onClick={onRemove}
-          className="flex size-4 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="size-4 min-w-0 rounded-full text-[10px] text-muted-foreground hover:text-foreground"
         >
           ✕
-        </button>
+        </Button>
       ) : null}
     </div>
   );

@@ -45,13 +45,18 @@ const GLOBAL_CONTROL_PREFIXES = ["ex-bg-", "ex-tooltip-"];
 const FAMILY_RULES = [
   [/area/, "area"],
   [/bar|histogram|bullet|monospace|hover-trace|grid-bar|isometric|mark-click/, "bar"],
+  [/sankey/, "sankey"],
+  [/kpi/, "kpi"],
+  [/cohort/, "heatmap"],
+  [/small-multiples/, "line"],
   [/line|reference-range/, "line"],
-  [/composed|pareto|boxplot|box-plot/, "composed"],
+  [/composed|pareto|boxplot|box-plot|variance|forecast|dumbbell/, "composed"],
   [/pie/, "pie"],
   [/radar/, "radar"],
   [/radial|gauge/, "radial"],
   [/scatter|bubble/, "scatter"],
   [/funnel/, "funnel"],
+  [/tile-column/, "tile-column"],
   [/waterfall/, "waterfall"],
   [/treemap/, "treemap"],
   [/heatmap/, "heatmap"],
@@ -75,7 +80,12 @@ function inferCategory(name, family) {
     name.includes("pareto") ||
     name.includes("bullet") ||
     name.includes("boxplot") ||
-    name.includes("gauge")
+    name.includes("gauge") ||
+    // Analyst recipes (nqchart 0.5): composed from `@nqlib/nqchart/recipes`.
+    name.includes("variance") ||
+    name.includes("forecast") ||
+    name.includes("dumbbell") ||
+    name.includes("cohort")
   ) {
     return "recipe";
   }
@@ -236,7 +246,7 @@ function auditDocsPreviews(catalogIds) {
 
 function listExtraSharedFiles(becoRoot) {
   const examplesDir = path.join(becoRoot, "src/registry/examples");
-  return ["example-shared.ts", "example-datasets.ts", "workload-demo-data.ts", "chart-tokens.ts"]
+  return ["example-shared.ts", "example-datasets.ts", "workload-demo-data.ts", "chart-tokens.ts", "iso-prism.ts"]
     .map((f) => path.join(examplesDir, f))
     .filter((p) => existsSync(p));
 }

@@ -4,7 +4,7 @@
 
 <NquiExample name="theming-tokens" />
 
-Open full variants: [Buttons & Actions](/catalog#buttons-actions) · [Design system](/design-system)
+Open full variants: [Actions](/catalog#buttons-actions) · [Design system](/design-system)
 
 ## How
 
@@ -39,7 +39,11 @@ Avoid raw palette colors and manual `dark:` overrides when tokens already flip w
 
 Host apps typically wrap with `ThemeProvider` (`next-themes`, `attribute="class"`) — see [Imports](/docs/nqui/imports). Token values live in `@nqlib/nqui/styles` and your CSS entry ([CSS](/docs/nqui/css)).
 
-This site's Appearance picker writes brand hue to `--primary` only. `--accent` and `--interactive` stay muted so hover/menu wash is not a primary fill. Try it at [/settings/appearance](/settings/appearance).
+This site's Theme Studio (the palette button in every top bar) writes brand hue to `--primary` only. `--accent` and `--interactive` stay muted so hover/menu wash is not a primary fill. Try it at [/studio](/studio).
+
+### Control finish
+
+Filled `Button` and `Badge` variants carry a soft top sheen from `--button-gradient` (a white-to-transparent gradient) over `--button-shadow`. Set `--button-gradient: none` on `:root` for a fully flat look. Slider, Switch and Progress share the control tokens `--track`, `--track-hover`, `--thumb` and `--shadow-thumb`.
 
 ### Conditional classes
 

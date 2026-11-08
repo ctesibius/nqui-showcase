@@ -5,7 +5,9 @@ import {
   type ElementType,
   type ReactNode,
 } from "react"
+import { ScrollArea } from "@nqlib/nqui"
 import { cn } from "@/lib/utils"
+import { scrollAreaFill } from "@/lib/scroll-area-fill"
 
 /**
  * Showcase hybrid elevation (app chrome only — not nqui Card):
@@ -48,16 +50,16 @@ const stageVariantClass = {
     "h-auto w-full flex-none aspect-[4/3] overflow-hidden p-0",
     stageFillChild,
   ),
-  table: cn("min-h-64 flex-1 overflow-auto p-0", stageFillChild),
+  table: "min-h-64 flex-1 p-0",
   gantt: cn(
     "h-[48rem] min-h-[48rem] flex-none overflow-hidden p-0",
     stageFillChild,
   ),
-  report: cn(
-    "min-h-[40rem] flex-1 overflow-auto p-0 [scrollbar-gutter:stable]",
-    stageFillChild,
-  ),
+  report: "min-h-[40rem] flex-1 p-0",
 } as const
+
+/** Stages that scroll their content — through nqui ScrollArea, never native overflow. */
+const scrollingStages = new Set<TrayStageVariant>(["table", "report"])
 
 export type TrayStageVariant = keyof typeof stageVariantClass
 
@@ -113,15 +115,30 @@ function TrayCaption({ className, children, ...props }: TrayCaptionProps) {
 type TrayStageProps = {
   variant?: TrayStageVariant
   className?: string
+  /** Scrolling stages (table / report): classes for the content inside the ScrollArea (e.g. padding). */
+  contentClassName?: string
   children: ReactNode
-} & ComponentPropsWithoutRef<"div">
+} & Omit<ComponentPropsWithoutRef<"div">, "dir">
 
 function TrayStage({
   variant = "default",
   className,
+  contentClassName,
   children,
   ...props
 }: TrayStageProps) {
+  if (scrollingStages.has(variant)) {
+    return (
+      <ScrollArea
+        orientation="both"
+        fadeMask={false}
+        className={cn(stageBase, stageVariantClass[variant], scrollAreaFill, className)}
+        {...props}
+      >
+        <div className={cn("h-full min-h-0", stageFillChild, contentClassName)}>{children}</div>
+      </ScrollArea>
+    )
+  }
   return (
     <div
       className={cn(stageBase, stageVariantClass[variant], className)}
@@ -132,7 +149,44 @@ function TrayStage({
   )
 }
 
+type TrayHeadingProps = {
+  /** Name of the thing shown — sans, the line you scan. */
+  title: ReactNode
+  /** One mono line under it: the import, e.g. "@nqlib/nqui · Button". */
+  meta?: string
+  /** Right side: a "Docs" / "Catalog" link or a small toggle. */
+  action?: ReactNode
+  /** Heading level for the title (catalog specimens sit under an h2). */
+  as?: "h2" | "h3" | "p"
+  className?: string
+}
+
+/**
+ * The specimen caption used across the site: name, import line, one action.
+ * No paragraph — explanation belongs in the page around the tray.
+ */
+function TrayHeading({ title, meta, action, as: Heading = "h3", className }: TrayHeadingProps) {
+  return (
+    <TrayCaption className={cn("items-center pb-1.5", className)}>
+      <div className="min-w-0">
+        <Heading className="text-sm font-medium leading-snug text-foreground">{title}</Heading>
+        {meta ? (
+          <p className="truncate font-mono text-[0.6875rem] leading-snug text-muted-foreground" title={meta}>
+            {meta}
+          </p>
+        ) : null}
+      </div>
+      {action ? <div className="flex shrink-0 items-center gap-2">{action}</div> : null}
+    </TrayCaption>
+  )
+}
+
+/** Quiet text link for a tray heading's action slot. */
+export const trayActionLink =
+  "rounded-sm text-xs text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-ring"
+
 export const Tray = Object.assign(TrayRoot, {
   Caption: TrayCaption,
+  Heading: TrayHeading,
   Stage: TrayStage,
 })

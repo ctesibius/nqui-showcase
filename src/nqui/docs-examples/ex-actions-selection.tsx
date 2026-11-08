@@ -7,7 +7,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@nqlib/nqui";
-import { ExampleFrame, ExampleHint, ExampleLabel, ExampleSplit } from "./shared";
+import { ExampleFrame, ExampleLabel, ExampleSplit } from "./shared";
 
 /** Toolbar selection vs form selection — the rule most people get wrong. */
 export default function ExActionsSelection() {
@@ -16,10 +16,6 @@ export default function ExActionsSelection() {
 
   return (
     <ExampleFrame>
-      <ExampleHint>
-        Left is chrome (ToggleGroup). Right is a form choice (RadioGroup). Same
-        job shape, different control.
-      </ExampleHint>
       <ExampleSplit
         left={
           <>

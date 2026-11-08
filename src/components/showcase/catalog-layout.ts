@@ -1,25 +1,34 @@
 /**
- * Catalog ledger layout — denser than soft gallery.
- * Specimen chrome: shared {@link ./tray} (muted rim → background stage).
- * Prefer single stage specimens over nested card chrome.
+ * Catalog layout — a six-column bento grid sized by container width, so the
+ * rail and the phone sheet never change the maths.
+ *
+ *   S = one third, M = half, L = full width.
+ *
+ * Rows stay even by pairing trays of similar height (M + M, S + S + S, L) or
+ * by stacking two trays beside a tall one ({@link catalogStack}). Each stage
+ * has a minimum height per size and centres its specimen, so a short tray in
+ * a row never shows a slab of empty stage at the bottom.
  */
-export const catalogShell =
-  "flex flex-1 flex-col gap-10 p-4 md:p-5 min-w-0 overflow-x-hidden"
+export type CatalogSize = "s" | "m" | "l"
 
-export const catalogSection = "space-y-3"
+/** Section body: container for the size queries below. */
+export const catalogGrid = "grid grid-cols-1 gap-3 @xl:grid-cols-6"
 
-/** Spec-sheet section stamp (not a soft marketing h2). */
-export const catalogHeading =
-  "font-mono text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground"
+export const catalogSpan: Record<CatalogSize, string> = {
+  s: "@xl:col-span-3 @3xl:col-span-2",
+  m: "@xl:col-span-3",
+  l: "@xl:col-span-6",
+}
 
-/** Default specimen grid: two columns, tight folds. */
-export const catalogGridLedger = "grid grid-cols-1 gap-3 md:grid-cols-2"
-
-/** Variant matrices only (Tracker, calendars, etc.). */
-export const catalogGridMatrix = "grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3"
+export const catalogStageMin: Record<CatalogSize, string> = {
+  s: "min-h-40",
+  m: "min-h-44",
+  l: "min-h-36",
+}
 
 /**
- * Optional inner grouping inside a stage — spacing only.
- * Do not add border/bg/radius (avoids card-in-card).
+ * Two trays stacked in one grid cell, sharing the row's height. Their stages
+ * drop the per-size minimum: the tall neighbour sets the row.
  */
-export const catalogDemoWell = "space-y-3"
+export const catalogStack =
+  "flex flex-col gap-3 [&>*]:grow [&_[data-catalog-stage]]:min-h-0 [&:not(:has([data-catalog-specimen]))]:hidden"

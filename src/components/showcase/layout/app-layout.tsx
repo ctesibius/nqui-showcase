@@ -29,7 +29,6 @@ import {
 } from "@nqlib/nqui/command"
 import {
   NQUI_HUB_PATH,
-  showcaseCatalogSections,
   showcasePatternSections,
   showcaseRouteLabel,
   showcaseRoutes,
@@ -50,10 +49,7 @@ const routeToBreadcrumbs: Record<string, { label: string; path: string }[]> = {
     { label: "Recipes", path: NQUI_HUB_PATH },
     { label: "Slider lab", path: "/recipes/sliders" },
   ],
-  "/catalog": [{ label: "Component catalog", path: "/catalog" }],
   "/design-system": [{ label: "Design system", path: "/design-system" }],
-  "/studio": [{ label: "Theme Studio", path: "/studio" }],
-  "/settings/appearance": [{ label: "Appearance", path: "/settings/appearance" }],
   "/command": [{ label: "Command lab", path: "/command" }],
 }
 
@@ -158,6 +154,7 @@ function AppLayoutContent() {
         <div
           ref={scrollContainerRef}
           data-main-scroll="true"
+          // eslint-disable-next-line no-restricted-syntax -- native scroll: page scrollport — sticky frosted header, scroll-spy context and an always-visible page scrollbar
           className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden"
         >
           {/* Header with FrostedGlass for content behind and reflections nearby */}
@@ -234,33 +231,21 @@ function CommandPaletteContent() {
             </CommandItem>
           ))}
         </CommandGroup>
-        <CommandSeparator />
-        <CommandGroup heading="Labs">
-          <CommandItem
-            value="Command lab ST-064 search slots"
-            onSelect={() => goTo("/command")}
-          >
-            <CommandItemContent>
-              <CommandItemTitle>Command lab</CommandItemTitle>
-              <CommandItemDescription>
-                Menu density, search slots, ScrollArea thumb
-              </CommandItemDescription>
-            </CommandItemContent>
-          </CommandItem>
-        </CommandGroup>
-        {location.pathname === "/catalog" ? (
+        {import.meta.env.DEV ? (
           <>
             <CommandSeparator />
-            <CommandGroup heading="Catalog sections">
-              {showcaseCatalogSections.map((section) => (
-                <CommandItem
-                  key={section.hash}
-                  value={section.title}
-                  onSelect={() => goTo(section.path, section.hash)}
-                >
-                  {section.title}
-                </CommandItem>
-              ))}
+            <CommandGroup heading="Labs">
+              <CommandItem
+                value="Command lab ST-064 search slots"
+                onSelect={() => goTo("/command")}
+              >
+                <CommandItemContent>
+                  <CommandItemTitle>Command lab</CommandItemTitle>
+                  <CommandItemDescription>
+                    Menu density, search slots, ScrollArea thumb
+                  </CommandItemDescription>
+                </CommandItemContent>
+              </CommandItem>
             </CommandGroup>
           </>
         ) : null}

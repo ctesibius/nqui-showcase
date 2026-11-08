@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "motion/react";
 import { Button, NquiLogo } from "@nqlib/nqui";
 import { ThemeControls } from "../showcase/theme-tokens/theme-token-sheet";
 import { STORY_EASE } from "./scroll-hooks";
+import { LiquidGlassBar } from "../liquid-glass-bar";
 
 const CHAPTERS = [
   { href: "#product", label: "Product" },
@@ -16,14 +16,6 @@ const CHAPTERS = [
 
 export function StoryNav() {
   const reducedMotion = useReducedMotion();
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   return (
     <motion.header
@@ -32,10 +24,8 @@ export function StoryNav() {
       transition={{ duration: 0.5, ease: STORY_EASE, delay: 0.05 }}
       className="fixed inset-x-0 top-3 z-50 flex justify-center px-4"
     >
-      <nav
-        data-scrolled={scrolled}
-        className="story-nav-pill flex h-12 w-full max-w-3xl items-center gap-3 rounded-full pl-5 pr-2"
-      >
+      <LiquidGlassBar shape="pill" className="w-full max-w-3xl" contentClassName="w-full p-0">
+      <nav className="flex h-12 w-full items-center gap-3 pl-5 pr-2">
         <a
           href="#top"
           aria-label="nqlib — back to top"
@@ -64,6 +54,7 @@ export function StoryNav() {
           </Button>
         </div>
       </nav>
+      </LiquidGlassBar>
     </motion.header>
   );
 }

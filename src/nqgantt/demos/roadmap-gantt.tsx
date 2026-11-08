@@ -20,6 +20,7 @@ import type {
 import { applyAutoSchedule, levelResources } from "@nqlib/nqgantt-engine";
 import { syncInboundDependencyLags } from "../lib/sync-inbound-lags";
 import {
+  ScrollArea,
   Select,
   SelectContent,
   SelectItem,
@@ -990,14 +991,14 @@ export function RoadmapGantt({
   return (
     <div className={cn("flex min-h-0 flex-1 gap-3", className)}>
       {gantt}
-      <div className="min-h-0 w-80 shrink-0 overflow-y-auto">
+      <ScrollArea className="min-h-0 w-80 shrink-0">
         <GanttPmpPanel
           features={ganttData.features}
           dependencies={dependencies}
           onFeaturesChange={onPmpFeaturesChange}
           onDependenciesChange={setDependencies}
         />
-      </div>
+      </ScrollArea>
     </div>
   );
 }

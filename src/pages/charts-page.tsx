@@ -1,18 +1,32 @@
-import { Suspense, use, useEffect, useMemo, useState, type ComponentType, type ReactNode } from "react";
+import { Suspense, use, useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import {
   Badge,
   Button,
-  Input,
-  NquiLogo,
+  Label,
+  NativeSelect,
+  NativeSelectOption,
   Skeleton,
+  Switch,
+  Tabs,
+  TabsList,
+  TabsTrigger,
   ToggleGroup,
   ToggleGroupItem,
   cn,
 } from "@nqlib/nqui";
 import type { BackgroundVariant } from "@nqlib/nqchart";
-import { ShowcaseTopBar , devTopBarLinks } from "../components/showcase-top-bar";
-import { LiquidGlassBar } from "../components/liquid-glass-bar";
+import { GalleryPage } from "../components/gallery/gallery-shell";
+import {
+  RailFilter,
+  RailGroup,
+  RailHeader,
+  RailLinks,
+  RailSearch,
+} from "../components/gallery/rail";
+import { useScrollSpy } from "../components/gallery/gallery-scroll";
 import {
   CATALOG_COUNT,
   NQCHART_CATALOG,
@@ -21,13 +35,20 @@ import {
 } from "../nqchart/catalog";
 import { loadCatalogComponent } from "../nqchart/catalog/load-entry";
 import {
+  FEATURED_GROUPS,
+  type FeaturedChart,
+} from "../nqchart/catalog/featured";
+import {
+  contrastSlidingTabsListClass,
+  contrastSlidingTabsTriggerClass,
+} from "../components/contrast-sliding-segment";
+import {
   applyChartPreviewControls,
   type TooltipPreviewMode,
 } from "../nqchart/catalog/apply-preview-controls";
 import { LazyMount } from "../components/blocks/lazy-mount";
-import { Tray, trayMeta, trayTags } from "../components/showcase/tray";
+import { Tray, trayMeta } from "../components/showcase/tray";
 import { isNew } from "../nqchart/lab/whats-new";
-import "../components/landing/landing.css";
 import "../components/blocks/blocks.css";
 import "./charts-page.css";
 
@@ -54,13 +75,8 @@ const TIP_OPTIONS: Array<{ id: TooltipPreviewMode; label: string }> = [
   { id: "hidden", label: "Hidden" },
 ];
 
-const FOCUS_OPTIONS = [
-  { id: "on", label: "On" },
-  { id: "off", label: "Off" },
-] as const;
-
 const CATEGORIES = [
-  { id: "all", label: "All" },
+  { id: "all", label: "Everything" },
   { id: "example", label: "Examples" },
   { id: "variant", label: "Variants" },
   { id: "recipe", label: "Recipes" },
@@ -69,6 +85,23 @@ const CATEGORIES = [
   { id: "matrix", label: "Matrix" },
   { id: "block", label: "Blocks" },
 ] as const;
+
+type ChartsView = "featured" | "all";
+
+const CATALOG_BY_ID = new Map(NQCHART_CATALOG.map((e) => [e.id, e]));
+
+/** Featured groups resolved against the generated catalog; unknown ids drop out. */
+const FEATURED_SECTIONS = FEATURED_GROUPS.map((g) => ({
+  ...g,
+  items: g.charts.flatMap((chart) => {
+    const entry = CATALOG_BY_ID.get(chart.id);
+    if (!entry) {
+      if (import.meta.env.DEV) console.warn(`[charts] featured id not in catalog: ${chart.id}`);
+      return [];
+    }
+    return [{ chart, entry }];
+  }),
+})).filter((g) => g.items.length > 0);
 
 const componentCache = new Map<string, Promise<ComponentType>>();
 
@@ -113,11 +146,14 @@ function ChartPreview({
 
 function ChartCard({
   entry,
+  feature,
   background,
   tooltip,
   hoverFocus,
 }: {
   entry: CatalogEntry;
+  /** Curated framing — the card then leads with the job, not the registry id. */
+  feature?: FeaturedChart;
   background: BackgroundVariant | "none";
   tooltip: TooltipPreviewMode;
   hoverFocus: boolean;
@@ -125,7 +161,7 @@ function ChartCard({
   return (
     <Tray interactive>
       <Tray.Caption>
-        <span className="truncate text-sm font-medium">{entry.name}</span>
+        <span className="truncate text-sm font-medium">{feature?.title ?? entry.name}</span>
         <span className="flex shrink-0 items-center gap-1.5">
           {isNew(entry.id) ? (
             <Badge className="font-mono text-xs font-normal">New</Badge>
@@ -155,45 +191,89 @@ function ChartCard({
           </Suspense>
         </LazyMount>
       </Tray.Stage>
-      <p className={cn(trayMeta, "font-mono text-xs text-muted-foreground")}>{entry.id}</p>
-      <ul className={trayTags}>
-        <li className="rounded-full bg-foreground/5 px-2 py-0.5 font-mono text-xs text-muted-foreground">
-          {entry.category}
-        </li>
-        <li className="rounded-full bg-foreground/5 px-2 py-0.5 font-mono text-xs text-muted-foreground">
-          {entry.component}
-        </li>
-      </ul>
+      <div className={cn(trayMeta, "space-y-1 pb-2")}>
+        {feature ? (
+          <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">{feature.note}</p>
+        ) : null}
+        <p className="truncate font-mono text-xs text-muted-foreground">
+          @nqlib/nqchart/{entry.component}
+        </p>
+      </div>
     </Tray>
   );
 }
 
+type CategoryId = (typeof CATEGORIES)[number]["id"];
+
+const FAMILY_LABEL = (f: string) => (f === "kpi" ? "KPI" : f.charAt(0).toUpperCase() + f.slice(1));
+
+function matchesQuery(e: CatalogEntry, q: string) {
+  return (
+    !q ||
+    e.id.toLowerCase().includes(q) ||
+    e.name.toLowerCase().includes(q) ||
+    e.exportName.toLowerCase().includes(q)
+  );
+}
+
+const FEATURED_IDS = FEATURED_SECTIONS.map((g) => g.id);
+
 export function ChartsPage() {
+  const [view, setView] = useState<ChartsView>("featured");
   const [query, setQuery] = useState("");
   const [family, setFamily] = useState<string>("all");
-  const [category, setCategory] = useState<(typeof CATEGORIES)[number]["id"]>("all");
+  const [category, setCategory] = useState<CategoryId>("all");
   const [background, setBackground] = useState<BackgroundVariant | "none">("none");
   const [tooltip, setTooltip] = useState<TooltipPreviewMode>("default");
   const [hoverFocus, setHoverFocus] = useState(true);
   const [page, setPage] = useState(0);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return NQCHART_CATALOG.filter((e) => {
-      if (family !== "all" && e.family !== family) return false;
-      if (category !== "all" && e.category !== category) return false;
-      if (!q) return true;
-      return (
-        e.id.toLowerCase().includes(q) ||
-        e.name.toLowerCase().includes(q) ||
-        e.exportName.toLowerCase().includes(q)
-      );
-    });
-  }, [query, family, category]);
+  const q = query.trim().toLowerCase();
+
+  const filtered = useMemo(
+    () =>
+      NQCHART_CATALOG.filter(
+        (e) =>
+          (family === "all" || e.family === family) &&
+          (category === "all" || e.category === category) &&
+          matchesQuery(e, q),
+      ),
+    [q, family, category],
+  );
+
+  // Faceted counts: each list counts what you'd get by picking that row,
+  // given the other filters — so a row never promises charts it can't show.
+  const familyItems = useMemo(() => {
+    const pool = NQCHART_CATALOG.filter(
+      (e) => (category === "all" || e.category === category) && matchesQuery(e, q),
+    );
+    return [
+      { value: "all", label: "All families", count: pool.length },
+      ...NQCHART_FAMILIES.map((f) => ({
+        value: f,
+        label: FAMILY_LABEL(f),
+        count: pool.filter((e) => e.family === f).length,
+      })),
+    ];
+  }, [q, category]);
+
+  const categoryItems = useMemo(() => {
+    const pool = NQCHART_CATALOG.filter(
+      (e) => (family === "all" || e.family === family) && matchesQuery(e, q),
+    );
+    return CATEGORIES.map((c) => ({
+      value: c.id,
+      label: c.label,
+      count: c.id === "all" ? pool.length : pool.filter((e) => e.category === c.id).length,
+    }));
+  }, [q, family]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, pageCount - 1);
   const pageItems = filtered.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
+
+  const activeQuestion = useScrollSpy(view === "featured" ? FEATURED_IDS : []);
 
   useEffect(() => {
     document.documentElement.dataset.nqTooltip = tooltip;
@@ -202,220 +282,263 @@ export function ChartsPage() {
     };
   }, [tooltip]);
 
-  return (
-    <div className="fl-page">
-      <div className="fl-grid" aria-hidden />
-      <div className="fl-glow" aria-hidden />
+  const goToPage = (next: number) => {
+    setPage(next);
+    const top = resultsRef.current;
+    if (top && top.getBoundingClientRect().top < 0) top.scrollIntoView({ block: "start" });
+  };
 
-      <div className="relative z-[var(--z-base)] mx-auto w-[var(--fl-shell)] pb-24 pt-8">
-        <ShowcaseTopBar
-          brand={
-            <Link to="/" className="flex items-center gap-2.5">
-              <NquiLogo className="size-[22px]" />
-              <span className="text-sm font-semibold tracking-tight">
-                nqlib<span className="font-medium text-muted-foreground"> · charts</span>
-              </span>
-            </Link>
-          }
-          links={[
-            { to: "/charts/0.4", label: "NQChart 0.4" },
-            { to: "/charts/lab", label: "Lab" },
-            { to: "/blocks", label: "Blocks" },
-            { to: "/catalog", label: "Catalog" },
-            { to: "/docs/nqchart", label: "Docs" },
-            ...devTopBarLinks,
-          ]}
-        />
+  const resetFilters = () => {
+    setQuery("");
+    setFamily("all");
+    setCategory("all");
+    setPage(0);
+  };
+  const hasFilters = family !== "all" || category !== "all" || q !== "";
 
-        <div className="mt-14 max-w-[52ch] md:mt-20">
-          <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground/80">
-            {CATALOG_COUNT} examples · synced from the nqchart registry
-          </p>
-          <h1 className="mt-3 text-4xl font-semibold leading-[1.07] tracking-[-0.028em] md:text-5xl">
-            Every NQChart, live.
-          </h1>
-          <p className="mt-4 leading-relaxed text-muted-foreground">
-            Full catalog of registry examples. Background, tooltip, and focus
-            controls apply to every chart on the page — no duplicate cards per chrome variant.
-          </p>
-        </div>
+  const familyLabel = family === "all" ? null : FAMILY_LABEL(family);
+  const categoryLabel = category === "all" ? null : CATEGORIES.find((c) => c.id === category)?.label;
 
-        <LiquidGlassBar
-          shape="rounded"
-          className="charts-toolbar sticky top-3 z-[var(--z-sticky-content)] mt-8 w-full max-w-full lg:max-w-[calc(100%-min(22rem,48vw))]"
-          contentClassName="w-full flex-col items-stretch gap-3 p-3"
-        >
-          <div className="flex flex-wrap items-center gap-2">
-            <Input
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setPage(0);
-              }}
-              placeholder="Search examples…"
-              className="h-8 max-w-xs text-xs"
-            />
-            <ToggleGroup
-              type="single"
+  const rail = (
+    <>
+      <RailHeader pkg="@nqlib/nqchart" count={CATALOG_COUNT} unit="charts" />
+
+      <Tabs value={view} onValueChange={(v) => setView(v as ChartsView)} className="w-full">
+        <TabsList aria-label="Charts view" className={contrastSlidingTabsListClass("w-full")}>
+          <TabsTrigger value="featured" className={contrastSlidingTabsTriggerClass("flex-1 px-2")}>
+            By question
+          </TabsTrigger>
+          <TabsTrigger value="all" className={contrastSlidingTabsTriggerClass("flex-1 px-2")}>
+            Everything
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {view === "featured" ? (
+        <RailGroup label="Questions">
+          <RailLinks
+            label="Chart questions"
+            activeId={activeQuestion}
+            items={FEATURED_SECTIONS.map((g) => ({ id: g.id, label: g.title, count: g.items.length }))}
+          />
+        </RailGroup>
+      ) : (
+        <>
+          <RailSearch
+            label="Search charts"
+            placeholder="Search charts"
+            value={query}
+            onChange={(v) => {
+              setQuery(v);
+              setPage(0);
+            }}
+          />
+          <RailGroup label="Family">
+            <RailFilter
+              label="Chart family"
               value={family}
               onValueChange={(v) => {
-                if (!v) return;
                 setFamily(v);
                 setPage(0);
               }}
-              /* No flex-wrap: nqui's ToggleGroup is deliberately a single row
-                 that scrolls horizontally (hidden scrollbar) when it runs out
-                 of width. Adding flex-wrap defeats that — the pill wraps and
-                 grows tall, and because nqui sets overflow-x:auto, CSS forces
-                 overflow-y to auto too, so the wrapped rows become draggable
-                 and slide out of alignment.
-                 No gap-* either: spacing=0 is nqui's segmented mode, where items are
-                 rounded-none because they're meant to sit flush. A gap re-exposes the
-                 shell between them, so a hover fill stops short of its neighbour and
-                 reads as a sliver. Use the `spacing` prop if separation is ever wanted. */
-            >
-              <ToggleGroupItem value="all" className="h-7 rounded-full px-2.5 text-xs">
-                All families
-              </ToggleGroupItem>
-              {NQCHART_FAMILIES.map((f) => (
-                <ToggleGroupItem key={f} value={f} className="h-7 rounded-full px-2.5 text-xs">
-                  {f}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-              Category
-            </span>
-            <ToggleGroup
-              type="single"
+              items={familyItems}
+            />
+          </RailGroup>
+          <RailGroup label="Kind">
+            <RailFilter
+              label="Example kind"
               value={category}
               onValueChange={(v) => {
-                if (!v) return;
-                setCategory(v as typeof category);
+                setCategory(v);
                 setPage(0);
               }}
-              /* No flex-wrap: nqui's ToggleGroup is deliberately a single row
-                 that scrolls horizontally (hidden scrollbar) when it runs out
-                 of width. Adding flex-wrap defeats that — the pill wraps and
-                 grows tall, and because nqui sets overflow-x:auto, CSS forces
-                 overflow-y to auto too, so the wrapped rows become draggable
-                 and slide out of alignment.
-                 No gap-* either: spacing=0 is nqui's segmented mode, where items are
-                 rounded-none because they're meant to sit flush. A gap re-exposes the
-                 shell between them, so a hover fill stops short of its neighbour and
-                 reads as a sliver. Use the `spacing` prop if separation is ever wanted. */
-            >
-              {CATEGORIES.map((c) => (
-                <ToggleGroupItem key={c.id} value={c.id} className="h-7 rounded-full px-2.5 text-xs">
-                  {c.label}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <label className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
-              Background
-              <select
-                className="h-7 rounded-full border bg-background px-2 text-xs normal-case tracking-normal text-foreground"
-                value={background}
-                onChange={(e) => setBackground(e.target.value as BackgroundVariant | "none")}
-              >
-                {BG_OPTIONS.map((v) => (
-                  <option key={v} value={v}>
-                    {v}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-              Tooltip
-            </span>
-            <ToggleGroup
-              type="single"
-              value={tooltip}
-              onValueChange={(v) => v && setTooltip(v as TooltipPreviewMode)}
-            >
-              {TIP_OPTIONS.map((t) => (
-                <ToggleGroupItem key={t.id} value={t.id} className="h-7 rounded-full px-2.5 text-xs">
-                  {t.label}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-
-            <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-              Focus
-            </span>
-            <ToggleGroup
-              type="single"
-              value={hoverFocus ? "on" : "off"}
-              onValueChange={(v) => {
-                if (v === "on") setHoverFocus(true);
-                if (v === "off") setHoverFocus(false);
-              }}
-            >
-              {FOCUS_OPTIONS.map((f) => (
-                <ToggleGroupItem key={f.id} value={f.id} className="h-7 rounded-full px-2.5 text-xs">
-                  {f.label}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-
-            <span className="ml-auto font-mono text-xs tabular-nums text-muted-foreground">
-              {filtered.length} match · page {safePage + 1}/{pageCount}
-            </span>
-          </div>
-        </LiquidGlassBar>
-
-        <div className="blk-shelf mt-8">
-          {pageItems.map((entry) => (
-            <ChartCard
-              key={entry.id}
-              entry={entry}
-              background={background}
-              tooltip={tooltip}
-              hoverFocus={hoverFocus}
+              items={categoryItems}
             />
+          </RailGroup>
+          <RailGroup label="Preview">
+            <div className="flex flex-col gap-3 px-2">
+              <Label className="flex-col items-stretch gap-1.5 text-xs font-normal text-muted-foreground">
+                Background
+                <NativeSelect
+                  size="sm"
+                  className="w-full text-foreground"
+                  value={background}
+                  onChange={(e) => setBackground(e.target.value as BackgroundVariant | "none")}
+                >
+                  {BG_OPTIONS.map((v) => (
+                    <NativeSelectOption key={v} value={v}>
+                      {v === "none" ? "None" : v.replace(/-/g, " ")}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+              </Label>
+              <div className="flex flex-col gap-1.5">
+                <span id="charts-tooltip-label" className="text-xs text-muted-foreground">
+                  Tooltip
+                </span>
+                <ToggleGroup
+                  type="single"
+                  aria-labelledby="charts-tooltip-label"
+                  value={tooltip}
+                  onValueChange={(v) => v && setTooltip(v as TooltipPreviewMode)}
+                  className="w-full"
+                >
+                  {TIP_OPTIONS.map((t) => (
+                    <ToggleGroupItem key={t.id} value={t.id} className="h-7 flex-1 text-xs">
+                      {t.label}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              </div>
+              <Label className="justify-between text-xs font-normal text-muted-foreground">
+                Dim others on hover
+                <Switch size="sm" checked={hoverFocus} onCheckedChange={setHoverFocus} />
+              </Label>
+            </div>
+          </RailGroup>
+        </>
+      )}
+    </>
+  );
+
+  const railSummary =
+    view === "featured"
+      ? (FEATURED_SECTIONS.find((g) => g.id === activeQuestion)?.title ?? "By question")
+      : [familyLabel ?? "All families", categoryLabel, q && `“${query.trim()}”`].filter(Boolean).join(" · ") +
+        ` — ${filtered.length}`;
+
+  return (
+    <GalleryPage
+      section="charts"
+      title="Pick the chart by the question."
+      lede="Compare, trend, composition, conversion, spread and capacity — one composable API, themed by your tokens. Hover any chart; the import is under each card."
+      aside={
+        <>
+          Want to feel the interactions — brush, legend focus, drill?{" "}
+          <Link
+            to="/charts/lab"
+            className="font-medium text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
+          >
+            Try the interaction lab
+          </Link>
+          .
+        </>
+      }
+      rail={rail}
+      railSummary={railSummary}
+      railLabel="Browse charts"
+      footer={
+        <Button size="sm" variant="outline" asChild>
+          <Link to="/catalog">Component catalog</Link>
+        </Button>
+      }
+    >
+      {view === "featured" ? (
+        <div className="flex flex-col gap-16">
+          {FEATURED_SECTIONS.map((g) => (
+            <section key={g.id} id={g.id} aria-labelledby={`${g.id}-title`} className="scroll-mt-24">
+              <header className="max-w-[60ch]">
+                <h2 id={`${g.id}-title`} className="text-xl font-semibold tracking-tight">
+                  {g.title}
+                </h2>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{g.question}</p>
+              </header>
+              <div className="blk-shelf charts-shelf--pairs mt-6">
+                {g.items.map(({ chart, entry }) => (
+                  <ChartCard
+                    key={entry.id}
+                    entry={entry}
+                    feature={chart}
+                    background="none"
+                    tooltip="default"
+                    hoverFocus
+                  />
+                ))}
+              </div>
+            </section>
           ))}
         </div>
-
-        {filtered.length === 0 ? (
-          <p className="mt-10 text-sm text-muted-foreground">No examples match these filters.</p>
-        ) : (
-          <div className="mt-10 flex items-center justify-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={safePage <= 0}
-              onClick={() => setPage((p) => Math.max(0, p - 1))}
-            >
-              Previous
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={safePage >= pageCount - 1}
-              onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
-            >
-              Next
-            </Button>
+      ) : (
+        <div ref={resultsRef} className="scroll-mt-24">
+          <div className="flex min-h-8 flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <p className="text-sm text-muted-foreground" aria-live="polite">
+              <span className="font-medium tabular-nums text-foreground">{filtered.length}</span>{" "}
+              {filtered.length === 1 ? "chart" : "charts"}
+              {familyLabel ? ` · ${familyLabel}` : ""}
+              {categoryLabel ? ` · ${categoryLabel}` : ""}
+              {q ? ` matching “${query.trim()}”` : ""}
+              {hasFilters ? (
+                <Button variant="link" size="sm" className="ml-2 h-auto p-0 text-sm" onClick={resetFilters}>
+                  Clear
+                </Button>
+              ) : null}
+            </p>
+            {pageCount > 1 ? (
+              <Pager page={safePage} pageCount={pageCount} onPage={goToPage} />
+            ) : null}
           </div>
-        )}
 
-        <footer className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t pt-6">
-          <p className="font-mono text-xs tracking-[0.04em] text-muted-foreground/70">
-            synced via <code>pnpm nqchart:sync</code> · {PAGE_SIZE} charts mounted per page
-          </p>
-          <Button size="sm" variant="outline" asChild>
-            <Link to="/blocks">Component blocks</Link>
-          </Button>
-        </footer>
-      </div>
-    </div>
+          {filtered.length === 0 ? (
+            <div className="mt-6 rounded-lg border border-dashed border-border px-6 py-14 text-center">
+              <p className="text-sm font-medium">No charts match these filters.</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Try another family, or search by component name — “bar”, “Funnel”, “sankey”.
+              </p>
+              <Button size="sm" variant="outline" className="mt-4" onClick={resetFilters}>
+                Clear filters
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div className="blk-shelf charts-shelf--pairs mt-5">
+                {pageItems.map((entry) => (
+                  <ChartCard
+                    key={entry.id}
+                    entry={entry}
+                    background={background}
+                    tooltip={tooltip}
+                    hoverFocus={hoverFocus}
+                  />
+                ))}
+              </div>
+              {pageCount > 1 ? (
+                <div className="mt-10 flex justify-center">
+                  <Pager page={safePage} pageCount={pageCount} onPage={goToPage} />
+                </div>
+              ) : null}
+            </>
+          )}
+        </div>
+      )}
+    </GalleryPage>
+  );
+}
+
+function Pager({ page, pageCount, onPage }: { page: number; pageCount: number; onPage: (page: number) => void }) {
+  return (
+    <nav aria-label="Pages" className="flex items-center gap-1">
+      <Button
+        size="icon"
+        variant="ghost"
+        aria-label="Previous page"
+        disabled={page <= 0}
+        onClick={() => onPage(page - 1)}
+      >
+        <HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} />
+      </Button>
+      <span className="min-w-[4.5rem] text-center text-xs tabular-nums text-muted-foreground">
+        {page + 1} of {pageCount}
+      </span>
+      <Button
+        size="icon"
+        variant="ghost"
+        aria-label="Next page"
+        disabled={page >= pageCount - 1}
+        onClick={() => onPage(page + 1)}
+      >
+        <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} />
+      </Button>
+    </nav>
   );
 }
 

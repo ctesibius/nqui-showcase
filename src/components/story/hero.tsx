@@ -174,21 +174,23 @@ function ReelHero({ reducedMotion }: { reducedMotion: boolean }) {
             {/* Stage rail */}
             <div className="mt-8 flex items-center gap-3">
               {PRODUCTS.map((p, i) => (
-                <button
+                <Button
                   key={p.id}
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => scrollToStage(i)}
                   title={p.name}
                   aria-label={`Go to ${p.name}`}
                   aria-current={i === active ? "true" : undefined}
-                  className="group flex items-center gap-2"
+                  className="group h-4 min-w-0 px-0 hover:bg-transparent"
                 >
                   <span
                     className={`h-1 rounded-full transition-all duration-300 ${
                       i === active ? "w-8 bg-foreground" : "w-4 bg-border group-hover:bg-muted-foreground"
                     }`}
                   />
-                </button>
+                </Button>
               ))}
             </div>
           </div>

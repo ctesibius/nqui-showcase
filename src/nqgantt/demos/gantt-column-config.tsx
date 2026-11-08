@@ -13,6 +13,7 @@
  */
 import { useMemo, useState } from "react";
 import {
+  ScrollArea,
   Badge,
   Button,
   Input,
@@ -27,6 +28,7 @@ import {
   SelectValue,
   Separator,
   cn,
+  Checkbox,
 } from "@nqlib/nqui";
 import type {
   GanttCellVariant,
@@ -146,7 +148,13 @@ export function GanttColumnConfigButton({
         collisionPadding={12}
         className="flex w-80 flex-col p-0 max-h-[min(30rem,var(--radix-popover-content-available-height))]"
       >
-        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-3">
+        {/* An auto-height popover gives the viewport no definite height, so the
+            cap is the popover's own max-height (less its 1px borders). */}
+        <ScrollArea
+          className="min-h-0"
+          viewportStyle={{ maxHeight: "calc(min(30rem, var(--radix-popover-content-available-height)) - 2px)" }}
+        >
+        <div className="space-y-3 p-3">
           <div className="space-y-1.5">
             <Label className="text-xs">Column</Label>
             <Select value={column.id} onValueChange={setSelectedId}>
@@ -349,6 +357,7 @@ export function GanttColumnConfigButton({
             </p>
           )}
         </div>
+        </ScrollArea>
       </PopoverContent>
     </Popover>
   );
@@ -364,15 +373,9 @@ function ToggleRow({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-1.5 text-xs">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={e => onChange(e.target.checked)}
-        className="h-3 w-3"
-      />
-      {label}
-    </label>
+    <Checkbox checked={checked} onCheckedChange={v => onChange(v === true)} gap={1.5}>
+      <span className="text-xs">{label}</span>
+    </Checkbox>
   );
 }
 
@@ -426,8 +429,10 @@ function OptionsEditor({
           <span aria-hidden className="cursor-grab px-0.5 text-xs text-muted-foreground">
             ⠿
           </span>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             aria-label={`Color for ${opt.label}`}
             onClick={() =>
               patchAt(i, {
@@ -437,7 +442,7 @@ function OptionsEditor({
                   ],
               })
             }
-            className="h-4 w-4 shrink-0 rounded-full ring-1 ring-border"
+            className="size-4 min-w-0 shrink-0 rounded-full p-0 ring-1 ring-border hover:opacity-80"
             style={{ backgroundColor: opt.color }}
           />
           <Input

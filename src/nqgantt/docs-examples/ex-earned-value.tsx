@@ -3,7 +3,7 @@ import { GanttRoot } from "@nqlib/nqgantt/ui";
 import { captureBaselineSet, computeEVMForecast } from "@nqlib/nqgantt";
 import type { BaselineSet } from "@nqlib/nqgantt";
 import { ExampleControls, ExampleFrame, NAME_ONLY_COLUMNS, STATUS, Tile, day, feature } from "./shared";
-import { Button } from "@nqlib/nqui";
+import { Button, Checkbox } from "@nqlib/nqui";
 
 const INITIAL = [
   feature("a", "Foundations", -21, -10, {
@@ -57,16 +57,9 @@ export default function ExEarnedValue() {
         <Button size="sm" variant="outline" className="h-7 text-xs" disabled={!baseline} onClick={inflate}>
           2 · Raise a budget by 60k
         </Button>
-        <label className="flex cursor-pointer items-center gap-1.5 text-xs">
-          <input
-            type="checkbox"
-            checked={measure}
-            disabled={!baseline}
-            onChange={(e) => setMeasure(e.target.checked)}
-            className="h-3 w-3"
-          />
-          3 · Measure against it
-        </label>
+        <Checkbox checked={measure} disabled={!baseline} onCheckedChange={(v) => setMeasure(v === true)} gap={1.5}>
+          <span className="text-xs">3 · Measure against it</span>
+        </Checkbox>
         <Button
           size="sm"
           variant="ghost"

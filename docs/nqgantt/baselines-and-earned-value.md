@@ -39,7 +39,7 @@ The rule that matters: **PV and BAC are frozen; EV uses today's progress; AC is 
 
 ## See it for yourself
 
-Open the Gantt lab, turn on the **PMP panel**, and do this in order:
+In `GanttDemo` from `@nqlib/nqgantt/ui`, turn on the **PMP panel**, and do this in order:
 
 1. **Capture baseline.**
 2. Change a task's **Budget** cell in the sidebar — make it much bigger.

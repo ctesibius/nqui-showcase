@@ -11,6 +11,12 @@ import {
   CardTitle,
   Progress,
   Separator,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
 } from "@nqlib/nqui"
 
 // ─── Token swatches ──────────────────────────────────────────────────────────
@@ -410,48 +416,48 @@ export default function RecipeElevation() {
       <section className="flex flex-col gap-3">
         <h2 className="text-base font-semibold">When to use which</h2>
         <div className="rounded-lg border border-border bg-muted/50 p-5 max-w-3xl">
-          <table className="w-full text-sm" style={{ borderCollapse: "separate", borderSpacing: "0 8px" }}>
-            <thead>
-              <tr className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
-                <th className="text-left pb-2 pr-4">Situation</th>
-                <th className="text-left pb-2">Model</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="pr-4 align-top py-1">Product UI, general case</td>
-                <td className="py-1">
+          <Table className="w-full text-sm" style={{ borderCollapse: "separate", borderSpacing: "0 8px" }}>
+            <TableHeader>
+              <TableRow className="border-0 hover:bg-transparent text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+                <TableHead className="h-auto px-0 pb-2 pr-4 text-left text-muted-foreground">Situation</TableHead>
+                <TableHead className="h-auto px-0 pb-2 text-left text-muted-foreground">Model</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow className="border-0 hover:bg-transparent">
+                <TableCell className="whitespace-normal px-0 pr-4 align-top py-1">Product UI, general case</TableCell>
+                <TableCell className="whitespace-normal px-0 py-1">
                   <strong className="text-foreground">Hybrid (2 surfaces + spacing)</strong> — the
                   nqui default
-                </td>
-              </tr>
-              <tr>
-                <td className="pr-4 align-top py-1">Stacked modals</td>
-                <td className="py-1 text-muted-foreground">
+                </TableCell>
+              </TableRow>
+              <TableRow className="border-0 hover:bg-transparent">
+                <TableCell className="whitespace-normal px-0 pr-4 align-top py-1">Stacked modals</TableCell>
+                <TableCell className="whitespace-normal px-0 py-1 text-muted-foreground">
                   Continuous — each layer must feel physically above the previous
-                </td>
-              </tr>
-              <tr>
-                <td className="pr-4 align-top py-1">Observability / data-dense dashboards</td>
-                <td className="py-1 text-muted-foreground">
+                </TableCell>
+              </TableRow>
+              <TableRow className="border-0 hover:bg-transparent">
+                <TableCell className="whitespace-normal px-0 pr-4 align-top py-1">Observability / data-dense dashboards</TableCell>
+                <TableCell className="whitespace-normal px-0 py-1 text-muted-foreground">
                   Continuous, capped at 3-4 levels — density is dominant
-                </td>
-              </tr>
-              <tr>
-                <td className="pr-4 align-top py-1">Focus-mode editor, single-concept screen</td>
-                <td className="py-1 text-muted-foreground">
+                </TableCell>
+              </TableRow>
+              <TableRow className="border-0 hover:bg-transparent">
+                <TableCell className="whitespace-normal px-0 pr-4 align-top py-1">Focus-mode editor, single-concept screen</TableCell>
+                <TableCell className="whitespace-normal px-0 py-1 text-muted-foreground">
                   Single surface + spacing only — most refined
-                </td>
-              </tr>
-              <tr>
-                <td className="pr-4 align-top py-1">You want to add a third inline surface</td>
-                <td className="py-1 text-muted-foreground">
+                </TableCell>
+              </TableRow>
+              <TableRow className="border-0 hover:bg-transparent">
+                <TableCell className="whitespace-normal px-0 pr-4 align-top py-1">You want to add a third inline surface</TableCell>
+                <TableCell className="whitespace-normal px-0 py-1 text-muted-foreground">
                   <strong className="text-foreground">Stop.</strong> Use spacing + label, or move it
                   to a sheet/route.
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
         </div>
       </section>
 

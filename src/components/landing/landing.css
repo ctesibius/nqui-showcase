@@ -226,7 +226,9 @@
 
 @media (max-width: 920px) {
   .fl-deck {
-    grid-template-columns: 1fr;
+    /* minmax(0, …): a bare 1fr can't shrink below its content's min-width,
+       which pushed the deck past the shell on phones. */
+    grid-template-columns: minmax(0, 1fr);
     gap: clamp(2rem, 6vh, 3rem);
   }
   .fl-stage {

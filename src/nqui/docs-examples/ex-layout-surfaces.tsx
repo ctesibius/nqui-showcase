@@ -10,16 +10,12 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@nqlib/nqui";
-import { ExampleFrame, ExampleHint, ExampleLabel, ExampleSplit } from "./shared";
+import { ExampleFrame, ExampleLabel, ExampleSplit } from "./shared";
 
 /** Full Card composition vs a quiet muted panel for chrome. */
 export default function ExLayoutSurfaces() {
   return (
     <ExampleFrame>
-      <ExampleHint>
-        Card is a content unit. Toolbar chrome can be a muted bordered panel —
-        not another nested Card.
-      </ExampleHint>
       <ExampleSplit
         left={
           <>

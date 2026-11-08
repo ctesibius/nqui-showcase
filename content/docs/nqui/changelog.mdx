@@ -7,6 +7,26 @@ Track published versions on npm: [`@nqlib/nqui`](https://www.npmjs.com/package/@
 
 Detailed release notes live in the nqui package repo (`CHANGELOG` / GitHub releases). This docs hub focuses on install and composition; bump the package and re-check [Installation](/docs/nqui/installation) when upgrading.
 
+## 0.9.1 — 2026-11-07
+
+- Filled `Button` and `Badge` get their top sheen back: `--button-gradient` is a white sheen
+  again instead of `none`. Set it to `none` for the flat look.
+- Half-star `Rating` no longer shows a seam down the middle of the star.
+
+## 0.9.0 and 0.8.3 — 2026-11-04
+
+**Slider** grew from one control into a family, by props:
+
+- `label`, `showValue`, `formatValue` — the value sits at the end of the label row.
+- `scale="log"` and `marks` — ratio values (100 % mid-track on 25–400 %), snapping to labelled marks.
+- `variant="field"` (type an exact value), `variant="segments"` (5–12 steps) and
+  `variant="ruler"` (ticks that adapt to width, `tickIntervals` for units).
+- `origin` (bipolar fill), `trackBackground` + `showRange` (gradient tracks) and `readOnly`.
+
+Slider, Switch and Progress moved onto shared control tokens (`--track`, `--thumb`,
+`--shadow-thumb`), and filled buttons press to a solid darker fill. See the
+[Slider lab](/recipes/sliders) and [Forms and fields](/docs/nqui/forms-and-fields).
+
 | Next | |
 |------|--|
 | [Components](/docs/nqui/components) | Live catalog |

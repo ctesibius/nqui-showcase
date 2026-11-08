@@ -7,7 +7,10 @@ import { lazy, type ComponentType } from "react";
 
 export interface NquiExampleEntry {
   id: string;
+  /** The rule the example shows, in a few words. */
   title: string;
+  /** Exports it uses — the tray's mono import line. */
+  imports: string;
   height: string;
   /** Catalog section hash for “Open in catalog”. */
   catalogHash: string;
@@ -17,43 +20,49 @@ export interface NquiExampleEntry {
 export const NQUI_DOC_EXAMPLES: NquiExampleEntry[] = [
   {
     id: "actions-selection",
-    title: "ToggleGroup vs RadioGroup",
+    title: "Toolbar choice or form choice",
+    imports: "ToggleGroup, RadioGroup",
     height: "h-[280px]",
     catalogHash: "buttons-actions",
     load: () => import("./ex-actions-selection"),
   },
   {
     id: "forms-field",
-    title: "FieldGroup, InputGroup, invalid",
-    height: "h-[320px]",
+    title: "Fields that line up",
+    imports: "FieldGroup, Field, InputGroup",
+    height: "h-[240px]",
     catalogHash: "form-components",
     load: () => import("./ex-forms-field"),
   },
   {
     id: "layout-surfaces",
-    title: "Card vs muted panel",
+    title: "Content card or quiet panel",
+    imports: "Card",
     height: "h-[300px]",
     catalogHash: "layout-components",
     load: () => import("./ex-layout-surfaces"),
   },
   {
     id: "overlays-pick",
-    title: "Dialog, Sheet, AlertDialog",
-    height: "h-[200px]",
+    title: "Pick the overlay by the job",
+    imports: "Dialog, Sheet, AlertDialog",
+    height: "h-20",
     catalogHash: "overlays-dialogs",
     load: () => import("./ex-overlays-pick"),
   },
   {
     id: "feedback-states",
-    title: "Empty and Skeleton",
+    title: "Empty and loading",
+    imports: "Empty, Skeleton",
     height: "h-[320px]",
     catalogHash: "display-components",
     load: () => import("./ex-feedback-states"),
   },
   {
     id: "theming-tokens",
-    title: "Variants and semantic tokens",
-    height: "h-[280px]",
+    title: "Variants, not new colours",
+    imports: "Button, Badge",
+    height: "h-[240px]",
     catalogHash: "buttons-actions",
     load: () => import("./ex-theming-tokens"),
   },

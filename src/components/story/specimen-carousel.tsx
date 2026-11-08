@@ -1,6 +1,9 @@
 import { type ComponentType, type SVGProps, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
-import { ScrollArea } from "@nqlib/nqui";
+import {
+  ScrollArea,
+  Button,
+} from "@nqlib/nqui";
 
 /** A single showcase slide: a live specimen plus metadata. */
 export interface Specimen {
@@ -125,24 +128,28 @@ export function SpecimenCarousel({
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="icon"
             aria-label="Previous"
             disabled={current <= 1}
             onClick={goPrev}
-            className="flex size-8 items-center justify-center rounded-full border text-foreground opacity-60 transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-25"
+            className="size-8 rounded-full opacity-60 transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100 disabled:opacity-25"
           >
             <Chevron dir="left" className="size-4" />
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="outline"
+            size="icon"
             aria-label="Next"
             disabled={current >= items.length}
             onClick={goNext}
-            className="flex size-8 items-center justify-center rounded-full border text-foreground opacity-60 transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-25"
+            className="size-8 rounded-full opacity-60 transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100 disabled:opacity-25"
           >
             <Chevron dir="right" className="size-4" />
-          </button>
+          </Button>
         </div>
       </div>
 

@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url"
 import tailwindcss from "@tailwindcss/vite"
 import react from "@vitejs/plugin-react"
 import mdx from "fumadocs-mdx/vite"
-import { defineConfig, type Alias, type PluginOption } from "vite"
+import { defineConfig, searchForWorkspaceRoot, type Alias, type PluginOption } from "vite"
 import * as MdxConfig from "./source.config"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -139,6 +139,15 @@ export default defineConfig(async ({ mode }) => ({
   optimizeDeps: {
     exclude: ["@nqlib/nqui"],
     include: [
+      // nqui is excluded, so its @dnd-kit imports are only discovered at
+      // runtime — in a later optimize pass that bundled @dnd-kit/sortable with
+      // its own copy of @dnd-kit/core. Two DndContexts: every nqui Sortable
+      // rendered handles with no listeners and nothing could be dragged.
+      // Pre-bundling them together keeps one shared core chunk.
+      "@dnd-kit/core",
+      "@dnd-kit/sortable",
+      "@dnd-kit/utilities",
+      "@dnd-kit/modifiers",
       "bind-event-listener",
       "raf-schd",
       "@atlaskit/pragmatic-drag-and-drop",
@@ -176,6 +185,10 @@ export default defineConfig(async ({ mode }) => ({
       "@nqlib/nqchart",
       "@nqlib/nqui",
       "@radix-ui/react-tooltip",
+      "@dnd-kit/core",
+      "@dnd-kit/sortable",
+      "@dnd-kit/utilities",
+      "@dnd-kit/modifiers",
       "fumadocs-core",
       "fumadocs-mdx",
     ],
@@ -189,6 +202,14 @@ export default defineConfig(async ({ mode }) => ({
     host: "127.0.0.1",
     strictPort: true,
     port: Number(process.env.PORT) || 5173,
+    // Linked `@nqlib/nqui` (`link:../nqui`) serves Satoshi from the sibling
+    // dist. Vite's default allow list is this repo, so those font URLs 403.
+    fs: {
+      allow: [
+        searchForWorkspaceRoot(__dirname),
+        path.resolve(__dirname, "../nqui"),
+      ],
+    },
   },
   preview: {
     host: "127.0.0.1",

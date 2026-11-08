@@ -5,6 +5,66 @@ description: Release notes for @nqlib/nqgantt.
 
 Track published versions on npm: [`@nqlib/nqgantt`](https://www.npmjs.com/package/@nqlib/nqgantt).
 
+## Unreleased
+
+**Group badges.** `badges` on a group (`{ label, tone, title }`, tone neutral, info, warning or
+destructive) puts short labels after its name in the sidebar: a priority (**AOG**), a hold and its
+age (**Quote · 9d**). Groups without badges are unchanged.
+
+## 0.6.0 — 2026-11-07
+
+**Production boards.** A group can draw its tasks inside its own row as segments, so a work
+order, a line or a program is one row moving through its steps. See
+[Production boards](/docs/nqgantt/production-boards).
+
+| | |
+|---|---|
+| `layout: "segments"` | Steps end to end in one row; overlaps stack into lanes |
+| `kind: "hold"` | Waiting time, hatched, with `holdReason` and `expectedRelease` |
+| `dueAt` | Promised-date marker, red when the last step is late; slack badge in the sidebar |
+| `capacity` | Washes the periods where more steps run at once than the unit can take |
+| `renderBarContent` | What a bar or segment says (`{ widthPx, kind }`) |
+
+Segments paint with the same `--gantt-bar-*` tokens as task bars, so every bar style applies to
+both.
+
+**Resource views.** `resourceId` on a group turns its header into that person's or machine's
+load, and `defaultCollapsedGroupIds` opens groups collapsed. The load row is now a utilization
+histogram: adjacent bars on one 0–175 % scale for every row, a dashed 100 % line, and one
+vertical colour ramp — grey, green through 85–100 %, amber at 125 %, dark red from 150 % — so a
+level is the same colour across the whole team. The sidebar peak badge carries a swatch in its
+colour. Recolour with `--gantt-load-idle`, `--gantt-load-ok`, `--gantt-load-warn`,
+`--gantt-load-over`. The same scale is exported from `@nqlib/nqgantt/ui`
+(`getLoadUtilizationColor`, `GANTT_LOAD_RAMP`, `formatLoadPercent`, …) for legends and tooltips.
+See [Resource availability](/docs/nqgantt/resource-availability).
+
+**Capacity per resource and per period.** Resource rows take `workloadSchemes` (hours by
+weekday: part time, shifts), `resourceCalendars` (pattern binding and dated absences such as leave
+or maintenance), `worklog`, and `resolveCapacityHours(resourceId, day)` for exact hours on a day —
+overtime, a shift change, maintenance at 0. Work booked where there is no capacity reads as
+unbounded overload: a full dark-red bar and a **∞** peak badge, not an idle period.
+
+**Scrolling uses nqui's ScrollArea**, in the timeline and in every list and dialog, with overlay
+scrollbars that match the rest of nqui. **Upgrade note:** the scroll position now lives on the
+ScrollArea viewport, not on `.gantt`. A host that reads or sets `scrollLeft` / `scrollTop` on
+`.gantt` should use `getGanttScroller(node)` instead.
+
+Also: the task edit dialog keeps one height across its tabs, fullscreen no longer adds a
+second toolbar when one is composed inside `GanttRoot`, and clicking a group in the sidebar scrolls
+the timeline to it.
+
+## 0.5.1 — 2026-11-03
+
+The active-group label no longer sits under a leading WBS column, and the WBS column is wide
+enough to read its header.
+
+## 0.5.0 — 2026-11-03
+
+**Performance.** `GanttRoot` mounts only the rows in view, so 2,000 rows hold about 2k DOM nodes
+instead of ~120k, and WebKit (Safari, Tauri) scrolls without stalls. Composed gantts opt in with
+`GanttRowLayoutProvider`. Working-day maths is constant time, and `scrollToFeature` also scrolls
+vertically.
+
 ## 0.4.0
 
 The first release since 0.3.1, and a large one. Two things changed shape.

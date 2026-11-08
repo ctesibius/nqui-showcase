@@ -3,8 +3,6 @@ title: "Bars and timeline"
 description: "A bar is a task’s planned window on a calendar axis. Dragging it changes dates (and may cascade if auto-schedule is on)."
 ---
 
-**Intention:** A bar is a task’s **planned window** on a calendar axis. Dragging it changes dates (and may cascade if auto-schedule is on).
-
 <GanttExample name="bars-basics" />
 
 ## What you see
@@ -16,8 +14,11 @@ description: "A bar is a task’s planned window on a calendar axis. Dragging it
 | **Row / group** | Sidebar label + timeline row (often grouped by status) |
 | **Range** | Day / week / month / quarter column scale |
 | **Density** | Row height (compact / default / comfortable) |
+| **Segment** | A step drawn inside its unit's row (`layout: "segments"`) — see [Production boards](/docs/nqgantt/production-boards) |
 
-Default look in the live demos: **flat** bars + **rail** group treatment. Theme via CSS custom properties on the Gantt root.
+Default look in the live demos: **flat** bars + **rail** group treatment. Theme via CSS custom properties on the Gantt root. Segments use the same bar tokens, so a bar style applies to tasks and segments alike.
+
+The timeline scrolls inside nqui's `ScrollArea` (overlay scrollbars, like every other nqui scroller). Hosts that read scroll position should read it from the scroller returned by `getGanttScroller(node)`, not from `.gantt`.
 
 ## What dragging does
 

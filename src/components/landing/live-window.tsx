@@ -1,5 +1,7 @@
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import {
+  ScrollArea,
   Avatar,
   AvatarFallback,
   AvatarImage,
@@ -8,8 +10,6 @@ import {
   Label,
   Progress,
   Switch,
-  ToggleGroup,
-  ToggleGroupItem,
 } from "@nqlib/nqui";
 import { PEOPLE } from "../story/avatar-stack";
 
@@ -27,16 +27,16 @@ import { PEOPLE } from "../story/avatar-stack";
 /*
  * Crumbs name the package a scene ACTUALLY renders — this is a library
  * showcase, so a scene may never claim a package it doesn't import. The pivot
- * scene is the real nqgrid engine, lazy-loaded the first time it shows (like
- * the chart). The schedule scene is an nqui composition (ToggleGroup + Badge),
- * not the nqgantt engine: that one is too heavy for a landing and gets its own
- * real block on /blocks.
+ * and schedule scenes are the real nqgrid and nqgantt engines, each
+ * lazy-loaded the first time its scene shows (like the chart), so none of
+ * them weigh on the landing's first paint.
  */
+/* `href` is where the full version of each scene lives on the site. */
 const SCENES = [
-  { id: "components", crumb: "nqui / deploy panel", label: "Components" },
-  { id: "charts", crumb: "nqchart / area", label: "Charts" },
-  { id: "grid", crumb: "nqgrid / pivot", label: "Pivot" },
-  { id: "plan", crumb: "nqui / bars", label: "Schedule" },
+  { id: "components", crumb: "nqui / deploy panel", label: "Components", href: "/blocks#deploy" },
+  { id: "charts", crumb: "nqchart / area", label: "Charts", href: "/charts" },
+  { id: "grid", crumb: "nqgrid / pivot", label: "Pivot", href: "/blocks#bookings-review" },
+  { id: "plan", crumb: "nqgantt / timeline", label: "Schedule", href: "/blocks#timeline-lab" },
 ] as const;
 
 const HOLD = 4200;
@@ -44,6 +44,7 @@ const STEP = 36.8; // rail tab (32px) + gap (0.3rem)
 
 const MiniChart = lazy(() => import("./mini-chart").then((m) => ({ default: m.MiniChart })));
 const MiniPivot = lazy(() => import("./mini-pivot").then((m) => ({ default: m.MiniPivot })));
+const MiniGantt = lazy(() => import("./mini-gantt").then((m) => ({ default: m.MiniGantt })));
 
 function RailIcon({ id }: { id: (typeof SCENES)[number]["id"] }) {
   const p = {
@@ -177,56 +178,39 @@ function GridScene({ mounted }: { mounted: boolean }) {
           Pivot
         </Badge>
       </div>
-      <div className="min-h-0 flex-1 overflow-auto rounded-md border bg-card">
+      <ScrollArea orientation="both" fadeMask={false} className="min-h-0 flex-1 rounded-md border bg-card">
         {mounted ? (
           <Suspense fallback={null}>
             <MiniPivot />
           </Suspense>
         ) : null}
-      </div>
+      </ScrollArea>
     </div>
   );
 }
 
-/* ── Scene 4 — nqui ToggleGroup + Badge over a schedule strip ──────────────── */
-const TASKS = [
-  { label: "Design", x: 2, w: 34, tone: "bg-primary" },
-  { label: "Build", x: 20, w: 42, tone: "bg-chart-2" },
-  { label: "Review", x: 46, w: 28, tone: "bg-primary" },
-  { label: "Ship", x: 66, w: 26, tone: "bg-chart-4" },
-];
-
-function PlanScene() {
-  const [view, setView] = useState("week");
+/* ── Scene 4 — nqgantt: the FY26 campaign on its real critical path ────────── */
+function PlanScene({ mounted }: { mounted: boolean }) {
   return (
-    <div className="flex h-full flex-col gap-3">
-      <div className="flex items-center justify-between gap-2">
-        <ToggleGroup type="single" size="sm" variant="outline" value={view} onValueChange={(v) => v && setView(v)}>
-          <ToggleGroupItem value="week" className="px-2 text-xs">Week</ToggleGroupItem>
-          <ToggleGroupItem value="month" className="px-2 text-xs">Month</ToggleGroupItem>
-        </ToggleGroup>
-        <Badge variant="outline" className="shrink-0">Critical path</Badge>
-      </div>
-
-      <div className="relative min-h-0 flex-1">
-        <span className="absolute inset-y-0 left-[47%] z-10 w-px bg-foreground/45" aria-hidden />
-        <div className="flex h-full flex-col justify-center gap-2.5">
-          {TASKS.map((t) => (
-            <div key={t.label} className="flex items-center gap-2.5">
-              <span className="w-11 shrink-0 text-[11px] text-muted-foreground">{t.label}</span>
-              <span className="relative h-2.5 flex-1 rounded-full bg-foreground/5">
-                <span
-                  className={`absolute inset-y-0 rounded-full ${t.tone}`}
-                  style={{ left: `${t.x}%`, width: `${t.w}%` }}
-                />
-              </span>
-            </div>
-          ))}
+    <div className="flex h-full min-h-0 flex-col gap-2">
+      <div className="flex shrink-0 items-baseline justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+            FY26 campaign · by lane
+          </p>
+          <p className="mt-0.5 text-lg font-semibold">In flight</p>
         </div>
+        <Badge variant="outline" className="shrink-0">
+          Critical path
+        </Badge>
       </div>
-      <p className="shrink-0 font-mono text-[10px] text-muted-foreground">
-        sketch · live Gantt is on /blocks
-      </p>
+      <div className="min-h-0 flex-1 overflow-hidden rounded-md border bg-card">
+        {mounted ? (
+          <Suspense fallback={null}>
+            <MiniGantt />
+          </Suspense>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -273,14 +257,22 @@ export function LiveWindow({ reducedMotion }: { reducedMotion: boolean }) {
       <div className="fl-win__bar">
         <span className="fl-win__lights" aria-hidden><i /><i /><i /></span>
         <span className="fl-win__crumb">{SCENES[idx].crumb}</span>
-        <button
+        <Link
+          to={SCENES[idx].href}
+          className="ml-3 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+        >
+          Open full →
+        </Link>
+        <Button
           type="button"
-          className="ml-auto font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground"
+          variant="ghost"
+          size="sm"
+          className="ml-auto h-5 px-1.5 font-mono text-[10px] font-normal uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground"
           aria-pressed={held || reducedMotion}
           onClick={() => setHeld((v) => !v)}
         >
           {held || reducedMotion ? "Play" : "Pause"}
-        </button>
+        </Button>
         <span className="fl-win__spark" aria-hidden />
       </div>
 
@@ -288,16 +280,18 @@ export function LiveWindow({ reducedMotion }: { reducedMotion: boolean }) {
         <nav className="fl-rail" aria-label="Library scenes">
           <span className="fl-rail__ink" style={{ "--y": `${idx * STEP}px` } as React.CSSProperties} aria-hidden />
           {SCENES.map((s, n) => (
-            <button
+            <Button
               key={s.id}
               type="button"
-              className={`fl-rail__tab${n === idx ? " is-active" : ""}`}
+              variant="ghost"
+              size="icon"
+              className={`fl-rail__tab size-8${n === idx ? " is-active" : ""}`}
               aria-label={s.label}
               aria-pressed={n === idx}
               onClick={() => go(n)}
             >
               <RailIcon id={s.id} />
-            </button>
+            </Button>
           ))}
         </nav>
 
@@ -312,7 +306,7 @@ export function LiveWindow({ reducedMotion }: { reducedMotion: boolean }) {
             <GridScene mounted={seen.has(2)} />
           </section>
           <section className={`fl-scene${idx === 3 ? " is-on" : ""}`} aria-hidden={idx !== 3}>
-            <PlanScene />
+            <PlanScene mounted={seen.has(3)} />
           </section>
         </div>
       </div>

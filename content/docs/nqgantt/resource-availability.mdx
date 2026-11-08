@@ -1,9 +1,7 @@
 ---
 title: "Resource availability"
-description: "Make the plan account for who is actually available — part-time patterns and leave included — so levelling produces a schedule people can work rather than one t"
+description: "Make the plan account for who is actually available — part-time patterns and leave included — so levelling produces a schedule people can work rather than one that merely looks resolved."
 ---
-
-**Intention:** Make the plan account for who is actually available — part-time patterns and leave included — so levelling produces a schedule people can work rather than one that merely looks resolved.
 
 <GanttExample name="resource-availability" />
 
@@ -35,21 +33,59 @@ A pattern can never grant a day the project itself doesn't work — a contractor
 
 ## See it for yourself
 
-In the Gantt lab's **PMP panel**: give someone leave, then press **Level**. The task steps *over* the absence. Untick the leave and level again — it lands inside it.
+In `GanttDemo`'s **PMP panel** (`@nqlib/nqgantt/ui`): give someone leave, then press **Level**. The task steps *over* the absence. Untick the leave and level again — it lands inside it.
 
 The same demo on the library's own docs page shows the peak-allocation badge going from 200 % to resolved.
 
 ## Reading the load chart
 
-Three lines matter:
+A resource row (a group with `resourceId`, see [Production boards](/docs/nqgantt/production-boards)) is a **histogram**: one bar per day, week or month, touching its neighbours, on **one scale for every row** (0–175 % of capacity).
 
-| Line | Means |
+| Mark | Means |
 |------|-------|
-| **Planned** | What the schedule says this person should be doing |
-| **Actual** | What they recorded (or, without a worklog, an estimate from progress) |
-| **Capacity** | What they are actually available for |
+| **Bar height** | Planned hours as a share of capacity for that period |
+| **Dashed line** | 100 % — the resource's capacity |
+| **Short rule on a bar** | Actual hours recorded (or estimated from progress) |
+| **Break near the top** | Taller than 175 % — the bar is capped |
+| **Sidebar badge** | Peak load over the plan, with a swatch in that peak's colour |
 
-Planned above capacity is over-allocation. Actual above planned is an estimate that was too optimistic. Actual well below planned on a task reporting high progress usually means the progress number is wishful.
+**Colour is height.** Every bar shows the same vertical ramp, so a level is the same colour in every column and every row:
+
+| Load | Colour |
+|------|--------|
+| Light use | Grey |
+| 85–100 % (healthy) | Green |
+| 125 % | Amber |
+| 150 % and over | Dark red |
+
+So you can scan **across** a team: the green level lines up, an idle week never leaves the grey, and anything warm has pushed through the dashed line. The ramp is themeable — `--gantt-load-idle`, `--gantt-load-ok`, `--gantt-load-warn`, `--gantt-load-over` on `.gantt`.
+
+A legend, tooltip or badge outside the gantt can use the same scale, so its colours match the bars:
+
+```tsx
+import { formatLoadPercent, getLoadUtilizationColor, GANTT_LOAD_RAMP } from "@nqlib/nqgantt/ui";
+
+<Badge style={{ background: getLoadUtilizationColor(132) }}>{formatLoadPercent(132)}</Badge>
+// GANTT_LOAD_RAMP is the full gradient, for a legend strip.
+// GANTT_LOAD_SCALE_MAX (175), GANTT_LOAD_HEALTHY_FROM (85), GANTT_LOAD_WARN_AT (125) and GANTT_LOAD_OVER_AT (150) are its stops.
+```
+
+### Capacity changes by period
+
+A bar is a share of **that period's** capacity, so a holiday week, a part-time week or a machine down for maintenance changes the line each bar is measured against. Tell the gantt what you know:
+
+| Source | Sets |
+|--------|------|
+| Project `calendar` | Working days, holidays, hours per day — everyone's default |
+| `workloadSchemes` | Hours by weekday for one resource: part time, a machine on two shifts |
+| `resourceCalendars` | Binds a scheme to a resource, plus dated absences (leave, maintenance) at zero |
+| `resolveCapacityHours(resourceId, day)` | Exact hours for one resource on one day — overtime, a shift change. Wins over the rest; return `undefined` to keep the computed value |
+
+**Work booked where there is no capacity** (someone on leave, a machine in maintenance) is the most over a period can be: a full dark-red bar and a **∞** peak badge — never an empty, idle-looking period.
+
+Planned work is spread over the project's working days. A pattern that removes a weekday (a four-day week) therefore shows that day as booked with no capacity; change hours, not days, unless you also move the work.
+
+Bars above the line are over-allocation. An actual rule above its bar is an estimate that was too optimistic; an actual rule well below a bar on a task reporting high progress usually means the progress number is wishful.
 
 ## When not to
 
@@ -62,6 +98,8 @@ Planned above capacity is over-allocation. Actual above planned is an estimate t
 If everyone is full-time and nobody is away in the horizon you are planning, the project calendar is enough. Adding per-person data you don't need is maintenance for no signal.
 
 ## Related
+
+- [Production boards](/docs/nqgantt/production-boards)
 
 - [Actuals and the worklog](/docs/nqgantt/actuals-and-worklog) — where the actual line comes from
 - [Auto-schedule](/docs/nqgantt/auto-schedule) — the other thing that moves tasks for you

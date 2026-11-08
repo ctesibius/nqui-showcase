@@ -1,6 +1,6 @@
 import { Suspense, use, useState, type ComponentType, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Skeleton, cn } from "@nqlib/nqui";
+import { ScrollArea, Skeleton, cn, ToggleGroup, ToggleGroupItem } from "@nqlib/nqui";
 import { resolveDocsCatalogEntry, loadCatalogComponent, type CatalogEntry } from "@/nqchart/catalog";
 import { LazyMount } from "@/components/blocks/lazy-mount";
 import { Tray } from "@/components/showcase/tray";
@@ -29,6 +29,7 @@ export function ComponentPreview({
   title,
   className,
   containerClassName,
+  previewClassName,
   align = "center",
   hideCode = false,
 }: {
@@ -37,6 +38,8 @@ export function ComponentPreview({
   className?: string;
   /** Extra classes on the live preview viewport (height, padding, etc.). */
   containerClassName?: string;
+  /** Upstream (becocharts) name for the same thing; synced pages use it. */
+  previewClassName?: string;
   align?: "center" | "start" | "end";
   hideCode?: boolean;
   children?: ReactNode;
@@ -71,45 +74,39 @@ export function ComponentPreview({
   return (
     <div className={cn("group relative my-4 mb-10", className)}>
       <Tray as="div">
-        <Tray.Caption className="items-center">
-          <span className="line-clamp-1 font-mono text-xs text-muted-foreground">
-            {title ?? entry.name}
-          </span>
-          {!hideCode ? (
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                className={cn(
-                  "rounded px-1.5 py-0.5 font-mono text-[0.6875rem] transition-colors",
-                  tab === "code"
-                    ? "bg-background text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-                onClick={() => setTab("code")}
-              >
-                Code
-              </button>
-              <button
-                type="button"
-                className={cn(
-                  "rounded px-1.5 py-0.5 font-mono text-[0.6875rem] transition-colors",
-                  tab === "preview"
-                    ? "bg-background text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-                onClick={() => setTab("preview")}
-              >
-                Preview
-              </button>
-            </div>
-          ) : null}
-        </Tray.Caption>
+        <Tray.Heading
+          as="p"
+          title={
+            // MDX often titles a variant with the prop itself (`areaVariant='dotted'`).
+            title && /[=<{]/.test(title) ? (
+              <code className="font-mono text-xs font-medium">{title}</code>
+            ) : (
+              (title ?? entry.name)
+            )
+          }
+          meta={`@nqlib/nqchart/${entry.component}`}
+          action={
+            !hideCode ? (
+            <ToggleGroup
+              type="single"
+              size="sm"
+              value={tab}
+              onValueChange={(v) => v && setTab(v as typeof tab)}
+              aria-label="Preview or code"
+            >
+              <ToggleGroupItem value="code" className="font-mono text-[0.6875rem]">Code</ToggleGroupItem>
+              <ToggleGroupItem value="preview" className="font-mono text-[0.6875rem]">Preview</ToggleGroupItem>
+            </ToggleGroup>
+            ) : null
+          }
+        />
 
         <Tray.Stage
           variant="flush"
           className={cn(
             tallPreview ? "h-[22rem] sm:h-[28rem]" : "h-64 sm:h-[22.5rem]",
             containerClassName,
+            previewClassName,
           )}
           data-align={align}
         >
@@ -125,7 +122,8 @@ export function ComponentPreview({
               </Suspense>
             </LazyMount>
           ) : (
-            <div className="space-y-2 overflow-auto p-4 text-sm text-muted-foreground">
+            <ScrollArea className="size-full min-h-0">
+            <div className="space-y-2 p-4 text-sm text-muted-foreground">
               <p>
                 Registry id{" "}
                 <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
@@ -143,6 +141,7 @@ export function ComponentPreview({
                 for the same specimen, or install via the NQChart registry.
               </p>
             </div>
+            </ScrollArea>
           )}
         </Tray.Stage>
       </Tray>

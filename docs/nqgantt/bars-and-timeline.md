@@ -13,8 +13,11 @@
 | **Row / group** | Sidebar label + timeline row (often grouped by status) |
 | **Range** | Day / week / month / quarter column scale |
 | **Density** | Row height (compact / default / comfortable) |
+| **Segment** | A step drawn inside its unit's row (`layout: "segments"`) — see [[production-boards]] |
 
-Default look in the live demos: **flat** bars + **rail** group treatment. Theme via CSS custom properties on the Gantt root.
+Default look in the live demos: **flat** bars + **rail** group treatment. Theme via CSS custom properties on the Gantt root. Segments use the same bar tokens, so a bar style applies to tasks and segments alike.
+
+The timeline scrolls inside nqui's `ScrollArea` (overlay scrollbars, like every other nqui scroller). Hosts that read scroll position should read it from the scroller returned by `getGanttScroller(node)`, not from `.gantt`.
 
 ## What dragging does
 

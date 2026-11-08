@@ -4,7 +4,12 @@
  * for every linkable variable.
  */
 import { useMemo, useRef, useState } from "react";
-import { Input, cn } from "@nqlib/nqui";
+import {
+  ScrollArea,
+  Input,
+  cn,
+  Button,
+} from "@nqlib/nqui";
 import {
   FORMULA_SNIPPETS,
   type FormulaVarInfo,
@@ -206,10 +211,9 @@ export function FormulaExpressionInput({
           }}
         />
         {open && suggestions.length > 0 ? (
-          <ul
-            role="listbox"
-            className="absolute z-50 mt-1 max-h-40 w-full overflow-auto rounded-md border border-border bg-popover py-1 text-xs shadow-(--shadow-elevated)"
-          >
+          <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover text-xs shadow-(--shadow-elevated)">
+          <ScrollArea className="rounded-[inherit]" viewportStyle={{ maxHeight: "10rem" }}>
+          <ul role="listbox" className="py-1">
             {suggestions.map((s, i) => {
               const key =
                 s.kind === "field" ? `f:${s.var.name}` : `s:${s.expression}`;
@@ -220,12 +224,13 @@ export function FormulaExpressionInput({
                   : s.label;
               return (
                 <li key={key}>
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
                     role="option"
                     aria-selected={i === active}
                     className={cn(
-                      "flex w-full items-baseline gap-2 px-2 py-1.5 text-left hover:bg-accent",
+                      "h-auto w-full items-baseline justify-start gap-2 rounded-none px-2 py-1.5 text-left text-xs font-normal",
                       i === active && "bg-accent",
                     )}
                     onMouseDown={(e) => {
@@ -238,26 +243,30 @@ export function FormulaExpressionInput({
                     <span className="truncate text-muted-foreground">
                       {detail}
                     </span>
-                  </button>
+                  </Button>
                 </li>
               );
             })}
           </ul>
+          </ScrollArea>
+          </div>
         ) : null}
       </div>
 
       <div className="flex flex-wrap gap-1">
         {linkables.map((v) => (
-          <button
+          <Button
             key={v.name}
             type="button"
+            variant="outline"
+            size="sm"
             title={v.description ?? v.label}
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => insertChip(v.name)}
-            className="rounded-md border border-border px-1.5 py-0.5 font-mono text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="h-5 px-1.5 font-mono font-normal text-muted-foreground hover:text-foreground"
           >
             {v.name}
-          </button>
+          </Button>
         ))}
       </div>
 

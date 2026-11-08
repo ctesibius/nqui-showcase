@@ -10,6 +10,7 @@ import {
   EmptyTitle,
   ScrollArea,
   cn,
+  Button,
 } from "@nqlib/nqui";
 import {
   KanbanBoard,
@@ -114,8 +115,9 @@ export function IssuesBlockView({
               style={quarterCols}
               aria-labelledby={`${panelId}-label`}
             >
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 id={`${panelId}-label`}
                 aria-expanded={open}
                 aria-controls={panelId}
@@ -127,7 +129,7 @@ export function IssuesBlockView({
                     return next;
                   })
                 }
-                className="col-span-full flex items-center gap-2 rounded-md bg-muted/40 px-2.5 py-2 text-left hover:bg-muted/60 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+                className="col-span-full h-auto justify-start gap-2 bg-muted/40 px-2.5 py-2 text-left font-normal hover:bg-muted/60"
               >
                 <HugeiconsIcon
                   icon={ArrowDown01Icon}
@@ -141,7 +143,7 @@ export function IssuesBlockView({
                 <LaneMark status={status} />
                 <span className="text-sm font-medium text-foreground">{meta?.name ?? status}</span>
                 <span className="ml-auto text-sm tabular-nums text-muted-foreground">{count}</span>
-              </button>
+              </Button>
 
               {open
                 ? quarters.map((quarter, qi) => (

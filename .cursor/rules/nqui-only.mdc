@@ -1,0 +1,49 @@
+---
+description: The showcase is built only from nqui components — never raw HTML controls.
+globs: "src/**/*.tsx"
+alwaysApply: true
+---
+
+# nqui only
+
+The showcase exists to show our libraries. Every control on screen is an nqui
+component; a hand-rolled `<button>` is the wrong demo. Raw `button`, `input`,
+`select`, `textarea`, `label` and `table` are a lint error
+(`no-restricted-syntax` in `eslint.config.js`).
+
+| Raw | nqui |
+|-----|------|
+| `<button>` | `Button` (`variant` ghost / outline / link / secondary, `size` sm / default / lg / icon, `asChild` for links) |
+| Segmented / mode buttons | `ToggleGroup` + `ToggleGroupItem`; view tabs `Tabs` + `TabsList` + `TabsTrigger` |
+| `<input>` | `Input` (any `type`, incl. `color`, `date`, hidden `file` driven by a `Button`) |
+| `<input type="checkbox">` + `<label>` | `Checkbox` with `children` (it renders its own label), or `Label` wrapping a bare `Checkbox` for rich content |
+| `<select>` | `NativeSelect` + `NativeSelectOption` (or `Select` for a styled popup); `className` lands on the wrapper |
+| `<textarea>` | `Textarea` |
+| `<label>` | `Label` (add `font-normal` where the old label was not bold) |
+| `<table>` … `<td>` | `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell` |
+
+Notes:
+
+- **Classes still merge.** nqui uses tailwind-merge, so layout classes win over
+  a variant's defaults (`h-auto w-full justify-start font-normal` turns a
+  `Button` into a list row). Prefer `variant` / `size` before overriding.
+- **`Table` brings its own horizontal scroll box** (`data-slot="table-container"`).
+  Inside a `ScrollArea` that already scrolls horizontally, add
+  `[&_[data-slot=table-container]]:overflow-visible` to the ScrollArea so the
+  nqui scrollbar stays the only one. `TableHead` defaults to `text-foreground`
+  and `h-10`; `TableCell` to `whitespace-nowrap` — restate muted headers and
+  `whitespace-normal` for prose cells.
+
+## Exceptions
+
+Only with a concrete technical reason, written on the line above:
+
+```tsx
+{/* eslint-disable-next-line no-restricted-syntax -- <why nqui cannot do this here> */}
+```
+
+Accepted reasons so far: tables whose `position: sticky` header lives in a
+`ScrollArea` (nqui `Table`'s scroll wrapper would capture it), nqgrid
+engine-driven tables, a `<select>` styled per value inside virtualized grid
+cells, and the host element of nqui `Item asChild`. "It looked easier" is not a
+reason.

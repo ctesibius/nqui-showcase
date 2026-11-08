@@ -22,6 +22,8 @@ CSS: `@import "@nqlib/nqui/styles";` → [CSS](/docs/nqui/css) · shell → [Imp
 | Form choice | `RadioGroup` / `Select` / `Combobox` |
 | Settings bool | `Switch` |
 | Form bool | `Checkbox` |
+| Number in a range | `Slider` (`field` / `segments` / `ruler` variants) |
+| Scrolling panel | `ScrollArea` — never `overflow-auto` |
 
 → [[actions-and-selection]]
 
@@ -50,7 +52,7 @@ Empty · Skeleton · Alert · Badge · Separator · Sonner toaster
 ## Practice
 
 Drills → [[practice-in-catalog]] · first session → [[getting-started]]  
-Live: [/catalog](/catalog) · [Buttons](/catalog#buttons-actions) · [Forms](/catalog#form-components) · [/nqui](/nqui) · [Appearance](/settings/appearance)
+Live: [/catalog](/catalog) · [Buttons](/catalog#buttons-actions) · [Forms](/catalog#form-components) · [/nqui](/nqui) · [Theme Studio](/studio)
 
 ## Team
 

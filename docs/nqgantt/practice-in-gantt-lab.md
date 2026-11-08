@@ -6,7 +6,8 @@
 
 | Control | Use it to |
 |---------|-----------|
-| **Dataset** | Full / Dense / Single / Empty — stress layouts |
+| **Dataset** | Full / Dense / Single / Empty, 500 / 2k / 5k stress sets, Production (work orders on segmented rows) |
+| **Rows** (Production) | By order, by Technician or by Machine — see [[production-boards]] |
 | **Range** | Day / Week / Month / Quarter — drag fidelity |
 | **Density** | Row height |
 | **Grouped** | Status sections on/off |
@@ -45,7 +46,7 @@
 
 ## Live timeline
 
-The [**/blocks**](/blocks) Timeline demo uses the same Gantt patterns. Use it to run the drills above.
+The [**Campaign timeline**](/blocks#timeline-lab) on /blocks uses the same Gantt patterns — drag bars, draw links and watch successors to run the drills above. The toolbar and PMP-panel controls named on this page belong to `GanttDemo` from `@nqlib/nqgantt/ui`.
 
 ## When not to
 

@@ -1,9 +1,9 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { GanttRoot } from "@nqlib/nqgantt/ui";
 import { DEFAULT_WORKING_CALENDAR, exportMSProjectXML, importMSProjectXML } from "@nqlib/nqgantt";
 import type { GanttDependency, MSProjectImportResult } from "@nqlib/nqgantt";
 import { ExampleControls, ExampleFrame, NAME_ONLY_COLUMNS, STATUS, feature } from "./shared";
-import { Button } from "@nqlib/nqui";
+import { Button, Input } from "@nqlib/nqui";
 
 const INITIAL = [
   feature("phase", "Phase 1", 0, 32, { progress: 45, status: STATUS.doing }),
@@ -51,6 +51,8 @@ export default function ExMsProject() {
     URL.revokeObjectURL(url);
   }, [xml]);
 
+  const fileRef = useRef<HTMLInputElement>(null);
+
   const importFile = useCallback(async (file: File) => {
     const back = importMSProjectXML(await file.text());
     setResult(back);
@@ -75,19 +77,20 @@ export default function ExMsProject() {
         <Button size="sm" variant="outline" className="h-7 text-xs" onClick={download}>
           Download .xml
         </Button>
-        <label className="inline-flex h-7 cursor-pointer items-center rounded-md border px-2 text-xs hover:bg-accent">
+        <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => fileRef.current?.click()}>
           Open your own .xml
-          <input
-            type="file"
-            accept=".xml,text/xml,application/xml"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) void importFile(f);
-              e.target.value = "";
-            }}
-          />
-        </label>
+        </Button>
+        <Input
+          ref={fileRef}
+          type="file"
+          accept=".xml,text/xml,application/xml"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) void importFile(f);
+            e.target.value = "";
+          }}
+        />
         <Button
           size="sm"
           variant="ghost"

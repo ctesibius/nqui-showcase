@@ -289,6 +289,7 @@ export function ProjectsGridTable({
           }}
           onKeyDown={onGridKeyDown}
         >
+          {/* eslint-disable-next-line no-restricted-syntax -- nqgrid-driven TanStack table with dnd-kit column/row sorting and sticky header inside a ScrollArea; nqui Table's overflow wrapper breaks sticky and the drag measurements */}
           <table className={gridTableClass} style={{ width: "100%", minWidth: table.getTotalSize() }}>
             <colgroup>
               {table.getVisibleLeafColumns().map((col) => (

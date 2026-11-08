@@ -3,7 +3,7 @@ import { GanttRoot } from "@nqlib/nqgantt/ui";
 import { DEFAULT_WORKING_CALENDAR, computeAssigneeWorkloads, levelResources } from "@nqlib/nqgantt";
 import type { ResourceCalendar } from "@nqlib/nqgantt";
 import { ExampleControls, ExampleFrame, NAME_ONLY_COLUMNS, STATUS, feature, isoDay } from "./shared";
-import { Badge, Button } from "@nqlib/nqui";
+import { Badge, Button, Checkbox } from "@nqlib/nqui";
 
 const ADA = [{ id: "ada", name: "Ada" }];
 
@@ -51,15 +51,9 @@ export default function ExResourceAvailability() {
         <Button size="sm" variant="outline" className="h-7 text-xs" onClick={level}>
           Level resources
         </Button>
-        <label className="flex cursor-pointer items-center gap-1.5 text-xs">
-          <input
-            type="checkbox"
-            checked={respectLeave}
-            onChange={(e) => setRespectLeave(e.target.checked)}
-            className="h-3 w-3"
-          />
-          Respect Ada&rsquo;s leave (all next week)
-        </label>
+        <Checkbox checked={respectLeave} onCheckedChange={(v) => setRespectLeave(v === true)} gap={1.5}>
+          <span className="text-xs">Respect Ada&rsquo;s leave (all next week)</span>
+        </Checkbox>
         <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setFeatures(INITIAL)}>
           Reset
         </Button>

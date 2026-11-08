@@ -8,7 +8,7 @@
 pnpm add @nqlib/nqgantt @nqlib/nqgantt-engine
 ```
 
-Details: [Installation](/docs/nqgantt/installation). Optional: try the same gestures on the live Timeline block at [**/blocks**](/blocks).
+Details: [Installation](/docs/nqgantt/installation). Try the same gestures on the live Campaign timeline at [**/blocks#timeline-lab**](/blocks#timeline-lab).
 
 ## First path (15 minutes)
 

@@ -20,7 +20,7 @@ Install with `pnpm add @nqlib/nqchart echarts motion`. Primitive API pages (bar,
 2. **How** — the prop or child you actually write.
 3. **When not to** — escape hatches and anti-patterns.
 
-Practice on the live [**/charts/lab**](/charts/lab). The gallery at [**/charts**](/charts) only proves drawing.
+[**/charts**](/charts) shows every chart family by the question it answers; [**/charts/lab**](/charts/lab) is where you try the interactions.
 
 ## All guide pages
 
@@ -35,7 +35,7 @@ Practice on the live [**/charts/lab**](/charts/lab). The gallery at [**/charts**
 
 | Surface | Route |
 |---------|-------|
-| Feature lab (BI acceptance) | `/charts/lab` |
+| Interaction lab | `/charts/lab` |
 | Chart gallery | `/charts` |
 | Blocks (embeds) | `/blocks` |
 | API reference | `/docs/nqchart/components` |

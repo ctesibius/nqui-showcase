@@ -12,7 +12,7 @@ import {
 } from "@nqlib/nqui";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Search01Icon } from "@hugeicons/core-free-icons";
-import { ExampleFrame, ExampleHint } from "./shared";
+import { ExampleFrame } from "./shared";
 
 /** FieldGroup spacing, InputGroup addon, and invalid styling. */
 export default function ExFormsField() {
@@ -21,10 +21,6 @@ export default function ExFormsField() {
 
   return (
     <ExampleFrame>
-      <ExampleHint>
-        Use FieldGroup / Field for rhythm. Mark invalid on both the Field and the
-        control.
-      </ExampleHint>
       <FieldGroup className="max-w-md">
         <Field>
           <FieldLabel htmlFor="docs-search">Search</FieldLabel>

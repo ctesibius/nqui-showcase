@@ -260,11 +260,11 @@ export function ProjectsPage() {
         ) : (
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-card">
             {view === "list" ? (
-              <div className="min-h-0 flex-1 overflow-auto">
+              <ScrollArea orientation="both" fadeMask={false} className="min-h-0 flex-1">
                 <ListView tasks={filteredTasks} schema={schema} secondaryFields={secondaryFields} />
-              </div>
+              </ScrollArea>
             ) : boardColumn && boardSchema ? (
-              <div className="min-h-0 flex-1 overflow-auto">
+              <ScrollArea orientation="both" fadeMask={false} className="min-h-0 flex-1">
                 <BoardView
                   tasks={filteredTasks}
                   schema={schema}
@@ -278,7 +278,7 @@ export function ProjectsPage() {
                     );
                   }}
                 />
-              </div>
+              </ScrollArea>
             ) : (
               <BoardUnavailable />
             )}
@@ -343,6 +343,7 @@ function ListView({
   }
 
   return (
+    // eslint-disable-next-line no-restricted-syntax -- sticky header pinned by the parent ScrollArea; nqui Table's overflow-x wrapper would capture position: sticky
     <table className="w-full text-xs">
       <thead className="sticky top-0 z-10 border-b border-border bg-card">
         <tr className="text-left text-[10px] font-medium uppercase tracking-wider text-muted-foreground">

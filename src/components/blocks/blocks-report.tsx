@@ -4,7 +4,7 @@ import { NQAreaChart, Area, XAxis, Grid, Legend, Tooltip } from "@nqlib/nqchart/
 import { NQBarChart, Bar, XAxis as BarXAxis, YAxis as BarYAxis, Grid as BarGrid, Tooltip as BarTooltip } from "@nqlib/nqchart/bar-chart";
 import { NQSparklineChart, Fill, Sparkline, Tooltip as SparkTooltip } from "@nqlib/nqchart/sparkline-chart";
 import { computePivot, type PivotConfig } from "@nqlib/nqgrid";
-import { cn, ScrollArea } from "@nqlib/nqui";
+import { cn, ScrollArea, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@nqlib/nqui";
 
 /*
  * Timeless sales ledger — the report every cohort from Boomer → Millennial
@@ -184,27 +184,27 @@ function CategoryPivot() {
   const yearLeaves = pivot.columnLeaves.filter((l) => l.path[0] !== undefined);
 
   return (
-    <ScrollArea orientation="horizontal" className="w-full min-w-0" fadeMask>
-      <table className="w-full min-w-[280px] border-collapse text-[12px] tabular-nums">
-        <thead>
-          <tr className="border-b border-[color:var(--ledger-rule)]">
-            <th className="pb-2 px-3 text-left text-[11px] font-medium text-[color:var(--ledger-muted)]">
+    <ScrollArea orientation="horizontal" className="w-full min-w-0 [&_[data-slot=table-container]]:overflow-visible" fadeMask>
+      <Table className="w-full min-w-[280px] border-collapse text-[12px] tabular-nums">
+        <TableHeader>
+          <TableRow className="border-b border-[color:var(--ledger-rule)] hover:bg-transparent">
+            <TableHead className="h-auto pb-2 px-3 text-left text-[11px] font-medium text-[color:var(--ledger-muted)]">
               Category
-            </th>
+            </TableHead>
             {YEARS.map((y) => (
-              <th
+              <TableHead
                 key={y}
-                className="pb-2 px-3 text-right text-[11px] font-medium text-[color:var(--ledger-muted)]"
+                className="h-auto pb-2 px-3 text-right text-[11px] font-medium text-[color:var(--ledger-muted)]"
               >
                 {y}
-              </th>
+              </TableHead>
             ))}
-            <th className="pb-2 px-3 text-right text-[11px] font-medium text-[color:var(--ledger-muted)]">
+            <TableHead className="h-auto pb-2 px-3 text-right text-[11px] font-medium text-[color:var(--ledger-muted)]">
               Total
-            </th>
-          </tr>
-        </thead>
-        <tbody>
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {pivot.rows.map((row) => {
             const isTotal = row.kind === "grandTotal";
             const byYear = Object.fromEntries(
@@ -212,23 +212,23 @@ function CategoryPivot() {
             );
             const total = YEARS.reduce((s, y) => s + (byYear[y] ?? 0), 0);
             return (
-              <tr
+              <TableRow
                 key={row.key}
                 className={cn(
-                  "border-b border-[color:var(--ledger-rule)]/60",
+                  "border-b border-[color:var(--ledger-rule)]/60 hover:bg-transparent",
                   isTotal && "border-t border-b-0 bg-[color:var(--ledger-band)] font-semibold",
                 )}
               >
-                <td
+                <TableCell
                   className={cn(
                     "px-3 py-1.5 text-left text-[color:var(--ledger-ink)]",
                     isTotal && "py-2",
                   )}
                 >
                   {isTotal ? "Total" : row.label}
-                </td>
+                </TableCell>
                 {YEARS.map((y) => (
-                  <td
+                  <TableCell
                     key={y}
                     className={cn(
                       "px-3 py-1.5 text-right text-[color:var(--ledger-ink)]",
@@ -236,21 +236,21 @@ function CategoryPivot() {
                     )}
                   >
                     {money(byYear[y] ?? 0)}
-                  </td>
+                  </TableCell>
                 ))}
-                <td
+                <TableCell
                   className={cn(
                     "px-3 py-1.5 text-right text-[color:var(--ledger-ink)]",
                     isTotal && "py-2",
                   )}
                 >
                   {money(total)}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             );
           })}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </ScrollArea>
   );
 }
@@ -374,34 +374,34 @@ function TopItems() {
   }, []);
 
   return (
-    <table className="w-full border-collapse text-[12px] tabular-nums">
-      <thead>
-        <tr className="border-b border-[color:var(--ledger-rule)]">
-          <th className="pb-2 pl-3 pr-2 text-left text-[11px] font-medium text-[color:var(--ledger-muted)]">
+    <Table className="w-full border-collapse text-[12px] tabular-nums">
+      <TableHeader>
+        <TableRow className="border-b border-[color:var(--ledger-rule)] hover:bg-transparent">
+          <TableHead className="h-auto pb-2 pl-3 pr-2 text-left text-[11px] font-medium text-[color:var(--ledger-muted)]">
             Item
-          </th>
-          <th className="pb-2 px-2 text-right text-[11px] font-medium text-[color:var(--ledger-muted)]">
+          </TableHead>
+          <TableHead className="h-auto pb-2 px-2 text-right text-[11px] font-medium text-[color:var(--ledger-muted)]">
             Qty
-          </th>
-          <th className="pb-2 pl-2 pr-3 text-right text-[11px] font-medium text-[color:var(--ledger-muted)]">
+          </TableHead>
+          <TableHead className="h-auto pb-2 pl-2 pr-3 text-right text-[11px] font-medium text-[color:var(--ledger-muted)]">
             %
-          </th>
-        </tr>
-      </thead>
-      <tbody>
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
         {items.map((it) => (
-          <tr key={it.name} className="border-b border-[color:var(--ledger-rule)]/50">
-            <td className="py-1.5 pl-3 pr-2 text-[color:var(--ledger-ink)]">{it.name}</td>
-            <td className="py-1.5 px-2 text-right text-[color:var(--ledger-ink)]">
+          <TableRow key={it.name} className="border-b border-[color:var(--ledger-rule)]/50 hover:bg-transparent">
+            <TableCell className="py-1.5 pl-3 pr-2 text-[color:var(--ledger-ink)]">{it.name}</TableCell>
+            <TableCell className="py-1.5 px-2 text-right text-[color:var(--ledger-ink)]">
               {it.qty.toLocaleString()}
-            </td>
-            <td className="py-1.5 pl-2 pr-3 text-right text-[color:var(--ledger-muted)]">
+            </TableCell>
+            <TableCell className="py-1.5 pl-2 pr-3 text-right text-[color:var(--ledger-muted)]">
               {it.pct.toFixed(1)}%
-            </td>
-          </tr>
+            </TableCell>
+          </TableRow>
         ))}
-      </tbody>
-    </table>
+      </TableBody>
+    </Table>
   );
 }
 
@@ -483,27 +483,6 @@ export function SalesLedgerBlock() {
         </section>
       </div>
 
-    </div>
-  );
-}
-
-/** Compact nqgrid pivot-only block. */
-export function CategoryPivotBlock() {
-  return (
-    <div
-      className="blk-ledger flex h-full flex-col gap-3 overflow-auto p-5"
-      style={
-        {
-          "--ledger-ink": "oklch(0.28 0.035 250)",
-          "--ledger-muted": "oklch(0.48 0.025 250)",
-          "--ledger-rule": "oklch(0.88 0.01 250)",
-          "--ledger-band": "oklch(0.955 0.008 250)",
-          "--ledger-paper": "oklch(0.99 0.004 250)",
-        } as CSSProperties
-      }
-    >
-      <SectionLabel>Sales by Category × Year</SectionLabel>
-      <CategoryPivot />
     </div>
   );
 }

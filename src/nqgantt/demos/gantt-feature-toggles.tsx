@@ -183,11 +183,13 @@ function Row({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-      <span className="mr-1 shrink-0 font-mono text-xs tracking-[0.14em] text-muted-foreground uppercase">
+    // Label column + wrapping controls, so a second line of toggles stays
+    // aligned under the first instead of drifting back under the label.
+    <div className="grid min-w-0 grid-cols-[5.5rem_minmax(0,1fr)] items-start gap-x-2">
+      <span className="pt-1 font-mono text-xs tracking-[0.14em] text-muted-foreground uppercase">
         {label}
       </span>
-      {children}
+      <div className="flex min-w-0 flex-wrap items-center gap-1.5">{children}</div>
     </div>
   )
 }
@@ -195,10 +197,16 @@ function Row({
 export function GanttFeatureToggles({
   value,
   onChange,
+  bare = false,
+  showRange = true,
   className,
 }: {
   value: GanttFeatureToggleState
   onChange: (next: GanttFeatureToggleState) => void
+  /** Drop the panel chrome (border + tint) — for use inside a popover. */
+  bare?: boolean
+  /** Hide the range segment when the gantt's own toolbar already owns it. */
+  showRange?: boolean
   className?: string
 }) {
   const set = <K extends keyof GanttFeatureToggleState>(
@@ -224,7 +232,8 @@ export function GanttFeatureToggles({
   return (
     <div
       className={cn(
-        "flex flex-col gap-2 rounded-md border border-border/70 bg-muted/30 px-3 py-2.5",
+        "flex flex-col gap-2.5",
+        !bare && "rounded-md border border-border/70 bg-muted/30 px-3 py-2.5",
         className,
       )}
     >
@@ -327,12 +336,14 @@ export function GanttFeatureToggles({
       </Row>
 
       <Row label="View">
-        <Seg
-          ariaLabel="Timeline range"
-          value={value.range}
-          onChange={(v) => set("range", v)}
-          options={RANGES}
-        />
+        {showRange ? (
+          <Seg
+            ariaLabel="Timeline range"
+            value={value.range}
+            onChange={(v) => set("range", v)}
+            options={RANGES}
+          />
+        ) : null}
         <Seg
           ariaLabel="Row density"
           value={value.density}
